@@ -13,4 +13,5 @@ public interface IDocument{
 	public double getContentSize() throws RepositoryException;
 	public Date getPropertyDateValue(String date_last_modified) throws RepositoryException;
 	public String getPermissionsXML();
+	public IPermissions getPermissions();
 }
