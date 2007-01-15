@@ -4,10 +4,10 @@ import java.io.InputStream;
 import java.util.Date;
 
 import com.filenet.wcm.api.Document;
-import com.filenet.wcm.api.GettableObject;
 import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.PropertyNotFoundException;
 import com.google.enterprise.connector.file.filewrap.IDocument;
+import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.spi.LoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
@@ -71,6 +71,10 @@ public class IFileDocument implements IDocument{
 	public String getPermissionsXML() {
 		return this.doc.getPermissionsXML();
 		
+	}
+
+	public IPermissions getPermissions() {
+		return new IFilePermissions(doc.getPermissions());
 	}
 
 	
