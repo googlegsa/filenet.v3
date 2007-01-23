@@ -27,6 +27,7 @@ public class FileSession implements Session {
 	// Constructor never called except for tests
 	public FileSession() throws RepositoryException {
 		try {
+			System.out.println("sesion.clear " + com.filenet.wcm.api.Session.CLEAR);
 			fileObjectFactory = new IFileObjectFactory();
 			fileSession = fileObjectFactory.getSession("file-connector", null,
 					"P8Admin", "UnDeuxTrois456");
@@ -34,13 +35,16 @@ public class FileSession implements Session {
 			fileSession
 					.setConfiguration(new FileInputStream(
 							"C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties"));
-
+//			fileSession.setRemoteServerUrl("http://swp-srv-gsaecm.sword.fr:8008/ApplicationEngine/xcmisasoap.dll");
+//			fileSession.setRemoteServerDownloadUrl("http://swp-srv-gsaecm.sword.fr:8008/ApplicationEngine/doccontent.dll");
+//			fileSession.setRemoteServerUploadUrl("http://swp-srv-gsaecm.sword.fr:8008/ApplicationEngine/doccontent.dll");
 			fileSession.verify();
 			objectStore = fileObjectFactory.getObjectStore("GSA_Filenet",
 					fileSession);
+			
 			objectStore
-					.setDisplayUrl("http://swp-vm-fnet352:8080/Workplace/getContent?objectStoreName=GSA_Filenet&objectType=document&id=");
-			// http://swp-vm-fnet352:8080/Workplace/getContent?objectStoreName=GSA_Filenet&objectType=document&id={19CBEC10-5603-4AC6-AA9B-07B60918EBA0}"
+					.setDisplayUrl("http://swp-vm-fnet352:8080/Workplace/getContent"+"?objectType=document"+"&objectStoreName="+"GSA_Filenet"+"&id=");
+//			fileSession.setObjectStore(objectStore);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -48,12 +52,16 @@ public class FileSession implements Session {
 		// this.client.setSession(session);
 	}
 
-	public FileSession(IObjectFactory iObjectFactory, String userName,
+	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String appId, String credTag,
 			String objectStoreName, String pathToWcmApiConfig, String displayUrl)
 			throws RepositoryException {
 		try {
-			fileObjectFactory = iObjectFactory;
+			System.out.println("fileSession "  + userName + " "+userPassword);
+			setFileObjectFactory(iObjectFactory);
+			if(credTag.equals("")){
+				credTag = null;
+			}
 			fileSession = fileObjectFactory.getSession(appId, credTag,
 					userName, userPassword);
 			this.pathToWcmApiConfig = pathToWcmApiConfig;
@@ -62,15 +70,36 @@ public class FileSession implements Session {
 			fileSession.verify();
 			objectStore = fileObjectFactory.getObjectStore(objectStoreName,
 					fileSession);
-			objectStore.setDisplayUrl(displayUrl);
-
+			objectStore.setDisplayUrl(displayUrl+"getContent?objectType=document&objectStoreName="+objectStoreName+"&id=");
+//			fileSession.setObjectStore(objectStore);
 		} catch (FileNotFoundException de) {
 			RepositoryException re = new LoginException(de.getMessage(), de
 					.getCause());
 			re.setStackTrace(de.getStackTrace());
 			throw re;
+		}catch(Exception e){
+			System.out.println("exception in FileSession()");
+			e.printStackTrace();
+			RepositoryException re = new LoginException(e.getMessage(), e
+					.getCause());
+			re.setStackTrace(e.getStackTrace());
+			throw re;
 		}
 		// this.client.setSession(session);
+	}
+
+	private void setFileObjectFactory(String objectFactory) {
+		
+		try {
+			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
+		} catch (InstantiationException e) {
+			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
+		} catch (IllegalAccessException e) {
+			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
+		} catch (ClassNotFoundException e) {
+			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
+		}
+		
 	}
 
 	public QueryTraversalManager getQueryTraversalManager()
@@ -89,6 +118,7 @@ public class FileSession implements Session {
 
 	public AuthorizationManager getAuthorizationManager()
 			throws RepositoryException {
+		System.out.println("getAuthorizationManager");
 		FileAuthorizationManager fileAzm = new FileAuthorizationManager(fileObjectFactory, pathToWcmApiConfig, objectStore);
 		return fileAzm;
 	}

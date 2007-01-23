@@ -9,6 +9,8 @@ import com.google.enterprise.connector.spi.ResultSet;
 
 public class FileResultSet extends LinkedList implements ResultSet{
 	
+	private static final long serialVersionUID = 1L;
+
 	public FileResultSet(){
 		super();
 	}

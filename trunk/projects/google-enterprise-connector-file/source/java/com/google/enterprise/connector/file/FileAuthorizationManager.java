@@ -1,8 +1,13 @@
 package com.google.enterprise.connector.file;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.filenet.wcm.api.BaseObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
@@ -21,18 +26,32 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		objectFactory = fileObjectFactory;
 		this.pathToWcmApiConfig =pathToWcmApiConfig;
 		this.objectStore = objectStore;
+		System.out.println("constructeur authoriza");
 		
 	}
 
 	public ResultSet authorizeDocids(List docidList, String username)
 			throws RepositoryException {
+		
+		System.out.println("FileAuthorize method authorizeDocids");
 		FileResultSet result = new FileResultSet();
 		SimplePropertyMap map = null;
 		IDocument doc = null;
+		
 		for(int i = 0; i< docidList.size(); i++){
 			map = new SimplePropertyMap();
-			doc = objectStore.getObject(BaseObject.TYPE_DOCUMENT,(String)docidList.get(i));
-			map.putProperty(new FileSimpleProperty(SpiConstants.PROPNAME_DOCID,(String)docidList.get(i)));
+			String id = "";
+			try {
+				doc = objectStore.getObject(BaseObject.TYPE_DOCUMENT,URLDecoder.decode((String)docidList.get(i),"UTF-8"));
+				map.putProperty(new FileSimpleProperty(SpiConstants.PROPNAME_DOCID,(String)docidList.get(i)));
+			} catch (UnsupportedEncodingException e) {
+				RepositoryException re = new RepositoryException(e.getMessage(),e.getCause());
+				re.setStackTrace(e.getStackTrace());
+				throw re;
+				
+			} catch (RepositoryException e) {
+				throw e;
+			}
 			if(doc.getPermissions().asMask(username) == 1){
 				map.putProperty(new FileSimpleProperty(SpiConstants.PROPNAME_AUTH_VIEWPERMIT, true));
 			}else{
@@ -40,6 +59,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 			}
 			result.add(map);
 		}
+		
 		return result;
 	}
 

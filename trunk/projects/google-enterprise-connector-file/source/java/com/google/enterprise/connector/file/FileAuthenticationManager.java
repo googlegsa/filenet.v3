@@ -21,7 +21,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
 
 	public boolean authenticate(String username, String password)
 			throws LoginException, RepositoryException {
-		
+		System.out.println("FileAuthentication method authenticate");
 		ISession sess = objectFactory.getSession("gsa-authenticate",null,username,password);
 		try {
 			sess.setConfiguration(new FileInputStream(wcmConfigFilePath));
@@ -36,6 +36,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
 			re.setStackTrace(e.getStackTrace());
 			throw re;
 		}
+		System.out.println("FileAuthentication method authenticate send true");
 		return true;
 	}
 

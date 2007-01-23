@@ -8,7 +8,7 @@ import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.PropertyNotFoundException;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
-import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class IFileDocument implements IDocument{
@@ -16,8 +16,10 @@ public class IFileDocument implements IDocument{
 	
 	public IFileDocument(Document doc){
 		
-		this.doc = doc;		
-		this.doc.getPermissionsXML();
+		this.doc = doc;	
+		
+		
+		
 	}
 
 	public InputStream getContent() {
@@ -27,12 +29,42 @@ public class IFileDocument implements IDocument{
 
 	public String getPropertyStringValue(String name) throws RepositoryException {
 		try {
-			return this.doc.getPropertyStringValue(name);
+//			System.out.println("nouveau");
+//			
+//			Properties props = doc.getProperties();
+//			Iterator iter = props.iterator();
+//			String [] test = {Property.MIME_TYPE,Property.PERMISSIONS};
+//			System.out.println(	doc.getPropertiesXML(test));
+//			while(iter.hasNext()){
+//				
+//				Property prop = (Property)iter.next();
+//System.out.println(	prop.getName() + " "+prop.getStringValue() + " " +doc.getPropertiesXML(test));
+//			}
+			
+				return this.doc.getPropertyStringValue(name);
+			
 		} catch (PropertyNotFoundException de) {
-			RepositoryException re = new LoginException(de.getMessage(), de
+			System.out.println(" PropertyNotFoundException docnmae plantage? "+doc.getName() + " " + doc.getSession().toString());
+			if(name.equals(Property.MIME_TYPE)){
+				
+				return "application/octet-stream";	
+			}else if(name.equals(Property.PERMISSIONS)){
+				return "security";
+			}else{
+			RepositoryException re = new RepositoryException(de.getMessage(), de
 					.getCause());
 			re.setStackTrace(de.getStackTrace());
 			throw re;
+			}
+		}
+		catch (Exception de) {
+			System.out.println(" Exception docnmae plantage? "+doc.getName() + " " + doc.getSession().toString() + " " + name);
+			
+			RepositoryException re = new RepositoryException(de.getMessage(), de
+					.getCause());
+			re.setStackTrace(de.getStackTrace());
+			throw re;
+			
 		}
 		
 	}
@@ -77,5 +109,19 @@ public class IFileDocument implements IDocument{
 		return new IFilePermissions(doc.getPermissions());
 	}
 
+	
+	public String getPropertiesXML(String [] tab){
+		return doc.getPropertiesXML(tab);
+		
+	}
+
+	public String getAccessMask() {
+		return this.doc.getAccessMask()+"";
+	}
+	
+	public ISession getSession(){
+		return new IFileSession(this.doc.getSession());
+	}
+	
 	
 }
