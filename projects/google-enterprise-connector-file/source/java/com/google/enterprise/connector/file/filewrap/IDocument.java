@@ -14,4 +14,5 @@ public interface IDocument{
 	public Date getPropertyDateValue(String date_last_modified) throws RepositoryException;
 	public String getPermissionsXML();
 	public IPermissions getPermissions();
+	public String getPropertiesXML(String [] tab);
 }

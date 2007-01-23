@@ -28,6 +28,8 @@ public class FileAuthenticationManagerTest extends TestCase {
 		
 		
 		assertTrue(authentManager.authenticate("P8Admin","UnDeuxTrois456"));
+		assertTrue(authentManager.authenticate("P8TestUser","p@ssw0rd"));
+		assertTrue(authentManager.authenticate("P8TestUser2","p@ssw0rd"));
 		
 
 	}

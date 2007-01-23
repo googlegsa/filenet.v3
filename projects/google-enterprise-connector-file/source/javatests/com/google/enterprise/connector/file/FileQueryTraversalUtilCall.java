@@ -18,13 +18,11 @@ public class FileQueryTraversalUtilCall extends TestCase {
 
 	public void testTraversal() {		
 		if (DFC) {
-			FileInstantiator.isFileJavaAPIavailable=true;
 			user="P8Admin";
 			password="UnDeuxTrois456";
 			client="com.google.enterprise.connector.file.filejavawrap.IFileObjectFactory";
 			
 		} else {
-			FileInstantiator.isFileJavaAPIavailable=false;
 			user="mark";
 			password="mark";
 			client="com.google.enterprise.connector.file.filemockwrap.FileMockObjectFactory";
@@ -41,8 +39,8 @@ public class FileQueryTraversalUtilCall extends TestCase {
 		/**
 		 * Simulation of the setters used by Instance.xml
 		 */
-		((FileConnector) connector).setLogin(user);
-		((FileConnector) connector).setPassword(password);
+//		((FileConnector) connector).setLogin(user);
+//		((FileConnector) connector).setPassword(password);
 //		((FileConnector) connector).setDocbase(docbase);
 		IObjectFactory cl = null;
 		try {
@@ -54,7 +52,7 @@ public class FileQueryTraversalUtilCall extends TestCase {
 		} catch (ClassNotFoundException e) {
 			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
 		}
-		((FileConnector) connector).setIObjectFactory(cl);
+//		((FileConnector) connector).setIObjectFactory(cl);
 		/**
 		 * End simulation
 		 */
@@ -63,7 +61,7 @@ public class FileQueryTraversalUtilCall extends TestCase {
 		try {
 			session = (FileSession) connector.login();
 			qtm = (FileQueryTraversalManager) session.getQueryTraversalManager();
-			FileQueryTraversalUtil.runTraversal(qtm, 50);
+			FileQueryTraversalUtil.runTraversal(qtm, 100000);
 
 		} catch (LoginException le) {
 			System.out.println("Root Cause : " + le.getCause() + " ; Message : " + le.getMessage());

@@ -1,14 +1,13 @@
 package com.google.enterprise.connector.file;
 
 import com.google.enterprise.connector.file.FileSession;
-import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.LoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
 
 public class FileConnector implements Connector {
-	private IObjectFactory objectFactory;
+	private String objectFactory;
 	private String login;
 	private String password;
 	private String appId;
@@ -46,12 +45,12 @@ public class FileConnector implements Connector {
 		this.credTag = credTag;
 	}
 
-	public IObjectFactory getIObjectFactory() {
+	public String getIObjectFactory() {
 		return objectFactory;
 	}
 
-	public void setIObjectFactory(IObjectFactory objectFactory) {
-		objectFactory = objectFactory;
+	public void setIObjectFactory(String objectFactory) {
+		this.objectFactory = objectFactory;
 	}
 
 	public String getLogin() {
@@ -70,11 +69,11 @@ public class FileConnector implements Connector {
 		this.password = password;
 	}
 
-	public IObjectFactory getObjectFactory() {
+	public String getObjectFactory() {
 		return objectFactory;
 	}
 
-	public void setObjectFactory(IObjectFactory objectFactory) {
+	public void setObjectFactory(String objectFactory) {
 		this.objectFactory = objectFactory;
 	}
 
@@ -92,6 +91,14 @@ public class FileConnector implements Connector {
 
 	public void setPathToWcmApiConfig(String pathToWcmApiConfig) {
 		this.pathToWcmApiConfig = pathToWcmApiConfig;
+	}
+
+	public String getDisplayUrl() {
+		return displayUrl;
+	}
+
+	public void setDisplayUrl(String displayUrl) {
+		this.displayUrl = displayUrl;
 	}
 
 	
