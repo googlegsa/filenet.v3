@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="FileConnectorInstance"
+		class="com.google.enterprise.connector.file.FileConnector">
+		
+		<property name="login" value="${login}" />
+		<property name="password" value="${password}" />
+		<property name="appId" value="${appId}" />
+		<property name="credTag" value="${credTag}" />
+		<property name="objectStoreName" value="${objectStoreName}" />
+		<property name="pathToWcmApiConfig" value="${pathToWcmApiConfig}" />
+		<property name="displayUrl" value="${displayUrl}" />
+		<property name="objectFactory" value="com.google.enterprise.connector.file.filejavawrap.IFileObjectFactory" />
+	</bean>
+</beans>
