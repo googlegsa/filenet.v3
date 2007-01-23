@@ -16,7 +16,6 @@ import org.xml.sax.SAXException;
 
 import com.filenet.wcm.api.BaseObject;
 import com.filenet.wcm.api.Search;
-import com.filenet.wcm.api.Property;
 import com.google.enterprise.connector.file.Field;
 import com.google.enterprise.connector.file.FileResultSet;
 import com.google.enterprise.connector.file.FileSimpleProperty;
@@ -27,7 +26,6 @@ import com.google.enterprise.connector.spi.LoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.ResultSet;
 import com.google.enterprise.connector.spi.SimplePropertyMap;
-import com.google.enterprise.connector.spi.SimpleValue;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.ValueType;
 

@@ -1,9 +1,7 @@
 package com.google.enterprise.connector.file;
 
-import java.lang.reflect.Array;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -45,14 +45,6 @@ public class FileConnector implements Connector {
 		this.credTag = credTag;
 	}
 
-	public String getIObjectFactory() {
-		return objectFactory;
-	}
-
-	public void setIObjectFactory(String objectFactory) {
-		this.objectFactory = objectFactory;
-	}
-
 	public String getLogin() {
 		return login;
 	}
