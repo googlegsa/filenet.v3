@@ -1,13 +1,11 @@
 package com.google.enterprise.connector.file;
 
-import java.util.Iterator;
 import java.util.List;
 
 import com.filenet.wcm.api.BaseObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
@@ -40,7 +38,6 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		
 		for(int i = 0; i< docidList.size(); i++){
 			map = new SimplePropertyMap();
-			String id = "";
 			try {
 				doc = objectStore.getObject(BaseObject.TYPE_DOCUMENT,URLDecoder.decode((String)docidList.get(i),"UTF-8"));
 				map.putProperty(new FileSimpleProperty(SpiConstants.PROPNAME_DOCID,(String)docidList.get(i)));
