@@ -14,17 +14,28 @@ import com.google.enterprise.connector.spi.Session;
 public class FileQueryTraversalUtilCall extends TestCase {
 	
 	private final boolean DFC = true;
-	private String user, password, client;
+	private String user, password, client, appId, credTag, objectStoreName, pathToWcmApiConfig, displayUrl;
 
 	public void testTraversal() {		
 		if (DFC) {
 			user="P8Admin";
 			password="UnDeuxTrois456";
 			client="com.google.enterprise.connector.file.filejavawrap.IFileObjectFactory";
+			appId = "file-connector";
+			credTag = "Clear";
+			objectStoreName = "GSA_Filenet";
+			pathToWcmApiConfig = "C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties";
+			displayUrl = "http://swp-vm-fnet352:8080/Workplace/";
+			
 			
 		} else {
 			user="mark";
 			password="mark";
+			appId = "";
+			credTag = "";
+			objectStoreName = "";
+			pathToWcmApiConfig = "";
+			displayUrl = "";
 			client="com.google.enterprise.connector.file.filemockwrap.FileMockObjectFactory";
 			
 		}
@@ -39,19 +50,26 @@ public class FileQueryTraversalUtilCall extends TestCase {
 		/**
 		 * Simulation of the setters used by Instance.xml
 		 */
-//		((FileConnector) connector).setLogin(user);
-//		((FileConnector) connector).setPassword(password);
-//		((FileConnector) connector).setDocbase(docbase);
-		IObjectFactory cl = null;
-		try {
-			cl = (IObjectFactory) Class.forName(client).newInstance();
-		} catch (InstantiationException e) {
-			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
-		} catch (IllegalAccessException e) {
-			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
-		} catch (ClassNotFoundException e) {
-			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
-		}
+		((FileConnector) connector).setLogin(user);
+		((FileConnector) connector).setPassword(password);
+		((FileConnector) connector).setObjectStoreName(objectStoreName);
+		((FileConnector) connector).setAppId(appId);
+		((FileConnector) connector).setCredTag(credTag);
+		((FileConnector) connector).setDisplayUrl(displayUrl);
+		((FileConnector) connector).setObjectFactory(client);
+		((FileConnector) connector).setPathToWcmApiConfig(pathToWcmApiConfig);
+		
+		
+//		IObjectFactory cl = null;
+//		try {
+//			cl = (IObjectFactory) Class.forName(client).newInstance();
+//		} catch (InstantiationException e) {
+//			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
+//		} catch (IllegalAccessException e) {
+//			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
+//		} catch (ClassNotFoundException e) {
+//			System.out.println("Root Cause : " + e.getCause() + " ; Message : " + e.getMessage());
+//		}
 //		((FileConnector) connector).setIObjectFactory(cl);
 		/**
 		 * End simulation
