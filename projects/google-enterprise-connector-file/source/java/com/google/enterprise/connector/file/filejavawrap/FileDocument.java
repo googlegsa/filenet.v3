@@ -1,20 +1,18 @@
 package com.google.enterprise.connector.file.filejavawrap;
 
 import java.io.InputStream;
-import java.util.Date;
 
 import com.filenet.wcm.api.Document;
 import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.PropertyNotFoundException;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
-import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.spi.RepositoryException;
 
-public class IFileDocument implements IDocument{
+public class FileDocument implements IDocument{
 	Document doc;
 	
-	public IFileDocument(Document doc){
+	public FileDocument(Document doc){
 		
 		this.doc = doc;	
 		
@@ -89,39 +87,39 @@ public class IFileDocument implements IDocument{
 		}
 	}
 
-	public Date getPropertyDateValue(String date_last_modified) throws RepositoryException {
-		
-		try {
-			return this.doc.getPropertyDateValue(date_last_modified);
-		} catch (PropertyNotFoundException de) {
-			RepositoryException re = new RepositoryException(de.getMessage(),de.getCause());
-			re.setStackTrace(de.getStackTrace());
-			throw re;
-		}
-	}
-
-	public String getPermissionsXML() {
-		return this.doc.getPermissionsXML();
-		
-	}
-
+//	public Date getPropertyDateValue(String date_last_modified) throws RepositoryException {
+//		
+//		try {
+//			return this.doc.getPropertyDateValue(date_last_modified);
+//		} catch (PropertyNotFoundException de) {
+//			RepositoryException re = new RepositoryException(de.getMessage(),de.getCause());
+//			re.setStackTrace(de.getStackTrace());
+//			throw re;
+//		}
+//	}
+//
+//	public String getPermissionsXML() {
+//		return this.doc.getPermissionsXML();
+//		
+//	}
+//
 	public IPermissions getPermissions() {
-		return new IFilePermissions(doc.getPermissions());
+		return new FilePermissions(doc.getPermissions());
 	}
-
-	
-	public String getPropertiesXML(String [] tab){
-		return doc.getPropertiesXML(tab);
-		
-	}
-
-	public String getAccessMask() {
-		return this.doc.getAccessMask()+"";
-	}
-	
-	public ISession getSession(){
-		return new IFileSession(this.doc.getSession());
-	}
+//
+//	
+//	public String getPropertiesXML(String [] tab){
+//		return doc.getPropertiesXML(tab);
+//		
+//	}
+//
+//	public String getAccessMask() {
+//		return this.doc.getAccessMask()+"";
+//	}
+//	
+//	public ISession getSession(){
+//		return new IFileSession(this.doc.getSession());
+//	}
 	
 	
 }

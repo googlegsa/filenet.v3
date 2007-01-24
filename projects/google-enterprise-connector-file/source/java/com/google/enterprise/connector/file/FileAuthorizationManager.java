@@ -50,13 +50,16 @@ public class FileAuthorizationManager implements AuthorizationManager {
 				throw e;
 			}
 			if(doc.getPermissions().asMask(username) == 1){
+				
 				map.putProperty(new FileSimpleProperty(SpiConstants.PROPNAME_AUTH_VIEWPERMIT, true));
 			}else{
 				map.putProperty(new FileSimpleProperty(SpiConstants.PROPNAME_AUTH_VIEWPERMIT, false));
 			}
 			result.add(map);
+			System.out.println("hasRight? " +doc.getPermissions().asMask(username));
 		}
 		
+		System.out.println("end of FileAuthorize method authorieDocIds");
 		return result;
 	}
 

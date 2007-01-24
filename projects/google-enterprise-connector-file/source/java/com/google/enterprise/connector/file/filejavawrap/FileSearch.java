@@ -15,6 +15,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.filenet.wcm.api.BaseObject;
+import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.Search;
 import com.google.enterprise.connector.file.Field;
 import com.google.enterprise.connector.file.FileResultSet;
@@ -30,20 +31,18 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.ValueType;
 
 
-public class IFileSearch implements ISearch {
+public class FileSearch implements ISearch {
 
 	Search search;
 
-	public IFileSearch(Search search) {
+	public FileSearch(Search search) {
 		this.search = search;
 	}
 
 	public ResultSet executeXml(String query, IObjectStore objectStore, Field[] fields)
 			throws RepositoryException {
-		IFileObjectStore fileObjectStore = (IFileObjectStore) objectStore;
-		// IFileSession iSession = (IFileSession) session;
+		FileObjectStore fileObjectStore = (FileObjectStore) objectStore;
 		String result = search.executeXML(query);
-//		System.out.println("Dans executeQueyr " + query + "\n" + result);
 		Document resultDoc = stringToDom(result);
 		LinkedHashMap fieldsMap = new LinkedHashMap(fields.length * 2);
         for (int i = 0; i < fields.length; i++) {
@@ -56,17 +55,18 @@ public class IFileSearch implements ISearch {
 	}
 
 	private ResultSet buildResultSetFromDocument(Document resultDoc,
-			IFileObjectStore objectStore, LinkedHashMap fields) throws RepositoryException {
+			FileObjectStore objectStore, LinkedHashMap fields) throws RepositoryException {
 		System.out.println("in buildResultSetFromDocument");
 		// IFileObjectStore objectStore = fileSession.getIObjectStore();
 		FileResultSet resultSet = new FileResultSet();
 		SimplePropertyMap simplePm;
 		NodeList data = resultDoc.getElementsByTagName("rs:data").item(0)
 				.getChildNodes();
+		System.out.println(data.getLength());
 		for (int i = 0; i < data.getLength(); i++) {
 			simplePm = new SimplePropertyMap();
 			NamedNodeMap nodeMap = data.item(i).getAttributes();
-			IFileDocument fileObject = null;
+			FileDocument fileObject = null;
 			String id = null;
 			if (nodeMap != null) {
 				
@@ -82,11 +82,9 @@ public class IFileSearch implements ISearch {
 							id  = nodeMap.item(j)
 							.getNodeValue();
 						}
-					}
-					
-//					
+					}	
 				}
-				fileObject = (IFileDocument) objectStore.getObject(
+				fileObject = (FileDocument) objectStore.getObject(
 						BaseObject.TYPE_DOCUMENT, id);
 
 				simplePm.putProperty(new FileSimpleProperty(
@@ -103,6 +101,11 @@ public class IFileSearch implements ISearch {
 						new FileSimpleValue(ValueType.STRING, objectStore
 								.getDisplayUrl()
 								+ id)));
+				
+//				simplePm.putProperty(new FileSimpleProperty(
+//						SpiConstants.PROPNAME_SECURITYTOKEN,
+//						new FileSimpleValue(ValueType.STRING, fileObject.getPropertyStringValue(Property.PERMISSIONS)
+//								)));
 				resultSet.add(simplePm);
 
 			}

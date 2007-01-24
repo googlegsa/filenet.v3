@@ -5,17 +5,17 @@ import com.filenet.wcm.api.ObjectStore;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 
-public class IFileObjectStore implements IObjectStore {
+public class FileObjectStore implements IObjectStore {
 	ObjectStore objectStore;
 	String displayUrl;
 
-	public IFileObjectStore(ObjectStore objectStore) {
+	public FileObjectStore(ObjectStore objectStore) {
 		this.objectStore = objectStore;
 		
 	}
 
 	public IDocument getObject(int objectType, String guidOrPath) {
-		return new IFileDocument((Document)objectStore.getObject(objectType, guidOrPath));
+		return new FileDocument((Document)objectStore.getObject(objectType, guidOrPath));
 		
 	}
 
