@@ -3,7 +3,7 @@ package com.google.enterprise.connector.file.filemockwrap;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 
-public class FileMockObjectStore implements IObjectStore {
+public class MockFnObjectStore implements IObjectStore {
 
 	public IDocument getObject(int objectType, String guidOrPath) {
 		// TODO Auto-generated method stub
