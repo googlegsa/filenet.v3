@@ -9,19 +9,19 @@ import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.file.filewrap.IUser;
 
 
-public class FileSession implements ISession {
+public class FnSession implements ISession {
 	
 	Session session = null;
-	FileObjectStore iObjectStore = null;
+	FnObjectStore iObjectStore = null;
 	
-	public FileSession(Session sess){
+	public FnSession(Session sess){
 		session = sess;
 	}
 
 	public IUser verify() {
 		IUser user = null;
 		try{
-			user =new FileUser(session.verify());
+			user =new FnUser(session.verify());
 		}catch(InvalidCredentialsException de){
 			return null;
 		}
@@ -38,12 +38,12 @@ public class FileSession implements ISession {
 		return session;
 	}
 
-	public FileObjectStore getIObjectStore() {
+	public FnObjectStore getIObjectStore() {
 		return iObjectStore;
 	}
 
 	public void setObjectStore(IObjectStore objectStore) {
-		iObjectStore = (FileObjectStore) objectStore;
+		iObjectStore = (FnObjectStore) objectStore;
 		System.out.println("dans set objectStore");
 		
 	}

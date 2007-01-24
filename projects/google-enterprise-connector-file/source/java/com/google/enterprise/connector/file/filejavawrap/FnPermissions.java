@@ -6,14 +6,14 @@ import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.filenet.wcm.api.Permissions;
 import com.filenet.wcm.api.Permission;
 
-public class FilePermissions implements IPermissions {
+public class FnPermissions implements IPermissions {
 
 	Permissions perms;
 	String authenticatedUser = "#AUTHENTICATED-USERS";
 	
 	public static int RIGHT_READ = Permission.RIGHT_READ;
 	
-	public FilePermissions(Permissions perms){
+	public FnPermissions(Permissions perms){
 		this.perms = perms;
 	}
 
