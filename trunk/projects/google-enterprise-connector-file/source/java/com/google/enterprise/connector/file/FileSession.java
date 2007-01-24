@@ -3,7 +3,7 @@ package com.google.enterprise.connector.file;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-import com.google.enterprise.connector.file.filejavawrap.IFileObjectFactory;
+import com.google.enterprise.connector.file.filejavawrap.FileObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISession;
@@ -28,7 +28,7 @@ public class FileSession implements Session {
 	public FileSession() throws RepositoryException {
 		try {
 			System.out.println("sesion.clear " + com.filenet.wcm.api.Session.CLEAR);
-			fileObjectFactory = new IFileObjectFactory();
+			fileObjectFactory = new FileObjectFactory();
 			fileSession = fileObjectFactory.getSession("file-connector", null,
 					"P8Admin", "UnDeuxTrois456");
 			this.pathToWcmApiConfig = "C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties";
