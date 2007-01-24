@@ -6,27 +6,27 @@ import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
 
-public class FileObjectFactory implements IObjectFactory {
+public class FnObjectFactory implements IObjectFactory {
 	
-	public FileObjectFactory(){
+	public FnObjectFactory(){
 		super();
 	}
 
 	
 	public ISession getSession(String appId, String credTag, String userId, String password) {
-		return new FileSession(ObjectFactory.getSession(appId, credTag, userId, password));
+		return new FnSession(ObjectFactory.getSession(appId, credTag, userId, password));
 	
 	}
 
 
 	public IObjectStore getObjectStore(String objectStoreName, ISession fileSession) {
-		return new FileObjectStore(ObjectFactory.getObjectStore(objectStoreName, fileSession.getSession()));
+		return new FnObjectStore(ObjectFactory.getObjectStore(objectStoreName, fileSession.getSession()));
 		
 	}
 
 
 	public ISearch getSearch(ISession fileSession) {
-		return new FileSearch(ObjectFactory.getSearch(fileSession.getSession()));
+		return new FnSearch(ObjectFactory.getSearch(fileSession.getSession()));
 		
 	}
 

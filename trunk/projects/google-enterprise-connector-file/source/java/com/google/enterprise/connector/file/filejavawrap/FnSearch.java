@@ -31,17 +31,17 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.ValueType;
 
 
-public class FileSearch implements ISearch {
+public class FnSearch implements ISearch {
 
 	Search search;
 
-	public FileSearch(Search search) {
+	public FnSearch(Search search) {
 		this.search = search;
 	}
 
 	public ResultSet executeXml(String query, IObjectStore objectStore, Field[] fields)
 			throws RepositoryException {
-		FileObjectStore fileObjectStore = (FileObjectStore) objectStore;
+		FnObjectStore fileObjectStore = (FnObjectStore) objectStore;
 		String result = search.executeXML(query);
 		Document resultDoc = stringToDom(result);
 		LinkedHashMap fieldsMap = new LinkedHashMap(fields.length * 2);
@@ -55,7 +55,7 @@ public class FileSearch implements ISearch {
 	}
 
 	private ResultSet buildResultSetFromDocument(Document resultDoc,
-			FileObjectStore objectStore, LinkedHashMap fields) throws RepositoryException {
+			FnObjectStore objectStore, LinkedHashMap fields) throws RepositoryException {
 		System.out.println("in buildResultSetFromDocument");
 		// IFileObjectStore objectStore = fileSession.getIObjectStore();
 		FileResultSet resultSet = new FileResultSet();
@@ -66,7 +66,7 @@ public class FileSearch implements ISearch {
 		for (int i = 0; i < data.getLength(); i++) {
 			simplePm = new SimplePropertyMap();
 			NamedNodeMap nodeMap = data.item(i).getAttributes();
-			FileDocument fileObject = null;
+			FnDocument fileObject = null;
 			String id = null;
 			if (nodeMap != null) {
 				
@@ -84,7 +84,7 @@ public class FileSearch implements ISearch {
 						}
 					}	
 				}
-				fileObject = (FileDocument) objectStore.getObject(
+				fileObject = (FnDocument) objectStore.getObject(
 						BaseObject.TYPE_DOCUMENT, id);
 
 				simplePm.putProperty(new FileSimpleProperty(

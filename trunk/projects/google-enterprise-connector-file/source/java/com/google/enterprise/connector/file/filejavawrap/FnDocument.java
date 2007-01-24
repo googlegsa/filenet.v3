@@ -9,10 +9,10 @@ import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.spi.RepositoryException;
 
-public class FileDocument implements IDocument{
+public class FnDocument implements IDocument{
 	Document doc;
 	
-	public FileDocument(Document doc){
+	public FnDocument(Document doc){
 		
 		this.doc = doc;	
 		
@@ -104,7 +104,7 @@ public class FileDocument implements IDocument{
 //	}
 //
 	public IPermissions getPermissions() {
-		return new FilePermissions(doc.getPermissions());
+		return new FnPermissions(doc.getPermissions());
 	}
 //
 //	
