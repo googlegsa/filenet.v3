@@ -5,7 +5,7 @@ import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
 
-public class FileMockObjectFactory implements IObjectFactory {
+public class MockFnObjectFactory implements IObjectFactory {
 
 	public ISession getSession(String appId, String credTag, String userId,
 			String password) {

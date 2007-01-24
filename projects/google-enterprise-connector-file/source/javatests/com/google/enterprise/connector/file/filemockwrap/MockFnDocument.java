@@ -7,7 +7,7 @@ import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.spi.RepositoryException;
 
-public class FileMockDocument implements IDocument {
+public class MockFnDocument implements IDocument {
 
 	public InputStream getContent() {
 		// TODO Auto-generated method stub
