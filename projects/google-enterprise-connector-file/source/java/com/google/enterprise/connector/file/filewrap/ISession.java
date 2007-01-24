@@ -14,10 +14,5 @@ public interface ISession {
 
 	public void setObjectStore(IObjectStore objectStore);
 
-	public void setRemoteServerUrl(String string);
-
-	public void setRemoteServerDownloadUrl(String string);
-
-	public void setRemoteServerUploadUrl(String string);
 
 }

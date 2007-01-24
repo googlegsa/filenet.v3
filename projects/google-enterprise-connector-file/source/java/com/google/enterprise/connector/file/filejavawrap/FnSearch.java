@@ -15,7 +15,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.filenet.wcm.api.BaseObject;
-import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.Search;
 import com.google.enterprise.connector.file.Field;
 import com.google.enterprise.connector.file.FileResultSet;
