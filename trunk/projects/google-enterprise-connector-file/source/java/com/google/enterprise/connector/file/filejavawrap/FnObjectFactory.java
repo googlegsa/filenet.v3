@@ -20,13 +20,13 @@ public class FnObjectFactory implements IObjectFactory {
 
 
 	public IObjectStore getObjectStore(String objectStoreName, ISession fileSession) {
-		return new FnObjectStore(ObjectFactory.getObjectStore(objectStoreName, fileSession.getSession()));
+		return new FnObjectStore(ObjectFactory.getObjectStore(objectStoreName, ((FnSession)fileSession).getSession()));
 		
 	}
 
 
 	public ISearch getSearch(ISession fileSession) {
-		return new FnSearch(ObjectFactory.getSearch(fileSession.getSession()));
+		return new FnSearch(ObjectFactory.getSearch(((FnSession)fileSession).getSession()));
 		
 	}
 

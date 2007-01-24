@@ -8,7 +8,13 @@ public class FnUser implements IUser {
 	User user;
 	public FnUser(User user) {
 		this.user = user;
-		// TODO Auto-generated constructor stub
-	}
 
+	}
+	
+
+	public String getName(){
+		return this.user.getName();
+	}
+	
+	
 }

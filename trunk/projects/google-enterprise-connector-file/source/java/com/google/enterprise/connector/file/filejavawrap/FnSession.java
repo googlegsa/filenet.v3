@@ -44,11 +44,6 @@ public class FnSession implements ISession {
 
 	public void setObjectStore(IObjectStore objectStore) {
 		iObjectStore = (FnObjectStore) objectStore;
-		System.out.println("dans set objectStore");
 		
 	}
-
-	
-	
-
 }
