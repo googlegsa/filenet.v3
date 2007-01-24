@@ -48,20 +48,7 @@ public class FnSession implements ISession {
 		
 	}
 
-	public void setRemoteServerUrl(String string) {
-		this.session.setRemoteServerUrl(string);
-		
-	}
-
-	public void setRemoteServerDownloadUrl(String string) {
-		this.session.setRemoteServerDownloadUrl(string);
-		
-	}
-
-	public void setRemoteServerUploadUrl(String string) {
-		this.session.setRemoteServerUploadUrl(string);
-		
-	}
+	
 	
 
 }
