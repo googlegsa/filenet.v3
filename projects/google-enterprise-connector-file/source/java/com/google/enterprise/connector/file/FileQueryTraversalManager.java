@@ -46,7 +46,7 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 
 	public ResultSet startTraversal() throws RepositoryException {
 		ISearch search = fileObjectFactory.getSearch(fileSession);
-		String query = buildQueryString(null);//unboundedTraversalQuery;
+		String query = buildQueryString(null);// unboundedTraversalQuery;
 		ResultSet set = null;
 		try {
 			set = search.executeXml(query, objectStore);
@@ -108,8 +108,10 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		String uuid = fetchAndVerifyValueForCheckpoint(pm,
 				SpiConstants.PROPNAME_DOCID).getString();
 
-		String nativeFormatDate = fetchAndVerifyValueForCheckpoint(pm,
-				SpiConstants.PROPNAME_LASTMODIFY).getString();
+		Value val = fetchAndVerifyValueForCheckpoint(pm,
+				SpiConstants.PROPNAME_LASTMODIFY);
+		String nativeFormatDate = FileDocumentValue.calendarToIso8601(val
+				.getDate());
 
 		String dateString = nativeFormatDate;
 

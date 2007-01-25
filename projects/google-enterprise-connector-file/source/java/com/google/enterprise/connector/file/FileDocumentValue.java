@@ -1,6 +1,7 @@
 package com.google.enterprise.connector.file;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -10,6 +11,9 @@ import com.google.enterprise.connector.spi.Value;
 import com.google.enterprise.connector.spi.ValueType;
 
 public class FileDocumentValue implements Value {
+
+	private static final SimpleDateFormat ISO8601_DATE_FORMAT_MILLIS = new SimpleDateFormat(
+			"yyyy-MM-dd'T'HH:mm:ss.SSS");
 
 	private IDocument fileDocument = null;
 
@@ -84,6 +88,14 @@ public class FileDocumentValue implements Value {
 
 	public ValueType getType() throws RepositoryException {
 		return this.type;
+	}
+
+	public static String calendarToIso8601(Calendar c) {
+
+		Date d = c.getTime();
+		String isoString = ISO8601_DATE_FORMAT_MILLIS.format(d);
+		return isoString;
+
 	}
 
 }
