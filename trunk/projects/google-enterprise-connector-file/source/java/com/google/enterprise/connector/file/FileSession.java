@@ -23,30 +23,6 @@ public class FileSession implements Session {
 
 	private String pathToWcmApiConfig;
 
-	// Constructor never called except for tests
-	// public FileSession() throws RepositoryException {
-	// try {
-	// fileObjectFactory = new FnObjectFactory();
-	// fileSession = fileObjectFactory.getSession("file-connector", null,
-	// "P8Admin", "UnDeuxTrois456");
-	// this.pathToWcmApiConfig =
-	// "C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties";
-	// fileSession
-	// .setConfiguration(new FileInputStream(
-	// "C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties"));
-	// fileSession.verify();
-	// objectStore = fileObjectFactory.getObjectStore("GSA_Filenet",
-	// fileSession);
-	//			
-	// objectStore
-	// .setDisplayUrl("http://swp-vm-fnet352:8080/Workplace/getContent"+"?objectType=document"+"&objectStoreName="+"GSA_Filenet"+"&id=");
-	// } catch (FileNotFoundException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	//		
-	// }
-
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String appId, String credTag,
 			String objectStoreName, String pathToWcmApiConfig, String displayUrl)
@@ -123,6 +99,14 @@ public class FileSession implements Session {
 		FileAuthorizationManager fileAzm = new FileAuthorizationManager(
 				fileObjectFactory, pathToWcmApiConfig, objectStore);
 		return fileAzm;
+	}
+
+	public IObjectStore getObjectStore() {
+		return objectStore;
+	}
+
+	public void setObjectStore(IObjectStore objectStore) {
+		this.objectStore = objectStore;
 	}
 
 }
