@@ -8,25 +8,34 @@ import com.google.enterprise.connector.spi.Session;
 
 public class FileConnector implements Connector {
 	private String objectFactory;
+
 	private String login;
+
 	private String password;
+
 	private String appId;
+
 	private String credTag;
+
 	private String objectStoreName;
+
 	private String pathToWcmApiConfig;
+
 	private String displayUrl;
 
-	
 	public Session login() throws LoginException, RepositoryException {
 		Session sess = null;
-		if (!(objectFactory == null||login == null||password == null||appId == null||objectStoreName == null||displayUrl == null)){
-			
-			sess = new FileSession(objectFactory,login,password,appId,credTag,objectStoreName,pathToWcmApiConfig, displayUrl);
-		} else {
-			sess = new FileSession();
+		if (!(objectFactory == null || login == null || password == null
+				|| appId == null || objectStoreName == null || displayUrl == null)) {
+
+			sess = new FileSession(objectFactory, login, password, appId,
+					credTag, objectStoreName, pathToWcmApiConfig, displayUrl);
 		}
+//		} else {
+//			sess = new FileSession();
+//		}
 		return sess;
-		
+
 	}
 
 	public String getAppId() {
@@ -92,7 +101,5 @@ public class FileConnector implements Connector {
 	public void setDisplayUrl(String displayUrl) {
 		this.displayUrl = displayUrl;
 	}
-
-	
 
 }

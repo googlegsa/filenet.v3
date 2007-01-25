@@ -7,19 +7,19 @@ import java.util.ListIterator;
 
 import com.google.enterprise.connector.spi.ResultSet;
 
-public class FileResultSet extends LinkedList implements ResultSet{
-	
+public class FileResultSet extends LinkedList implements ResultSet {
+
 	private static final long serialVersionUID = 1L;
 
-	public FileResultSet(){
+	public FileResultSet() {
 		super();
 	}
-	
-	public FileResultSet(Collection co){
+
+	public FileResultSet(Collection co) {
 		super(co);
 	}
-	
-	public Iterator iterator(){
+
+	public Iterator iterator() {
 		ListIterator iterator = listIterator(0);
 		return iterator;
 	}
