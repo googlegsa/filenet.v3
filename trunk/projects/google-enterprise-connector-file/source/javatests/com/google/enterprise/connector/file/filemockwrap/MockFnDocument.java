@@ -46,4 +46,19 @@ public class MockFnDocument implements IDocument {
 		return null;
 	}
 
+	public long getPropertyLongValue(String name) throws RepositoryException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public double getPropertyDoubleValue(String name) throws RepositoryException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public boolean getPropertyBooleanValue(String name) throws RepositoryException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }
