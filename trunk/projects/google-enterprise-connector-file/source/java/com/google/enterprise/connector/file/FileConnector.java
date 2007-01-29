@@ -23,17 +23,20 @@ public class FileConnector implements Connector {
 
 	private String displayUrl;
 
+	private String isPublic;
+
 	public Session login() throws LoginException, RepositoryException {
 		Session sess = null;
 		if (!(objectFactory == null || login == null || password == null
 				|| appId == null || objectStoreName == null || displayUrl == null)) {
 
 			sess = new FileSession(objectFactory, login, password, appId,
-					credTag, objectStoreName, pathToWcmApiConfig, displayUrl);
+					credTag, objectStoreName, pathToWcmApiConfig, displayUrl,
+					isPublic);
 		}
-//		} else {
-//			sess = new FileSession();
-//		}
+		// } else {
+		// sess = new FileSession();
+		// }
 		return sess;
 
 	}
@@ -100,6 +103,14 @@ public class FileConnector implements Connector {
 
 	public void setDisplayUrl(String displayUrl) {
 		this.displayUrl = displayUrl;
+	}
+
+	public String getIsPublic() {
+		return isPublic;
+	}
+
+	public void setIsPublic(String isPublic) {
+		this.isPublic = isPublic;
 	}
 
 }

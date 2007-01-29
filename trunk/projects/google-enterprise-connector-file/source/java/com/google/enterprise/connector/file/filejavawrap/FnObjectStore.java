@@ -11,6 +11,8 @@ public class FnObjectStore implements IObjectStore {
 
 	String displayUrl;
 
+	String isPublic;
+
 	public FnObjectStore(ObjectStore objectStore) {
 		this.objectStore = objectStore;
 
@@ -33,6 +35,15 @@ public class FnObjectStore implements IObjectStore {
 
 	public String getName() {
 		return this.objectStore.getName();
+	}
+
+	public String getIsPublic() {
+		return isPublic;
+	}
+
+	public void setIsPublic(String isPublic) {
+		this.isPublic = isPublic;
+
 	}
 
 }

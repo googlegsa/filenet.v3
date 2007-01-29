@@ -24,7 +24,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
 			throws LoginException, RepositoryException {
 
 		System.out.println("FileAuthentication method authenticate");
-		
+
 		ISession sess = objectFactory.getSession("gsa-authenticate", null,
 				username, password);
 		try {

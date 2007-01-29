@@ -10,4 +10,8 @@ public interface IObjectStore {
 
 	public String getName();
 
+	public String getIsPublic();
+
+	public void setIsPublic(String isPublic);
+
 }

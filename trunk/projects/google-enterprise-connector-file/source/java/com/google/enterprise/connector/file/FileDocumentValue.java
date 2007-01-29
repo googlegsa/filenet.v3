@@ -29,6 +29,7 @@ public class FileDocumentValue implements Value {
 		this.propname_content = propname_content;
 		fileDocument = document;
 		stringValue = null;
+
 	}
 
 	public FileDocumentValue(ValueType t, String v) {
@@ -36,6 +37,7 @@ public class FileDocumentValue implements Value {
 		this.propname_content = null;
 		fileDocument = null;
 		stringValue = v;
+
 	}
 
 	public String getString() throws IllegalArgumentException,
@@ -43,10 +45,13 @@ public class FileDocumentValue implements Value {
 		if (stringValue != null) {
 			return stringValue;
 		} else {
-			return this.fileDocument
+			String value = this.fileDocument
 					.getPropertyStringValue(this.propname_content);
+			if (value == null) {
+				return "";
+			}
+			return value;
 		}
-
 	}
 
 	public InputStream getStream() throws IllegalArgumentException,
