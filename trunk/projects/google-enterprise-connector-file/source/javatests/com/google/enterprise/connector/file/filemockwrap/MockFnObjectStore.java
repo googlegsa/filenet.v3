@@ -5,14 +5,14 @@ import com.google.enterprise.connector.file.filewrap.IObjectStore;
 
 public class MockFnObjectStore implements IObjectStore {
 
-	public IDocument getObject(int objectType, String guidOrPath) {
+	public IDocument getObject(String guidOrPath) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public void setDisplayUrl(String displayUrl) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	public String getDisplayUrl() {
@@ -25,9 +25,14 @@ public class MockFnObjectStore implements IObjectStore {
 		return null;
 	}
 
-	public IDocument getObject(String guidOrPath) {
+	public String getIsPublic() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void setIsPublic(String isPublic) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
