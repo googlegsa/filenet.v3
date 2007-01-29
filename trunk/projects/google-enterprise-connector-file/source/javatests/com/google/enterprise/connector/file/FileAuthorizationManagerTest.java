@@ -28,18 +28,17 @@ public class FileAuthorizationManagerTest extends TestCase {
 		FileAuthorizationManager authorizationManager;
 		authorizationManager = null;
 		Connector connector = new FileConnector();
-		((FileConnector) connector).setLogin("P8Admin");
-		((FileConnector) connector).setPassword("UnDeuxTrois456");
-		((FileConnector) connector).setObjectStoreName("GSA_Filenet");
-		((FileConnector) connector).setAppId("file-connector");
-		((FileConnector) connector).setCredTag("Clear");
+		((FileConnector) connector).setLogin(FnConnection.userName);
+		((FileConnector) connector).setPassword(FnConnection.password);
 		((FileConnector) connector)
-				.setDisplayUrl("http://swp-vm-fnet352:8080/Workplace/");
+				.setObjectStoreName(FnConnection.objectStoreName);
+		((FileConnector) connector).setAppId(FnConnection.appId);
+		((FileConnector) connector).setCredTag(FnConnection.credTag);
+		((FileConnector) connector).setDisplayUrl(FnConnection.displayUrl);
 		((FileConnector) connector)
-				.setObjectFactory("com.google.enterprise.connector.file.filejavawrap.FnObjectFactory");
+				.setObjectFactory(FnConnection.objectFactory);
 		((FileConnector) connector)
-				.setPathToWcmApiConfig("C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties");
-		//		
+				.setPathToWcmApiConfig(FnConnection.pathToWcmApiConfig);
 		Session sess = (FileSession) connector.login();
 		authorizationManager = (FileAuthorizationManager) sess
 				.getAuthorizationManager();
@@ -78,13 +77,13 @@ public class FileAuthorizationManagerTest extends TestCase {
 			String username = "P8TestUser";
 
 			Map expectedResults = new HashMap();
-			expectedResults.put("{8AE0301C-2F52-46FD-B487-FC7A468A902A}",
+			expectedResults.put("%7B8AE0301C-2F52-46FD-B487-FC7A468A902A%7D",
 					Boolean.TRUE);
-			expectedResults.put("{BC13F942-5EF5-42BB-B5B2-1E2442C32A1C}",
+			expectedResults.put("%7BBC13F942-5EF5-42BB-B5B2-1E2442C32A1C%7D",
 					Boolean.TRUE);
-			expectedResults.put("{3D5E1FB4-2670-4C52-B695-02C800112B2A}",
+			expectedResults.put("%7B3D5E1FB4-2670-4C52-B695-02C800112B2A%7D",
 					Boolean.TRUE);
-			expectedResults.put("{33D6C374-427D-4F96-A0D9-C641E3DECD7F}",
+			expectedResults.put("%7B33D6C374-427D-4F96-A0D9-C641E3DECD7F%7D",
 					Boolean.TRUE);
 
 			testAuthorization(authorizationManager, expectedResults, username);
