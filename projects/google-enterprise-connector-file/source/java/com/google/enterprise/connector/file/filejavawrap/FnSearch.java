@@ -56,7 +56,7 @@ public class FnSearch implements ISearch {
 				for (int j = 0; j < nodeMap.getLength(); j++) {
 					if (nodeMap.item(j).getNodeName().equals("Id")) {
 						fileDocumentPropertyMap = new FileDocumentPropertyMap(
-								(String) nodeMap.item(1).getNodeValue(),
+								(String) nodeMap.item(j).getNodeValue(),
 								objectStore);
 
 						resultSet.add(fileDocumentPropertyMap);
@@ -69,7 +69,7 @@ public class FnSearch implements ISearch {
 		return resultSet;
 	}
 
-	public Document stringToDom(String xmlSource) throws RepositoryException {
+	private Document stringToDom(String xmlSource) throws RepositoryException {
 		DocumentBuilder builder = null;
 		try {
 			DocumentBuilderFactory factory = DocumentBuilderFactory
@@ -80,19 +80,13 @@ public class FnSearch implements ISearch {
 			return builder.parse(new InputSource(new StringReader(xmlSource)));
 
 		} catch (ParserConfigurationException de) {
-			RepositoryException re = new LoginException(de.getMessage(), de
-					.getCause());
-			re.setStackTrace(de.getStackTrace());
+			RepositoryException re = new LoginException(de);
 			throw re;
 		} catch (SAXException de) {
-			RepositoryException re = new LoginException(de.getMessage(), de
-					.getCause());
-			re.setStackTrace(de.getStackTrace());
+			RepositoryException re = new LoginException(de);
 			throw re;
 		} catch (IOException de) {
-			RepositoryException re = new LoginException(de.getMessage(), de
-					.getCause());
-			re.setStackTrace(de.getStackTrace());
+			RepositoryException re = new LoginException(de);
 			throw re;
 		}
 

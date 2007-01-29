@@ -64,8 +64,6 @@ public class FileAuthorizationManager implements AuthorizationManager {
 						new FileDocumentValue(ValueType.BOOLEAN, "false")));
 			}
 			result.add(map);
-			System.out.println("hasRight? "
-					+ doc.getPermissions().asMask(username));
 		}
 
 		System.out.println("end of FileAuthorize method authorieDocIds");

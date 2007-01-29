@@ -25,4 +25,7 @@ public interface IDocument {
 
 	public boolean getPropertyBooleanValue(String name)
 			throws RepositoryException;
+
+	public IProperties getProperties() throws RepositoryException;
+
 }

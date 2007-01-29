@@ -3,11 +3,13 @@ package com.google.enterprise.connector.file.filejavawrap;
 import java.io.InputStream;
 import java.util.Date;
 
+import com.filenet.wcm.api.BaseRuntimeException;
 import com.filenet.wcm.api.Document;
 import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.PropertyNotFoundException;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
+import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnDocument implements IDocument {
@@ -20,7 +22,16 @@ public class FnDocument implements IDocument {
 	}
 
 	public InputStream getContent() {
-		return doc.getContent();
+		try {
+			return doc.getContent();
+		} catch (BaseRuntimeException e) {
+
+			System.out.println("how often? getContent BaseRuntimeException");
+			return doc.getContent();
+		} catch (Error er) {
+			System.out.println("to check " + er.getMessage());
+			return doc.getContent();
+		}
 
 	}
 
@@ -33,20 +44,36 @@ public class FnDocument implements IDocument {
 			System.out.println(" PropertyNotFoundException docnmae plantage? "
 					+ doc.getName() + " " + doc.getSession().toString());
 			if (name.equals(Property.MIME_TYPE)) {
-
+				System.out.println("how often? mimetype propertynotfound");
 				return "application/octet-stream";
 			} else if (name.equals(Property.PERMISSIONS)) {
+				System.out.println("how often? permissions propertynotfound");
 				return "security";
 			} else {
 				RepositoryException re = new RepositoryException(de);
 				throw re;
 			}
+			// }catch (BaseRuntimeException e){
+			// if (name.equals(Property.MIME_TYPE)) {
+			// System.out.println("how often? mimetype BaseRuntimeException");
+			// return "application/octet-stream";
+			// } else if (name.equals(Property.PERMISSIONS)) {
+			// System.out.println("how often? permissions
+			// BaseRuntimeException");
+			// return "security";
+			// } else {
+			// RepositoryException re = new RepositoryException(e);
+			// throw re;
+			// }
 		} catch (Exception de) {
 			System.out.println(" FnDocument Exception" + doc.getName() + " "
 					+ doc.getSession().toString() + " " + name);
 			RepositoryException re = new RepositoryException(de);
 			throw re;
 
+		} catch (Error er) {
+			System.out.println("to check " + er.getMessage());
+			return "";
 		}
 
 	}
@@ -116,6 +143,15 @@ public class FnDocument implements IDocument {
 			return this.doc.getPropertyBooleanValue(name);
 		} catch (PropertyNotFoundException e) {
 
+			RepositoryException re = new RepositoryException(e);
+			throw re;
+		}
+	}
+
+	public IProperties getProperties() throws RepositoryException {
+		try {
+			return new FnProperties(this.doc.getProperties());
+		} catch (PropertyNotFoundException e) {
 			RepositoryException re = new RepositoryException(e);
 			throw re;
 		}

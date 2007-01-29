@@ -25,10 +25,9 @@ public class FileSession implements Session {
 
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String appId, String credTag,
-			String objectStoreName, String pathToWcmApiConfig, String displayUrl)
-			throws RepositoryException {
+			String objectStoreName, String pathToWcmApiConfig,
+			String displayUrl, String isPublic) throws RepositoryException {
 		try {
-			System.out.println("fileSession " + userName + " " + userPassword);
 			setFileObjectFactory(iObjectFactory);
 			if (credTag.equals("")) {
 				credTag = null;
@@ -45,20 +44,16 @@ public class FileSession implements Session {
 					+ "getContent?objectType=document&objectStoreName="
 					+ objectStoreName + "&id=");
 
+			objectStore.setIsPublic(isPublic);
 		} catch (FileNotFoundException de) {
-			RepositoryException re = new LoginException(de.getMessage(), de
-					.getCause());
-			re.setStackTrace(de.getStackTrace());
+			RepositoryException re = new LoginException(de);
 			throw re;
 		} catch (Exception e) {
 			System.out.println("exception in FileSession()");
 			e.printStackTrace();
-			RepositoryException re = new LoginException(e.getMessage(), e
-					.getCause());
-			re.setStackTrace(e.getStackTrace());
+			RepositoryException re = new LoginException(e);
 			throw re;
 		}
-		// this.client.setSession(session);
 	}
 
 	private void setFileObjectFactory(String objectFactory) {
