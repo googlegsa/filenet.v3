@@ -34,6 +34,8 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 
 	private String whereClause = " AND DateLastModified > {0}";
 
+	private int batchint;
+
 	public FileQueryTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession) {
 		this.fileObjectFactory = fileObjectFactory;
@@ -46,14 +48,9 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 
 	public ResultSet startTraversal() throws RepositoryException {
 		ISearch search = fileObjectFactory.getSearch(fileSession);
-		String query = buildQueryString(null);// unboundedTraversalQuery;
+		String query = buildQueryString(null);
 		ResultSet set = null;
-		try {
-			set = search.executeXml(query, objectStore);
-		} catch (RepositoryException e) {
-			System.out.println("apres executeQuery ");
-			e.printStackTrace();
-		}
+		set = search.executeXml(query, objectStore);
 		return set;
 	}
 
@@ -69,7 +66,12 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 			query.append(getCheckpointClause(checkpoint));
 		}
 		query.append(order_by);
-		query.append("</querystatement></request>");
+		query.append("</querystatement>");
+		if (batchint != 0) {
+			query.append("<options maxrecords='" + batchint
+					+ "' objectasid=\"false\"/>");
+		}
+		query.append("</request>");
 		System.out.println(query.toString());
 		return query.toString();
 	}
@@ -88,8 +90,6 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		String uuid = extractDocidFromCheckpoint(jo, checkPoint);
 		String c = extractNativeDateFromCheckpoint(jo, checkPoint);
 		String queryString = makeCheckpointQueryString(uuid, c);
-		System.out.println("queryString vaut " + queryString);
-
 		return queryString;
 
 	}
@@ -128,7 +128,7 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 	}
 
 	public void setBatchHint(int batchHint) throws RepositoryException {
-		// TODO Auto-generated method stub
+		this.batchint = batchHint;
 
 	}
 
