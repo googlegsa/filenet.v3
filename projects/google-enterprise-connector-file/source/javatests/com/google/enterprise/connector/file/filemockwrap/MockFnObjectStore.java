@@ -25,4 +25,9 @@ public class MockFnObjectStore implements IObjectStore {
 		return null;
 	}
 
+	public IDocument getObject(String guidOrPath) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
