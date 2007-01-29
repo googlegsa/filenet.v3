@@ -34,7 +34,6 @@ public class FileDocumentPropertyMap implements PropertyMap {
 		set.add("DateContentLastAccessed");
 		set.add("DateCreated");
 		set.add("DateLastModified");
-		set.add("FoldersFiledIn");
 		set.add("Id");
 		set.add("IsCurrentVersion");
 		set.add("IsFrozenVersion");
@@ -95,6 +94,7 @@ public class FileDocumentPropertyMap implements PropertyMap {
 	}
 
 	public Iterator getProperties() throws RepositoryException {
+		fetch();
 		HashSet properties = new HashSet();
 		IProperties documentProperties = this.document.getProperties();
 		IProperty property;

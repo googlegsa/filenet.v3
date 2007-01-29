@@ -34,9 +34,6 @@ public class FileConnector implements Connector {
 					credTag, objectStoreName, pathToWcmApiConfig, displayUrl,
 					isPublic);
 		}
-		// } else {
-		// sess = new FileSession();
-		// }
 		return sess;
 
 	}
