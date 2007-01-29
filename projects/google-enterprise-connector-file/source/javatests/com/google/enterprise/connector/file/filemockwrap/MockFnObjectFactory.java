@@ -7,8 +7,7 @@ import com.google.enterprise.connector.file.filewrap.ISession;
 
 public class MockFnObjectFactory implements IObjectFactory {
 
-	public ISession getSession(String appId, String credTag, String userId,
-			String password) {
+	public ISession getSession(String appId, String credTag, String userId, String password) {
 		// TODO Auto-generated method stub
 		return null;
 	}

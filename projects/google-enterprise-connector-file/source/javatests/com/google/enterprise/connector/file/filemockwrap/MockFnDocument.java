@@ -5,6 +5,7 @@ import java.util.Date;
 
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
+import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class MockFnDocument implements IDocument {
@@ -14,26 +15,9 @@ public class MockFnDocument implements IDocument {
 		return null;
 	}
 
-	public String getPropertyStringValue(String name)
-			throws RepositoryException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public double getContentSize() throws RepositoryException {
 		// TODO Auto-generated method stub
 		return 0;
-	}
-
-	public Date getPropertyDateValue(String date_last_modified)
-			throws RepositoryException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public String getPermissionsXML() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	public IPermissions getPermissions() {
@@ -41,7 +25,7 @@ public class MockFnDocument implements IDocument {
 		return null;
 	}
 
-	public String getPropertiesXML(String[] tab) {
+	public String getPropertyStringValue(String name) throws RepositoryException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -56,9 +40,18 @@ public class MockFnDocument implements IDocument {
 		return 0;
 	}
 
+	public Date getPropertyDateValue(String name) throws RepositoryException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public boolean getPropertyBooleanValue(String name) throws RepositoryException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	public IProperties getProperties() throws RepositoryException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

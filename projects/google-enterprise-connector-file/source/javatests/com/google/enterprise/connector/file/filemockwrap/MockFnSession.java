@@ -15,12 +15,12 @@ public class MockFnSession implements ISession {
 
 	public void setConfiguration(FileInputStream stream) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	public void setObjectStore(IObjectStore objectStore) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 }
