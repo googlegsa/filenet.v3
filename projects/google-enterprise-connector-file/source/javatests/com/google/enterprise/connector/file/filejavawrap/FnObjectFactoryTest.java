@@ -1,5 +1,9 @@
 package com.google.enterprise.connector.file.filejavawrap;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import com.google.enterprise.connector.file.FnConnection;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
@@ -12,7 +16,6 @@ public class FnObjectFactoryTest extends TestCase {
 
 	protected void setUp() throws Exception {
 
-		super.setUp();
 		objectFactory = new FnObjectFactory();
 	}
 
@@ -23,8 +26,9 @@ public class FnObjectFactoryTest extends TestCase {
 	 */
 	public void testGetSession() {
 
-		ISession session = objectFactory.getSession("test-getSession", "Clear",
-				"P8TestUser", "p@ssw0rd");
+		ISession session = objectFactory.getSession("test-getSession",
+				FnConnection.credTag, FnConnection.userName,
+				FnConnection.password);
 		assertNotNull(session);
 		assertTrue(session instanceof FnSession);
 
@@ -35,11 +39,15 @@ public class FnObjectFactoryTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnObjectFactory.getObjectStore(String,
 	 * ISession)'
 	 */
-	public void testGetObjectStore() {
+	public void testGetObjectStore() throws FileNotFoundException {
 		ISession session = objectFactory.getSession("test-getObjectStore",
-				"Clear", "P8TestUser", "p@ssw0rd");
-		IObjectStore objectStore = objectFactory.getObjectStore("GSA_Filenet",
-				session);
+				FnConnection.credTag, FnConnection.userName,
+				FnConnection.password);
+		session.setConfiguration(new FileInputStream(
+				FnConnection.pathToWcmApiConfig));
+		session.verify();
+		IObjectStore objectStore = objectFactory.getObjectStore(
+				FnConnection.objectStoreName, session);
 		assertNotNull(objectStore);
 		assertTrue(objectStore instanceof FnObjectStore);
 

@@ -7,16 +7,17 @@ import com.google.enterprise.connector.spi.Session;
 
 import junit.framework.TestCase;
 
-public class FileAuthenticationManagerTest extends TestCase {
+public class FileConnectorTest extends TestCase {
+
+	protected void setUp() throws Exception {
+	}
 
 	/*
 	 * Test method for
-	 * 'com.google.enterprise.connector.file.FileAuthenticationManager.authenticate(String,
-	 * String)'
+	 * 'com.google.enterprise.connector.file.FileConnector.login()'
 	 */
-	public void testAuthenticate() throws LoginException, RepositoryException {
+	public void testLogin() throws LoginException, RepositoryException {
 		Connector connector = new FileConnector();
-
 		((FileConnector) connector).setLogin(FnConnection.userName);
 		((FileConnector) connector).setPassword(FnConnection.password);
 		((FileConnector) connector)
@@ -28,19 +29,10 @@ public class FileAuthenticationManagerTest extends TestCase {
 				.setObjectFactory(FnConnection.objectFactory);
 		((FileConnector) connector)
 				.setPathToWcmApiConfig(FnConnection.pathToWcmApiConfig);
-		Session sess = (FileSession) connector.login();
-		FileAuthenticationManager authentManager = (FileAuthenticationManager) sess
-				.getAuthenticationManager();
 
-		assertFalse(authentManager.authenticate("ebouvier", "falsePassword"));
-		assertFalse(authentManager.authenticate("p8Admin", null));
-		assertFalse(authentManager.authenticate(null, "p@ssw0rd"));
-		assertFalse(authentManager.authenticate(null, null));
-
-		assertTrue(authentManager.authenticate("P8Admin", "UnDeuxTrois456"));
-		assertTrue(authentManager.authenticate("P8TestUser", "p@ssw0rd"));
-		assertTrue(authentManager.authenticate("P8TestUser2", "p@ssw0rd"));
-
+		Session sess = connector.login();
+		assertNotNull(sess);
+		assertTrue(sess instanceof FileSession);
 	}
 
 }

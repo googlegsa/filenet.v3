@@ -3,6 +3,7 @@ package com.google.enterprise.connector.file.filejavawrap;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
+import com.google.enterprise.connector.file.FnConnection;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.file.filewrap.IUser;
@@ -18,15 +19,14 @@ public class FnSessionTest extends TestCase {
 	public void testVerify() throws FileNotFoundException {
 
 		IObjectFactory objectFactory = new FnObjectFactory();
-		ISession session = objectFactory.getSession("test-verify", "Clear",
-				"P8TestUser", "p@ssw0rd");
-		session
-				.setConfiguration(new FileInputStream(
-						"C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties"));
+		ISession session = objectFactory.getSession("test-verify",
+				FnConnection.credTag, FnConnection.userLambda1,
+				FnConnection.userLambdaPassword1);
+		session.setConfiguration(new FileInputStream(
+				FnConnection.pathToWcmApiConfig));
 		IUser user = session.verify();
-		System.out.println(user.getName());
 		assertNotNull(user);
-		assertEquals(user.getName(), "P8TestUser@SWORD.FR");
+		assertEquals(FnConnection.userLambda1, user.getName());
 	}
 
 }
