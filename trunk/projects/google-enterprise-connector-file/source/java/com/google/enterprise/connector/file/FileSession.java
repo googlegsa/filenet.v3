@@ -26,7 +26,8 @@ public class FileSession implements Session {
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String appId, String credTag,
 			String objectStoreName, String pathToWcmApiConfig,
-			String displayUrl, String isPublic) throws RepositoryException, LoginException {
+			String displayUrl, String isPublic) throws RepositoryException,
+			LoginException {
 		try {
 			setFileObjectFactory(iObjectFactory);
 			if (credTag.equals("")) {
@@ -37,7 +38,7 @@ public class FileSession implements Session {
 			this.pathToWcmApiConfig = pathToWcmApiConfig;
 			fileSession.setConfiguration(new FileInputStream(
 					this.pathToWcmApiConfig));
-			//fileSession.verify();
+			// fileSession.verify();
 			objectStore = fileObjectFactory.getObjectStore(objectStoreName,
 					fileSession);
 			objectStore.setDisplayUrl(displayUrl
@@ -48,15 +49,15 @@ public class FileSession implements Session {
 		} catch (FileNotFoundException de) {
 			RepositoryException re = new RepositoryException(de);
 			throw re;
-		}/* catch (Exception e) {
-			System.out.println("exception in FileSession()");
-			e.printStackTrace();
-			LoginException re = new LoginException(e);
-			throw re;
-		}*/
+		}/*
+			 * catch (Exception e) { System.out.println("exception in
+			 * FileSession()"); e.printStackTrace(); LoginException re = new
+			 * LoginException(e); throw re; }
+			 */
 	}
 
-	private void setFileObjectFactory(String objectFactory) throws RepositoryException {
+	private void setFileObjectFactory(String objectFactory)
+			throws RepositoryException {
 
 		try {
 			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory)
