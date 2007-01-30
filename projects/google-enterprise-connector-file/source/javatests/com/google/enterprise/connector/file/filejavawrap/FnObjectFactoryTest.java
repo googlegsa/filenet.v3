@@ -7,6 +7,8 @@ import com.google.enterprise.connector.file.FnConnection;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;
 
@@ -39,7 +41,7 @@ public class FnObjectFactoryTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnObjectFactory.getObjectStore(String,
 	 * ISession)'
 	 */
-	public void testGetObjectStore() throws FileNotFoundException {
+	public void testGetObjectStore() throws FileNotFoundException, LoginException, RepositoryException {
 		ISession session = objectFactory.getSession("test-getObjectStore",
 				FnConnection.credTag, FnConnection.userName,
 				FnConnection.password);

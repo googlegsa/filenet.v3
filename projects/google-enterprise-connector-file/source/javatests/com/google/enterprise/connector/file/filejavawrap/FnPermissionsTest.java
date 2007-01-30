@@ -9,6 +9,8 @@ import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;
 
@@ -18,7 +20,7 @@ public class FnPermissionsTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnPermissions.asMask(String)'
 	 */
-	public void testAsMask() throws FileNotFoundException {
+	public void testAsMask() throws FileNotFoundException, LoginException, RepositoryException {
 
 		IObjectFactory objectFactory = new FnObjectFactory();
 		ISession session = objectFactory.getSession(FnConnection.appId,
