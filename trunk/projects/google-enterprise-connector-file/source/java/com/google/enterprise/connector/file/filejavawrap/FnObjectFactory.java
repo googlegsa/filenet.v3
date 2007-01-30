@@ -5,6 +5,8 @@ import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.file.filewrap.IUser;
+import com.google.enterprise.connector.spi.LoginException;
 
 public class FnObjectFactory implements IObjectFactory {
 
@@ -20,10 +22,10 @@ public class FnObjectFactory implements IObjectFactory {
 	}
 
 	public IObjectStore getObjectStore(String objectStoreName,
-			ISession fileSession) {
+			ISession fileSession) throws LoginException {
+		fileSession.verify();
 		return new FnObjectStore(ObjectFactory.getObjectStore(objectStoreName,
 				((FnSession) fileSession).getSession()));
-
 	}
 
 	public ISearch getSearch(ISession fileSession) {
