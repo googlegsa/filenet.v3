@@ -98,8 +98,7 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 		this.isAuthenticated = false;
 		try {
 			MockJcrSession session = null;// The connector is not able to deal
-											// with more
-			// than one session instance.
+			// with more than one session instance.
 			session = (MockJcrSession) repo.login(creds);
 			if (session == null) {
 				throw new LoginException(
