@@ -4,9 +4,14 @@ import com.google.enterprise.connector.file.filewrap.IUser;
 
 public class MockFnUser implements IUser {
 
+	String userName;
+
+	protected MockFnUser(String userName) {
+		this.userName = userName;
+	}
+
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.userName;
 	}
 
 }

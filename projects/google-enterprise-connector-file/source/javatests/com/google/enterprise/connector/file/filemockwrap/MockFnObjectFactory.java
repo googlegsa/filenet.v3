@@ -8,20 +8,27 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 public class MockFnObjectFactory implements IObjectFactory {
 
+	private MockFnSessionAndObjectStore mfnOS;
+
 	public ISession getSession(String appId, String credTag, String userId,
 			String password) {
-		return new MockFnObjectStore(appId, credTag, userId, password);
+		this.mfnOS = new MockFnSessionAndObjectStore(userId, password);
+		return this.mfnOS;
 
 	}
 
 	public IObjectStore getObjectStore(String string, ISession fileSession)
 			throws RepositoryException {
-		return null;
+		this.mfnOS.valuateEventList(string);
+		return this.mfnOS;
 	}
 
 	public ISearch getSearch(ISession fileSession) {
-		// TODO Auto-generated method stub
-		return null;
+		if (((MockFnSessionAndObjectStore) fileSession).hasBeenAuthenticated()) {
+			return new MockFnSearch();
+		} else {
+			return null;
+		}
 	}
 
 }
