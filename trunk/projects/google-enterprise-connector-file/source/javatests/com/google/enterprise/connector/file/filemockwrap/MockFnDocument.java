@@ -25,7 +25,8 @@ public class MockFnDocument implements IDocument {
 		return null;
 	}
 
-	public String getPropertyStringValue(String name) throws RepositoryException {
+	public String getPropertyStringValue(String name)
+			throws RepositoryException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -35,7 +36,8 @@ public class MockFnDocument implements IDocument {
 		return 0;
 	}
 
-	public double getPropertyDoubleValue(String name) throws RepositoryException {
+	public double getPropertyDoubleValue(String name)
+			throws RepositoryException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -45,7 +47,8 @@ public class MockFnDocument implements IDocument {
 		return null;
 	}
 
-	public boolean getPropertyBooleanValue(String name) throws RepositoryException {
+	public boolean getPropertyBooleanValue(String name)
+			throws RepositoryException {
 		// TODO Auto-generated method stub
 		return false;
 	}
