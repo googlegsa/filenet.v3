@@ -11,18 +11,19 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FileAuthenticationManager implements AuthenticationManager {
 	IObjectFactory objectFactory;
-	
+
 	String wcmConfigFilePath;
-	
+
 	public FileAuthenticationManager(IObjectFactory object, String wcm) {
 		objectFactory = object;
 		wcmConfigFilePath = wcm;
 	}
-	
-	public boolean authenticate(String username, String password) throws RepositoryException {
-		
+
+	public boolean authenticate(String username, String password)
+			throws RepositoryException {
+
 		System.out.println("FileAuthentication method authenticate");
-		
+
 		ISession sess = objectFactory.getSession("gsa-authenticate", null,
 				username, password);
 		try {
@@ -32,12 +33,12 @@ public class FileAuthenticationManager implements AuthenticationManager {
 			RepositoryException re = new RepositoryException(e);
 			throw re;
 		} catch (LoginException e) {
-			//Login failed, user not authenticated
+			// Login failed, user not authenticated
 			return false;
 		}
 		System.out.println("FileAuthentication method authenticate send true");
 		return true;
-		
+
 	}
-	
+
 }
