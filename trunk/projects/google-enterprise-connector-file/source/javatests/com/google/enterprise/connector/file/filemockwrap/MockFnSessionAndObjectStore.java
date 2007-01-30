@@ -9,42 +9,49 @@ import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.file.filewrap.IUser;
+import com.google.enterprise.connector.mock.MockRepository;
+import com.google.enterprise.connector.mock.MockRepositoryDocument;
 import com.google.enterprise.connector.mock.MockRepositoryDocumentStore;
+import com.google.enterprise.connector.mock.MockRepositoryEventList;
 import com.google.enterprise.connector.mock.jcr.MockJcrRepository;
 import com.google.enterprise.connector.mock.jcr.MockJcrSession;
 import com.google.enterprise.connector.spi.LoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
-public class MockFnObjectStore implements IObjectStore, ISession {
+public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 	private MockJcrRepository repo;
 
 	private String mockRepositoryEventList;
 
 	private String isPublic;
 
-	private MockJcrSession session;
-
 	private String userId;
 
 	private String password;
 
-	/*
-	 * protected MockFnObjectStore(String mockRepEvList, ISession session)
-	 * throws RepositoryException { this.mockRepositoryEventList =
-	 * mockRepEvList; MockRepositoryEventList mrel = new
-	 * MockRepositoryEventList(this.mockRepositoryEventList); this.repo = new
-	 * MockJcrRepository(new MockRepository(mrel)); }
-	 */
+	private boolean isAuthenticated = false;
 
-	protected MockFnObjectStore(String appId, String credTag, String userId,
-			String password) {
+	// Note : This super class implements two key interfaces : Session and
+	// ObjectStore.
+	// Assumes that verify() method is called only when an ObjectStoreName has
+	// been defined. Indeed FileNet authentifies session before it defines an
+	// object Store (because it only needs LDAP and this mechnism cannot be
+	// reproduced for the Mock (the users are defined in an EventList which
+	// actually is the ObjectStoreName therefore we merged those two classes for
+	// the mock so that we can get away with this asynchronism problem.
+
+	protected MockFnSessionAndObjectStore(String userId, String password) {
 		this.userId = userId;
 		this.password = password;
 	}
 
+	/**
+	 * Retrieve object by its ID.
+	 */
 	public IDocument getObject(String guidOrPath) {
-		// TODO Auto-generated method stub
-		return null;
+		MockRepositoryDocument doc = this.repo.getRepo().getStore().getDocByID(
+				guidOrPath);
+		return new MockFnDocument(doc);
 	}
 
 	public void setDisplayUrl(String displayUrl) {
@@ -60,8 +67,7 @@ public class MockFnObjectStore implements IObjectStore, ISession {
 	}
 
 	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		return mockRepositoryEventList;
 	}
 
 	public String getIsPublic() {
@@ -82,18 +88,36 @@ public class MockFnObjectStore implements IObjectStore, ISession {
 		return this.repo.getRepo().getStore();
 	}
 
+	protected boolean hasBeenAuthenticated() {
+		return isAuthenticated;
+	}
+
 	public IUser verify() throws RepositoryException, LoginException {
 		Credentials creds = new SimpleCredentials(this.userId, this.password
 				.toCharArray());
-
+		this.isAuthenticated = false;
 		try {
-			this.session = (MockJcrSession) repo.login(creds);
+			MockJcrSession session = null;// The connector is not able to deal
+											// with more
+			// than one session instance.
+			session = (MockJcrSession) repo.login(creds);
+			if (session == null) {
+				throw new LoginException(
+						"MockJcrRepository.login() returned null session => LoginException manually thrown"
+								+ " from MockFnSessionAndObjectStore.verify(). Cause of this failure among the three following "
+								+ "parameters :\n\t- EventList = "
+								+ this.mockRepositoryEventList
+								+ "\n\t- userId = "
+								+ this.userId
+								+ "\n\t- password = " + this.password);
+			}
+			this.isAuthenticated = true;
+			return new MockFnUser(userId);
 		} catch (javax.jcr.LoginException e) {
 			throw new LoginException(e);
 		} catch (javax.jcr.RepositoryException e) {
 			throw new com.google.enterprise.connector.spi.RepositoryException(e);
 		}
-		return null;
 	}
 
 	/**
@@ -104,8 +128,14 @@ public class MockFnObjectStore implements IObjectStore, ISession {
 	}
 
 	public void setObjectStore(IObjectStore objectStore) {
-		// TODO Auto-generated method stub
+		// TODO Ask if we can remove it.
 
+	}
+
+	protected void valuateEventList(String evntLst) {
+		this.mockRepositoryEventList = evntLst;
+		this.repo = new MockJcrRepository(new MockRepository(
+				new MockRepositoryEventList(evntLst)));
 	}
 
 }

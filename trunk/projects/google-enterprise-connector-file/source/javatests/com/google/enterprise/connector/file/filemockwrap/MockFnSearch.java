@@ -15,6 +15,10 @@ import com.google.enterprise.connector.spi.ResultSet;
 
 public class MockFnSearch implements ISearch {
 
+	protected MockFnSearch() {
+		// nothing
+	}
+
 	private static final String XPATH_QUERY_STRING_UNBOUNDED_DEFAULT = "//*[@jcr:primaryType='nt:resource'] order by @jcr:lastModified, @jcr:uuid";
 
 	private static final String XPATH_QUERY_STRING_BOUNDED_DEFAULT = "//*[@jcr:primaryType = 'nt:resource' and @jcr:lastModified >= "
@@ -22,8 +26,8 @@ public class MockFnSearch implements ISearch {
 
 	public ResultSet executeXml(String query, IObjectStore objectStore)
 			throws RepositoryException {
-		MockFnObjectStore a = null;
-		a = (MockFnObjectStore) objectStore;
+		MockFnSessionAndObjectStore a = null;
+		a = (MockFnSessionAndObjectStore) objectStore;
 		MockJcrQueryManager mrQueryMger = new MockJcrQueryManager(a
 				.getMockRepositoryDocumentStore());
 		Query q;

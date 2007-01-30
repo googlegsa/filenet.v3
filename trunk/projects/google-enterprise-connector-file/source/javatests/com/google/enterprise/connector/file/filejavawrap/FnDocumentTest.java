@@ -36,7 +36,7 @@ public class FnDocumentTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getContent()'
 	 */
-	public void testGetContent() {
+	public void testGetContent() throws RepositoryException {
 		InputStream is = doc.getContent();
 		assertNotNull(is);
 		assertTrue(is instanceof InputStream);
