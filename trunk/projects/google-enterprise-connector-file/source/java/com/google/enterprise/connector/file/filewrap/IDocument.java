@@ -7,7 +7,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 public interface IDocument {
 
-	public InputStream getContent();
+	public InputStream getContent() throws RepositoryException;
 
 	public double getContentSize() throws RepositoryException;
 
