@@ -11,12 +11,12 @@ public class MockFnObjectFactory implements IObjectFactory {
 	public ISession getSession(String appId, String credTag, String userId,
 			String password) {
 		return new MockFnObjectStore(appId, credTag, userId, password);
+
 	}
 
 	public IObjectStore getObjectStore(String string, ISession fileSession)
 			throws RepositoryException {
-		return null;// new MockFnObjectStore(string, (MockFnSession)
-		// fileSession);
+		return null;
 	}
 
 	public ISearch getSearch(ISession fileSession) {

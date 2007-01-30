@@ -41,7 +41,8 @@ public class FnObjectFactoryTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnObjectFactory.getObjectStore(String,
 	 * ISession)'
 	 */
-	public void testGetObjectStore() throws FileNotFoundException, LoginException, RepositoryException {
+	public void testGetObjectStore() throws FileNotFoundException,
+			LoginException, RepositoryException {
 		ISession session = objectFactory.getSession("test-getObjectStore",
 				FnConnection.credTag, FnConnection.userName,
 				FnConnection.password);

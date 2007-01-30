@@ -36,6 +36,7 @@ public class MockFnSearch implements ISearch {
 		} catch (javax.jcr.RepositoryException e) {
 			throw new RepositoryException(e);
 		}
+
 	}
 
 	/**
@@ -54,17 +55,6 @@ public class MockFnSearch implements ISearch {
 					new Object[] { date });
 		}
 	}
-
-	// private String extractID(String query) {
-	// int lb = query.indexOf("<objectstore id=\"") + "<objectstore
-	// id=\"".length();
-	// int ub = query.indexOf("\"/></objectstores>") + 1;
-	// if (lb != "<objectstore id=\"".length()-1 && ub != 0) {
-	// return query.substring(lb, ub);
-	// } else {
-	// return null;
-	// }
-	// }
 
 	private String extractDate(String query) {
 		int lb = query.indexOf(" AND DateLastModified > ")

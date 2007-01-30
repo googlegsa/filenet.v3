@@ -9,9 +9,7 @@ import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.file.filewrap.IUser;
-import com.google.enterprise.connector.mock.MockRepository;
 import com.google.enterprise.connector.mock.MockRepositoryDocumentStore;
-import com.google.enterprise.connector.mock.MockRepositoryEventList;
 import com.google.enterprise.connector.mock.jcr.MockJcrRepository;
 import com.google.enterprise.connector.mock.jcr.MockJcrSession;
 import com.google.enterprise.connector.spi.LoginException;
@@ -50,8 +48,10 @@ public class MockFnObjectStore implements IObjectStore, ISession {
 	}
 
 	public void setDisplayUrl(String displayUrl) {
+
 		// Nothing. If a display URL is implemented for the Mock, return an
 		// hard-coded one in getDisplayURL method.
+
 	}
 
 	public String getDisplayUrl() {

@@ -20,7 +20,8 @@ public class FnPermissionsTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnPermissions.asMask(String)'
 	 */
-	public void testAsMask() throws FileNotFoundException, LoginException, RepositoryException {
+	public void testAsMask() throws FileNotFoundException, LoginException,
+			RepositoryException {
 
 		IObjectFactory objectFactory = new FnObjectFactory();
 		ISession session = objectFactory.getSession(FnConnection.appId,
