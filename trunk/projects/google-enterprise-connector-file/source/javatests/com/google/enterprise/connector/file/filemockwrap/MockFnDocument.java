@@ -57,4 +57,5 @@ public class MockFnDocument implements IDocument {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

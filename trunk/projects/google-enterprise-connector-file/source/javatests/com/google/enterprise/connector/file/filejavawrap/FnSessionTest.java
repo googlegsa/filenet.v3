@@ -18,7 +18,8 @@ public class FnSessionTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnSession.verify()'
 	 */
-	public void testVerify() throws FileNotFoundException, LoginException, RepositoryException {
+	public void testVerify() throws FileNotFoundException, LoginException,
+			RepositoryException {
 
 		IObjectFactory objectFactory = new FnObjectFactory();
 		ISession session = objectFactory.getSession("test-verify",
