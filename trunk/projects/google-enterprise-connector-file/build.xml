@@ -11,24 +11,22 @@
 	<property name="src" value="source/java" />
 	<property name="classes" value="${build}/classes" />
 	<property name="config" value="config" />
-
+	<property name="jarfile.dir" value="../third_party/lib"/>
+	
 	<property name="tests.src" value="source/javatests" />
 	<property name="tests.build" value="build/tests" />
 	<property name="tests.classes" value="${tests.build}/classes" />
-	
-	<property name="connector-manager.dir" location="../../../connector-manager/projects/connector-manager" />
-	<property name="spi.jar.dir" value="${connector-manager.dir}/dist/jarfile" />
-	<property name="spi.jarfile" value="${spi.jar.dir}/connector_spi.jar" />
-	<property name="connector.jarfile" value="${spi.jar.dir}/connector.jar" />
-	<property name="tests.jarfile" value="${spi.jar.dir}/connector_tests.jar" />
 
 	<property name="jar.dir"  value="${dist}/jar" />
 	<property name="jarfile"  value="${jar.dir}/connector-file.jar" />
 	
-	<property name="file.jarfile" location="../third_party/lib/javaapi.jar" />
-	<property name="json.jarfile" location="../third_party/lib/json.jar" />
-	<property name="jcr.jarfile" location="../third_party/lib/jcr-1.0.jar" />
-	<property name="junit.jarfile" location="../third_party/lib/junit.jar" />
+	<property name="file.jarfile" location="${jarfile.dir}/javaapi.jar" />
+	<property name="json.jarfile" location="${jarfile.dir}/json.jar" />
+	<property name="jcr.jarfile" location="${jarfile.dir}/jcr-1.0.jar" />
+	<property name="junit.jarfile" location="${jarfile.dir}/junit.jar" />
+	<property name="spi.jarfile" value="${jarfile.dir}/connector_spi.jar" />
+	<property name="connector.jarfile" value="${jarfile.dir}/connector.jar" />
+	<property name="tests.jarfile" value="${jarfile.dir}/connector_tests.jar" />
 
 	<!-- =========================== TASKS =============================== -->
 	<target name="connector-file" depends="init,compile,compile_tests,jar">
@@ -59,8 +57,8 @@
 		<!-- compile java source files for tests -->
 		<javac srcdir="${tests.src}" destdir="${tests.classes}" debug="${COMPILE_DEBUG_FLAG} ">
 			<classpath>
-				<pathelement location="${spi.jar.dir}/connector.jar" />
-				<pathelement location="${spi.jar.dir}/connector_tests.jar" />
+				<pathelement location="${connector.jarfile}" />
+				<pathelement location="${tests.jarfile}" />
 				<pathelement location="${spi.jarfile}" />
 				<pathelement location="${junit.jarfile}" />
 				<pathelement location="${json.jarfile}" />
