@@ -13,6 +13,7 @@
 				<value>pathToWcmApiConfig</value>
 				<value>displayUrl</value>
 				<value>objectFactory</value>
+				<value>isPublic</value>
 			</list>
 		</property>
 	</bean>

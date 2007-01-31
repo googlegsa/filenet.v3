@@ -11,6 +11,7 @@
 		<property name="objectStoreName" value="${objectStoreName}" />
 		<property name="pathToWcmApiConfig" value="${pathToWcmApiConfig}" />
 		<property name="displayUrl" value="${displayUrl}" />
-		<property name="objectFactory" value="com.google.enterprise.connector.file.filejavawrap.IFileObjectFactory" />
+		<property name="objectFactory" value="${objectFactory}" />
+		<property name="isPublic" value="${isPublic}" />
 	</bean>
 </beans>
