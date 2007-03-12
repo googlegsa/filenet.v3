@@ -12,7 +12,7 @@ public class FnSearch implements ISearch {
 		this.search = search;
 	}
 
-	public String executeXml(String query, IObjectStore objectStore){
+	public String executeXml(String query, IObjectStore objectStore) {
 		return search.executeXML(query);
 	}
 }

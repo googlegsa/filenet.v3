@@ -3,6 +3,8 @@ package com.google.enterprise.connector.file;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,16 +37,23 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 
 	private ISession fileSession;
 
-	private String order_by = " ORDER BY DateLastModified;";
+	private String order_by = " ORDER BY Id,DateLastModified;";
 
 	private String objectStoresQuery = "<objectstores mergeoption=\"none\"><objectstore id=\"{0}\"/></objectstores>";
 
 	// TODO: add possibility for an administrator to change it
 	private String tableName = "Document";
 
-	private String whereClause = " AND DateLastModified > {0}";
+	private String whereClause = " AND DateLastModified >= {0} AND Id > {1}";
 
 	private int batchint;
+
+	private static Logger logger;
+
+	{
+		logger = Logger.getLogger(FileQueryTraversalManager.class.getName());
+		logger.setLevel(Level.ALL);
+	}
 
 	public FileQueryTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession) {
@@ -60,8 +69,9 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		ISearch search = fileObjectFactory.getSearch(fileSession);
 		String query = buildQueryString(null);
 		ResultSet set = null;
-		Document resultDoc = this.stringToDom(search.executeXml(query, objectStore));
-		set = new FileResultSet(resultDoc,objectStore);
+		Document resultDoc = this.stringToDom(search.executeXml(query,
+				objectStore));
+		set = new FileResultSet(resultDoc, objectStore);
 		return set;
 	}
 
@@ -83,13 +93,17 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 					+ "' objectasid=\"false\"/>");
 		}
 		query.append("</request>");
-		System.out.println(query.toString());
+		if (FileConnector.DEBUG && FileConnector.DEBUG_LEVEL >= 1) {
+			logger.info(query.toString());
+		}
 		return query.toString();
 	}
 
 	private String getCheckpointClause(String checkPoint)
 			throws RepositoryException {
-		System.out.println("checkpoint vaut " + checkPoint);
+		if (FileConnector.DEBUG && FileConnector.DEBUG_LEVEL >= 1) {
+			logger.info(checkPoint);
+		}
 		JSONObject jo = null;
 
 		try {
@@ -110,8 +124,9 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		ResultSet resultSet = null;
 		String queryString = buildQueryString(checkPoint);
 		ISearch search = this.fileObjectFactory.getSearch(this.fileSession);
-		Document resultDoc = this.stringToDom(search.executeXml(queryString, this.objectStore));
-		 resultSet = new FileResultSet(resultDoc,objectStore);
+		Document resultDoc = this.stringToDom(search.executeXml(queryString,
+				this.objectStore));
+		resultSet = new FileResultSet(resultDoc, objectStore);
 		return resultSet;
 	}
 
@@ -143,8 +158,8 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 
 	}
 
-	public Value fetchAndVerifyValueForCheckpoint(PropertyMap pm, String pName)
-			throws RepositoryException {
+	protected Value fetchAndVerifyValueForCheckpoint(PropertyMap pm,
+			String pName) throws RepositoryException {
 		Property property = pm.getProperty(pName);
 		if (property == null) {
 			throw new IllegalArgumentException("checkpoint must have a "
@@ -158,7 +173,7 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		return value;
 	}
 
-	public String extractDocidFromCheckpoint(JSONObject jo, String checkPoint) {
+	protected String extractDocidFromCheckpoint(JSONObject jo, String checkPoint) {
 		String uuid = null;
 		try {
 			uuid = jo.getString("uuid");
@@ -169,7 +184,7 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		return uuid;
 	}
 
-	public String extractNativeDateFromCheckpoint(JSONObject jo,
+	protected String extractNativeDateFromCheckpoint(JSONObject jo,
 			String checkPoint) {
 		String dateString = null;
 		try {
@@ -183,15 +198,14 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		return dateString;
 	}
 
-	public String makeCheckpointQueryString(String uuid, String c)
+	protected String makeCheckpointQueryString(String uuid, String c)
 			throws RepositoryException {
 
-		Object[] arguments = { c };
+		Object[] arguments = { c, uuid };
 		String statement = MessageFormat.format(whereClause, arguments);
 		return statement;
 	}
-	
-	
+
 	private Document stringToDom(String xmlSource) throws RepositoryException {
 		DocumentBuilder builder = null;
 		try {

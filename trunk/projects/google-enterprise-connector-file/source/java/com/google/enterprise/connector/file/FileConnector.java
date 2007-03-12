@@ -1,5 +1,14 @@
 package com.google.enterprise.connector.file;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.google.enterprise.connector.dctm.DctmConnector;
 import com.google.enterprise.connector.file.FileSession;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.LoginException;
@@ -7,6 +16,13 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
 
 public class FileConnector implements Connector {
+
+	private static Logger logger = null;
+
+	public static boolean DEBUG = true;
+
+	public static int DEBUG_LEVEL = 1;
+
 	private String objectFactory;
 
 	private String login;
@@ -24,6 +40,40 @@ public class FileConnector implements Connector {
 	private String displayUrl;
 
 	private String isPublic;
+
+	static {
+		logger = Logger.getLogger(DctmConnector.class.getName());
+
+		File propertiesFile = new File("../config/logging.properties");
+		Properties properties = null;
+		FileInputStream fileInputStream = null;
+		if (propertiesFile.isFile() == true) {
+			try {
+				fileInputStream = new FileInputStream(propertiesFile);
+			} catch (FileNotFoundException e) {
+				logger.setLevel(Level.OFF);
+			}
+			if (fileInputStream != null) {
+				properties = new Properties();
+				try {
+					properties.load(fileInputStream);
+					DEBUG = properties.getProperty("DEBUG").equals("true");
+					DEBUG_LEVEL = Integer.parseInt(properties
+							.getProperty("LEVEL"));
+				} catch (IOException e) {
+					fileInputStream = null;
+					properties = null;
+				} finally {
+					try {
+						fileInputStream.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+
+					}
+				}
+			}
+		}
+	}
 
 	public Session login() throws LoginException, RepositoryException {
 		Session sess = null;
