@@ -84,7 +84,7 @@ public class FileSession implements Session {
 
 	public AuthorizationManager getAuthorizationManager()
 			throws RepositoryException {
-		
+
 		FileAuthorizationManager fileAzm = new FileAuthorizationManager(
 				fileObjectFactory, pathToWcmApiConfig, objectStore);
 		return fileAzm;

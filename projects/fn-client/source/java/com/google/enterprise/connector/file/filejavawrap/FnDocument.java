@@ -2,11 +2,14 @@ package com.google.enterprise.connector.file.filejavawrap;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.filenet.wcm.api.BaseRuntimeException;
 import com.filenet.wcm.api.Document;
 import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.PropertyNotFoundException;
+import com.google.enterprise.connector.dctm.DctmConnector;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.IProperties;
@@ -14,6 +17,13 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnDocument implements IDocument {
 	Document doc;
+
+	private static Logger logger = null;
+	{
+		logger = Logger.getLogger(FnDocument.class.getName());
+
+		logger.setLevel(Level.ALL);
+	}
 
 	public FnDocument(Document doc) {
 
@@ -26,10 +36,14 @@ public class FnDocument implements IDocument {
 			return doc.getContent();
 		} catch (BaseRuntimeException e) {
 
-			System.out.println("how often? getContent BaseRuntimeException");
+			logger.log(Level.SEVERE,
+					"error while trying to get the content of file "
+							+ this.doc.getId() + " " + e.getMessage());
 			return doc.getContent();
 		} catch (Error er) {
-			System.out.println("to check " + er.getMessage());
+			logger.log(Level.SEVERE,
+					"error while trying to get the content of file "
+							+ this.doc.getId() + " " + er.getMessage());
 			return doc.getContent();
 		}
 
@@ -41,39 +55,35 @@ public class FnDocument implements IDocument {
 			return this.doc.getPropertyStringValue(name);
 
 		} catch (PropertyNotFoundException de) {
-			System.out.println(" PropertyNotFoundException docnmae plantage? "
-					+ doc.getName() + " " + doc.getSession().toString());
+
 			if (name.equals(Property.MIME_TYPE)) {
-				System.out.println("how often? mimetype propertynotfound");
+
 				return "application/octet-stream";
 			} else if (name.equals(Property.PERMISSIONS)) {
-				System.out.println("how often? permissions propertynotfound");
+
 				return "security";
 			} else {
+				logger.log(Level.SEVERE,
+						"error while trying to get the property " + name
+								+ " of the file " + this.doc.getId() + " "
+								+ de.getMessage());
 				RepositoryException re = new RepositoryException(de);
 				throw re;
 			}
-			// }catch (BaseRuntimeException e){
-			// if (name.equals(Property.MIME_TYPE)) {
-			// System.out.println("how often? mimetype BaseRuntimeException");
-			// return "application/octet-stream";
-			// } else if (name.equals(Property.PERMISSIONS)) {
-			// System.out.println("how often? permissions
-			// BaseRuntimeException");
-			// return "security";
-			// } else {
-			// RepositoryException re = new RepositoryException(e);
-			// throw re;
-			// }
+
 		} catch (Exception de) {
-			System.out.println(" FnDocument Exception" + doc.getName() + " "
-					+ doc.getSession().toString() + " " + name);
+			logger.log(Level.SEVERE, "error while trying to get the property "
+					+ name + " of the file " + this.doc.getId() + " "
+					+ de.getMessage());
 			RepositoryException re = new RepositoryException(de);
 			throw re;
 
 		} catch (Error er) {
-			System.out.println("to check " + er.getMessage());
-			return "";
+			logger.log(Level.SEVERE, "error while trying to get the property "
+					+ name + " of the file " + this.doc.getId() + " "
+					+ er.getMessage());
+			RepositoryException re = new RepositoryException(er);
+			throw re;
 		}
 
 	}
@@ -89,14 +99,18 @@ public class FnDocument implements IDocument {
 			}
 
 		} catch (NumberFormatException de) {
+			logger.log(Level.SEVERE,
+					"error while trying to get the size of the file "
+							+ this.doc.getId() + " " + de.getMessage());
 			RepositoryException re = new RepositoryException(de.getMessage(),
 					de.getCause());
-			re.setStackTrace(de.getStackTrace());
 			throw re;
 		} catch (PropertyNotFoundException de) {
+			logger.log(Level.SEVERE,
+					"error while trying to get the size of the file "
+							+ this.doc.getId() + " " + de.getMessage());
 			RepositoryException re = new RepositoryException(de.getMessage(),
 					de.getCause());
-			re.setStackTrace(de.getStackTrace());
 			throw re;
 		}
 	}
@@ -110,7 +124,9 @@ public class FnDocument implements IDocument {
 		try {
 			return this.doc.getPropertyIntValue(name);
 		} catch (PropertyNotFoundException e) {
-
+			logger.log(Level.SEVERE, "error while trying to get the property "
+					+ name + " of the file " + this.doc.getId() + " "
+					+ e.getMessage());
 			RepositoryException re = new RepositoryException(e);
 			throw re;
 		}
@@ -121,7 +137,9 @@ public class FnDocument implements IDocument {
 		try {
 			return this.doc.getPropertyDoubleValue(name);
 		} catch (PropertyNotFoundException e) {
-
+			logger.log(Level.SEVERE, "error while trying to get the property "
+					+ name + " of the file " + this.doc.getId() + " "
+					+ e.getMessage());
 			RepositoryException re = new RepositoryException(e);
 			throw re;
 		}
@@ -131,7 +149,9 @@ public class FnDocument implements IDocument {
 		try {
 			return this.doc.getPropertyDateValue(name);
 		} catch (PropertyNotFoundException e) {
-
+			logger.log(Level.SEVERE, "error while trying to get the property "
+					+ name + " of the file " + this.doc.getId() + " "
+					+ e.getMessage());
 			RepositoryException re = new RepositoryException(e);
 			throw re;
 		}
@@ -142,7 +162,9 @@ public class FnDocument implements IDocument {
 		try {
 			return this.doc.getPropertyBooleanValue(name);
 		} catch (PropertyNotFoundException e) {
-
+			logger.log(Level.SEVERE, "error while trying to get the property "
+					+ name + " of the file " + this.doc.getId() + " "
+					+ e.getMessage());
 			RepositoryException re = new RepositoryException(e);
 			throw re;
 		}
@@ -152,6 +174,9 @@ public class FnDocument implements IDocument {
 		try {
 			return new FnProperties(this.doc.getProperties());
 		} catch (PropertyNotFoundException e) {
+			logger.log(Level.SEVERE,
+					"error while trying to get the properties of the file "
+							+ this.doc.getId() + " " + er.getMessage());
 			RepositoryException re = new RepositoryException(e);
 			throw re;
 		}

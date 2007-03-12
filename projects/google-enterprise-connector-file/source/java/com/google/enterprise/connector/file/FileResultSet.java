@@ -11,13 +11,14 @@ import com.google.enterprise.connector.spi.ResultSet;
 public class FileResultSet extends LinkedList implements ResultSet {
 
 	private static final long serialVersionUID = 1L;
+
 	private Document doc = null;
+
 	private IObjectStore objectStore = null;
 
 	public FileResultSet() {
 		super();
 	}
-
 
 	public FileResultSet(Document resultDoc, IObjectStore objectStore) {
 		this.doc = resultDoc;
@@ -25,8 +26,7 @@ public class FileResultSet extends LinkedList implements ResultSet {
 	}
 
 	public Iterator iterator() {
-		
-		return new FileDocumentIterator(this.doc,this.objectStore);
+		return new FileDocumentIterator(this.doc, this.objectStore);
 	}
 
 }

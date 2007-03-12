@@ -8,14 +8,14 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite(
 				"Test for com.google.enterprise.connector.file");
-		//$JUnit-BEGIN$
+		// $JUnit-BEGIN$
 		suite.addTestSuite(FileAuthorizationManagerTest.class);
 		suite.addTestSuite(FileDocumentValueTest.class);
 		suite.addTestSuite(FileAuthenticationManagerTest.class);
 		suite.addTestSuite(FileQueryTraversalManagerTest.class);
 		suite.addTestSuite(FileConnectorTest.class);
 		suite.addTestSuite(FileDocumentPropertyMapTest.class);
-		//$JUnit-END$
+		// $JUnit-END$
 		return suite;
 	}
 

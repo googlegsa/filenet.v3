@@ -32,7 +32,6 @@ public class FileAuthorizationManager implements AuthorizationManager {
 	public ResultSet authorizeDocids(List docidList, String username)
 			throws RepositoryException {
 
-	
 		SimpleResultSet result = new SimpleResultSet();
 		SimplePropertyMap map = null;
 		IDocument doc = null;
@@ -67,13 +66,12 @@ public class FileAuthorizationManager implements AuthorizationManager {
 			result.add(map);
 		}
 
-	
 		return result;
 	}
 
 	public ResultSet authorizeTokens(List tokenList, String username)
 			throws RepositoryException {
-		
+
 		return null;
 	}
 

@@ -10,6 +10,7 @@ import com.google.enterprise.connector.spi.LoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FileAuthenticationManager implements AuthenticationManager {
+
 	IObjectFactory objectFactory;
 
 	String wcmConfigFilePath;
@@ -21,9 +22,6 @@ public class FileAuthenticationManager implements AuthenticationManager {
 
 	public boolean authenticate(String username, String password)
 			throws RepositoryException {
-
-	
-
 		ISession sess = objectFactory.getSession("gsa-authenticate", null,
 				username, password);
 		try {
@@ -36,7 +34,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
 			// Login failed, user not authenticated
 			return false;
 		}
-	
+
 		return true;
 
 	}

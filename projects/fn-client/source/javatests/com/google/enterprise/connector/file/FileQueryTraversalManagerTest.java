@@ -2,10 +2,15 @@ package com.google.enterprise.connector.file;
 
 import java.util.Iterator;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.enterprise.connector.spi.Connector;
+
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.ResultSet;
 import com.google.enterprise.connector.spi.Session;
+import com.google.enterprise.connector.spi.SpiConstants;
 
 import junit.framework.TestCase;
 
@@ -64,7 +69,7 @@ public class FileQueryTraversalManagerTest extends TestCase {
 			iter.next();
 			counter++;
 		}
-		assertEquals(5, counter);
+		assertEquals(3, counter);
 
 	}
 
@@ -95,6 +100,74 @@ public class FileQueryTraversalManagerTest extends TestCase {
 			counter++;
 		}
 		assertEquals(10, counter);
+	}
+
+	public void testFetchAndVerifyValueForCheckpoint()
+			throws RepositoryException {
+
+		FileDocumentPropertyMap pm = new FileDocumentPropertyMap(
+				FnConnection.docId, ((FileSession) sess).getObjectStore());
+		String result = qtm.fetchAndVerifyValueForCheckpoint(pm,
+				SpiConstants.PROPNAME_DOCID).getString();
+		assertEquals(FnConnection.docId, result);
+		result = FileDocumentValue.calendarToIso8601(qtm
+				.fetchAndVerifyValueForCheckpoint(pm,
+						SpiConstants.PROPNAME_LASTMODIFY).getDate());
+		assertEquals(FnConnection.date, result);
+
+	}
+
+	public void extractDocidFromCheckpoint() {
+		String checkPoint = "{\"uuid\":\"" + FnConnection.docId
+				+ "\",\"lastModified\":\"" + FnConnection.date + "\"}";
+		String uuid = null;
+		JSONObject jo = null;
+
+		try {
+			jo = new JSONObject(checkPoint);
+		} catch (JSONException e) {
+			throw new IllegalArgumentException(
+					"checkPoint string does not parse as JSON: " + checkPoint);
+		}
+
+		uuid = qtm.extractDocidFromCheckpoint(jo, checkPoint);
+		assertNotNull(uuid);
+		assertEquals(FnConnection.docId, uuid);
+
+	}
+
+	public void extractNativeDateFromCheckpoint() {
+
+		JSONObject jo = null;
+		String modifDate = null;
+
+		try {
+			jo = new JSONObject(FnConnection.checkpoint);
+		} catch (JSONException e) {
+			throw new IllegalArgumentException(
+					"checkPoint string does not parse as JSON: "
+							+ FnConnection.checkpoint);
+		}
+
+		modifDate = qtm.extractNativeDateFromCheckpoint(jo,
+				FnConnection.checkpoint);
+		assertNotNull(modifDate);
+		assertEquals(FnConnection.date, modifDate);
+
+	}
+
+	public void makeCheckpointQueryString() throws RepositoryException {
+		String uuid = FnConnection.docId;
+		String statement = "";
+		try {
+			statement = qtm.makeCheckpointQueryString(uuid, FnConnection.date);
+		} catch (RepositoryException re) {
+			re.printStackTrace();
+		}
+
+		assertNotNull(statement);
+		assertEquals(FnConnection.checkpoint, statement);
+
 	}
 
 }

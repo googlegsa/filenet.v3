@@ -22,6 +22,8 @@ public class FnConnection {
 
 	public static String docId = "{5052959D-5CD2-4827-8B27-A8ECC3483CF8}";
 
+	public static String date = "2007-01-25T15:18:50.000";
+
 	public static String docIdTitle = "Odysseus and Penelope.txt";
 
 	public static String userLambda1 = "P8TestUser@SWORD.FR";
