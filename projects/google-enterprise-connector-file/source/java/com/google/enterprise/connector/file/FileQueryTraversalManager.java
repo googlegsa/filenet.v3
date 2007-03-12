@@ -1,14 +1,24 @@
 package com.google.enterprise.connector.file;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.text.MessageFormat;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.spi.LoginException;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.PropertyMap;
 import com.google.enterprise.connector.spi.QueryTraversalManager;
@@ -50,7 +60,8 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		ISearch search = fileObjectFactory.getSearch(fileSession);
 		String query = buildQueryString(null);
 		ResultSet set = null;
-		set = search.executeXml(query, objectStore);
+		Document resultDoc = this.stringToDom(search.executeXml(query, objectStore));
+		set = new FileResultSet(resultDoc,objectStore);
 		return set;
 	}
 
@@ -67,7 +78,7 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		}
 		query.append(order_by);
 		query.append("</querystatement>");
-		if (batchint != 0) {
+		if (batchint > 0) {
 			query.append("<options maxrecords='" + batchint
 					+ "' objectasid=\"false\"/>");
 		}
@@ -96,12 +107,12 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 
 	public ResultSet resumeTraversal(String checkPoint)
 			throws RepositoryException {
-		ResultSet resu = null;
+		ResultSet resultSet = null;
 		String queryString = buildQueryString(checkPoint);
 		ISearch search = this.fileObjectFactory.getSearch(this.fileSession);
-		resu = search.executeXml(queryString, this.objectStore);
-
-		return resu;
+		Document resultDoc = this.stringToDom(search.executeXml(queryString, this.objectStore));
+		 resultSet = new FileResultSet(resultDoc,objectStore);
+		return resultSet;
 	}
 
 	public String checkpoint(PropertyMap pm) throws RepositoryException {
@@ -179,5 +190,28 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		String statement = MessageFormat.format(whereClause, arguments);
 		return statement;
 	}
+	
+	
+	private Document stringToDom(String xmlSource) throws RepositoryException {
+		DocumentBuilder builder = null;
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory
+					.newInstance();
 
+			builder = factory.newDocumentBuilder();
+
+			return builder.parse(new InputSource(new StringReader(xmlSource)));
+
+		} catch (ParserConfigurationException de) {
+			RepositoryException re = new LoginException(de);
+			throw re;
+		} catch (SAXException de) {
+			RepositoryException re = new LoginException(de);
+			throw re;
+		} catch (IOException de) {
+			RepositoryException re = new LoginException(de);
+			throw re;
+		}
+
+	}
 }

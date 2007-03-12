@@ -11,6 +11,7 @@ import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.ResultSet;
 import com.google.enterprise.connector.spi.SimplePropertyMap;
+import com.google.enterprise.connector.spi.SimpleResultSet;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.ValueType;
 
@@ -31,8 +32,8 @@ public class FileAuthorizationManager implements AuthorizationManager {
 	public ResultSet authorizeDocids(List docidList, String username)
 			throws RepositoryException {
 
-		System.out.println("FileAuthorize method authorizeDocids");
-		FileResultSet result = new FileResultSet();
+	
+		SimpleResultSet result = new SimpleResultSet();
 		SimplePropertyMap map = null;
 		IDocument doc = null;
 
@@ -66,13 +67,13 @@ public class FileAuthorizationManager implements AuthorizationManager {
 			result.add(map);
 		}
 
-		System.out.println("end of FileAuthorize method authorieDocIds");
+	
 		return result;
 	}
 
 	public ResultSet authorizeTokens(List tokenList, String username)
 			throws RepositoryException {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 

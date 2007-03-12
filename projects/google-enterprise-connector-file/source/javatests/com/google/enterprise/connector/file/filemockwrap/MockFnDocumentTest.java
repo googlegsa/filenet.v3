@@ -14,6 +14,7 @@ import com.google.enterprise.connector.mock.MockRepositoryPropertyList;
 import com.google.enterprise.connector.pusher.DocPusher;
 
 public class MockFnDocumentTest extends TestCase {
+	
 	MockRepositoryDocument document = new MockRepository(
 			new MockRepositoryEventList("MockRepositoryEventLog7.txt"))
 			.getStore().getDocByID("doc2");
