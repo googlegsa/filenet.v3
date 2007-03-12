@@ -22,7 +22,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
 	public boolean authenticate(String username, String password)
 			throws RepositoryException {
 
-		System.out.println("FileAuthentication method authenticate");
+	
 
 		ISession sess = objectFactory.getSession("gsa-authenticate", null,
 				username, password);
@@ -36,7 +36,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
 			// Login failed, user not authenticated
 			return false;
 		}
-		System.out.println("FileAuthentication method authenticate send true");
+	
 		return true;
 
 	}

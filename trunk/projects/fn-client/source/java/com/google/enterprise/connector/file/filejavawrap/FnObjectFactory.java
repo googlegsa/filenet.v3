@@ -5,8 +5,6 @@ import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
-import com.google.enterprise.connector.file.filewrap.IUser;
-import com.google.enterprise.connector.spi.LoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnObjectFactory implements IObjectFactory {

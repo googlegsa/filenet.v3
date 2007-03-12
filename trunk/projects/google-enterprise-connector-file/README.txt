@@ -9,6 +9,9 @@ REQUIRED FILES
 •	connector_spi.jar
 •	connector.jar
 •	connector_tests.jar
+•	json.jar
+•	jcr-1.0.jar
+•	junit.jar
 
 CONFIGURATION
 Add the jars file in the folder projects\third_party\lib.

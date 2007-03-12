@@ -49,11 +49,7 @@ public class FileSession implements Session {
 		} catch (FileNotFoundException de) {
 			RepositoryException re = new RepositoryException(de);
 			throw re;
-		}/*
-			 * catch (Exception e) { System.out.println("exception in
-			 * FileSession()"); e.printStackTrace(); LoginException re = new
-			 * LoginException(e); throw re; }
-			 */
+		}
 	}
 
 	private void setFileObjectFactory(String objectFactory)
@@ -88,7 +84,7 @@ public class FileSession implements Session {
 
 	public AuthorizationManager getAuthorizationManager()
 			throws RepositoryException {
-		System.out.println("getAuthorizationManager");
+		
 		FileAuthorizationManager fileAzm = new FileAuthorizationManager(
 				fileObjectFactory, pathToWcmApiConfig, objectStore);
 		return fileAzm;

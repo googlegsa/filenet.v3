@@ -64,7 +64,7 @@ public class FileQueryTraversalManagerTest extends TestCase {
 			iter.next();
 			counter++;
 		}
-		assertEquals(0, counter);
+		assertEquals(5, counter);
 
 	}
 
