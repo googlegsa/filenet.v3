@@ -23,6 +23,10 @@ public class FileSession implements Session {
 
 	private String pathToWcmApiConfig;
 
+	private String displayUrl;
+
+	private String isPublic;
+
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String appId, String credTag,
 			String objectStoreName, String pathToWcmApiConfig,
@@ -41,11 +45,11 @@ public class FileSession implements Session {
 			// fileSession.verify();
 			objectStore = fileObjectFactory.getObjectStore(objectStoreName,
 					fileSession);
-			objectStore.setDisplayUrl(displayUrl
+			this.displayUrl = displayUrl
 					+ "getContent?objectType=document&objectStoreName="
-					+ objectStoreName + "&id=");
+					+ objectStoreName + "&id=";
 
-			objectStore.setIsPublic(isPublic);
+			this.isPublic = isPublic;
 		} catch (FileNotFoundException de) {
 			RepositoryException re = new RepositoryException(de);
 			throw re;
@@ -71,7 +75,7 @@ public class FileSession implements Session {
 	public QueryTraversalManager getQueryTraversalManager()
 			throws RepositoryException {
 		FileQueryTraversalManager fileQTM = new FileQueryTraversalManager(
-				fileObjectFactory, objectStore, fileSession);
+				fileObjectFactory, objectStore, fileSession, this.isPublic, this.displayUrl);
 		return fileQTM;
 	}
 

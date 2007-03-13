@@ -16,17 +16,23 @@ public class FileResultSet extends LinkedList implements ResultSet {
 
 	private IObjectStore objectStore = null;
 
+	private String displayUrl;
+
+	private String isPublic;
+
 	public FileResultSet() {
 		super();
 	}
 
-	public FileResultSet(Document resultDoc, IObjectStore objectStore) {
+	public FileResultSet(Document resultDoc, IObjectStore objectStore, String isPublic, String displayUrl ) {
 		this.doc = resultDoc;
 		this.objectStore = objectStore;
+		this.displayUrl = displayUrl;
+		this.isPublic = isPublic;
 	}
 
 	public Iterator iterator() {
-		return new FileDocumentIterator(this.doc, this.objectStore);
+		return new FileDocumentIterator(this.doc, this.objectStore, this.isPublic, this.displayUrl );
 	}
 
 }

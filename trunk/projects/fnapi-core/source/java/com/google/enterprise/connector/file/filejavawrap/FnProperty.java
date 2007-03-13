@@ -7,20 +7,6 @@ import com.google.enterprise.connector.spi.ValueType;
 public class FnProperty implements IProperty {
 	Property property;
 
-	private static String[] valueTypes;
-
-	static {
-		valueTypes = new String[8];
-		valueTypes[0] = "binary";
-		valueTypes[1] = "BOOLEAN";
-		valueTypes[2] = "DATE";
-		valueTypes[3] = "DOUBLE";
-		valueTypes[4] = "ID";
-		valueTypes[5] = "LONG";
-		valueTypes[6] = "OBJECT";
-		valueTypes[7] = "STRING";
-	}
-
 	private static ValueType[] correspondancevalueTypes;
 
 	static {

@@ -7,12 +7,9 @@ import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.filenet.wcm.api.BaseObject;
 
 public class FnObjectStore implements IObjectStore {
-	ObjectStore objectStore;
+	private ObjectStore objectStore;
 
-	String displayUrl;
-
-	String isPublic;
-
+	
 	public FnObjectStore(ObjectStore objectStore) {
 		this.objectStore = objectStore;
 
@@ -23,27 +20,8 @@ public class FnObjectStore implements IObjectStore {
 				BaseObject.TYPE_DOCUMENT, guidOrPath));
 
 	}
-
-	public void setDisplayUrl(String displayUrl) {
-		this.displayUrl = displayUrl;
-
-	}
-
-	public String getDisplayUrl() {
-		return displayUrl;
-	}
-
 	public String getName() {
 		return this.objectStore.getName();
-	}
-
-	public String getIsPublic() {
-		return isPublic;
-	}
-
-	public void setIsPublic(String isPublic) {
-		this.isPublic = isPublic;
-
 	}
 
 }

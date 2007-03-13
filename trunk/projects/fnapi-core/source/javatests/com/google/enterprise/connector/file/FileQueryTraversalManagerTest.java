@@ -80,7 +80,8 @@ public class FileQueryTraversalManagerTest extends TestCase {
 	public void testCheckpoint() throws RepositoryException {
 
 		FileDocumentPropertyMap pm = new FileDocumentPropertyMap(
-				FnConnection.docId, ((FileSession) sess).getObjectStore());
+				FnConnection.docId, ((FileSession) sess).getObjectStore(),
+				"false", FnConnection.displayUrl);
 
 		assertEquals(FnConnection.checkpoint, qtm.checkpoint(pm));
 
@@ -106,7 +107,8 @@ public class FileQueryTraversalManagerTest extends TestCase {
 			throws RepositoryException {
 
 		FileDocumentPropertyMap pm = new FileDocumentPropertyMap(
-				FnConnection.docId, ((FileSession) sess).getObjectStore());
+				FnConnection.docId, ((FileSession) sess).getObjectStore(),
+				"false", FnConnection.displayUrl);
 		String result = qtm.fetchAndVerifyValueForCheckpoint(pm,
 				SpiConstants.PROPNAME_DOCID).getString();
 		assertEquals(FnConnection.docId, result);
