@@ -35,7 +35,8 @@ public class FileDocumentPropertyMapTest extends TestCase {
 	public void testGetProperty() throws RepositoryException {
 
 		FileDocumentPropertyMap fdpm = new FileDocumentPropertyMap(
-				FnConnection.docId, objectStore);
+				FnConnection.docId, objectStore, "false",
+				FnConnection.displayUrl);
 		Property property = fdpm.getProperty("Id");
 		assertTrue(property instanceof FileDocumentProperty);
 		assertEquals("Id", property.getName());
@@ -48,7 +49,8 @@ public class FileDocumentPropertyMapTest extends TestCase {
 	 */
 	public void testGetProperties() throws RepositoryException {
 		FileDocumentPropertyMap fdpm = new FileDocumentPropertyMap(
-				FnConnection.docId, objectStore);
+				FnConnection.docId, objectStore, "false",
+				FnConnection.displayUrl);
 		Iterator properties = fdpm.getProperties();
 
 		int counter = 0;

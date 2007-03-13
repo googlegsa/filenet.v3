@@ -48,6 +48,10 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 
 	private int batchint;
 
+	private String displayUrl;
+
+	private String isPublic;
+
 	private static Logger logger;
 
 	{
@@ -56,12 +60,15 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 	}
 
 	public FileQueryTraversalManager(IObjectFactory fileObjectFactory,
-			IObjectStore objectStore, ISession fileSession) {
+			IObjectStore objectStore, ISession fileSession, String isPublic,
+			String displayUrl) {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
 		this.fileSession = fileSession;
 		Object[] args = { objectStore.getName() };
 		objectStoresQuery = MessageFormat.format(objectStoresQuery, args);
+		this.isPublic = isPublic;
+		this.displayUrl = displayUrl;
 
 	}
 
@@ -71,7 +78,7 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		ResultSet set = null;
 		Document resultDoc = this.stringToDom(search.executeXml(query,
 				objectStore));
-		set = new FileResultSet(resultDoc, objectStore);
+		set = new FileResultSet(resultDoc, objectStore, isPublic, displayUrl);
 		return set;
 	}
 
@@ -126,7 +133,8 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 		ISearch search = this.fileObjectFactory.getSearch(this.fileSession);
 		Document resultDoc = this.stringToDom(search.executeXml(queryString,
 				this.objectStore));
-		resultSet = new FileResultSet(resultDoc, objectStore);
+		resultSet = new FileResultSet(resultDoc, objectStore, this.isPublic,
+				this.displayUrl);
 		return resultSet;
 	}
 

@@ -8,7 +8,6 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 import com.google.enterprise.connector.file.FileSession;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.LoginException;
@@ -19,9 +18,9 @@ public class FileConnector implements Connector {
 
 	private static Logger logger = null;
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 
-	public static int DEBUG_LEVEL = 1;
+	public static int DEBUG_LEVEL = 0;
 
 	private String objectFactory;
 

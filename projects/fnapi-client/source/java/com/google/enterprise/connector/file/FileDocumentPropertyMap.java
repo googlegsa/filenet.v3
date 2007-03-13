@@ -23,6 +23,8 @@ public class FileDocumentPropertyMap implements PropertyMap {
 
 	private String isPublic = "false";
 
+	private String displayUrl;
+
 	private static HashSet set = null;
 	static {
 		set = new HashSet();
@@ -52,10 +54,11 @@ public class FileDocumentPropertyMap implements PropertyMap {
 
 	}
 
-	public FileDocumentPropertyMap(String docId, IObjectStore objectStore) {
+	public FileDocumentPropertyMap(String docId, IObjectStore objectStore, String isPublic, String displayUrl) {
 		this.docId = docId;
 		this.objectStore = objectStore;
-		this.isPublic = objectStore.getIsPublic();
+		this.isPublic = isPublic;
+		this.displayUrl = displayUrl;
 	}
 
 	private void fetch() {
@@ -72,7 +75,7 @@ public class FileDocumentPropertyMap implements PropertyMap {
 					ValueType.BINARY, name, document));
 		} else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
 			return new FileDocumentProperty(name, new FileDocumentValue(
-					ValueType.STRING, objectStore.getDisplayUrl() + docId));
+					ValueType.STRING, this.displayUrl + docId));
 		} else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
 			return new FileDocumentProperty(name, new FileDocumentValue(
 					ValueType.BOOLEAN, this.isPublic));
@@ -92,6 +95,7 @@ public class FileDocumentPropertyMap implements PropertyMap {
 		return new FileDocumentProperty(name, new FileDocumentValue(
 				ValueType.STRING, name, document));
 	}
+
 
 	public Iterator getProperties() throws RepositoryException {
 		fetch();
