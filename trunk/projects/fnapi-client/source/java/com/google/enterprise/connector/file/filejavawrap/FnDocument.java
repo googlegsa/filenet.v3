@@ -9,7 +9,6 @@ import com.filenet.wcm.api.BaseRuntimeException;
 import com.filenet.wcm.api.Document;
 import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.PropertyNotFoundException;
-import com.google.enterprise.connector.dctm.DctmConnector;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.IProperties;
@@ -176,7 +175,7 @@ public class FnDocument implements IDocument {
 		} catch (PropertyNotFoundException e) {
 			logger.log(Level.SEVERE,
 					"error while trying to get the properties of the file "
-							+ this.doc.getId() + " " + er.getMessage());
+							+ this.doc.getId() + " " + e.getMessage());
 			RepositoryException re = new RepositoryException(e);
 			throw re;
 		}

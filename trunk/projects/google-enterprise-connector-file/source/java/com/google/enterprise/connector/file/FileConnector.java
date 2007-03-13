@@ -8,7 +8,7 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.enterprise.connector.dctm.DctmConnector;
+
 import com.google.enterprise.connector.file.FileSession;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.LoginException;
@@ -42,7 +42,7 @@ public class FileConnector implements Connector {
 	private String isPublic;
 
 	static {
-		logger = Logger.getLogger(DctmConnector.class.getName());
+		logger = Logger.getLogger(FileConnector.class.getName());
 
 		File propertiesFile = new File("../config/logging.properties");
 		Properties properties = null;
