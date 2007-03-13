@@ -68,7 +68,7 @@ public class FileQueryTraversalUtilCall extends TestCase {
 			session = (FileSession) connector.login();
 			qtm = (FileQueryTraversalManager) session
 					.getQueryTraversalManager();
-			FileQueryTraversalUtil.runTraversal(qtm, 100000);
+			FileQueryTraversalUtil.runTraversal(qtm, 1000);
 
 		} catch (LoginException le) {
 			System.out.println("Root Cause : " + le.getCause()
