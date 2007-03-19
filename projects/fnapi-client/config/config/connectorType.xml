@@ -7,7 +7,6 @@
 			<list>
 				<value>login</value>
 				<value>password</value>
-				<value>appId</value>
 				<value>credTag</value>
 				<value>objectStoreName</value>
 				<value>pathToWcmApiConfig</value>

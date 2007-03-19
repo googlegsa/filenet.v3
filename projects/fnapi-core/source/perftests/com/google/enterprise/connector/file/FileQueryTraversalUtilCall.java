@@ -12,7 +12,7 @@ public class FileQueryTraversalUtilCall extends TestCase {
 
 	private final boolean javaapi = true;
 
-	private String user, password, client, appId, credTag, objectStoreName,
+	private String user, password, client, credTag, objectStoreName,
 			pathToWcmApiConfig, displayUrl;
 
 	private String isPublic;
@@ -22,7 +22,6 @@ public class FileQueryTraversalUtilCall extends TestCase {
 			user = "P8Admin";
 			password = "UnDeuxTrois456";
 			client = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
-			appId = "file-connector";
 			credTag = "Clear";
 			objectStoreName = "GSA_Filenet";
 			pathToWcmApiConfig = "C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties";
@@ -32,7 +31,6 @@ public class FileQueryTraversalUtilCall extends TestCase {
 		} else {
 			user = "mark";
 			password = "mark";
-			appId = "";
 			credTag = "";
 			objectStoreName = "";
 			pathToWcmApiConfig = "";
@@ -54,7 +52,6 @@ public class FileQueryTraversalUtilCall extends TestCase {
 		((FileConnector) connector).setLogin(user);
 		((FileConnector) connector).setPassword(password);
 		((FileConnector) connector).setObjectStoreName(objectStoreName);
-		((FileConnector) connector).setAppId(appId);
 		((FileConnector) connector).setCredTag(credTag);
 		((FileConnector) connector).setDisplayUrl(displayUrl);
 		((FileConnector) connector).setObjectFactory(client);

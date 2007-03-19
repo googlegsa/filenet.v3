@@ -16,19 +16,17 @@ import com.google.enterprise.connector.spi.Session;
 
 public class FileConnector implements Connector {
 
-	private static Logger logger = null;
+	private static Logger logger = Logger.getLogger(FileConnector.class.getName());
 
 	public static boolean DEBUG = false;
 
-	public static int DEBUG_LEVEL = 0;
+	public static int DEBUG_LEVEL = 1;
 
 	private String objectFactory;
 
 	private String login;
 
 	private String password;
-
-	private String appId;
 
 	private String credTag;
 
@@ -41,7 +39,7 @@ public class FileConnector implements Connector {
 	private String isPublic;
 
 	static {
-		logger = Logger.getLogger(FileConnector.class.getName());
+		
 
 		File propertiesFile = new File("../config/logging.properties");
 		Properties properties = null;
@@ -77,9 +75,9 @@ public class FileConnector implements Connector {
 	public Session login() throws LoginException, RepositoryException {
 		Session sess = null;
 		if (!(objectFactory == null || login == null || password == null
-				|| appId == null || objectStoreName == null || displayUrl == null)) {
+				|| objectStoreName == null || displayUrl == null)) {
 
-			sess = new FileSession(objectFactory, login, password, appId,
+			sess = new FileSession(objectFactory, login, password, 
 					credTag, objectStoreName, pathToWcmApiConfig, displayUrl,
 					isPublic);
 		}
@@ -87,13 +85,7 @@ public class FileConnector implements Connector {
 
 	}
 
-	public String getAppId() {
-		return appId;
-	}
-
-	public void setAppId(String appId) {
-		this.appId = appId;
-	}
+	
 
 	public String getCredTag() {
 		return credTag;

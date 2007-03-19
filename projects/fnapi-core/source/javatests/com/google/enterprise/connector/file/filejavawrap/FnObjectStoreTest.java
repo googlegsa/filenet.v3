@@ -44,7 +44,7 @@ public class FnObjectStoreTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getName()'
 	 */
-	public void testGetName() {
+	public void testGetName() throws RepositoryException {
 		assertEquals(FnConnection.objectStoreName, objectStore.getName());
 	}
 

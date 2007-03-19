@@ -5,7 +5,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 public interface IObjectFactory {
 
-	public ISession getSession(String appId, String credTag, String userId,
+	public ISession getSession(String appId,String credTag, String userId,
 			String password);
 
 	public IObjectStore getObjectStore(String string, ISession fileSession)
