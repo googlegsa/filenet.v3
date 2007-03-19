@@ -61,7 +61,7 @@ public class FileQueryTraversalManager implements QueryTraversalManager {
 
 	public FileQueryTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession, String isPublic,
-			String displayUrl) {
+			String displayUrl) throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
 		this.fileSession = fileSession;

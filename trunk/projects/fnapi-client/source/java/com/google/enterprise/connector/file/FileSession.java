@@ -28,7 +28,7 @@ public class FileSession implements Session {
 	private String isPublic;
 
 	public FileSession(String iObjectFactory, String userName,
-			String userPassword, String appId, String credTag,
+			String userPassword, String credTag,
 			String objectStoreName, String pathToWcmApiConfig,
 			String displayUrl, String isPublic) throws RepositoryException,
 			LoginException {
@@ -37,7 +37,7 @@ public class FileSession implements Session {
 			if (credTag.equals("")) {
 				credTag = null;
 			}
-			fileSession = fileObjectFactory.getSession(appId, credTag,
+			fileSession = fileObjectFactory.getSession("gsa-file-connector",credTag,
 					userName, userPassword);
 			this.pathToWcmApiConfig = pathToWcmApiConfig;
 			fileSession.setConfiguration(new FileInputStream(

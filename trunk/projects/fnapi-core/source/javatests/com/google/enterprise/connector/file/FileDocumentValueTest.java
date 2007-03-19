@@ -25,7 +25,6 @@ public class FileDocumentValueTest extends TestCase {
 		((FileConnector) connector).setPassword(FnConnection.password);
 		((FileConnector) connector)
 				.setObjectStoreName(FnConnection.objectStoreName);
-		((FileConnector) connector).setAppId(FnConnection.appId);
 		((FileConnector) connector).setCredTag(FnConnection.credTag);
 		((FileConnector) connector).setDisplayUrl(FnConnection.displayUrl);
 		((FileConnector) connector)

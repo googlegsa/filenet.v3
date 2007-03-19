@@ -6,12 +6,11 @@
 		
 		<property name="login" value="${login}" />
 		<property name="password" value="${password}" />
-		<property name="appId" value="${appId}" />
 		<property name="credTag" value="${credTag}" />
 		<property name="objectStoreName" value="${objectStoreName}" />
-		<property name="pathToWcmApiConfig" value="${pathToWcmApiConfig}" />
+		<property name="pathToWcmApiConfig" value="C:\_dev\google\connector\connector-file\projects\third_party\WcmApiConfig.properties" />
 		<property name="displayUrl" value="${displayUrl}" />
-		<property name="objectFactory" value="${objectFactory}" />
+		<property name="objectFactory" value="com.google.enterprise.connector.file.filejavawrap.FnObjectFactory" />
 		<property name="isPublic" value="${isPublic}" />
 	</bean>
 </beans>
