@@ -1,32 +1,26 @@
 package com.google.enterprise.connector.file.filemockwrap;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 import junit.framework.TestCase;
 
+import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.mock.MockRepository;
 import com.google.enterprise.connector.mock.MockRepositoryDocument;
 import com.google.enterprise.connector.mock.MockRepositoryEventList;
-import com.google.enterprise.connector.mock.MockRepositoryProperty;
-import com.google.enterprise.connector.mock.MockRepositoryPropertyList;
 import com.google.enterprise.connector.pusher.DocPusher;
+import com.google.enterprise.connector.spi.RepositoryException;
 
 public class MockFnDocumentTest extends TestCase {
 
 	MockRepositoryDocument document = new MockRepository(
 			new MockRepositoryEventList("MockRepositoryEventLog7.txt"))
 			.getStore().getDocByID("doc2");
+	MockFnDocument doc = new MockFnDocument(document);
 
-	public void testGetContent() {
-		InputStream is;
-		try {
-			is = document.getContentStream();
-		} catch (FileNotFoundException e) {
-			assertEquals(true, false);
-			return;
-		}
+	public void testGetContent() throws RepositoryException {
+		InputStream is = doc.getContent();
 		byte[] arg0 = new byte[1];
 		StringBuffer sb = new StringBuffer();
 		try {
@@ -39,29 +33,20 @@ public class MockFnDocumentTest extends TestCase {
 		assertEquals(sb.toString(), "This is a document.");
 	}
 
-	public void testGetContentSize() {
-		assertEquals(document.getContent().length(), "This is a document."
-				.length());
+	public void testGetContentSize() throws RepositoryException {
+		assertTrue((("This is a document.".length())+0.0) == doc.getContentSize());
 	}
 
 	public void testGetPermissions() {
-		MockRepositoryPropertyList mrPL = document.getProplist();
-		// "acl":{type:string, value:[fred,mark,bill]}
-		// "google:ispublic":"false"
-		String pub = mrPL.lookupStringValue("google:ispublic");
-		assertEquals(pub, "public");
+		IPermissions permissions = doc.getPermissions();
+	
+		assertNotNull(permissions);
+		assertTrue(permissions instanceof MockFnPermissions);
 	}
 
-	/**
-	 * TOTEST carrefully
-	 */
-	public void testGetPropertyStringValue() {
-		MockRepositoryProperty curProp = document.getProplist().getProperty(
-				"acl");
-		if (curProp.getType() == MockRepositoryProperty.PropertyType.STRING
-				|| curProp.getType() == MockRepositoryProperty.PropertyType.UNDEFINED) {
-			assertEquals(curProp.getValue(), "joe");
-		}
+	
+	public void testGetPropertyStringValue() throws RepositoryException {
+		assertEquals("joe",doc.getPropertyStringValue("acl"));
 	}
-
+		
 }

@@ -58,9 +58,8 @@ public class FileQueryTraversalManagerTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.FileQueryTraversalManager.resumeTraversal(String)'
 	 */
 	public void testResumeTraversal() throws RepositoryException {
-
+		qtm.setBatchHint(50);
 		ResultSet set = this.qtm.resumeTraversal(FnConnection.checkpoint);
-
 		assertNotNull(set);
 		Iterator iter = set.iterator();
 		int counter = 0;
@@ -68,7 +67,7 @@ public class FileQueryTraversalManagerTest extends TestCase {
 			iter.next();
 			counter++;
 		}
-		assertEquals(17113, counter);
+		assertEquals(50, counter);
 
 	}
 
@@ -118,7 +117,7 @@ public class FileQueryTraversalManagerTest extends TestCase {
 
 	}
 
-	public void extractDocidFromCheckpoint() {
+	public void testExtractDocidFromCheckpoint() {
 		String checkPoint = "{\"uuid\":\"" + FnConnection.docId
 				+ "\",\"lastModified\":\"" + FnConnection.date + "\"}";
 		String uuid = null;
@@ -137,7 +136,7 @@ public class FileQueryTraversalManagerTest extends TestCase {
 
 	}
 
-	public void extractNativeDateFromCheckpoint() {
+	public void testExtractNativeDateFromCheckpoint() {
 
 		JSONObject jo = null;
 		String modifDate = null;
@@ -157,7 +156,7 @@ public class FileQueryTraversalManagerTest extends TestCase {
 
 	}
 
-	public void makeCheckpointQueryString() throws RepositoryException {
+	public void testMakeCheckpointQueryString() throws RepositoryException {
 		String uuid = FnConnection.docId;
 		String statement = "";
 		try {
@@ -167,7 +166,7 @@ public class FileQueryTraversalManagerTest extends TestCase {
 		}
 
 		assertNotNull(statement);
-		assertEquals(FnConnection.checkpoint, statement);
+		assertEquals(FnConnection.DM_CHECKPOINT_QUERY_STRING, statement);
 
 	}
 

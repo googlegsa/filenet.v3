@@ -42,7 +42,7 @@ public class FileSession implements Session {
 			this.pathToWcmApiConfig = pathToWcmApiConfig;
 			fileSession.setConfiguration(new FileInputStream(
 					this.pathToWcmApiConfig));
-			// fileSession.verify();
+			
 			objectStore = fileObjectFactory.getObjectStore(objectStoreName,
 					fileSession);
 			this.displayUrl = displayUrl
@@ -50,6 +50,7 @@ public class FileSession implements Session {
 					+ objectStoreName + "&id=";
 
 			this.isPublic = isPublic;
+			fileSession.verify();
 		} catch (FileNotFoundException de) {
 			RepositoryException re = new RepositoryException(de);
 			throw re;

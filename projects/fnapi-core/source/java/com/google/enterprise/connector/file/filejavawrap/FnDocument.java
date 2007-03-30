@@ -15,6 +15,7 @@ import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnDocument implements IDocument {
+	
 	Document doc;
 
 	private static Logger logger = null;
@@ -31,15 +32,23 @@ public class FnDocument implements IDocument {
 	}
 
 	public InputStream getContent() {
+		
 		try {
+			int[] tab = doc.getContentElementObjectTypes();
+			for(int i = 0; i<tab.length; i++){
+				System.out.println(tab[i]);	
+			}
+			System.out.println(doc.getContentReferenceLocation());	
 			return doc.getContent();
+			
 		} catch (BaseRuntimeException e) {
-
+			e.printStackTrace();
 			logger.log(Level.SEVERE,
 					"error while trying to get the content of file "
 							+ this.doc.getId() + " " + e.getMessage());
 			return doc.getContent();
 		} catch (Error er) {
+			er.printStackTrace();
 			logger.log(Level.SEVERE,
 					"error while trying to get the content of file "
 							+ this.doc.getId() + " " + er.getMessage());

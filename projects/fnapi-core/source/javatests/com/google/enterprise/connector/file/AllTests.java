@@ -9,12 +9,12 @@ public class AllTests {
 		TestSuite suite = new TestSuite(
 				"Test for com.google.enterprise.connector.file");
 		// $JUnit-BEGIN$
-		suite.addTestSuite(FileAuthorizationManagerTest.class);
+		suite.addTestSuite(FileMockAuthorizationManagerTest.class);
 		suite.addTestSuite(FileDocumentValueTest.class);
-		suite.addTestSuite(FileAuthenticationManagerTest.class);
+		suite.addTestSuite(FileMockAuthenticationManagerTest.class);
 		suite.addTestSuite(FileQueryTraversalManagerTest.class);
 		suite.addTestSuite(FileConnectorTest.class);
-		suite.addTestSuite(FileDocumentPropertyMapTest.class);
+		suite.addTestSuite(FileMockDocumentPropertyMapTest.class);
 		// $JUnit-END$
 		return suite;
 	}

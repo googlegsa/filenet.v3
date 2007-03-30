@@ -23,8 +23,6 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 
 	private String mockRepositoryEventList;
 
-	private String isPublic;
-
 	private String userId;
 
 	private String password;
@@ -54,30 +52,6 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 		return new MockFnDocument(doc);
 	}
 
-	public void setDisplayUrl(String displayUrl) {
-
-		// Nothing. If a display URL is implemented for the Mock, return an
-		// hard-coded one in getDisplayURL method.
-
-	}
-
-	public String getDisplayUrl() {
-		return "http://tomcatURL:8080/someTestServletThatRetrievesContentOfTheEventList?EventList="
-				+ mockRepositoryEventList + "&DocID=";
-	}
-
-	public String getName() {
-		return mockRepositoryEventList;
-	}
-
-	public String getIsPublic() {
-		return this.isPublic;
-	}
-
-	public void setIsPublic(String isPublic) {
-		this.isPublic = isPublic;
-	}
-
 	/**
 	 * The MockRepositoryDocumentStore is needed in this package (at least in
 	 * MockFnSearch class) then implement a protected getter for it.
@@ -95,6 +69,7 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 	public IUser verify() throws RepositoryException, LoginException {
 		Credentials creds = new SimpleCredentials(this.userId, this.password
 				.toCharArray());
+		valuateEventList(this.mockRepositoryEventList);
 		this.isAuthenticated = false;
 		try {
 			MockJcrSession session = null;// The connector is not able to deal
@@ -126,10 +101,7 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 	public void setConfiguration(FileInputStream stream) {
 	}
 
-	public void setObjectStore(IObjectStore objectStore) {
-		// TODO Ask if we can remove it.
-
-	}
+	
 
 	protected void valuateEventList(String evntLst) {
 		this.mockRepositoryEventList = evntLst;
@@ -137,4 +109,9 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 				new MockRepositoryEventList(evntLst)));
 	}
 
+	public String getName() throws RepositoryException {
+		return mockRepositoryEventList;
+	}
+
+	
 }

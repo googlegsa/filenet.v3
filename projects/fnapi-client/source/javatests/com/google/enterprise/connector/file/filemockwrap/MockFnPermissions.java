@@ -6,13 +6,10 @@ public class MockFnPermissions implements IPermissions {
 
 	String[] users;
 
-	String pub;
-
-	protected MockFnPermissions(String[] users, String pub) {
+	protected MockFnPermissions(String[] users) {
 		this.users = users;
-		this.pub = pub;
+		
 	}
-
 	/**
 	 * TOASK Deal with public property too?
 	 */

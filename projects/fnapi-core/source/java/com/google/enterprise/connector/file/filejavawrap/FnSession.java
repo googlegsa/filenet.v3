@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 
 import com.filenet.wcm.api.InvalidCredentialsException;
 import com.filenet.wcm.api.Session;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.file.filewrap.IUser;
 import com.google.enterprise.connector.spi.LoginException;
@@ -12,8 +11,6 @@ import com.google.enterprise.connector.spi.LoginException;
 public class FnSession implements ISession {
 
 	Session session = null;
-
-	FnObjectStore iObjectStore = null;
 
 	public FnSession(Session sess) {
 		session = sess;
@@ -39,12 +36,5 @@ public class FnSession implements ISession {
 		return session;
 	}
 
-	public FnObjectStore getIObjectStore() {
-		return iObjectStore;
-	}
 
-	public void setObjectStore(IObjectStore objectStore) {
-		iObjectStore = (FnObjectStore) objectStore;
-
-	}
 }
