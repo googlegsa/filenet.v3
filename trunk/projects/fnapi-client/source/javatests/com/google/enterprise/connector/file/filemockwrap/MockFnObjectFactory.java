@@ -17,9 +17,9 @@ public class MockFnObjectFactory implements IObjectFactory {
 
 	}
 
-	public IObjectStore getObjectStore(String string, ISession fileSession)
+	public IObjectStore getObjectStore(String objectStoreName, ISession fileSession)
 			throws RepositoryException {
-		this.mfnOS.valuateEventList(string);
+		this.mfnOS.valuateEventList(objectStoreName);
 		return this.mfnOS;
 	}
 

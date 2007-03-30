@@ -58,7 +58,7 @@ public class FileDocumentPropertyMapTest extends TestCase {
 			properties.next();
 			counter++;
 		}
-		assertEquals(23, counter);
+		assertEquals(26, counter);
 
 	}
 

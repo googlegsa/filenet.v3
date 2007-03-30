@@ -72,7 +72,7 @@ public class FileDocumentValue implements Value {
 	}
 
 	public Calendar getDate() throws IllegalArgumentException,
-			RepositoryException {
+			RepositoryException {		
 		Date date = this.fileDocument
 				.getPropertyDateValue(this.propname_content);
 		Calendar c = Calendar.getInstance();

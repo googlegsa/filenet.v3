@@ -25,6 +25,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
 		ISession sess = objectFactory.getSession("gsa-authenticate", null,
 				username, password);
 		try {
+			
 			sess.setConfiguration(new FileInputStream(wcmConfigFilePath));
 			sess.verify();
 		} catch (FileNotFoundException e) {

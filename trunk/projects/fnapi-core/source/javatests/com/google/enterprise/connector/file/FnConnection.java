@@ -39,5 +39,8 @@ public class FnConnection {
 	public static String mimeType = "text/plain";
 
 	public static String checkpoint = "{\"uuid\":\"{5052959D-5CD2-4827-8B27-A8ECC3483CF8}\",\"lastModified\":\"2007-01-25T15:18:50.000\"}";
+	public static final String DM_CHECKPOINT_QUERY_STRING = " AND DateLastModified >= 2007-01-25T15:18:50.000 AND Id > {5052959D-5CD2-4827-8B27-A8ECC3483CF8}";
+
+	
 
 }

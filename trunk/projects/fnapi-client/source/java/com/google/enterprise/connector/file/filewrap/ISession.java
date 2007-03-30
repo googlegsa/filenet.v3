@@ -11,6 +11,4 @@ public interface ISession {
 
 	public void setConfiguration(FileInputStream stream);
 
-	public void setObjectStore(IObjectStore objectStore);
-
 }

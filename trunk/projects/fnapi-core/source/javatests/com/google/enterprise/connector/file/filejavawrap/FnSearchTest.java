@@ -57,6 +57,7 @@ public class FnSearchTest extends TestCase {
 				+ "</querystatement>"
 				+ "<options maxrecords='100' objectasid=\"false\"/></request>";
 		String result = search.executeXml(query, objectStore);
+		
 		Document resultDocument = this.stringToDom(result);
 		
 		assertTrue(resultDocument instanceof Document);

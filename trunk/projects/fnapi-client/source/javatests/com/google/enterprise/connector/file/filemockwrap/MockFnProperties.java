@@ -15,6 +15,7 @@ public class MockFnProperties implements IProperties {
 	int size = 0;
 
 	protected MockFnProperties(MockRepositoryPropertyList propLst) {
+		mrPL = new Vector();
 		Iterator it = propLst.iterator();
 		while (it.hasNext()) {
 			this.mrPL.add(it.next());

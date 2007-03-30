@@ -36,6 +36,7 @@ public class FileDocumentPropertyMap implements PropertyMap {
 		set.add("DateContentLastAccessed");
 		set.add("DateCreated");
 		set.add("DateLastModified");
+		set.add("DocumentTitle");
 		set.add("Id");
 		set.add("IsCurrentVersion");
 		set.add("IsFrozenVersion");
@@ -53,6 +54,46 @@ public class FileDocumentPropertyMap implements PropertyMap {
 		set.add("VersionStatus");
 
 	}
+	private static HashSet sysmeta = null;
+	static {
+		sysmeta = new HashSet();
+		sysmeta.add("AccessMask");
+		sysmeta.add("ActiveMarkings");
+		sysmeta.add("Annotations");	
+		sysmeta.add("AuditedEvents");	
+		sysmeta.add("ClassDescription");	
+		sysmeta.add("ContentElements");	
+		sysmeta.add("ContentElementsPresent");	
+		sysmeta.add("CreatePending");	
+		sysmeta.add("DateContentLastAccessed");	
+		sysmeta.add("DeletePending");	
+		sysmeta.add("DestinationDocuments");	
+		sysmeta.add("DocumentLifecyclePolicy");	
+		sysmeta.add("EntryTemplateId");	
+		sysmeta.add("EntryTemplateLaunchedWorkflowNumber");	
+		sysmeta.add("EntryTemplateObjectStoreName");	
+		sysmeta.add("FoldersFiledIn");	
+		sysmeta.add("IsInExceptionState");	
+		sysmeta.add("IsVersioningEnabled");	
+		sysmeta.add("LockOwner");	
+		sysmeta.add("ObjectType");	
+		sysmeta.add("OIID");	
+		sysmeta.add("OwnerDocument");	
+		sysmeta.add("PendingOperation");
+		sysmeta.add("Properties");	
+		sysmeta.add("PublicationInfo");	
+		sysmeta.add("ReleasedVersion");	
+		sysmeta.add("Reservation");	
+		sysmeta.add("ReservationType");	
+		sysmeta.add("SecurityParent");	
+		sysmeta.add("SecurityPolicy");	
+		sysmeta.add("SourceDocument");	
+		sysmeta.add("StoragePolicy");
+		sysmeta.add("UpdatePending");	
+		sysmeta.add("VersionSeries");	
+		sysmeta.add("WorkflowSubscriptions");
+	}
+
 
 	public FileDocumentPropertyMap(String docId, IObjectStore objectStore, String isPublic, String displayUrl) {
 		this.docId = docId;
@@ -104,7 +145,7 @@ public class FileDocumentPropertyMap implements PropertyMap {
 		IProperty property;
 		for (int i = 0; i < documentProperties.size(); i++) {
 			property = (IProperty) documentProperties.get(i);
-			if (set.contains(property.getName())) {
+			if (!sysmeta.contains(property.getName()) || set.contains(property.getName())) {
 				properties.add(new FileDocumentProperty(property.getName(),
 						new FileDocumentValue(property.getValueType(), property
 								.getName(), document)));
