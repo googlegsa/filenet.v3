@@ -11,22 +11,25 @@ import junit.framework.TestCase;
 public class MockFnSessionAndObjectStoreTest extends TestCase {
 
 	MockFnSessionAndObjectStore sessAndObjectStore = null;
+
 	protected void setUp() throws Exception {
 		IObjectFactory objectFactory = new MockFnObjectFactory();
-		sessAndObjectStore = (MockFnSessionAndObjectStore) objectFactory.getSession("mock",
-				FnMockConnection.credTag, FnMockConnection.userName,
-				FnMockConnection.password);
+		sessAndObjectStore = (MockFnSessionAndObjectStore) objectFactory
+				.getSession("mock", FnMockConnection.credTag,
+						FnMockConnection.userName, FnMockConnection.password);
 		sessAndObjectStore.setConfiguration(new FileInputStream(
 				FnMockConnection.pathToWcmApiConfig));
-		
-		sessAndObjectStore = (MockFnSessionAndObjectStore) objectFactory.getObjectStore(
-				FnMockConnection.objectStoreName, sessAndObjectStore);
+
+		sessAndObjectStore = (MockFnSessionAndObjectStore) objectFactory
+				.getObjectStore(FnMockConnection.objectStoreName,
+						sessAndObjectStore);
 		sessAndObjectStore.verify();
-		
+
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnSessionAndObjectStore.getObject(String)'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnSessionAndObjectStore.getObject(String)'
 	 */
 	public void testGetObject() {
 		IDocument document = sessAndObjectStore.getObject("doc2");
@@ -35,14 +38,16 @@ public class MockFnSessionAndObjectStoreTest extends TestCase {
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnSessionAndObjectStore.verify()'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnSessionAndObjectStore.verify()'
 	 */
 	public void testVerify() {
 
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnSessionAndObjectStore.getName()'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnSessionAndObjectStore.getName()'
 	 */
 	public void testGetName() {
 

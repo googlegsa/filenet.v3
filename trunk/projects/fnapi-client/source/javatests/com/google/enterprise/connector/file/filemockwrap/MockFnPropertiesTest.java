@@ -13,31 +13,33 @@ import junit.framework.TestCase;
 public class MockFnPropertiesTest extends TestCase {
 
 	MockFnProperties mockFnProperties = null;
+
 	protected void setUp() throws Exception {
 		MockRepositoryDocument document = new MockRepository(
 				new MockRepositoryEventList("MockRepositoryEventLog7.txt"))
 				.getStore().getDocByID("doc2");
 		MockRepositoryPropertyList propList = document.getProplist();
-	
+
 		mockFnProperties = new MockFnProperties(propList);
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnProperties.get(int)'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnProperties.get(int)'
 	 */
 	public void testGet() {
 		IProperty prop = mockFnProperties.get(0);
 		assertNotNull(prop);
 		assertTrue(prop instanceof MockFnProperty);
-		
 
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnProperties.iterator()'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnProperties.iterator()'
 	 */
 	public void testIterator() {
-		
+
 		Iterator itera = mockFnProperties.iterator();
 		assertNotNull(itera);
 		assertTrue(itera instanceof Iterator);
@@ -45,10 +47,11 @@ public class MockFnPropertiesTest extends TestCase {
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnProperties.size()'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnProperties.size()'
 	 */
 	public void testSize() {
-		assertEquals(2,mockFnProperties.size());
+		assertEquals(2, mockFnProperties.size());
 	}
 
 }
