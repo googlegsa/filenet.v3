@@ -8,8 +8,9 @@ public class MockFnPermissions implements IPermissions {
 
 	protected MockFnPermissions(String[] users) {
 		this.users = users;
-		
+
 	}
+
 	/**
 	 * TOASK Deal with public property too?
 	 */

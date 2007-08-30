@@ -11,14 +11,14 @@ public class MockFnObjectFactory implements IObjectFactory {
 	private MockFnSessionAndObjectStore mfnOS;
 
 	public ISession getSession(String appId, String credTag, String userId,
-			String password) {
+			String password) throws RepositoryException {
 		this.mfnOS = new MockFnSessionAndObjectStore(userId, password);
 		return this.mfnOS;
 
 	}
 
-	public IObjectStore getObjectStore(String objectStoreName, ISession fileSession)
-			throws RepositoryException {
+	public IObjectStore getObjectStore(String objectStoreName,
+			ISession fileSession) throws RepositoryException {
 		this.mfnOS.valuateEventList(objectStoreName);
 		return this.mfnOS;
 	}

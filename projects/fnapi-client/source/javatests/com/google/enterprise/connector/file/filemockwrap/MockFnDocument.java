@@ -4,9 +4,11 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Date;
 
+import com.filenet.wcm.api.PropertyNotFoundException;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.IProperties;
+import com.google.enterprise.connector.file.filewrap.IVersionSeries;
 import com.google.enterprise.connector.mock.MockRepositoryDateTime;
 import com.google.enterprise.connector.mock.MockRepositoryDocument;
 import com.google.enterprise.connector.mock.MockRepositoryProperty;
@@ -30,22 +32,17 @@ public class MockFnDocument implements IDocument {
 		}
 	}
 
-	public double getContentSize() throws RepositoryException {
-		return this.document.getContent().length();
-	}
-
 	public IPermissions getPermissions() {
 		MockRepositoryPropertyList mrPL = this.document.getProplist();
 		String[] users = mrPL.getProperty("acl").getValues();
 		return new MockFnPermissions(users);
 	}
 
-
 	public String getPropertyStringValue(String name)
 			throws RepositoryException {
 		MockRepositoryProperty curProp = this.document.getProplist()
 				.getProperty(name);
-			return curProp.getValue();
+		return curProp.getValue();
 	}
 
 	public long getPropertyLongValue(String name) throws RepositoryException {
@@ -78,13 +75,15 @@ public class MockFnDocument implements IDocument {
 	}
 
 	public Date getPropertyDateValue(String name) throws RepositoryException {
-		if(name.equals("DateLastModified") || name.equals(SpiConstants.PROPNAME_LASTMODIFY)){
+		if (name.equals("DateLastModified")
+				|| name.equals(SpiConstants.PROPNAME_LASTMODIFIED)) {
 			MockRepositoryDateTime curProp = this.document.getTimeStamp();
 			return new Date(curProp.getTicks());
 		}
-		MockRepositoryProperty curProp = this.document.getProplist().getProperty(name);
+		MockRepositoryProperty curProp = this.document.getProplist()
+				.getProperty(name);
 		return new Date(Long.parseLong(curProp.getValue()));
-		
+
 	}
 
 	public boolean getPropertyBooleanValue(String name)
@@ -95,6 +94,30 @@ public class MockFnDocument implements IDocument {
 
 	public IProperties getProperties() throws RepositoryException {
 		return new MockFnProperties(this.document.getProplist());
+	}
+
+	public IVersionSeries getVersionSeries() {
+		return null;
+	}
+
+	public String getId() {
+		return document.getDocID();
+	}
+
+	public String getPropertyValue(String name)
+			throws PropertyNotFoundException {
+		return null;
+	}
+
+	public byte[] getPropertyBinaryValue(String name)
+			throws RepositoryException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public IProperties getProperties(String[] names) throws RepositoryException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

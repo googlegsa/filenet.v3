@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.enterprise.connector.spi.Connector;
-import com.google.enterprise.connector.spi.PropertyMap;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.ResultSet;
 import com.google.enterprise.connector.spi.Session;
-import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.AuthorizationResponse;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -23,7 +21,9 @@ public class FileMockAuthorizationManagerTest extends TestCase {
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.FileAuthorizationManager.authorizeDocids(List, String)'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.FileAuthorizationManager.authorizeDocids(List,
+	 * String)'
 	 */
 	public void testAuthorizeDocids() throws RepositoryException {
 
@@ -32,13 +32,16 @@ public class FileMockAuthorizationManagerTest extends TestCase {
 		((FileConnector) connector).setLogin(FnMockConnection.userName);
 		((FileConnector) connector).setPassword(FnMockConnection.password);
 		((FileConnector) connector)
-				.setObjectStoreName(FnMockConnection.objectStoreName);
-		((FileConnector) connector).setCredTag(FnMockConnection.credTag);
-		((FileConnector) connector).setDisplayUrl(FnMockConnection.displayUrl);
+				.setObject_store(FnMockConnection.objectStoreName);
+		// ((FileConnector)
+		// connector).setCredential_tag(FnMockConnection.credTag);
 		((FileConnector) connector)
-				.setObjectFactory(FnMockConnection.objectFactory);
+				.setWorkplace_display_url(FnMockConnection.displayUrl);
 		((FileConnector) connector)
-				.setPathToWcmApiConfig(FnMockConnection.pathToWcmApiConfig);
+				.setObject_factory(FnMockConnection.objectFactory);
+		((FileConnector) connector)
+				.setPath_to_WcmApiConfig(FnMockConnection.pathToWcmApiConfig);
+		((FileConnector) connector).setIs_public("false");
 		Session sess = (FileSession) connector.login();
 		FileAuthorizationManager authorizationManager = (FileAuthorizationManager) sess
 				.getAuthorizationManager();
@@ -92,26 +95,25 @@ public class FileMockAuthorizationManagerTest extends TestCase {
 	private void testAuthorization(
 			FileAuthorizationManager authorizationManager, Map expectedResults,
 			String username) throws RepositoryException {
-
 		List docids = new LinkedList(expectedResults.keySet());
 
 		assertNotNull(docids);
-		ResultSet resultSet = authorizationManager.authorizeDocids(docids,
-				username);
+		List resultSet = authorizationManager.authorizeDocids(docids,
+				new FileAuthenticationIdentity(username, null));
 		assertNotNull(resultSet);
+		Boolean expected;
+		AuthorizationResponse authorizationResponse;
+		String uuid;
 		for (Iterator i = resultSet.iterator(); i.hasNext();) {
-			PropertyMap pm = (PropertyMap) i.next();
-			assertNotNull(pm);
-			String uuid = pm.getProperty(SpiConstants.PROPNAME_DOCID)
-					.getValue().getString();
+			authorizationResponse = (AuthorizationResponse) i.next();
+			assertNotNull(authorizationResponse);
+			uuid = authorizationResponse.getDocid();
 			assertNotNull(uuid);
-			boolean ok = pm.getProperty(SpiConstants.PROPNAME_AUTH_VIEWPERMIT)
-					.getValue().getBoolean();
-			Boolean expected = (Boolean) expectedResults.get(uuid);
+			expected = (Boolean) expectedResults.get(uuid);
+
 			Assert.assertEquals(username + " access to " + uuid, expected
-					.booleanValue(), ok);
+					.booleanValue(), authorizationResponse.isValid());
 		}
 	}
-
 
 }

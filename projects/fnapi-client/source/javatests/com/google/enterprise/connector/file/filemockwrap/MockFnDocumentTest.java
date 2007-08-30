@@ -17,6 +17,7 @@ public class MockFnDocumentTest extends TestCase {
 	MockRepositoryDocument document = new MockRepository(
 			new MockRepositoryEventList("MockRepositoryEventLog7.txt"))
 			.getStore().getDocByID("doc2");
+
 	MockFnDocument doc = new MockFnDocument(document);
 
 	public void testGetContent() throws RepositoryException {
@@ -33,20 +34,15 @@ public class MockFnDocumentTest extends TestCase {
 		assertEquals(sb.toString(), "This is a document.");
 	}
 
-	public void testGetContentSize() throws RepositoryException {
-		assertTrue((("This is a document.".length())+0.0) == doc.getContentSize());
-	}
-
 	public void testGetPermissions() {
 		IPermissions permissions = doc.getPermissions();
-	
+
 		assertNotNull(permissions);
 		assertTrue(permissions instanceof MockFnPermissions);
 	}
 
-	
 	public void testGetPropertyStringValue() throws RepositoryException {
-		assertEquals("joe",doc.getPropertyStringValue("acl"));
+		assertEquals("joe", doc.getPropertyStringValue("acl"));
 	}
-		
+
 }

@@ -7,23 +7,25 @@ import com.google.enterprise.connector.file.FnMockConnection;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
-import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;
 
 public class MockFnObjectFactoryTest extends TestCase {
 
-	
 	MockFnObjectFactory objectFactory;
+
 	protected void setUp() throws Exception {
 		objectFactory = new MockFnObjectFactory();
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnObjectFactory.getSession(String, String, String, String)'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnObjectFactory.getSession(String,
+	 * String, String, String)'
 	 */
-	public void testGetSession() {
+	public void testGetSession() throws RepositoryException {
 		ISession session = objectFactory.getSession("test-getSession",
 				FnMockConnection.credTag, FnMockConnection.userName,
 				FnMockConnection.password);
@@ -32,9 +34,12 @@ public class MockFnObjectFactoryTest extends TestCase {
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnObjectFactory.getObjectStore(String, ISession)'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnObjectFactory.getObjectStore(String,
+	 * ISession)'
 	 */
-	public void testGetObjectStore() throws FileNotFoundException, LoginException, RepositoryException {
+	public void testGetObjectStore() throws FileNotFoundException,
+			RepositoryLoginException, RepositoryException {
 		ISession session = objectFactory.getSession("test-getObjectStore",
 				FnMockConnection.credTag, FnMockConnection.userName,
 				FnMockConnection.password);
@@ -48,14 +53,16 @@ public class MockFnObjectFactoryTest extends TestCase {
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filemockwrap.MockFnObjectFactory.getSearch(ISession)'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.filemockwrap.MockFnObjectFactory.getSearch(ISession)'
 	 */
-	public void testGetSearch() throws LoginException, RepositoryException {
-		ISession session = objectFactory.getSession("test-getSearch", FnMockConnection.credTag, FnMockConnection.userName,
+	public void testGetSearch() throws RepositoryLoginException,
+			RepositoryException {
+		ISession session = objectFactory.getSession("test-getSearch",
+				FnMockConnection.credTag, FnMockConnection.userName,
 				FnMockConnection.password);
-		
-		objectFactory.getObjectStore(
-				FnMockConnection.objectStoreName, session);
+
+		objectFactory.getObjectStore(FnMockConnection.objectStoreName, session);
 		session.verify();
 		ISearch search = objectFactory.getSearch(session);
 		assertNotNull(search);

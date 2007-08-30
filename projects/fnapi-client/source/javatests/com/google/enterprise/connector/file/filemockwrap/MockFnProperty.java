@@ -2,7 +2,6 @@ package com.google.enterprise.connector.file.filemockwrap;
 
 import com.google.enterprise.connector.file.filewrap.IProperty;
 import com.google.enterprise.connector.mock.MockRepositoryProperty;
-import com.google.enterprise.connector.spi.ValueType;
 
 public class MockFnProperty implements IProperty {
 
@@ -16,18 +15,27 @@ public class MockFnProperty implements IProperty {
 		return this.property.getName();
 	}
 
-	public ValueType getValueType() {
-		if (this.property.getType() == MockRepositoryProperty.PropertyType.DATE) {
-			return ValueType.DATE;
-		} else if (this.property.getType() == MockRepositoryProperty.PropertyType.INTEGER) {
-			return ValueType.LONG;
-		} else if (this.property.getType() == MockRepositoryProperty.PropertyType.STRING) {
-			return ValueType.STRING;
-		} else if (this.property.getType() == MockRepositoryProperty.PropertyType.UNDEFINED) {
-			return ValueType.BINARY;// Not sure that it makes sense. TODO test.
-		} else {
-			return null;
-		}
+	public String getValueType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
+
+	// public ValueType getValueType() {
+	// if (this.property.getType() == MockRepositoryProperty.PropertyType.DATE)
+	// {
+	// return ValueType.DATE;
+	// } else if (this.property.getType() ==
+	// MockRepositoryProperty.PropertyType.INTEGER) {
+	// return ValueType.LONG;
+	// } else if (this.property.getType() ==
+	// MockRepositoryProperty.PropertyType.STRING) {
+	// return ValueType.STRING;
+	// } else if (this.property.getType() ==
+	// MockRepositoryProperty.PropertyType.UNDEFINED) {
+	// return ValueType.BINARY;// Not sure that it makes sense. TODO test.
+	// } else {
+	// return null;
+	// }
+	// }
 
 }

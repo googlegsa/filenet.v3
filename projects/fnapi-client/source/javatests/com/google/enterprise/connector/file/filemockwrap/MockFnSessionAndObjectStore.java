@@ -6,6 +6,7 @@ import javax.jcr.Credentials;
 import javax.jcr.SimpleCredentials;
 
 import com.google.enterprise.connector.file.filewrap.IDocument;
+import com.google.enterprise.connector.file.filewrap.IGettableObject;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.file.filewrap.IUser;
@@ -15,7 +16,7 @@ import com.google.enterprise.connector.mock.MockRepositoryDocumentStore;
 import com.google.enterprise.connector.mock.MockRepositoryEventList;
 import com.google.enterprise.connector.mock.jcr.MockJcrRepository;
 import com.google.enterprise.connector.mock.jcr.MockJcrSession;
-import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
@@ -66,18 +67,19 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 		return isAuthenticated;
 	}
 
-	public IUser verify() throws RepositoryException, LoginException {
+	public IUser verify() throws RepositoryException, RepositoryLoginException {
 		Credentials creds = new SimpleCredentials(this.userId, this.password
 				.toCharArray());
-		valuateEventList(this.mockRepositoryEventList);
+		valuateEventList("SwordEventLog.txt");
+		// valuateEventList(this.mockRepositoryEventList);
 		this.isAuthenticated = false;
 		try {
 			MockJcrSession session = null;// The connector is not able to deal
 			// with more than one session instance.
 			session = (MockJcrSession) repo.login(creds);
 			if (session == null) {
-				throw new LoginException(
-						"MockJcrRepository.login() returned null session => LoginException manually thrown"
+				throw new RepositoryLoginException(
+						"MockJcrRepository.login() returned null session => RepositoryLoginException manually thrown"
 								+ " from MockFnSessionAndObjectStore.verify(). Cause of this failure among the three following "
 								+ "parameters :\n\t- EventList = "
 								+ this.mockRepositoryEventList
@@ -88,7 +90,7 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 			this.isAuthenticated = true;
 			return new MockFnUser(userId);
 		} catch (javax.jcr.LoginException e) {
-			throw new LoginException(e);
+			throw new RepositoryLoginException(e);
 		} catch (javax.jcr.RepositoryException e) {
 			throw new com.google.enterprise.connector.spi.RepositoryException(e);
 		}
@@ -101,8 +103,6 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 	public void setConfiguration(FileInputStream stream) {
 	}
 
-	
-
 	protected void valuateEventList(String evntLst) {
 		this.mockRepositoryEventList = evntLst;
 		this.repo = new MockJcrRepository(new MockRepository(
@@ -113,5 +113,18 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 		return mockRepositoryEventList;
 	}
 
-	
+	public IGettableObject getObject(int type, String guidOrPath) {
+
+		if (type == 1140) {
+			MockRepositoryDocument doc = this.repo.getRepo().getStore()
+					.getDocByID(guidOrPath);
+			return new MockFnVersionSeries(doc);
+		} else if (type == 1) {
+			MockRepositoryDocument doc = this.repo.getRepo().getStore()
+					.getDocByID(guidOrPath);
+			return new MockFnDocument(doc);
+		}
+		return null;
+	}
+
 }
