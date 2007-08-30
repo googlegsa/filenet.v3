@@ -7,11 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.enterprise.connector.spi.Connector;
-import com.google.enterprise.connector.spi.PropertyMap;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.ResultSet;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.Session;
-import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.AuthorizationResponse;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -31,13 +30,14 @@ public class FileAuthorizationManagerTest extends TestCase {
 		((FileConnector) connector).setLogin(FnConnection.userName);
 		((FileConnector) connector).setPassword(FnConnection.password);
 		((FileConnector) connector)
-				.setObjectStoreName(FnConnection.objectStoreName);
-		((FileConnector) connector).setCredTag(FnConnection.credTag);
-		((FileConnector) connector).setDisplayUrl(FnConnection.displayUrl);
+				.setObject_store(FnConnection.objectStoreName);
 		((FileConnector) connector)
-				.setObjectFactory(FnConnection.objectFactory);
+				.setWorkplace_display_url(FnConnection.displayUrl);
 		((FileConnector) connector)
-				.setPathToWcmApiConfig(FnConnection.pathToWcmApiConfig);
+				.setObject_factory(FnConnection.objectFactory);
+		((FileConnector) connector)
+				.setPath_to_WcmApiConfig(FnConnection.pathToWcmApiConfig);
+		((FileConnector) connector).setIs_public("false");
 		Session sess = (FileSession) connector.login();
 		authorizationManager = (FileAuthorizationManager) sess
 				.getAuthorizationManager();
@@ -45,44 +45,24 @@ public class FileAuthorizationManagerTest extends TestCase {
 			String username = "p8Admin";
 
 			Map expectedResults = new HashMap();
-			expectedResults.put("%7B8AE0301C-2F52-46FD-B487-FC7A468A902A%7D",
-					Boolean.TRUE);
-			expectedResults.put("%7BBC13F942-5EF5-42BB-B5B2-1E2442C32A1C%7D",
-					Boolean.TRUE);
-			expectedResults.put("%7B3D5E1FB4-2670-4C52-B695-02C800112B2A%7D",
-					Boolean.TRUE);
-			expectedResults.put("%7B33D6C374-427D-4F96-A0D9-C641E3DECD7F%7D",
+			expectedResults.put("%7B56042FFC-976E-4F61-8B32-B789218B9324%7D",
 					Boolean.TRUE);
 
 			testAuthorization(authorizationManager, expectedResults, username);
 		}
-
 		{
 			String username = "ebouvier";
 
 			Map expectedResults = new HashMap();
-			expectedResults.put("%7B8AE0301C-2F52-46FD-B487-FC7A468A902A%7D",
-					Boolean.TRUE);
-			expectedResults.put("%7BBC13F942-5EF5-42BB-B5B2-1E2442C32A1C%7D",
-					Boolean.TRUE);
-			expectedResults.put("%7B3D5E1FB4-2670-4C52-B695-02C800112B2A%7D",
-					Boolean.FALSE);
-			expectedResults.put("%7B33D6C374-427D-4F96-A0D9-C641E3DECD7F%7D",
+			expectedResults.put("%7B56042FFC-976E-4F61-8B32-B789218B9324%7D",
 					Boolean.TRUE);
 			testAuthorization(authorizationManager, expectedResults, username);
 		}
-
 		{
 			String username = "P8TestUser";
 
 			Map expectedResults = new HashMap();
-			expectedResults.put("%7B8AE0301C-2F52-46FD-B487-FC7A468A902A%7D",
-					Boolean.TRUE);
-			expectedResults.put("%7BBC13F942-5EF5-42BB-B5B2-1E2442C32A1C%7D",
-					Boolean.TRUE);
-			expectedResults.put("%7B3D5E1FB4-2670-4C52-B695-02C800112B2A%7D",
-					Boolean.TRUE);
-			expectedResults.put("%7B33D6C374-427D-4F96-A0D9-C641E3DECD7F%7D",
+			expectedResults.put("%7B56042FFC-976E-4F61-8B32-B789218B9324%7D",
 					Boolean.TRUE);
 
 			testAuthorization(authorizationManager, expectedResults, username);
@@ -95,21 +75,53 @@ public class FileAuthorizationManagerTest extends TestCase {
 			String username) throws RepositoryException {
 		List docids = new LinkedList(expectedResults.keySet());
 
-		ResultSet resultSet = authorizationManager.authorizeDocids(docids,
-				username);
+		List resultSet = authorizationManager.authorizeDocids(docids,
+				new FileAuthenticationIdentity(username, null));
 
+		Boolean expected;
+		AuthorizationResponse authorizationResponse;
 		for (Iterator i = resultSet.iterator(); i.hasNext();) {
-			PropertyMap pm = (PropertyMap) i.next();
-			String uuid = pm.getProperty(SpiConstants.PROPNAME_DOCID)
-					.getValue().getString();
-			boolean ok = pm.getProperty(SpiConstants.PROPNAME_AUTH_VIEWPERMIT)
-					.getValue().getBoolean();
-			Boolean expected = new Boolean(false);
-			expected = (Boolean) expectedResults.get(uuid);
+			authorizationResponse = (AuthorizationResponse) i.next();
+			String uuid = authorizationResponse.getDocid();
 
+			expected = (Boolean) expectedResults.get(uuid);
 			Assert.assertEquals(username + " access to " + uuid, expected
-					.booleanValue(), ok);
+					.booleanValue(), authorizationResponse.isValid());
 		}
 	}
 
+	public void testAuthorizeWithVsId() throws RepositoryLoginException,
+			RepositoryException {
+		{
+			FileAuthorizationManager authorizationManager;
+			authorizationManager = null;
+			Connector connector = new FileConnector();
+			((FileConnector) connector).setLogin(FnConnection.userName);
+			((FileConnector) connector).setPassword(FnConnection.password);
+			((FileConnector) connector)
+					.setObject_store(FnConnection.objectStoreName);
+			((FileConnector) connector)
+					.setWorkplace_display_url(FnConnection.displayUrl);
+			((FileConnector) connector)
+					.setObject_factory(FnConnection.objectFactory);
+			((FileConnector) connector)
+					.setPath_to_WcmApiConfig(FnConnection.pathToWcmApiConfig);
+			((FileConnector) connector).setIs_public("false");
+			Session sess = (FileSession) connector.login();
+			authorizationManager = (FileAuthorizationManager) sess
+					.getAuthorizationManager();
+			{
+				String username = "P8TestUser";
+
+				Map expectedResults = new HashMap();
+				expectedResults.put(
+						"%7BFBD09261-20F4-4B28-B274-D9A560898D17%7D",
+						Boolean.TRUE);
+
+				testAuthorization(authorizationManager, expectedResults,
+						username);
+			}
+		}
+
+	}
 }

@@ -4,12 +4,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import com.google.enterprise.connector.file.FnConnection;
+import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.ISession;
-import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;
@@ -20,8 +21,8 @@ public class FnPermissionsTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnPermissions.asMask(String)'
 	 */
-	public void testAsMask() throws FileNotFoundException, LoginException,
-			RepositoryException {
+	public void testAsMask() throws FileNotFoundException,
+			RepositoryLoginException, RepositoryException {
 
 		IObjectFactory objectFactory = new FnObjectFactory();
 		ISession session = objectFactory.getSession(FnConnection.appId,
@@ -33,7 +34,8 @@ public class FnPermissionsTest extends TestCase {
 		IObjectStore objectStore = objectFactory.getObjectStore(
 				FnConnection.objectStoreName, session);
 
-		IDocument doc = objectStore.getObject(FnConnection.docId);
+		IDocument doc = (IDocument) objectStore.getObject(
+				IBaseObject.TYPE_DOCUMENT, FnConnection.docId);
 
 		IPermissions permissions = doc.getPermissions();
 		assertNotNull(permissions);

@@ -1,6 +1,7 @@
 package com.google.enterprise.connector.file.filejavawrap;
 
 import com.filenet.wcm.api.ObjectFactory;
+import com.filenet.wcm.api.Session;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
@@ -13,10 +14,14 @@ public class FnObjectFactory implements IObjectFactory {
 		super();
 	}
 
-	public ISession getSession(String appId,String credTag, String userId,
-			String password) {
-		return new FnSession(ObjectFactory.getSession(appId,credTag, userId,
-				password));
+	public ISession getSession(String appId, String credTag, String userId,
+			String password) throws RepositoryException {
+		try {
+			return new FnSession(ObjectFactory.getSession(appId,
+					Session.DEFAULT, userId, password));
+		} catch (NoClassDefFoundError e) {
+			throw new RepositoryException(e);
+		}
 
 	}
 

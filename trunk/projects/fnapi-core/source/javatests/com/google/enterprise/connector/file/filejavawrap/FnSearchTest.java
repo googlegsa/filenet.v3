@@ -17,7 +17,7 @@ import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
-import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;
@@ -57,14 +57,13 @@ public class FnSearchTest extends TestCase {
 				+ "</querystatement>"
 				+ "<options maxrecords='100' objectasid=\"false\"/></request>";
 		String result = search.executeXml(query, objectStore);
-		
+
 		Document resultDocument = this.stringToDom(result);
-		
+
 		assertTrue(resultDocument instanceof Document);
 
 	}
-	
-	
+
 	private Document stringToDom(String xmlSource) throws RepositoryException {
 		DocumentBuilder builder = null;
 		try {
@@ -76,17 +75,16 @@ public class FnSearchTest extends TestCase {
 			return builder.parse(new InputSource(new StringReader(xmlSource)));
 
 		} catch (ParserConfigurationException de) {
-			RepositoryException re = new LoginException(de);
+			RepositoryException re = new RepositoryLoginException(de);
 			throw re;
 		} catch (SAXException de) {
-			RepositoryException re = new LoginException(de);
+			RepositoryException re = new RepositoryLoginException(de);
 			throw re;
 		} catch (IOException de) {
-			RepositoryException re = new LoginException(de);
+			RepositoryException re = new RepositoryLoginException(de);
 			throw re;
 		}
 
 	}
-
 
 }

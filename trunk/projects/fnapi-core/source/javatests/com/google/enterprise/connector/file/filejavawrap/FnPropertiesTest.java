@@ -3,6 +3,7 @@ package com.google.enterprise.connector.file.filejavawrap;
 import java.io.FileInputStream;
 
 import com.google.enterprise.connector.file.FnConnection;
+import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
@@ -28,7 +29,8 @@ public class FnPropertiesTest extends TestCase {
 		IObjectStore objectStore = objectFactory.getObjectStore(
 				FnConnection.objectStoreName, session);
 
-		IDocument doc = objectStore.getObject(FnConnection.docId);
+		IDocument doc = (IDocument) objectStore.getObject(
+				IBaseObject.TYPE_DOCUMENT, FnConnection.docId);
 		properties = doc.getProperties();
 	}
 
@@ -47,7 +49,7 @@ public class FnPropertiesTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnProperties.size()'
 	 */
 	public void testSize() {
-		assertEquals(50, properties.size());
+		assertEquals(51, properties.size());
 	}
 
 }

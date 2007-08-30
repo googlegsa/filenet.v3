@@ -7,7 +7,7 @@ import com.google.enterprise.connector.file.FnConnection;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
-import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;
@@ -26,13 +26,17 @@ public class FnObjectFactoryTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnObjectFactory.getSession(String,
 	 * String, String, String)'
 	 */
-	public void testGetSession() {
+	public void testGetSession() throws RepositoryException,
+			FileNotFoundException {
 
 		ISession session = objectFactory.getSession("test-getSession",
 				FnConnection.credTag, FnConnection.userName,
 				FnConnection.password);
 		assertNotNull(session);
 		assertTrue(session instanceof FnSession);
+		session.setConfiguration(new FileInputStream(
+				FnConnection.pathToWcmApiConfig));
+		session.verify();
 
 	}
 
@@ -42,7 +46,7 @@ public class FnObjectFactoryTest extends TestCase {
 	 * ISession)'
 	 */
 	public void testGetObjectStore() throws FileNotFoundException,
-			LoginException, RepositoryException {
+			RepositoryLoginException, RepositoryException {
 		ISession session = objectFactory.getSession("test-getObjectStore",
 				FnConnection.credTag, FnConnection.userName,
 				FnConnection.password);
@@ -60,7 +64,7 @@ public class FnObjectFactoryTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnObjectFactory.getSearch(ISession)'
 	 */
-	public void testGetSearch() {
+	public void testGetSearch() throws RepositoryException {
 		ISession session = objectFactory.getSession("test-getSearch", "Clear",
 				"P8TestUser", "p@ssw0rd");
 		ISearch search = objectFactory.getSearch(session);

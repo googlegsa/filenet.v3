@@ -1,25 +1,34 @@
 package com.google.enterprise.connector.file;
 
-import java.util.Iterator;
-
 import com.google.enterprise.connector.pusher.DocPusher;
 import com.google.enterprise.connector.pusher.GsaFeedConnection;
-import com.google.enterprise.connector.spi.PropertyMap;
-import com.google.enterprise.connector.spi.QueryTraversalManager;
+import com.google.enterprise.connector.pusher.PushException;
+import com.google.enterprise.connector.spi.Document;
+import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.ResultSet;
+import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.TraversalManager;
+
+//import com.google.enterprise.connector.pusher.DocPusher;
+//import com.google.enterprise.connector.pusher.GsaFeedConnection;
+//import com.google.enterprise.connector.pusher.PushException;
+//
+//import com.google.enterprise.connector.spi.Document;
+//import com.google.enterprise.connector.spi.DocumentList;
+//import com.google.enterprise.connector.spi.TraversalManager;
+//import com.google.enterprise.connector.spi.RepositoryException;
+//import com.google.enterprise.connector.spi.SpiConstants;
 
 public class FileQueryTraversalUtil {
 
-	public static void runTraversal(
-			QueryTraversalManager queryTraversalManager, int batchHint)
-			throws RepositoryException {
+	public static void runTraversal(TraversalManager queryTraversalManager,
+			int batchHint) throws RepositoryException, PushException {
 
-		FileQueryTraversalManager fileQTM = (FileQueryTraversalManager) queryTraversalManager;
+		FileTraversalManager fileQTM = (FileTraversalManager) queryTraversalManager;
 		fileQTM.setBatchHint(batchHint);
 		System.out.println(batchHint);
 
-		ResultSet resultSet = fileQTM.startTraversal();
+		DocumentList resultSet = fileQTM.startTraversal();
 		// int nb=resultSet.size();
 		// System.out.println("nb vaut "+nb);
 		// The real connector manager will not always start from the beginning.
@@ -37,17 +46,22 @@ public class FileQueryTraversalUtil {
 			return;
 		}
 
-		DocPusher push = new DocPusher(new GsaFeedConnection("swp-srv-gsa2",
-				19900));
+		DocPusher push = new DocPusher(
+				new GsaFeedConnection("8.6.49.36", 19900));
+
 		// DocPusher push = new DocPusher(new FileFeedConnection());
 		while (true) {
 			int counter = 0;
 
-			PropertyMap pm = null;
-			for (Iterator iter = resultSet.iterator(); iter.hasNext();) {
-				pm = (PropertyMap) iter.next();
-				counter++;
+			// FileDocument pm = null;
+			// for (Iterator iter = resultSet.iterator(); iter.hasNext();) {
+			// pm = (Document) iter.next();
+			// counter++;
 
+			Document doc;
+			while ((doc = resultSet.nextDocument()) != null) {
+
+				counter++;
 				if (counter == batchHint) {
 					System.out.println("counter == batchhint !!!!");
 					// this test program only takes batchHint results from each
@@ -58,7 +72,9 @@ public class FileQueryTraversalUtil {
 					break;
 				}
 				System.out.println("counter " + counter);
-				push.take(pm, "file");
+				System.out.println(doc.findProperty(
+						SpiConstants.PROPNAME_DISPLAYURL).nextValue());
+				push.take(doc, "file");
 
 			}
 
@@ -69,8 +85,7 @@ public class FileQueryTraversalUtil {
 				break;
 			}
 
-			String checkPointString = fileQTM.checkpoint(pm);
-
+			String checkPointString = resultSet.checkpoint();
 			resultSet = fileQTM.resumeTraversal(checkPointString);
 
 			// the real connector manager will call checkpoint (as here) as soon

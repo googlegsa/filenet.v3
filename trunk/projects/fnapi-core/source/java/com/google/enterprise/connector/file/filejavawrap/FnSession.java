@@ -6,7 +6,8 @@ import com.filenet.wcm.api.InvalidCredentialsException;
 import com.filenet.wcm.api.Session;
 import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.file.filewrap.IUser;
-import com.google.enterprise.connector.spi.LoginException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
+import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnSession implements ISession {
 
@@ -16,12 +17,12 @@ public class FnSession implements ISession {
 		session = sess;
 	}
 
-	public IUser verify() throws LoginException {
+	public IUser verify() throws RepositoryException {
 		IUser user = null;
 		try {
 			user = new FnUser(session.verify());
 		} catch (InvalidCredentialsException de) {
-			throw new LoginException(de);
+			throw new RepositoryLoginException(de);
 		}
 		return user;
 	}
@@ -35,6 +36,5 @@ public class FnSession implements ISession {
 
 		return session;
 	}
-
 
 }
