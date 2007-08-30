@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 import com.google.enterprise.connector.file.FnConnection;
+import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
@@ -17,6 +18,8 @@ public class FnDocumentTest extends TestCase {
 
 	IDocument doc = null;
 
+	IObjectStore objectStore = null;
+
 	protected void setUp() throws Exception {
 
 		IObjectFactory objectFactory = new FnObjectFactory();
@@ -26,10 +29,11 @@ public class FnDocumentTest extends TestCase {
 		session.setConfiguration(new FileInputStream(
 				FnConnection.pathToWcmApiConfig));
 		session.verify();
-		IObjectStore objectStore = objectFactory.getObjectStore(
+		objectStore = objectFactory.getObjectStore(
 				FnConnection.objectStoreName, session);
 
-		doc = objectStore.getObject(FnConnection.docId);
+		doc = (IDocument) objectStore.getObject(IBaseObject.TYPE_DOCUMENT,
+				FnConnection.docId);
 	}
 
 	/*
@@ -56,11 +60,13 @@ public class FnDocumentTest extends TestCase {
 
 	/*
 	 * Test method for
-	 * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getContentSize()'
+	 * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyStringValue(String)'
 	 */
-	public void testGetContentSize() throws RepositoryException {
-
-		assertTrue(0 < doc.getContentSize());
+	public void testGetPropertyStringMultipleValue() throws RepositoryException {
+		assertEquals("Emilie", doc.getPropertyStringValue("Authors"));
+		doc = (IDocument) objectStore.getObject(IBaseObject.TYPE_DOCUMENT,
+				FnConnection.docId3);
+		assertEquals("Max, Sylvain", doc.getPropertyStringValue("Authors"));
 
 	}
 
@@ -73,7 +79,7 @@ public class FnDocumentTest extends TestCase {
 
 		assertEquals(1, perms.asMask(FnConnection.userLambda1));
 		assertEquals(1, perms.asMask(FnConnection.userLambda2));
-		assertEquals(0, perms.asMask(FnConnection.userLambda3));
+		assertEquals(1, perms.asMask(FnConnection.userLambda3));
 
 	}
 

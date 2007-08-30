@@ -1,73 +1,57 @@
 package com.google.enterprise.connector.file;
 
-import java.util.Iterator;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.enterprise.connector.spi.Connector;
-
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.ResultSet;
 import com.google.enterprise.connector.spi.Session;
 import com.google.enterprise.connector.spi.SpiConstants;
 
 import junit.framework.TestCase;
 
-public class FileQueryTraversalManagerTest extends TestCase {
+public class FileDocumentListTest extends TestCase {
 	Connector connector = null;
 
 	Session sess = null;
 
-	FileQueryTraversalManager qtm = null;
+	FileDocumentList fdl = null;
+
+	FileTraversalManager qtm = null;
 
 	protected void setUp() throws Exception {
 		connector = new FileConnector();
 		((FileConnector) connector).setLogin(FnConnection.userName);
 		((FileConnector) connector).setPassword(FnConnection.password);
 		((FileConnector) connector)
-				.setObjectStoreName(FnConnection.objectStoreName);
-		((FileConnector) connector).setCredTag(FnConnection.credTag);
-		((FileConnector) connector).setDisplayUrl(FnConnection.displayUrl);
+				.setObject_store(FnConnection.objectStoreName);
 		((FileConnector) connector)
-				.setObjectFactory(FnConnection.objectFactory);
+				.setWorkplace_display_url(FnConnection.displayUrl);
 		((FileConnector) connector)
-				.setPathToWcmApiConfig(FnConnection.pathToWcmApiConfig);
+				.setObject_factory(FnConnection.objectFactory);
+		((FileConnector) connector)
+				.setPath_to_WcmApiConfig(FnConnection.pathToWcmApiConfig);
+		((FileConnector) connector)
+				.setAdditional_where_clause(FnConnection.additionalWhereClause);
+		((FileConnector) connector).setIs_public("false");
 		sess = (FileSession) connector.login();
-		qtm = (FileQueryTraversalManager) sess.getQueryTraversalManager();
+		qtm = (FileTraversalManager) sess.getTraversalManager();
 	}
 
 	/*
 	 * Test method for
-	 * 'com.google.enterprise.connector.file.FileQueryTraversalManager.startTraversal()'
+	 * 'com.google.enterprise.connector.file.FileDocumentList.FileDocumentList(Document,
+	 * IObjectStore, boolean, String, HashSet, HashSet)'
 	 */
-	public void testStartTraversal() throws RepositoryException {
-		qtm.setBatchHint(50);
-		ResultSet set = this.qtm.startTraversal();
-		Iterator iter = set.iterator();
-		int counter = 0;
-		while (iter.hasNext()) {
-			iter.next();
-			counter++;
-		}
-		assertEquals(50, counter);
+	public void testFileDocumentList() {
+
 	}
 
 	/*
 	 * Test method for
-	 * 'com.google.enterprise.connector.file.FileQueryTraversalManager.resumeTraversal(String)'
+	 * 'com.google.enterprise.connector.file.FileDocumentList.nextDocument()'
 	 */
-	public void testResumeTraversal() throws RepositoryException {
-		qtm.setBatchHint(50);
-		ResultSet set = this.qtm.resumeTraversal(FnConnection.checkpoint);
-		assertNotNull(set);
-		Iterator iter = set.iterator();
-		int counter = 0;
-		while (iter.hasNext()) {
-			iter.next();
-			counter++;
-		}
-		assertEquals(50, counter);
+	public void testNextDocument() {
 
 	}
 
@@ -77,52 +61,35 @@ public class FileQueryTraversalManagerTest extends TestCase {
 	 */
 	public void testCheckpoint() throws RepositoryException {
 
-		FileDocumentPropertyMap pm = new FileDocumentPropertyMap(
-				FnConnection.docId, ((FileSession) sess).getObjectStore(),
-				"false", FnConnection.displayUrl);
-
-		assertEquals(FnConnection.checkpoint, qtm.checkpoint(pm));
-
-	}
-
-	/*
-	 * Test method for
-	 * 'com.google.enterprise.connector.file.FileQueryTraversalManager.setBatchHint(int)'
-	 */
-	public void testSetBatchHint() throws RepositoryException {
-		this.qtm.setBatchHint(10);
-		ResultSet set = this.qtm.startTraversal();
-		Iterator iter = set.iterator();
+		FileDocumentList set = (FileDocumentList) qtm.startTraversal();
 		int counter = 0;
-		while (iter.hasNext()) {
-			iter.next();
+		com.google.enterprise.connector.spi.Document doc = null;
+		doc = set.nextDocument();
+		while (doc != null) {
+			doc = set.nextDocument();
 			counter++;
 		}
-		assertEquals(10, counter);
+		assertEquals(FnConnection.checkpoint, set.checkpoint());
 	}
 
 	public void testFetchAndVerifyValueForCheckpoint()
 			throws RepositoryException {
 
-		FileDocumentPropertyMap pm = new FileDocumentPropertyMap(
-				FnConnection.docId, ((FileSession) sess).getObjectStore(),
-				"false", FnConnection.displayUrl);
-		String result = qtm.fetchAndVerifyValueForCheckpoint(pm,
-				SpiConstants.PROPNAME_DOCID).getString();
+		FileDocument pm = new FileDocument(FnConnection.docId,
+				((FileSession) sess).getObjectStore(), false,
+				FnConnection.displayUrl, FnConnection.included_meta,
+				FnConnection.excluded_meta);
+		fdl = (FileDocumentList) qtm.startTraversal();
+		String result = fdl.fetchAndVerifyValueForCheckpoint(pm,
+				SpiConstants.PROPNAME_DOCID).nextValue().toString();
 		assertEquals(FnConnection.docId, result);
-		result = FileDocumentValue.calendarToIso8601(qtm
-				.fetchAndVerifyValueForCheckpoint(pm,
-						SpiConstants.PROPNAME_LASTMODIFY).getDate());
-		assertEquals(FnConnection.date, result);
-
 	}
 
 	public void testExtractDocidFromCheckpoint() {
-		String checkPoint = "{\"uuid\":\"" + FnConnection.docId
+		String checkPoint = "{\"uuid\":\"" + FnConnection.docVsId
 				+ "\",\"lastModified\":\"" + FnConnection.date + "\"}";
 		String uuid = null;
 		JSONObject jo = null;
-
 		try {
 			jo = new JSONObject(checkPoint);
 		} catch (JSONException e) {
@@ -152,7 +119,7 @@ public class FileQueryTraversalManagerTest extends TestCase {
 		modifDate = qtm.extractNativeDateFromCheckpoint(jo,
 				FnConnection.checkpoint);
 		assertNotNull(modifDate);
-		assertEquals(FnConnection.date, modifDate);
+		assertEquals(FnConnection.dateForResume, modifDate);
 
 	}
 
