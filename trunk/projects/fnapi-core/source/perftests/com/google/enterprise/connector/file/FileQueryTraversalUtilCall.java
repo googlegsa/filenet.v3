@@ -27,7 +27,7 @@ public class FileQueryTraversalUtilCall extends TestCase {
 			client = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
 
 			objectStoreName = "GSA_Filenet";
-			pathToWcmApiConfig = "C:\\_dev\\google\\connector\\connector-file\\projects\\third_party\\WcmApiConfig.properties";
+			pathToWcmApiConfig = "C:\\_dev\\google\\workspacev3.5\\connector-file\\projects\\third_party\\WcmApiConfig.properties";
 			displayUrl = "http://swp-vm-fnet352:8080/Workplace/properties/ObjectInfo.jsp";
 			isPublic = "false";
 			additionalWhereClause = "and Document.This INSUBFOLDER '/testdata'";
