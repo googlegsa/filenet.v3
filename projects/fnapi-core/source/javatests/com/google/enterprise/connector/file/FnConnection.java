@@ -18,7 +18,7 @@ public class FnConnection {
 
 	public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
 
-	public static String pathToWcmApiConfig = "C:\\_dev\\google\\workspacev3.5\\connector-file\\webapps\\connector-manager\\WEB-INF\\WcmApiConfig.properties";
+	public static String pathToWcmApiConfig = "C:\\_dev\\google\\workspacev3.5\\connector-file\\projects\\webapps\\connector-manager\\WEB-INF\\WcmApiConfig.properties";
 
 	public static String wrongObjectStoreName = "GSA_Filen";
 
