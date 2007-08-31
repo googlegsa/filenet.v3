@@ -23,7 +23,6 @@ public class MockFnSearchTest extends TestCase {
 
 		mockFnObjectFactory.getObjectStore("MockRepositoryEventLog7.txt",
 				sessionAndObjectStore);
-		sessionAndObjectStore.verify();
 		MockFnSearch mockFnSearch = new MockFnSearch();
 		String expectedResult = "<rs:data>\n<z:row Id='users'/>\n<z:row Id='doc1'/>\n<z:row Id='doc2'/>\n</rs:data>";
 		assertEquals(expectedResult, mockFnSearch.executeXml(query,

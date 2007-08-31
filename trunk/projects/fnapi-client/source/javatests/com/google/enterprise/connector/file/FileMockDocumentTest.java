@@ -47,10 +47,7 @@ public class FileMockDocumentTest extends TestCase {
 				FnMockConnection.excluded_meta);
 		Property property = filePm.findProperty("google:docid");
 		assertTrue(property instanceof FileDocumentProperty);
-		// System.out.println(filePm.getPropertyNames());
-		// assertEquals("google:docid", filePm.getPropertyNames());
 		Iterator fileProp = filePm.getPropertyNames().iterator();
-		// System.out.println(fileProp.next());
 		assertEquals("google:ispublic", fileProp.next());
 		assertEquals(FnMockConnection.FN_ID1, property.nextValue().toString());
 
