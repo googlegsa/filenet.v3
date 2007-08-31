@@ -18,7 +18,7 @@ public class FnMockConnection {
 
 	// public static final String pathToWcmApiConfig =
 	// "C:\\_dev\\google\\workspacev3.5\\connector-file\\testdata\\mocktestdata\\MockRepositoryEventLog7.txt";
-	public static final String pathToWcmApiConfig = "C:\\_dev\\google\\workspacev3.5\\connector-file\\testdata\\mocktestdata\\SwordEventLog.txt";
+	public static final String pathToWcmApiConfig = "C:\\_dev\\google\\workspacev3.5\\connector-file\\projects\\testdata\\mocktestdata\\SwordEventLog.txt";
 
 	public static final String FN_CHECKPOINT_QUERY_STRING = " AND ((DateLastModified=1970-01-01 01:00:00.020 AND (doc2>id)) OR DateLastModified>1970-01-01 01:00:00.020)";
 
