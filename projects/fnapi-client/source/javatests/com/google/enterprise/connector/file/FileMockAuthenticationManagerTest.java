@@ -22,8 +22,6 @@ public class FileMockAuthenticationManagerTest extends TestCase {
 		((FileConnector) connector).setPassword(FnMockConnection.password);
 		((FileConnector) connector)
 				.setObject_store(FnMockConnection.objectStoreName);
-		// ((FileConnector)
-		// connector).setCredential_tag(FnMockConnection.credTag);
 		((FileConnector) connector)
 				.setWorkplace_display_url(FnMockConnection.displayUrl);
 		((FileConnector) connector)
@@ -50,15 +48,15 @@ public class FileMockAuthenticationManagerTest extends TestCase {
 		assertFalse(authentManager.authenticate(
 				new FileAuthenticationIdentity(FnMockConnection.FN_LOGIN_OK2,
 						FnMockConnection.FN_PWD_KO)).isValid());
-		// assertFalse(authentManager
-		// .authenticate(new
-		// FileAuthenticationIdentity(FnMockConnection.FN_LOGIN_OK2,
-		// null)).isValid());
-		// assertFalse(authentManager.authenticate(new
-		// FileAuthenticationIdentity(null,
-		// FnMockConnection.FN_PWD_OK1)).isValid());
-		// assertFalse(authentManager.authenticate(new
-		// FileAuthenticationIdentity(null, null)).isValid());
+//		 assertFalse(authentManager
+//		 .authenticate(new
+//		 FileAuthenticationIdentity(FnMockConnection.FN_LOGIN_OK2,
+//		 null)).isValid());
+//		 assertFalse(authentManager.authenticate(new
+//		 FileAuthenticationIdentity(null,
+//		 FnMockConnection.FN_PWD_OK1)).isValid());
+//		 assertFalse(authentManager.authenticate(new
+//		 FileAuthenticationIdentity(null, null)).isValid());
 
 		assertTrue(authentManager.authenticate(
 				new FileAuthenticationIdentity(FnMockConnection.FN_LOGIN_OK3,
