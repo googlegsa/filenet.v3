@@ -66,10 +66,11 @@ public class FileDocumentList implements DocumentList {
 						index++;
 					}
 					docId = (String) nodeMap.item(j).getNodeValue();
-					return new FileDocument((String) nodeMap.item(j)
+					fileDocument = new FileDocument((String) nodeMap.item(j)
 							.getNodeValue(), this.objectStore, this.isPublic,
 							this.displayUrl, this.included_meta,
 							this.excluded_meta);
+					return fileDocument;
 				}
 			}
 		}
@@ -109,13 +110,11 @@ public class FileDocumentList implements DocumentList {
 
 	protected Property fetchAndVerifyValueForCheckpoint(FileDocument pm,
 			String pName) throws RepositoryException {
-
 		Property property = pm.findProperty(pName);
 		if (property == null) {
 			throw new IllegalArgumentException("checkpoint must have a "
 					+ pName + " property");
 		}
-
 		return property;
 	}
 
