@@ -99,7 +99,7 @@ public class FileDocumentListTest extends TestCase {
 
 		uuid = qtm.extractDocidFromCheckpoint(jo, checkPoint);
 		assertNotNull(uuid);
-		assertEquals(FnConnection.docId, uuid);
+		assertEquals(FnConnection.docVsId, uuid);
 
 	}
 
@@ -134,7 +134,6 @@ public class FileDocumentListTest extends TestCase {
 
 		assertNotNull(statement);
 		assertEquals(FnConnection.DM_CHECKPOINT_QUERY_STRING, statement);
-
 	}
 
 }

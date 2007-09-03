@@ -54,7 +54,7 @@ public class FnConnection {
 
 	public static String additionalWhereClause = "and Document.This INSUBFOLDER '/testdata'";
 
-	public static final String DM_CHECKPOINT_QUERY_STRING = " AND ((DateLastModified>=2007-06-05T14:46:19.019 AND ({97E02C4F-7E0D-4874-894E-42CDD456AA97}>id)) OR DateLastModified>=2007-06-05T14:46:19.019)";
+	public static final String DM_CHECKPOINT_QUERY_STRING = " AND ((DateLastModified=2007-06-05T14:46:19.019 AND ({97E02C4F-7E0D-4874-894E-42CDD456AA97}>id)) OR DateLastModified>2007-06-05T14:46:19.019)";
 
 	public static HashSet included_meta = null;
 	static {
