@@ -85,11 +85,9 @@ public class FileDocumentList implements DocumentList {
 		try {
 			date = FileDateValue.iso8601ToCalendar(val.nextValue().toString());
 		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw new RepositoryException("Unexpected JSON problem", e1);
 		} catch (RepositoryException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw new RepositoryException("Unexpected JSON problem", e1);
 		}
 		date.setTimeInMillis(date.getTimeInMillis() - 7200000);
 		FileDateValue nativeFormatDateCalendar = new FileDateValue(date);

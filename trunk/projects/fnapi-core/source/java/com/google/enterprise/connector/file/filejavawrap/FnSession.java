@@ -15,10 +15,12 @@ public class FnSession implements ISession {
 
 	public FnSession(Session sess) {
 		session = sess;
+
 	}
 
 	public IUser verify() throws RepositoryException {
 		IUser user = null;
+
 		try {
 			user = new FnUser(session.verify());
 		} catch (InvalidCredentialsException de) {
