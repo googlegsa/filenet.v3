@@ -18,13 +18,11 @@ public class FileDocumentProperty implements Property {
 	}
 
 	public FileDocumentProperty(String name, HashSet value) {
-		// TODO Auto-generated constructor stub
 		this.name = name;
 		this.iter = value.iterator();
 	}
 
 	public Value nextValue() throws RepositoryException {
-		// TODO Auto-generated method stub
 		Value value = null;
 
 		if (this.iter.hasNext()) {

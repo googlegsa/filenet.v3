@@ -48,15 +48,15 @@ public class FileMockAuthenticationManagerTest extends TestCase {
 		assertFalse(authentManager.authenticate(
 				new FileAuthenticationIdentity(FnMockConnection.FN_LOGIN_OK2,
 						FnMockConnection.FN_PWD_KO)).isValid());
-//		 assertFalse(authentManager
-//		 .authenticate(new
-//		 FileAuthenticationIdentity(FnMockConnection.FN_LOGIN_OK2,
-//		 null)).isValid());
-//		 assertFalse(authentManager.authenticate(new
-//		 FileAuthenticationIdentity(null,
-//		 FnMockConnection.FN_PWD_OK1)).isValid());
-//		 assertFalse(authentManager.authenticate(new
-//		 FileAuthenticationIdentity(null, null)).isValid());
+		// assertFalse(authentManager
+		// .authenticate(new
+		// FileAuthenticationIdentity(FnMockConnection.FN_LOGIN_OK2,
+		// null)).isValid());
+		// assertFalse(authentManager.authenticate(new
+		// FileAuthenticationIdentity(null,
+		// FnMockConnection.FN_PWD_OK1)).isValid());
+		// assertFalse(authentManager.authenticate(new
+		// FileAuthenticationIdentity(null, null)).isValid());
 
 		assertTrue(authentManager.authenticate(
 				new FileAuthenticationIdentity(FnMockConnection.FN_LOGIN_OK3,
