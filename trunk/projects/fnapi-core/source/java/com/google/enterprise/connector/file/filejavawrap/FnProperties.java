@@ -1,7 +1,5 @@
 package com.google.enterprise.connector.file.filejavawrap;
 
-import java.util.Iterator;
-
 import com.filenet.wcm.api.Properties;
 import com.filenet.wcm.api.Property;
 import com.google.enterprise.connector.file.filewrap.IProperties;
@@ -17,11 +15,6 @@ public class FnProperties implements IProperties {
 
 	public IProperty get(int index) {
 		return new FnProperty((Property) this.properties.get(index));
-	}
-
-	public Iterator iterator() {
-
-		return this.properties.iterator();
 	}
 
 	public int size() {
