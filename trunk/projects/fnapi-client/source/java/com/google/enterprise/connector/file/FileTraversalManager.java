@@ -115,6 +115,7 @@ public class FileTraversalManager implements TraversalManager {
 		if (FileConnector.DEBUG && FileConnector.DEBUG_LEVEL >= 1) {
 			logger.info(query.toString());
 		}
+System.out.println(query.toString());
 		return query.toString();
 	}
 
