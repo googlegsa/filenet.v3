@@ -191,12 +191,12 @@ System.out.println(test.getConfigForm(Locale.US).getFormSnippet());
 		map.put("authentication_type", "API");
 
 		String expectedForm = "<tr>\r\n"
-				+ "<td>Username</td>\r\n<td><input type=\"text\" name=\"login\" value=\"P8Admin\"/></td>\r\n</tr>"
+				+ "<td>Username</td>\r\n<td><input type=\"text\" size=\"50\" name=\"login\" value=\"P8Admin\"/></td>\r\n</tr>"
 				+ "\r\n<tr>\r\n<td>Password</td>\r\n<td><input type=\"password\" name=\"password\" value=\"UnDeuxTrois456\"/></td>"
-				+ "\r\n</tr>\r\n<tr>\r\n<td>Object store</td>\r\n<td><input type=\"text\" name=\"object_store\" value=\"GSA_Filenet\"/></td>"
+				+ "\r\n</tr>\r\n<tr>\r\n<td>Object store</td>\r\n<td><input type=\"text\" size=\"50\" name=\"object_store\" value=\"GSA_Filenet\"/></td>"
 				+ "\r\n</tr>\r\n<tr>\r\n<td><input type=\"hidden\" name=\"path_to_WcmApiConfig\" value=\"C:\\_dev\\google\\workspacev3.5\\connector-file\\projects\\webapps\\connector-manager\\WEB-INF\\WcmApiConfig.properties\"/></td>\r\n</tr>\r\n<tr>\r\n"
 				+ "<td><input type=\"hidden\" name=\"object_factory\" value=\"com.google.enterprise.connector.file.filejavawrap.FnObjectFactory\"/></td>"
-				+ "\r\n</tr>\r\n<tr>\r\n<td>Workplace URL</td>\r\n<td><input type=\"text\" name=\"workplace_display_url\" value=\"http://swp-vm-fnet352:8080/Workplace/\"/></td>"
+				+ "\r\n</tr>\r\n<tr>\r\n<td>Workplace URL</td>\r\n<td><input type=\"text\" size=\"50\" name=\"workplace_display_url\" value=\"http://swp-vm-fnet352:8080/Workplace/\"/></td>"
 				+ "\r\n</tr>\r\n<tr>\r\n<td><input type=CHECKBOX name=\"is_public\" CHECKED/>Make public</td>\r\n</tr>\r\n"
 				+ "<tr>\r\n<td><input type=\"hidden\" value=\"false\" name=\"is_public\"/></td>\r\n</tr>\r\n"
 				+ "<tr>\r\n<td><input type=\"hidden\" name=\"additional_where_clause\" value=\"and Document.This INSUBFOLDER '/testdata'\"/></td>\r\n</tr>"
