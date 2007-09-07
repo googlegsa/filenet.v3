@@ -32,6 +32,8 @@ public class FileConnectorTypeTest extends TestCase {
 				+ "<tr>\r\n<td><input type=\"hidden\" value=\"false\" name=\"is_public\"/></td>\r\n</tr>\r\n"
 				+ "<tr>\r\n<td><input type=\"hidden\" name=\"additional_where_clause\" value=\"\"/></td>\r\n</tr>"
 				+ "\r\n<tr>\r\n<td><input type=\"hidden\" name=\"authentication_type\" value=\"\"/></td>\r\n</tr>\r\n";
+
+System.out.println(test.getConfigForm(Locale.US).getFormSnippet());
 		assertEquals(expectedForm, test.getConfigForm(Locale.US)
 				.getFormSnippet());
 	}
@@ -57,7 +59,7 @@ public class FileConnectorTypeTest extends TestCase {
 		map.put("authentication_type", "");
 		FileConnectorType test = new FileConnectorType();
 		test.setConfigKeys(fiels);
-		ConfigureResponse resp = test.validateConfig(map, Locale.US);
+		ConfigureResponse resp = test.validateConfig(map, Locale.US, null);
 		assertNull(resp);
 
 	}
@@ -79,7 +81,7 @@ public class FileConnectorTypeTest extends TestCase {
 		map.put("authentication_type", "API");
 		FileConnectorType test = new FileConnectorType();
 		test.setConfigKeys(fiels);
-		ConfigureResponse resp = test.validateConfig(map, Locale.US);
+		ConfigureResponse resp = test.validateConfig(map, Locale.US, null);
 		assertTrue(resp
 				.getMessage()
 				.startsWith(
@@ -103,7 +105,7 @@ public class FileConnectorTypeTest extends TestCase {
 		map.put("authentication_type", "API");
 		FileConnectorType test = new FileConnectorType();
 		test.setConfigKeys(fiels);
-		ConfigureResponse resp = test.validateConfig(map, Locale.US);
+		ConfigureResponse resp = test.validateConfig(map, Locale.US, null);
 
 		assertTrue(resp
 				.getMessage()
@@ -130,7 +132,7 @@ public class FileConnectorTypeTest extends TestCase {
 		map.put("authentication_type", "API");
 		FileConnectorType test = new FileConnectorType();
 		test.setConfigKeys(fiels);
-		ConfigureResponse resp = test.validateConfig(map, Locale.US);
+		ConfigureResponse resp = test.validateConfig(map, Locale.US, null);
 
 		assertTrue(resp
 				.getMessage()
@@ -157,7 +159,7 @@ public class FileConnectorTypeTest extends TestCase {
 		map.put("authentication_type", "API");
 		FileConnectorType test = new FileConnectorType();
 		test.setConfigKeys(fiels);
-		ConfigureResponse resp = test.validateConfig(map, Locale.US);
+		ConfigureResponse resp = test.validateConfig(map, Locale.US, null);
 		assertTrue(resp
 				.getMessage()
 				.startsWith(

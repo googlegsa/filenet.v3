@@ -26,7 +26,6 @@ public class FileQueryTraversalUtil {
 
 		FileTraversalManager fileQTM = (FileTraversalManager) queryTraversalManager;
 		fileQTM.setBatchHint(batchHint);
-		System.out.println(batchHint);
 
 		DocumentList resultSet = fileQTM.startTraversal();
 		// int nb=resultSet.size();

@@ -75,7 +75,7 @@ public class FileAuthorizationManagerTest extends TestCase {
 			String username) throws RepositoryException {
 		List docids = new LinkedList(expectedResults.keySet());
 
-		List resultSet = authorizationManager.authorizeDocids(docids,
+		List resultSet = (List) authorizationManager.authorizeDocids(docids,
 				new FileAuthenticationIdentity(username, null));
 
 		Boolean expected;
