@@ -1,6 +1,7 @@
 package com.google.enterprise.connector.file;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import java.io.UnsupportedEncodingException;
@@ -29,10 +30,12 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		this.objectStore = objectStore;
 	}
 
-	public List authorizeDocids(List docidList, AuthenticationIdentity username)
+	public Collection authorizeDocids(Collection docids, AuthenticationIdentity username)
 			throws RepositoryException {
 
+		
 		List authorizeDocids = new ArrayList();
+		List docidList = new ArrayList(docids); 
 		IVersionSeries versionSeries = null;
 		AuthorizationResponse authorizationResponse;
 		for (int i = 0; i < docidList.size(); i++) {

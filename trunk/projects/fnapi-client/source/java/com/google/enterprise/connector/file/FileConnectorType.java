@@ -24,6 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import com.google.enterprise.connector.spi.ConfigureResponse;
+import com.google.enterprise.connector.spi.ConnectorFactory;
 import com.google.enterprise.connector.spi.ConnectorType;
 import com.google.enterprise.connector.spi.RepositoryException;
 
@@ -161,7 +162,7 @@ public class FileConnectorType implements ConnectorType {
 		return "";
 	}
 
-	public ConfigureResponse validateConfig(Map configData, Locale language) {
+	public ConfigureResponse validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory) {
 		resource = ResourceBundle.getBundle("FileConnectorResources", language);
 		String form = null;
 		String validation = validateConfigMap(configData);
@@ -181,7 +182,7 @@ public class FileConnectorType implements ConnectorType {
 					p.put(ISPUBLIC, "false");
 				}
 				Resource res = new ClassPathResource(
-						"config/connectorInstanceFilenet.xml");
+						"config/connectorInstance.xml");
 
 				XmlBeanFactory factory = new XmlBeanFactory(res);
 				PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
@@ -344,6 +345,9 @@ public class FileConnectorType implements ConnectorType {
 		buf.append("=\"");
 		buf.append(attrValue);
 		buf.append("\"");
+		if (attrName == TYPE && attrValue == TEXT) {
+			buf.append(" size=\"50\"");
+		}
 	}
 
 	private void appendCheckBox(StringBuffer buf, String key, String label,
@@ -363,4 +367,5 @@ public class FileConnectorType implements ConnectorType {
 		buf.append(TR_END);
 
 	}
+
 }
