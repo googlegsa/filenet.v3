@@ -2,6 +2,10 @@ package com.google.enterprise.connector.file;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.HashSet;
 
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
@@ -40,16 +44,21 @@ public class FileSession implements Session {
 			String additionalWhereClause, HashSet included_meta,
 			HashSet excluded_meta) throws RepositoryException,
 			RepositoryLoginException {
-		try {
 			setFileObjectFactory(iObjectFactory);
 
 			fileSession = fileObjectFactory.getSession("gsa-file-connector",
 					null, userName, userPassword);
 			this.pathToWcmApiConfig = pathToWcmApiConfig;
 
-			fileSession.setConfiguration(new FileInputStream(
-					this.pathToWcmApiConfig));
-
+			try {
+				URL is = this.getClass().getClassLoader().getResource(this.pathToWcmApiConfig);
+				String sFile = URLDecoder.decode(is.getFile(),"UTF-8");
+				FileInputStream fis = new FileInputStream(sFile);
+				fileSession.setConfiguration(fis );
+			} catch (IOException exp) {
+				exp.printStackTrace();
+				System.out.println("Manoj:" + exp);
+			}
 			objectStore = fileObjectFactory.getObjectStore(objectStoreName,
 					fileSession);
 			this.displayUrl = displayUrl + "?objectStoreName="
@@ -62,10 +71,6 @@ public class FileSession implements Session {
 			this.additionalWhereClause = additionalWhereClause;
 			this.included_meta = included_meta;
 			this.excluded_meta = excluded_meta;
-		} catch (FileNotFoundException de) {
-			RepositoryException re = new RepositoryException(de);
-			throw re;
-		}
 	}
 
 	private void setFileObjectFactory(String objectFactory)
