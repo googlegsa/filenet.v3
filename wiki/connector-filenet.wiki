@@ -7,8 +7,8 @@ file connectorInstance.xml located in the folder
 /connector-manager/WEB-INF/connectors/Filenet_P8_3.5.2/`instance_of_connector`/
 
 By changing this file, you can add an additional where clause to 
-specify for example the folder you want the GSA work with, and you can change the 
-required metadata of the document.
+specify for example a specific folder in the Filenet repository, and you can change the 
+included or excluded metadata of the document.
 
 
 == Add an additional where clause ==
@@ -17,7 +17,7 @@ By modifying the value of the property named “additional_where_clause”,
 you can change the where clause of the connector. This clause is a part
 of a query begining by an `AND`. To know how to create a Filenet query, 
 please contact your Filenet administrator.
-There is an example of a simple query to only explore a particular folder:
+There is an example of a simple query to only explore a specific folder:
 
 {{{
 
@@ -30,7 +30,7 @@ You just have to change /`path_to_add` by using the path you wish.
 
 == Change the required metadata ==
 
-To change the required data, there are two lists of metadata the 
+To change the required data, there are two lists of metadata: the 
 included metadata and the excluded metadata.
 
 If you wish to add a metadata in the included list or excluded list 
@@ -44,9 +44,9 @@ for the connector, you have to add a line between the tags <set> and
 }}}
 
 If the metadata is in any list or in included, the metadata is 
-included during a searching.
-If the metadata is in twice lists or in excluded, the metadata is 
-excluded during a searching.
+included during the indexing process.
+If the metadata is in both lists or in excluded, the metadata is 
+excluded during the indexing process.
 
 
 Once the modification of the file is done, you have to restart the 
