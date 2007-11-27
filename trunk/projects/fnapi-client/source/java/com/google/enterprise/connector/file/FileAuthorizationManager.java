@@ -30,12 +30,11 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		this.objectStore = objectStore;
 	}
 
-	public Collection authorizeDocids(Collection docids, AuthenticationIdentity username)
-			throws RepositoryException {
+	public Collection authorizeDocids(Collection docids,
+			AuthenticationIdentity username) throws RepositoryException {
 
-		
 		List authorizeDocids = new ArrayList();
-		List docidList = new ArrayList(docids); 
+		List docidList = new ArrayList(docids);
 		IVersionSeries versionSeries = null;
 		AuthorizationResponse authorizationResponse;
 		for (int i = 0; i < docidList.size(); i++) {

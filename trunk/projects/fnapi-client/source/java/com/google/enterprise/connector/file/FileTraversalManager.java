@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
 import java.util.HashSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -59,7 +58,6 @@ public class FileTraversalManager implements TraversalManager {
 
 	{
 		logger = Logger.getLogger(FileTraversalManager.class.getName());
-		logger.setLevel(Level.ALL);
 	}
 
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
@@ -112,17 +110,16 @@ public class FileTraversalManager implements TraversalManager {
 					+ "' objectasid=\"false\"/>");
 		}
 		query.append("</request>");
-		if (FileConnector.DEBUG && FileConnector.DEBUG_LEVEL >= 1) {
-			logger.info(query.toString());
-		}
+		logger.info(query.toString());
+
 		return query.toString();
 	}
 
 	private String getCheckpointClause(String checkPoint)
 			throws RepositoryException {
-		if (FileConnector.DEBUG && FileConnector.DEBUG_LEVEL >= 1) {
-			logger.info(checkPoint);
-		}
+
+		logger.info(checkPoint);
+
 		JSONObject jo = null;
 
 		try {

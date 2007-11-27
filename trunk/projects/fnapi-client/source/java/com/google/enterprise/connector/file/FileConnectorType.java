@@ -162,18 +162,16 @@ public class FileConnectorType implements ConnectorType {
 		return "";
 	}
 
-	public ConfigureResponse validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory) {
+	public ConfigureResponse validateConfig(Map configData, Locale language,
+			ConnectorFactory connectorFactory) {
 		resource = ResourceBundle.getBundle("FileConnectorResources", language);
 		String form = null;
 		String validation = validateConfigMap(configData);
 		FileSession session;
 		if (validation.equals("")) {
 			try {
-				if (FileConnector.DEBUG && FileConnector.DEBUG_LEVEL == 1) {
-					logger.log(Level.INFO,
-							"test connection to the object store "
-									+ (String) configData.get("object_store"));
-				}
+				logger.log(Level.INFO, "test connection to the object store "
+						+ (String) configData.get("object_store"));
 
 				Properties p = new Properties();
 				p.putAll(configData);
@@ -223,18 +221,16 @@ public class FileConnectorType implements ConnectorType {
 
 	private void testWorkplaceUrl(String workplaceServerUrl)
 			throws RepositoryException {
-		if (FileConnector.DEBUG && FileConnector.DEBUG_LEVEL == 1) {
-			logger.log(Level.INFO, "test connection to the workplace server : "
-					+ workplaceServerUrl);
-		}
+		logger.log(Level.INFO, "test connection to the workplace server : "
+				+ workplaceServerUrl);
+
 		HttpClient client = new HttpClient();
 		GetMethod getMethod = new GetMethod(workplaceServerUrl);
 		try {
 			int status = client.executeMethod(getMethod);
 			if (status != 200) {
-				if (FileConnector.DEBUG && FileConnector.DEBUG_LEVEL == 1) {
-					logger.log(Level.INFO, "status " + status);
-				}
+				logger.log(Level.INFO, "status " + status);
+
 				throw new RepositoryException("status Http request returned a "
 						+ status + " status", new HttpException("status is "
 						+ status));
