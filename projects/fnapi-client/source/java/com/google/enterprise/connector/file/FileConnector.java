@@ -10,10 +10,6 @@ import com.google.enterprise.connector.spi.Session;
 
 public class FileConnector implements Connector {
 
-	public static boolean DEBUG = false;
-
-	public static int DEBUG_LEVEL = 1;
-
 	private String object_factory;
 
 	private String login;

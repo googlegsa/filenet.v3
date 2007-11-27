@@ -137,8 +137,9 @@ public class FileDocument implements Document {
 		IProperty property;
 		for (int i = 0; i < documentProperties.size(); i++) {
 			property = (IProperty) documentProperties.get(i);
-			if (!excluded_meta.contains(property.getName())
-					|| included_meta.contains(property.getName())) {
+			if ((!excluded_meta.contains(property.getName()) || included_meta
+					.contains(property.getName()))
+					&& (property.getValue() != null)) {
 				properties.add(property.getName());
 			}
 		}

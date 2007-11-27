@@ -26,8 +26,6 @@ public class FnDocument implements IDocument {
 	private static Logger logger = null;
 	{
 		logger = Logger.getLogger(FnDocument.class.getName());
-
-		logger.setLevel(Level.ALL);
 	}
 
 	public FnDocument(Document doc) {

@@ -32,4 +32,8 @@ public class FnProperty implements IProperty {
 		return correspondancevalueTypes[property.getType() - 1];
 	}
 
+	public Object getValue() {
+		return this.property.getValue();
+	}
+
 }

@@ -6,4 +6,5 @@ public interface IProperty {
 
 	public String getValueType();
 
+	public Object getValue();
 }
