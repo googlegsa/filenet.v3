@@ -16,7 +16,10 @@ public class MockFnProperty implements IProperty {
 	}
 
 	public String getValueType() {
-		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object getValue() {
 		return null;
 	}
 }
