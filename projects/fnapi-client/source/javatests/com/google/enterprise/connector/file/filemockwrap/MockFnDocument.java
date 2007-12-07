@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Date;
 
-import com.filenet.wcm.api.PropertyNotFoundException;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.IProperties;
@@ -102,11 +101,6 @@ public class MockFnDocument implements IDocument {
 
 	public String getId() {
 		return document.getDocID();
-	}
-
-	public String getPropertyValue(String name)
-			throws PropertyNotFoundException {
-		return null;
 	}
 
 	public byte[] getPropertyBinaryValue(String name)

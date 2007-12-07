@@ -24,7 +24,7 @@ public class FnPropertiesTest extends TestCase {
 				FnConnection.credTag, FnConnection.userName,
 				FnConnection.password);
 		session.setConfiguration(new FileInputStream(
-				FnConnection.pathToWcmApiConfig));
+				FnConnection.completePathToWcmApiConfig));
 		session.verify();
 		IObjectStore objectStore = objectFactory.getObjectStore(
 				FnConnection.objectStoreName, session);

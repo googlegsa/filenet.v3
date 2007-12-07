@@ -3,9 +3,8 @@
 <beans>
 	<bean id="FileConnectorInstance"
 		class="com.google.enterprise.connector.file.FileConnector">
-		
 		<property name="login" value="${login}" />
-		<property name="password" value="${password}" />
+		<property name="password" value="${Password}" />
 		<property name="object_store" value="${object_store}" />
 		<property name="path_to_WcmApiConfig" value="WcmApiConfig.properties" />
 		<property name="workplace_display_url" value="${workplace_display_url}" />

@@ -44,7 +44,7 @@ public class MockFnObjectFactoryTest extends TestCase {
 				FnMockConnection.credTag, FnMockConnection.userName,
 				FnMockConnection.password);
 		session.setConfiguration(new FileInputStream(
-				FnMockConnection.pathToWcmApiConfig));
+				FnMockConnection.completePathToWcmApiConfig));
 		IObjectStore objectStore = objectFactory.getObjectStore(
 				FnMockConnection.objectStoreName, session);
 		session.verify();

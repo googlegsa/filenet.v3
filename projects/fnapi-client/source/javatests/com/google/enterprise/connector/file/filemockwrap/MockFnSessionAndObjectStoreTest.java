@@ -18,7 +18,7 @@ public class MockFnSessionAndObjectStoreTest extends TestCase {
 				.getSession("mock", FnMockConnection.credTag,
 						FnMockConnection.userName, FnMockConnection.password);
 		sessAndObjectStore.setConfiguration(new FileInputStream(
-				FnMockConnection.pathToWcmApiConfig));
+				FnMockConnection.completePathToWcmApiConfig));
 
 		sessAndObjectStore = (MockFnSessionAndObjectStore) objectFactory
 				.getObjectStore(FnMockConnection.objectStoreName,

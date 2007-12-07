@@ -48,6 +48,7 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 	 * Retrieve object by its ID.
 	 */
 	public IDocument getObject(String guidOrPath) {
+
 		MockRepositoryDocument doc = this.repo.getRepo().getStore().getDocByID(
 				guidOrPath);
 		return new MockFnDocument(doc);
@@ -114,7 +115,6 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 	}
 
 	public IGettableObject getObject(int type, String guidOrPath) {
-
 		if (type == 1140) {
 			MockRepositoryDocument doc = this.repo.getRepo().getStore()
 					.getDocByID(guidOrPath);
