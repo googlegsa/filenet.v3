@@ -57,6 +57,7 @@ public class FileDocument implements Document {
 		}
 		document = (IDocument) objectStore.getObject(IBaseObject.TYPE_DOCUMENT,
 				docId);
+
 		this.vsDocId = ((IVersionSeries) objectStore.getObject(
 				IBaseObject.TYPE_VERSIONSERIES, docId)).getId();
 	}

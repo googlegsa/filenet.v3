@@ -84,6 +84,7 @@ public class FileTraversalManager implements TraversalManager {
 		String query = buildQueryString(null);
 		Document resultDoc = this.stringToDom(search.executeXml(query,
 				objectStore));
+		resultDoc.getElementsByTagName("Id");
 		set = new FileDocumentList(resultDoc, objectStore, isPublic,
 				displayUrl, this.included_meta, this.excluded_meta);
 		return set;

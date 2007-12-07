@@ -35,7 +35,7 @@ public class FnObjectFactoryTest extends TestCase {
 		assertNotNull(session);
 		assertTrue(session instanceof FnSession);
 		session.setConfiguration(new FileInputStream(
-				FnConnection.pathToWcmApiConfig));
+				FnConnection.completePathToWcmApiConfig));
 		session.verify();
 
 	}
@@ -51,7 +51,7 @@ public class FnObjectFactoryTest extends TestCase {
 				FnConnection.credTag, FnConnection.userName,
 				FnConnection.password);
 		session.setConfiguration(new FileInputStream(
-				FnConnection.pathToWcmApiConfig));
+				FnConnection.completePathToWcmApiConfig));
 		session.verify();
 		IObjectStore objectStore = objectFactory.getObjectStore(
 				FnConnection.objectStoreName, session);

@@ -17,7 +17,7 @@ public class MockFnSearchTest extends TestCase {
 		String query = "<?xml version=\"1.0\" ?><request><objectstores mergeoption=\"none\"><objectstore id=\"MockRepositoryEventLog7.txt\"/></objectstores><querystatement>SELECT Id, DateLastModified  FROM Document WHERE IsCurrentVersion=true AND DateLastModified >= 1969-01-01 01:00:00.000 ORDER BY Id,DateLastModified;</querystatement><options maxrecords='1' objectasid=\"false\"/></request>";
 		MockFnObjectFactory mockFnObjectFactory = new MockFnObjectFactory();
 		MockFnSessionAndObjectStore sessionAndObjectStore = null;// new
-																	// MockFnSessionAndObjectStore("mark","mark");
+		// MockFnSessionAndObjectStore("mark","mark");
 		sessionAndObjectStore = (MockFnSessionAndObjectStore) mockFnObjectFactory
 				.getSession("mock-filenet", "CLEAR", "mark", "mark");
 

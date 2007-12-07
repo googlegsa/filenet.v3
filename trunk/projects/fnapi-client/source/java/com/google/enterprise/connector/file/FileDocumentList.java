@@ -3,6 +3,7 @@ package com.google.enterprise.connector.file;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +42,9 @@ public class FileDocumentList implements DocumentList {
 
 	private NodeList data = null;
 
+	private static Logger logger = Logger.getLogger(FileDocumentList.class
+			.getName());
+
 	public FileDocumentList(Document document, IObjectStore objectStore,
 			boolean isPublic, String displayUrl, HashSet included_meta,
 			HashSet excluded_meta) {
@@ -50,6 +54,7 @@ public class FileDocumentList implements DocumentList {
 		this.index = 1;
 		this.data = resultDoc.getElementsByTagName("rs:data").item(0)
 				.getChildNodes();
+		logger.info(this.data.getLength() + " new documents find");
 		this.isPublic = isPublic;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;

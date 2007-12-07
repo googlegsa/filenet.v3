@@ -21,7 +21,7 @@ public class FileDocumentTest extends TestCase {
 				FnConnection.credTag, FnConnection.userName,
 				FnConnection.password);
 		session.setConfiguration(new FileInputStream(
-				FnConnection.pathToWcmApiConfig));
+				FnConnection.completePathToWcmApiConfig));
 		session.verify();
 		objectStore = objectFactory.getObjectStore(
 				FnConnection.objectStoreName, session);
@@ -63,7 +63,7 @@ public class FileDocumentTest extends TestCase {
 			counter++;
 		}
 
-		assertEquals(31, counter);
+		assertEquals(25, counter);
 
 	}
 

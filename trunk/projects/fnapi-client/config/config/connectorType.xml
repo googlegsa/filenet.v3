@@ -6,7 +6,7 @@
 		<property name="configKeys">
 			<list>
 				<value>login</value>
-				<value>password</value>
+				<value>Password</value>
 				<value>object_store</value>
 				<value>path_to_WcmApiConfig</value>
 				<value>workplace_display_url</value>

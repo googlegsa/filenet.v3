@@ -46,7 +46,7 @@ public class FileConnectorType implements ConnectorType {
 
 	private static final String OPEN_ELEMENT = "<";
 
-	private static final String PASSWORD = "password";
+	private static final String PASSWORD = "Password";
 
 	private static final String TR_END = "</tr>\r\n";
 
@@ -127,7 +127,13 @@ public class FileConnectorType implements ConnectorType {
 	}
 
 	public ConfigureResponse getConfigForm(Locale language) {
-		resource = ResourceBundle.getBundle("FileConnectorResources", language);
+
+		try {
+			resource = ResourceBundle.getBundle("FileConnectorResources",
+					language);
+		} catch (MissingResourceException e) {
+			resource = ResourceBundle.getBundle("FileConnectorResources");
+		}
 		if (initialConfigForm != null) {
 			return new ConfigureResponse("", initialConfigForm);
 		}
@@ -141,7 +147,12 @@ public class FileConnectorType implements ConnectorType {
 
 	public ConfigureResponse getPopulatedConfigForm(Map configMap,
 			Locale language) {
-		resource = ResourceBundle.getBundle("FileConnectorResources", language);
+		try {
+			resource = ResourceBundle.getBundle("FileConnectorResources",
+					language);
+		} catch (MissingResourceException e) {
+			resource = ResourceBundle.getBundle("FileConnectorResources");
+		}
 		ConfigureResponse response = new ConfigureResponse("",
 				makeConfigForm(configMap));
 		return response;
@@ -164,7 +175,12 @@ public class FileConnectorType implements ConnectorType {
 
 	public ConfigureResponse validateConfig(Map configData, Locale language,
 			ConnectorFactory connectorFactory) {
-		resource = ResourceBundle.getBundle("FileConnectorResources", language);
+		try {
+			resource = ResourceBundle.getBundle("FileConnectorResources",
+					language);
+		} catch (MissingResourceException e) {
+			resource = ResourceBundle.getBundle("FileConnectorResources");
+		}
 		String form = null;
 		String validation = validateConfigMap(configData);
 		FileSession session;
@@ -191,7 +207,8 @@ public class FileConnectorType implements ConnectorType {
 				session = (FileSession) conn.login();
 				// test on the objectStore name
 				session.getTraversalManager();
-
+				logger.log(Level.INFO, "test connection to Workplace server "
+						+ (String) configData.get("workplace_display_url"));
 				testWorkplaceUrl((String) configData
 						.get("workplace_display_url"));
 			} catch (RepositoryException e) {
@@ -204,6 +221,8 @@ public class FileConnectorType implements ConnectorType {
 							+ " " + e.getMessage();
 				}
 				form = makeConfigForm(configData);
+				logger.severe(e.getMessage() + " "
+						+ e.getCause().getClass().getName());
 				return new ConfigureResponse("<p><font color=\"#FF0000\">"
 						+ bundleMessage + "</font></p>",
 						"<p><font color=\"#FF0000\">" + bundleMessage

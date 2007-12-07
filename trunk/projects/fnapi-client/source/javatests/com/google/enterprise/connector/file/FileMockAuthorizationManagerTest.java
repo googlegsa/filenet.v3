@@ -33,8 +33,6 @@ public class FileMockAuthorizationManagerTest extends TestCase {
 		((FileConnector) connector).setPassword(FnMockConnection.password);
 		((FileConnector) connector)
 				.setObject_store(FnMockConnection.objectStoreName);
-		// ((FileConnector)
-		// connector).setCredential_tag(FnMockConnection.credTag);
 		((FileConnector) connector)
 				.setWorkplace_display_url(FnMockConnection.displayUrl);
 		((FileConnector) connector)

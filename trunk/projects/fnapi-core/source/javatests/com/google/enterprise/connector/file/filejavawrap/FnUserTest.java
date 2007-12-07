@@ -20,7 +20,7 @@ public class FnUserTest extends TestCase {
 				FnConnection.credTag, FnConnection.userLambda1,
 				FnConnection.userLambdaPassword1);
 		sess.setConfiguration(new FileInputStream(
-				FnConnection.pathToWcmApiConfig));
+				FnConnection.completePathToWcmApiConfig));
 		FnUser user = new FnUser(sess.verify());
 		assertEquals(FnConnection.userLambda1, user.getName());
 	}

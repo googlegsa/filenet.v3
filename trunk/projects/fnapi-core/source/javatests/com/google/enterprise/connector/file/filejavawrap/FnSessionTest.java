@@ -26,7 +26,7 @@ public class FnSessionTest extends TestCase {
 				FnConnection.credTag, FnConnection.userLambda1,
 				FnConnection.userLambdaPassword1);
 		session.setConfiguration(new FileInputStream(
-				FnConnection.pathToWcmApiConfig));
+				FnConnection.completePathToWcmApiConfig));
 		IUser user = session.verify();
 		assertNotNull(user);
 		assertEquals(FnConnection.userLambda1, user.getName());

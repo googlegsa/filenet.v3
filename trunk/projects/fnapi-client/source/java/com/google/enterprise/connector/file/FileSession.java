@@ -1,10 +1,10 @@
 package com.google.enterprise.connector.file;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashSet;
+import java.util.logging.Logger;
 
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
@@ -36,6 +36,12 @@ public class FileSession implements Session {
 
 	private HashSet excluded_meta;
 
+	private static Logger logger;
+
+	static {
+		logger = Logger.getLogger(FileSession.class.getName());
+	}
+
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String objectStoreName,
 			String pathToWcmApiConfig, String displayUrl, boolean isPublic,
@@ -47,15 +53,21 @@ public class FileSession implements Session {
 		fileSession = fileObjectFactory.getSession("gsa-file-connector", null,
 				userName, userPassword);
 		this.pathToWcmApiConfig = pathToWcmApiConfig;
-
 		try {
+
 			URL is = this.getClass().getClassLoader().getResource(
 					this.pathToWcmApiConfig);
+
+			if (is == null) {
+				logger.info("null");
+			}
 			String sFile = URLDecoder.decode(is.getFile(), "UTF-8");
 			FileInputStream fis = new FileInputStream(sFile);
+
 			fileSession.setConfiguration(fis);
-		} catch (IOException exp) {
+		} catch (Exception exp) {
 			exp.printStackTrace();
+			throw new RepositoryLoginException(exp);
 		}
 		objectStore = fileObjectFactory.getObjectStore(objectStoreName,
 				fileSession);
