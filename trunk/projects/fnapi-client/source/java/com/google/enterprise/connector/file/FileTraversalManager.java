@@ -83,8 +83,8 @@ public class FileTraversalManager implements TraversalManager {
 		DocumentList set = null;
 		ISearch search = fileObjectFactory.getSearch(fileSession);
 		String query = buildQueryString(null);
-		FileConnectorType.logger.log(Level.INFO,"query: "+query);
-		FileConnectorType.logger.log(Level.INFO,"objectStore: "+this.objectStore);
+		logger.log(Level.INFO,"query: "+query);
+		logger.log(Level.INFO,"objectStore: "+this.objectStore);
 		Document resultDoc = this.stringToDom(search.executeXml(query,
 				objectStore));
 		resultDoc.getElementsByTagName("Id");
@@ -144,8 +144,8 @@ public class FileTraversalManager implements TraversalManager {
 		DocumentList resultSet = null;
 		String queryString = buildQueryString(checkPoint);
 		ISearch search = this.fileObjectFactory.getSearch(this.fileSession);
-		FileConnectorType.logger.log(Level.INFO,"query: "+queryString);
-		FileConnectorType.logger.log(Level.INFO,"objectStore: "+this.objectStore);
+		logger.log(Level.INFO,"query: "+queryString);
+		logger.log(Level.INFO,"objectStore: "+this.objectStore);
 		Document resultDoc = this.stringToDom(search.executeXml(queryString,
 				this.objectStore));
 		resultSet = new FileDocumentList(resultDoc, objectStore, this.isPublic,
