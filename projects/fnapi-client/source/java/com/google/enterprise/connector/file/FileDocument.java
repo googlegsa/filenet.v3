@@ -112,18 +112,18 @@ public class FileDocument implements Document {
 			prop = property.getValueType();
 		}
 
-		if (prop == "Binary") {
+		if (prop.equals("Binary")) {
 			set.add(new BinaryValue(document.getPropertyBinaryValue(name)));
-		} else if (prop == "Boolean") {
+		} else if (prop.equals("Boolean")) {
 			set.add(BooleanValue.makeBooleanValue(document
 					.getPropertyBooleanValue(name)));
-		} else if (prop == "Date") {
+		} else if (prop.equals("Date")) {
 			set.add(new DateValue(getDate(name, document)));
-		} else if (prop == "Double") {
+		} else if (prop.equals("Double")) {
 			set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
-		} else if (prop == "String") {
+		} else if (prop.equals("String")) {
 			set.add(new StringValue(document.getPropertyStringValue(name)));
-		} else if (prop == "Long") {
+		} else if (prop.equals("Long")) {
 			set.add(new LongValue(document.getPropertyLongValue(name)));
 		}
 		FileDocumentProperty fileDocumentProperty = new FileDocumentProperty(
