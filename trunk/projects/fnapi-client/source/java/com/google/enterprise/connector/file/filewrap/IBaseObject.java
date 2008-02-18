@@ -1,5 +1,7 @@
 package com.google.enterprise.connector.file.filewrap;
 
+import com.google.enterprise.connector.spi.RepositoryException;
+
 public interface IBaseObject {
 
 	public static final int TYPE_PROPERTYDESCRIPTION = 24;
@@ -146,6 +148,6 @@ public interface IBaseObject {
 
 	public static final int EXPORT_FULL = 128;
 
-	public String getId();
+	public String getId() throws RepositoryException;
 
 }
