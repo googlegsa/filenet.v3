@@ -9,7 +9,7 @@ public interface IDocument extends IBaseObject, IGettableObject,
 
 	public InputStream getContent() throws RepositoryException;
 
-	public IVersionSeries getVersionSeries();
+	public IVersionSeries getVersionSeries() throws RepositoryException;
 
 	public IProperties getProperties(String[] names) throws RepositoryException;
 

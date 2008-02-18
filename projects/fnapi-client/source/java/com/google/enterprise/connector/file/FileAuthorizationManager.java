@@ -24,16 +24,17 @@ public class FileAuthorizationManager implements AuthorizationManager {
 	IObjectStore objectStore;
 
 	String pathToWcmApiConfig;
-	
+
 	ISession session;
 
 	private static Logger logger = null;
 	static {
 		logger = Logger.getLogger(FileAuthorizationManager.class.getName());
 	}
-	
+
 	public FileAuthorizationManager(IObjectFactory fileObjectFactory,
-			String pathToWcmApiConfig, IObjectStore objectStore,ISession session) {
+			String pathToWcmApiConfig, IObjectStore objectStore,
+			ISession session) {
 		objectFactory = fileObjectFactory;
 		this.pathToWcmApiConfig = pathToWcmApiConfig;
 		this.objectStore = objectStore;
@@ -48,7 +49,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		IVersionSeries versionSeries = null;
 		AuthorizationResponse authorizationResponse;
 		for (int i = 0; i < docidList.size(); i++) {
-			logger.fine("check authorization for doc "+docidList.get(i));
+			logger.fine("check authorization for doc " + docidList.get(i));
 			try {
 				versionSeries = (IVersionSeries) objectStore.getObject(
 						IBaseObject.TYPE_VERSIONSERIES, URLDecoder.decode(
@@ -57,14 +58,16 @@ public class FileAuthorizationManager implements AuthorizationManager {
 				throw new RepositoryException(e);
 
 			}
-			
-			if (versionSeries.getReleasedVersion().getPermissions(session.getSession()).authorize(
-					username.getUsername())) {
-				logger.fine("user: "+username.getUsername()+ " authorized for doc "+docidList.get(i));
+
+			if (versionSeries.getReleasedVersion().getPermissions(
+					session.getSession()).authorize(username.getUsername())) {
+				logger.fine("user: " + username.getUsername()
+						+ " authorized for doc " + docidList.get(i));
 				authorizationResponse = new AuthorizationResponse(true,
 						(String) docidList.get(i));
 			} else {
-				logger.fine("user: "+username.getUsername()+ " NOT authorized for doc "+docidList.get(i));
+				logger.fine("user: " + username.getUsername()
+						+ " NOT authorized for doc " + docidList.get(i));
 				authorizationResponse = new AuthorizationResponse(false,
 						(String) docidList.get(i));
 

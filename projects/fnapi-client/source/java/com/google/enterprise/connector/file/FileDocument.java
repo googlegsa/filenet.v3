@@ -6,13 +6,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import com.google.enterprise.connector.file.filejavawrap.FnDocument;
 import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.file.filewrap.IProperty;
-import com.google.enterprise.connector.file.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -41,7 +39,7 @@ public class FileDocument implements Document {
 	private HashSet excluded_meta = null;
 
 	private String vsDocId;
-	
+
 	private static Logger logger = null;
 	{
 		logger = Logger.getLogger(FileDocument.class.getName());
@@ -58,17 +56,17 @@ public class FileDocument implements Document {
 		this.excluded_meta = excluded_meta;
 	}
 
-	private void fetch() {
+	private void fetch() throws RepositoryException {
 		if (document != null) {
 			return;
 		}
 		document = (IDocument) objectStore.getObject(IBaseObject.TYPE_DOCUMENT,
 				docId);
-		
-		logger.fine("fetch doc "+docId);
+
+		logger.fine("fetch doc " + docId);
 
 		this.vsDocId = document.getVersionSeries().getId();
-		logger.fine("fetch doc VSID: "+this.vsDocId);
+		logger.fine("fetch doc VSID: " + this.vsDocId);
 	}
 
 	private Calendar getDate(String type, IDocument document)

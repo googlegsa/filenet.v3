@@ -83,8 +83,8 @@ public class FileTraversalManager implements TraversalManager {
 		DocumentList set = null;
 		ISearch search = fileObjectFactory.getSearch(fileSession);
 		String query = buildQueryString(null);
-		logger.log(Level.INFO,"query: "+query);
-		logger.log(Level.INFO,"objectStore: "+this.objectStore);
+		logger.log(Level.INFO, "query: " + query);
+		logger.log(Level.INFO, "objectStore: " + this.objectStore);
 		Document resultDoc = this.stringToDom(search.executeXml(query,
 				objectStore));
 		resultDoc.getElementsByTagName("Id");
@@ -144,8 +144,8 @@ public class FileTraversalManager implements TraversalManager {
 		DocumentList resultSet = null;
 		String queryString = buildQueryString(checkPoint);
 		ISearch search = this.fileObjectFactory.getSearch(this.fileSession);
-		logger.log(Level.INFO,"query: "+queryString);
-		logger.log(Level.INFO,"objectStore: "+this.objectStore);
+		logger.log(Level.INFO, "query: " + queryString);
+		logger.log(Level.INFO, "objectStore: " + this.objectStore);
 		Document resultDoc = this.stringToDom(search.executeXml(queryString,
 				this.objectStore));
 		resultSet = new FileDocumentList(resultDoc, objectStore, this.isPublic,
@@ -188,7 +188,7 @@ public class FileTraversalManager implements TraversalManager {
 
 		Object[] arguments = { c, uuid, c };
 		String statement = MessageFormat.format(whereClause, arguments);
-		logger.info("makeCheckpointQueryString ID: "+uuid);
+		logger.info("makeCheckpointQueryString ID: " + uuid);
 		return statement;
 	}
 
