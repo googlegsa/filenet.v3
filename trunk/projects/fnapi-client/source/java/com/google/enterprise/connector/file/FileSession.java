@@ -59,7 +59,9 @@ public class FileSession implements Session {
 					this.pathToWcmApiConfig);
 
 			if (is == null) {
-				logger.info("null");
+				URL f = this.getClass().getClassLoader().getResource("");
+				logger.info(f.toString());
+				logger.info(this.pathToWcmApiConfig+" is not valid.");
 			}
 			String sFile = URLDecoder.decode(is.getFile(), "UTF-8");
 			FileInputStream fis = new FileInputStream(sFile);
@@ -76,7 +78,8 @@ public class FileSession implements Session {
 
 		this.isPublic = isPublic;
 		fileSession.verify();
-
+		
+		
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
@@ -117,7 +120,7 @@ public class FileSession implements Session {
 			throws RepositoryException {
 
 		FileAuthorizationManager fileAzm = new FileAuthorizationManager(
-				fileObjectFactory, pathToWcmApiConfig, objectStore);
+				fileObjectFactory, pathToWcmApiConfig, objectStore, fileSession);
 		return fileAzm;
 	}
 

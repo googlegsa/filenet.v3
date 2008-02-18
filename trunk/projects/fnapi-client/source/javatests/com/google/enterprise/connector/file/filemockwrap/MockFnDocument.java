@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Date;
 
+import com.filenet.wcm.api.Session;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.IProperties;
@@ -110,6 +111,11 @@ public class MockFnDocument implements IDocument {
 	}
 
 	public IProperties getProperties(String[] names) throws RepositoryException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public IPermissions getPermissions(Session s) {
 		// TODO Auto-generated method stub
 		return null;
 	}

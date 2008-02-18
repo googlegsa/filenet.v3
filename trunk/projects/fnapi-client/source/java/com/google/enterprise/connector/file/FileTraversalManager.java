@@ -41,7 +41,7 @@ public class FileTraversalManager implements TraversalManager {
 	// TODO: add possibility for an administrator to change it
 	private String tableName = "Document";
 
-	private String whereClause = " AND ((DateLastModified={0} AND ({1}>id)) OR DateLastModified>{2})";
+	private String whereClause = " AND ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified>{2} AND ({1}&lt;>id)))";
 
 	private int batchint;
 
@@ -188,6 +188,7 @@ public class FileTraversalManager implements TraversalManager {
 
 		Object[] arguments = { c, uuid, c };
 		String statement = MessageFormat.format(whereClause, arguments);
+		logger.info("makeCheckpointQueryString ID: "+uuid);
 		return statement;
 	}
 

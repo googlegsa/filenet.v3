@@ -11,8 +11,8 @@ public class MockFnPermissionsTest extends TestCase {
 	public void testAsMask() {
 		String[] users = { "mark", "joe" };
 		MockFnPermissions perms = new MockFnPermissions(users);
-		assertEquals(1, perms.asMask("mark"));
-		assertEquals(0, perms.asMask("clara"));
+		assertEquals(true, perms.authorize("mark"));
+		assertEquals(false, perms.authorize("clara"));
 
 	}
 

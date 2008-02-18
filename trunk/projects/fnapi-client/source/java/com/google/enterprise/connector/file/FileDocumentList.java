@@ -54,7 +54,8 @@ public class FileDocumentList implements DocumentList {
 		this.index = 1;
 		this.data = resultDoc.getElementsByTagName("rs:data").item(0)
 				.getChildNodes();
-		logger.info(this.data.getLength() + " new documents find");
+		logger.info(resultDoc.getElementsByTagName("z:row").getLength() 
+				+ " new documents find");
 		this.isPublic = isPublic;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
@@ -94,7 +95,7 @@ public class FileDocumentList implements DocumentList {
 		} catch (RepositoryException e1) {
 			throw new RepositoryException("Unexpected JSON problem", e1);
 		}
-		date.setTimeInMillis(date.getTimeInMillis() - 7200000);
+		date.setTimeInMillis(date.getTimeInMillis()); //- 7200000
 		FileDateValue nativeFormatDateCalendar = new FileDateValue(date);
 		String nativeFormatDate = nativeFormatDateCalendar.toIso8601();
 		String dateString = nativeFormatDate;
@@ -108,6 +109,7 @@ public class FileDocumentList implements DocumentList {
 		} catch (JSONException e) {
 			throw new RepositoryException("Unexpected JSON problem", e);
 		}
+		logger.info("checkpoint: "+result);
 		return result;
 	}
 

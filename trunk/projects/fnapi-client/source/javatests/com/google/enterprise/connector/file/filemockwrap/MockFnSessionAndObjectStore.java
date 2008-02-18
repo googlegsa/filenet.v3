@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import javax.jcr.Credentials;
 import javax.jcr.SimpleCredentials;
 
+import com.filenet.wcm.api.Session;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IGettableObject;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
@@ -124,6 +125,11 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 					.getDocByID(guidOrPath);
 			return new MockFnDocument(doc);
 		}
+		return null;
+	}
+
+	public Session getSession() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
