@@ -37,9 +37,9 @@ public class FnPermissionsTest extends TestCase {
 		IDocument doc = (IDocument) objectStore.getObject(
 				IBaseObject.TYPE_DOCUMENT, FnConnection.docId);
 
-		IPermissions permissions = doc.getPermissions();
+		IPermissions permissions = doc.getPermissions(session.getSession());
 		assertNotNull(permissions);
-		assertEquals(1, permissions.asMask(FnConnection.userLambda1));
+		assertEquals(true, permissions.authorize(FnConnection.userLambda1));
 
 	}
 

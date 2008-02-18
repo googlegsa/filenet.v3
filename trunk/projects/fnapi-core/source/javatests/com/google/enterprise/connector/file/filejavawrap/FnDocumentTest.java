@@ -19,11 +19,13 @@ public class FnDocumentTest extends TestCase {
 	IDocument doc = null;
 
 	IObjectStore objectStore = null;
+	
+	ISession session = null;
 
 	protected void setUp() throws Exception {
 
 		IObjectFactory objectFactory = new FnObjectFactory();
-		ISession session = objectFactory.getSession(FnConnection.appId,
+		session = objectFactory.getSession(FnConnection.appId,
 				FnConnection.credTag, FnConnection.userName,
 				FnConnection.password);
 		session.setConfiguration(new FileInputStream(
@@ -75,11 +77,11 @@ public class FnDocumentTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPermissions()'
 	 */
 	public void testGetPermissions() {
-		IPermissions perms = doc.getPermissions();
+		IPermissions perms = doc.getPermissions(session.getSession());
 
-		assertEquals(1, perms.asMask(FnConnection.userLambda1));
-		assertEquals(1, perms.asMask(FnConnection.userLambda2));
-		assertEquals(1, perms.asMask(FnConnection.userLambda3));
+		assertEquals(true, perms.authorize(FnConnection.userLambda1));
+		assertEquals(true, perms.authorize(FnConnection.userLambda2));
+		assertEquals(true, perms.authorize(FnConnection.userLambda3));
 
 	}
 

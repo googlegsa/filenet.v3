@@ -8,9 +8,13 @@ import java.util.logging.Logger;
 
 import com.filenet.wcm.api.BaseRuntimeException;
 import com.filenet.wcm.api.Document;
+import com.filenet.wcm.api.EntireNetwork;
+import com.filenet.wcm.api.ObjectFactory;
+import com.filenet.wcm.api.Permissions;
 import com.filenet.wcm.api.Properties;
 import com.filenet.wcm.api.Property;
 import com.filenet.wcm.api.PropertyNotFoundException;
+import com.filenet.wcm.api.Session;
 import com.filenet.wcm.api.Value;
 import com.filenet.wcm.api.Values;
 import com.google.enterprise.connector.file.filewrap.IDocument;
@@ -108,8 +112,18 @@ public class FnDocument implements IDocument {
 
 	}
 
-	public IPermissions getPermissions() {
-		return new FnPermissions(doc.getPermissions());
+	public IPermissions getPermissions(Session session) {
+		EntireNetwork en = ObjectFactory.getEntireNetwork(session);
+		logger.info("getPermissions1");
+		try{
+		logger.info("getPermissions11:"+this.doc.getId());
+		}
+		catch (Exception e){
+			e.printStackTrace();
+		}
+		Permissions perms = this.doc.getPermissions();
+		logger.info("getPermissions2:"+perms.toString());
+		return new FnPermissions(en,perms);
 	}
 
 	public long getPropertyLongValue(String name) throws RepositoryException {

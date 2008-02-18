@@ -8,7 +8,7 @@ public class FnConnection {
 
 	public static String password = "UnDeuxTrois456";
 
-	public static String objectStoreName = "GSA_Filenet";
+	public static String objectStoreName = "Test";//"GSA_Filenet";
 
 	public static String appId = "file-connector";
 
@@ -20,7 +20,7 @@ public class FnConnection {
 
 	public static String pathToWcmApiConfig = "WcmApiConfig.properties";
 
-	public static String completePathToWcmApiConfig = "C:\\_dev\\google\\connector\\connector-file-complete\\trunk\\projects\\fnapi-client\\config\\WcmApiConfig.properties";
+	public static String completePathToWcmApiConfig = "C:\\WcmApiConfig.properties";
 
 	public static String wrongObjectStoreName = "GSA_Filen";
 
