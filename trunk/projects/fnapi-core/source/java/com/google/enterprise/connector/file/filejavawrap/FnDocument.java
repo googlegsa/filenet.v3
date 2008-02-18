@@ -112,15 +112,15 @@ public class FnDocument implements IDocument {
 
 	}
 
-	public IPermissions getPermissions(Session session) {
-		EntireNetwork en = ObjectFactory.getEntireNetwork(session);
+	public IPermissions getPermissions(Session session) throws RepositoryException {
 		try {
-			logger.info("getPermissions11:" + this.doc.getId());
+			EntireNetwork en = ObjectFactory.getEntireNetwork(session);
+			Permissions perms = this.doc.getPermissions();
+			return new FnPermissions(en, perms);
 		} catch (Exception e) {
-			e.printStackTrace();
+			RepositoryException re = new RepositoryException(e);
+			throw re;
 		}
-		Permissions perms = this.doc.getPermissions();
-		return new FnPermissions(en, perms);
 	}
 
 	public long getPropertyLongValue(String name) throws RepositoryException {
