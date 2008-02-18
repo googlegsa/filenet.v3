@@ -3,6 +3,7 @@ package com.google.enterprise.connector.file;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -10,6 +11,7 @@ import java.net.URLDecoder;
 import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
+import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.file.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -22,12 +24,20 @@ public class FileAuthorizationManager implements AuthorizationManager {
 	IObjectStore objectStore;
 
 	String pathToWcmApiConfig;
+	
+	ISession session;
 
+	private static Logger logger = null;
+	static {
+		logger = Logger.getLogger(FileAuthorizationManager.class.getName());
+	}
+	
 	public FileAuthorizationManager(IObjectFactory fileObjectFactory,
-			String pathToWcmApiConfig, IObjectStore objectStore) {
+			String pathToWcmApiConfig, IObjectStore objectStore,ISession session) {
 		objectFactory = fileObjectFactory;
 		this.pathToWcmApiConfig = pathToWcmApiConfig;
 		this.objectStore = objectStore;
+		this.session = session;
 	}
 
 	public Collection authorizeDocids(Collection docids,
@@ -38,6 +48,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		IVersionSeries versionSeries = null;
 		AuthorizationResponse authorizationResponse;
 		for (int i = 0; i < docidList.size(); i++) {
+			logger.fine("check authorization for doc "+docidList.get(i));
 			try {
 				versionSeries = (IVersionSeries) objectStore.getObject(
 						IBaseObject.TYPE_VERSIONSERIES, URLDecoder.decode(
@@ -46,11 +57,14 @@ public class FileAuthorizationManager implements AuthorizationManager {
 				throw new RepositoryException(e);
 
 			}
-			if (versionSeries.getReleasedVersion().getPermissions().asMask(
-					username.getUsername()) == 1) {
+			
+			if (versionSeries.getReleasedVersion().getPermissions(session.getSession()).authorize(
+					username.getUsername())) {
+				logger.fine("user: "+username.getUsername()+ " authorized for doc "+docidList.get(i));
 				authorizationResponse = new AuthorizationResponse(true,
 						(String) docidList.get(i));
 			} else {
+				logger.fine("user: "+username.getUsername()+ " NOT authorized for doc "+docidList.get(i));
 				authorizationResponse = new AuthorizationResponse(false,
 						(String) docidList.get(i));
 

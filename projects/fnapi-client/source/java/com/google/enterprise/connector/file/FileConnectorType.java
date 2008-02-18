@@ -223,6 +223,7 @@ public class FileConnectorType implements ConnectorType {
 				form = makeConfigForm(configData);
 				logger.severe(e.getMessage() + " "
 						+ e.getCause().getClass().getName());
+				e.printStackTrace();
 				return new ConfigureResponse("<p><font color=\"#FF0000\">"
 						+ bundleMessage + "</font></p>",
 						"<p><font color=\"#FF0000\">" + bundleMessage

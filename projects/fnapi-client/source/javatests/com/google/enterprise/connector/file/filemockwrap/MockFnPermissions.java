@@ -14,13 +14,13 @@ public class MockFnPermissions implements IPermissions {
 	/**
 	 * TOASK Deal with public property too?
 	 */
-	public int asMask(String username) {
+	public boolean authorize(String username) {
 		for (int i = 0; i < users.length; i++) {
 			if (this.users[i].equals(username)) {
-				return 1;
+				return true;
 			}
 		}
-		return 0;
+		return false;
 	}
 
 }

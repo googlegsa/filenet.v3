@@ -4,7 +4,9 @@ import java.util.Date;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import com.google.enterprise.connector.file.filejavawrap.FnDocument;
 import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
@@ -39,6 +41,11 @@ public class FileDocument implements Document {
 	private HashSet excluded_meta = null;
 
 	private String vsDocId;
+	
+	private static Logger logger = null;
+	{
+		logger = Logger.getLogger(FileDocument.class.getName());
+	}
 
 	public FileDocument(String docId, IObjectStore objectStore,
 			boolean isPublic, String displayUrl, HashSet included_meta,
@@ -57,9 +64,11 @@ public class FileDocument implements Document {
 		}
 		document = (IDocument) objectStore.getObject(IBaseObject.TYPE_DOCUMENT,
 				docId);
+		
+		logger.fine("fetch doc "+docId);
 
-		this.vsDocId = ((IVersionSeries) objectStore.getObject(
-				IBaseObject.TYPE_VERSIONSERIES, docId)).getId();
+		this.vsDocId = document.getVersionSeries().getId();
+		logger.fine("fetch doc VSID: "+this.vsDocId);
 	}
 
 	private Calendar getDate(String type, IDocument document)

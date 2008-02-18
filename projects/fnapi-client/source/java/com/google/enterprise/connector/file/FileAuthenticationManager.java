@@ -41,7 +41,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
 			URL is = this.getClass().getClassLoader().getResource(
 					this.wcmConfigFilePath);
 			if (is == null) {
-				logger.info("null");
+				logger.warning("getResource(this.wcmConfigFilePath) -> null");
 			}
 			String sFile = URLDecoder.decode(is.getFile(), "UTF-8");
 			FileInputStream fis = new FileInputStream(sFile);
