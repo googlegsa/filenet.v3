@@ -22,8 +22,8 @@ public class FnObjectStore implements IObjectStore {
 
 		GettableObject obj = objectStore.getObject(type, guidOrPath);
 		if (type == BaseObject.TYPE_VERSIONSERIES) {
-			VersionSeries vs = (VersionSeries) objectStore.getObject(
-					type, guidOrPath);
+			VersionSeries vs = (VersionSeries) objectStore.getObject(type,
+					guidOrPath);
 			vs.refresh();
 			return new FnVersionSeries(vs);
 		}
