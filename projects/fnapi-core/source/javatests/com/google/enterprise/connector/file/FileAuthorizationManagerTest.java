@@ -22,7 +22,7 @@ public class FileAuthorizationManagerTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.FileAuthorizationManager.authorizeDocids(List,
 	 * String)'
 	 */
-	public void testAuthorizeDocids() throws RepositoryException {
+	/*public void testAuthorizeDocids() throws RepositoryException {
 
 		FileAuthorizationManager authorizationManager;
 		authorizationManager = null;
@@ -41,6 +41,18 @@ public class FileAuthorizationManagerTest extends TestCase {
 		Session sess = (FileSession) connector.login();
 		authorizationManager = (FileAuthorizationManager) sess
 				.getAuthorizationManager();
+		
+		
+		
+		{
+			String username = "p8Admin";
+
+			Map expectedResults = new HashMap();
+			expectedResults.put("%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
+					Boolean.TRUE);
+
+			testAuthorization(authorizationManager, expectedResults, username);
+		}
 		{
 			String username = "p8Admin";
 
@@ -68,7 +80,7 @@ public class FileAuthorizationManagerTest extends TestCase {
 			testAuthorization(authorizationManager, expectedResults, username);
 		}
 
-	}
+	}*/
 
 	private void testAuthorization(
 			FileAuthorizationManager authorizationManager, Map expectedResults,
@@ -111,11 +123,33 @@ public class FileAuthorizationManagerTest extends TestCase {
 			authorizationManager = (FileAuthorizationManager) sess
 					.getAuthorizationManager();
 			{
-				String username = "P8TestUser";
+				String username = "jbombonati";
 
 				Map expectedResults = new HashMap();
 				expectedResults.put(
-						"%7BFBD09261-20F4-4B28-B274-D9A560898D17%7D",
+						"%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
+						Boolean.FALSE);
+
+				testAuthorization(authorizationManager, expectedResults,
+						username);
+			}
+			{
+				String username = "jpasquon";
+
+				Map expectedResults = new HashMap();
+				expectedResults.put(
+						"%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
+						Boolean.TRUE);
+
+				testAuthorization(authorizationManager, expectedResults,
+						username);
+			}
+			{
+				String username = "scauchy";
+
+				Map expectedResults = new HashMap();
+				expectedResults.put(
+						"%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
 						Boolean.TRUE);
 
 				testAuthorization(authorizationManager, expectedResults,

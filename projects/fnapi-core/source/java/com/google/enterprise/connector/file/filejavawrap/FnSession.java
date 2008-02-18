@@ -15,7 +15,6 @@ public class FnSession implements ISession {
 
 	public FnSession(Session sess) {
 		session = sess;
-
 	}
 
 	public IUser verify() throws RepositoryException {
@@ -35,7 +34,6 @@ public class FnSession implements ISession {
 	}
 
 	public Session getSession() {
-
 		return session;
 	}
 
