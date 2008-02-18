@@ -76,7 +76,7 @@ public class FnDocumentTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPermissions()'
 	 */
-	public void testGetPermissions() {
+	public void testGetPermissions() throws RepositoryException {
 		IPermissions perms = doc.getPermissions(session.getSession());
 
 		assertEquals(true, perms.authorize(FnConnection.userLambda1));

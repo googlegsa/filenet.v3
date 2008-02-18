@@ -114,16 +114,13 @@ public class FnDocument implements IDocument {
 
 	public IPermissions getPermissions(Session session) {
 		EntireNetwork en = ObjectFactory.getEntireNetwork(session);
-		logger.info("getPermissions1");
-		try{
-		logger.info("getPermissions11:"+this.doc.getId());
-		}
-		catch (Exception e){
+		try {
+			logger.info("getPermissions11:" + this.doc.getId());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		Permissions perms = this.doc.getPermissions();
-		logger.info("getPermissions2:"+perms.toString());
-		return new FnPermissions(en,perms);
+		return new FnPermissions(en, perms);
 	}
 
 	public long getPropertyLongValue(String name) throws RepositoryException {
@@ -202,12 +199,29 @@ public class FnDocument implements IDocument {
 		}
 	}
 
-	public IVersionSeries getVersionSeries() {
-		return new FnVersionSeries(doc.getVersionSeries());
+	public IVersionSeries getVersionSeries() throws RepositoryException {
+		try {
+			return new FnVersionSeries(doc.getVersionSeries());
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,
+					"error while trying to get the properties of the file "
+							+ this.doc.getId() + " " + e.getMessage());
+			RepositoryException re = new RepositoryException(e);
+			throw re;
+		}
 	}
 
-	public String getId() {
-		return doc.getId();
+	public String getId() throws RepositoryException {
+		try {
+			return doc.getId();
+		} catch (Exception e) {
+			logger.log(Level.SEVERE,
+					"error while trying to get the properties of the file "
+							+ this.doc.getId() + " " + e.getMessage());
+			RepositoryException re = new RepositoryException(e);
+			throw re;
+		}
+
 	}
 
 	public String getPropertyValue(String name)

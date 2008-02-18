@@ -17,53 +17,55 @@ import com.filenet.wcm.api.Users;
 public class FnPermissions implements IPermissions {
 
 	EntireNetwork en;
-	
+
 	Permissions perms;
 
 	public static int LEVEL_VIEW = Permission.LEVEL_VIEW;
-	
+
 	private static Logger logger = null;
 	static {
 		logger = Logger.getLogger(FnPermissions.class.getName());
 	}
-	
+
 	public FnPermissions(EntireNetwork en, Permissions perms) {
-		logger.info("FnPermissions:"+perms.toString());
+		logger.finest("FnPermissions:" + perms.toString());
 		this.en = en;
 		this.perms = perms;
 	}
-	
+
 	public boolean authorize(String username) {
 		boolean found;
 		Iterator iter = perms.iterator();
 		String granteeName;
-		while(iter.hasNext()){
-			Permission perm = (Permission)iter.next();
-			if ((perm.getAccess() & LEVEL_VIEW) == LEVEL_VIEW){
+		while (iter.hasNext()) {
+			Permission perm = (Permission) iter.next();
+			if ((perm.getAccess() & LEVEL_VIEW) == LEVEL_VIEW) {
 				granteeName = perm.getGranteeName();
-				
-				if (perm.getGranteeType() == BaseObject.TYPE_USER){
-					if (granteeName.equalsIgnoreCase(username) 
-							|| granteeName.split("@")[0].equalsIgnoreCase(username)) 
+
+				if (perm.getGranteeType() == BaseObject.TYPE_USER) {
+					if (granteeName.equalsIgnoreCase(username)
+							|| granteeName.split("@")[0]
+									.equalsIgnoreCase(username))
 						return true;
-				}
-				else if(perm.getGranteeType() == BaseObject.TYPE_GROUP){ //GROUP
-					Groups groups = en.getUserRealm().findGroups(perm.getGranteeName().split("@")[0],
+				} else if (perm.getGranteeType() == BaseObject.TYPE_GROUP) { // GROUP
+					Groups groups = en.getUserRealm().findGroups(
+							perm.getGranteeName().split("@")[0],
 							Realm.PRINCIPAL_SEARCH_TYPE_EXACT,
 							Realm.PRINCIPAL_SEARCH_ATTR_DISPLAY_NAME,
-							Realm.PRINCIPAL_SEARCH_SORT_NONE,1);
-					
+							Realm.PRINCIPAL_SEARCH_SORT_NONE, 1);
+
 					Group group = null;
 					Iterator it = groups.iterator();
-					while (it.hasNext()){
-						group = (Group)it.next();
+					while (it.hasNext()) {
+						group = (Group) it.next();
 					}
-					
-					if (group != null){
-						found = searchUserInGroup(username,group);
-						if (found) return true;
+
+					if (group != null) {
+						found = searchUserInGroup(username, group);
+						if (found)
+							return true;
 					}
-				}	
+				}
 			}
 		}
 		return false;
@@ -75,20 +77,20 @@ public class FnPermissions implements IPermissions {
 		boolean found;
 		Users us = group.getUsers();
 		Iterator itUser = us.iterator();
-		while (itUser.hasNext()){
+		while (itUser.hasNext()) {
 			user = (User) itUser.next();
-			if (user.getName().equalsIgnoreCase(username) 
+			if (user.getName().equalsIgnoreCase(username)
 					|| user.getName().split("@")[0].equalsIgnoreCase(username)) {
 				return true;
-			}		
+			}
 		}
 		Groups gs = group.getSubGroups();
 		Iterator itGroup = gs.iterator();
-		while (itGroup.hasNext())
-		{
+		while (itGroup.hasNext()) {
 			subGroup = (Group) itGroup.next();
 			found = searchUserInGroup(username, subGroup);
-			if (found) return true; 
+			if (found)
+				return true;
 		}
 		return false;
 	}
