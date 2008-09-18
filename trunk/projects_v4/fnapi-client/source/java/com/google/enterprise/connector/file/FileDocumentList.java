@@ -216,7 +216,7 @@ public class FileDocumentList implements DocumentList {
 			String pName) throws RepositoryException {
 		Property property = pm.findProperty(pName);
 		if (property == null) {
-			throw new IllegalArgumentException("checkpoint must have a "
+			throw new RepositoryException("checkpoint must have a "
 					+ pName + " property");
 		}
 		return property;

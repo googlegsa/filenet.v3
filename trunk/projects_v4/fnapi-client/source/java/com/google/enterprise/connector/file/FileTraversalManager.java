@@ -100,31 +100,11 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	public DocumentList startTraversal() throws RepositoryException {
-		logger.info("Start traversal");
-		DocumentList resultSet = null;
-		objectStore.refreshSUserContext();
-		
-		ISearch search = fileObjectFactory.getSearch(objectStore);
-		String query = buildQueryString(null);
-		
-		logger.log(Level.INFO, "Query add : " + query);
-		
-		IObjectSet objectSet = search.execute(query);
-
-		//Added: document remove all
-		ISearch searchToDelete = fileObjectFactory.getSearch(objectStore);
-		String queryStringToDelete = buildQueryToDelete(null);
-		logger.log(Level.INFO, "Query del : " + queryStringToDelete);
-		
-		IObjectSet objectSetToDelete = searchToDelete.execute(queryStringToDelete);
-				
-		resultSet = new FileDocumentList(objectSet, objectSetToDelete, objectStore, isPublic,
-				displayUrl, this.included_meta, this.excluded_meta,dateFirstPush,null);
-		return resultSet;
+		return resumeTraversal(null);
 	}
 
 	public DocumentList resumeTraversal(String checkPoint) throws RepositoryException {
-		logger.info("Resume traversal");
+		logger.info((checkPoint == null) ? "Start traversal" : "Resume traversal");
 		DocumentList resultSet = null;
 		objectStore.refreshSUserContext();
 		
@@ -142,8 +122,10 @@ public class FileTraversalManager implements TraversalManager {
 		logger.log(Level.INFO, "Query del : " + queryStringToDelete);
 		IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
 		
-		resultSet = new FileDocumentList(objectSet, objectSetToDelete, objectStore, this.isPublic,
-				this.displayUrl, this.included_meta, this.excluded_meta,dateFirstPush,checkPoint);
+		if ((objectSet.getSize() > 0) || (objectSetToDelete.getSize() > 0)) {
+			resultSet = new FileDocumentList(objectSet, objectSetToDelete, objectStore, this.isPublic,
+					this.displayUrl, this.included_meta, this.excluded_meta,dateFirstPush,checkPoint);
+		}
 		return resultSet;
 	}
 
