@@ -80,17 +80,7 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	public DocumentList startTraversal() throws RepositoryException {
-		DocumentList set = null;
-		ISearch search = fileObjectFactory.getSearch(fileSession);
-		String query = buildQueryString(null);
-		logger.log(Level.INFO, "query: " + query);
-		logger.log(Level.INFO, "objectStore: " + this.objectStore);
-		Document resultDoc = this.stringToDom(search.executeXml(query,
-				objectStore));
-		resultDoc.getElementsByTagName("Id");
-		set = new FileDocumentList(resultDoc, objectStore, isPublic,
-				displayUrl, this.included_meta, this.excluded_meta);
-		return set;
+		return resumeTraversal(null);
 	}
 
 	private String buildQueryString(String checkpoint)
@@ -148,8 +138,10 @@ public class FileTraversalManager implements TraversalManager {
 		logger.log(Level.INFO, "objectStore: " + this.objectStore);
 		Document resultDoc = this.stringToDom(search.executeXml(queryString,
 				this.objectStore));
-		resultSet = new FileDocumentList(resultDoc, objectStore, this.isPublic,
-				this.displayUrl, this.included_meta, this.excluded_meta);
+		if (resultDoc.getElementsByTagName("Id").getLength() > 0) {
+			resultSet = new FileDocumentList(resultDoc, objectStore, this.isPublic,
+					this.displayUrl, this.included_meta, this.excluded_meta);
+		}
 		return resultSet;
 	}
 

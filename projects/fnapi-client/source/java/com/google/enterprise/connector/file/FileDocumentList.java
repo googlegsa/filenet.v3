@@ -7,10 +7,12 @@ import java.util.logging.Logger;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.NodeList;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.DOMException;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -63,20 +65,27 @@ public class FileDocumentList implements DocumentList {
 
 	public com.google.enterprise.connector.spi.Document nextDocument()
 			throws RepositoryException {
-		if (index > -1 && index < data.getLength()) {
+		while (index > -1 && index < data.getLength()) {
 			NamedNodeMap nodeMap = data.item(index).getAttributes();
 			for (int j = 0; j < nodeMap.getLength(); j++) {
 				if (nodeMap.item(j).getNodeName().equals("Id")) {
 					index++;
-					if (data.item(index).getNodeType() == 3) {
+					if (data.item(index).getNodeType() == Node.TEXT_NODE) {
 						index++;
 					}
-					docId = (String) nodeMap.item(j).getNodeValue();
-					fileDocument = new FileDocument((String) nodeMap.item(j)
-							.getNodeValue(), this.objectStore, this.isPublic,
-							this.displayUrl, this.included_meta,
-							this.excluded_meta);
-					return fileDocument;
+					try {
+						docId = (String) nodeMap.item(j).getNodeValue();
+						fileDocument = new FileDocument(
+								(String) nodeMap.item(j).getNodeValue(), 
+								this.objectStore, this.isPublic, this.displayUrl,
+								this.included_meta, this.excluded_meta);
+						return fileDocument;
+					} catch (DOMException e) {
+						// skip this document
+						logger.severe("Unable to retrieve docId for item: " + e);
+						throw new RepositoryDocumentException(
+								"Unable to retrieve docId for item", e);
+					}
 				}
 			}
 		}
@@ -85,6 +94,9 @@ public class FileDocumentList implements DocumentList {
 	}
 
 	public String checkpoint() throws RepositoryException {
+		if ((docId == null) || (fileDocument == null)) {
+			throw new RepositoryException("Cannot create checkpoint: No documents found.");
+		}
 		Property val = fetchAndVerifyValueForCheckpoint(fileDocument,
 				SpiConstants.PROPNAME_LASTMODIFIED);
 		Calendar date = null;
@@ -117,7 +129,7 @@ public class FileDocumentList implements DocumentList {
 			String pName) throws RepositoryException {
 		Property property = pm.findProperty(pName);
 		if (property == null) {
-			throw new IllegalArgumentException("checkpoint must have a "
+			throw new RepositoryException("checkpoint must have a "
 					+ pName + " property");
 		}
 		return property;
