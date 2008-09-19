@@ -6,7 +6,6 @@ REQUIRED FILES to compile and run the tests
 •	commons-httpclient-3.0.1.jar (in file_third_party/lib folder of the project)
 •	commons-codec-1.3.jar (in file_third_party/lib folder of the project)
 •	json.jar (in third_party/lib folder of the project)
-•	jcr-1.0.jar
 •	junit.jar (in third_party/lib folder of the project)
 •	spring.jar (in third_party/lib folder of the project)
 •	commons-logging.jar (in third_party/lib folder of the project)
