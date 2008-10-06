@@ -74,6 +74,7 @@
 		<!-- compile java source files for tests -->
 		<javac srcdir="${src-client}" destdir="${classes-client}" debug="${COMPILE_DEBUG_FLAG} ">
 			<classpath>
+				<pathelement location="${file.jarfile}" />
 				<pathelement location="${connector.jarfile}" />
 				<pathelement location="${tests.jarfile}" />
 				<pathelement location="${spi.jarfile}" />
