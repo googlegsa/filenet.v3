@@ -2,6 +2,7 @@ package com.google.enterprise.connector.file;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -9,6 +10,8 @@ import com.google.enterprise.connector.spi.Value;
 
 public class FileDocumentProperty implements Property {
 
+	private static Logger logger = Logger.getLogger(FileDocumentList.class
+			.getName());
 	private String name;
 
 	private Iterator iter;
@@ -27,8 +30,7 @@ public class FileDocumentProperty implements Property {
 
 		if (this.iter.hasNext()) {
 			value = (Value) this.iter.next();
-		}
-
+		}		
 		return value;
 	}
 
