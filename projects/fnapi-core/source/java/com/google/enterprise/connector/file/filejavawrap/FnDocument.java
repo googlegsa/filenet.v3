@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import com.filenet.wcm.api.BaseRuntimeException;
 import com.filenet.wcm.api.Document;
 import com.filenet.wcm.api.EntireNetwork;
+import com.filenet.wcm.api.InsufficientPermissionException;
 import com.filenet.wcm.api.ObjectFactory;
 import com.filenet.wcm.api.Permissions;
 import com.filenet.wcm.api.Properties;
@@ -36,21 +37,20 @@ public class FnDocument implements IDocument {
 		this.doc = doc;
 	}
 
-	public InputStream getContent() {
+	public InputStream getContent() throws RepositoryException{
 		try {
 			return doc.getContent();
+			
 		} catch (BaseRuntimeException e) {
-			e.printStackTrace();
 			logger.log(Level.SEVERE,
-					"error while trying to get the content of file "
+					"exception while trying to get the content of file "
 							+ this.doc.getId() + " " + e.getMessage());
-			return doc.getContent();
+			throw new RepositoryException();
 		} catch (Error er) {
-			er.printStackTrace();
 			logger.log(Level.SEVERE,
 					"error while trying to get the content of file "
 							+ this.doc.getId() + " " + er.getMessage());
-			return doc.getContent();
+			throw new RepositoryException();
 		}
 	}
 

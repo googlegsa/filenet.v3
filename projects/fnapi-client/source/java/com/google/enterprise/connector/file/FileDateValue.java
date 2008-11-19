@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
+import java.util.logging.Logger;
 
 import com.google.enterprise.connector.spi.Value;
 //import com.google.enterprise.connector.spiimpl.DateValue;
@@ -13,10 +15,16 @@ public class FileDateValue extends ValueImpl {
 
 	Calendar calendarValue;
 
+	
+	private static Logger logger = Logger.getLogger(FileDocumentList.class
+			.getName());
+
+	
 	public FileDateValue(Calendar calendarValue) {
+	
 		this.calendarValue = calendarValue;
 	}
-
+	
 	public String toFeedXml() {
 		return toString();
 	}
@@ -26,6 +34,7 @@ public class FileDateValue extends ValueImpl {
 	}
 
 	public String toIso8601() {
+		logger.info("toIso8601 calendarValue : "+calendarValue);
 		return FileDateValue.calendarToIso8601(calendarValue);
 	}
 
@@ -51,12 +60,15 @@ public class FileDateValue extends ValueImpl {
 			throws ParseException {
 		Date d = null;
 		try {
-			d = ISO8601_DATE_FORMAT_MILLIS.parse(s);
+			//d = ISO8601_DATE_FORMAT_MILLIS.parse(s);
+			d = ISO8601_DATE_FORMAT_SECS.parse(s);
 			return d;
 		} catch (ParseException e) {
 			// this is just here so we can try another format
 		}
-		d = ISO8601_DATE_FORMAT_SECS.parse(s);
+		//d = ISO8601_DATE_FORMAT_SECS.parse(s);
+		d = ISO8601_DATE_FORMAT_MILLIS.parse(s);
+		logger.info("WARNING : Date with milliseconds");
 		return d;
 	}
 
