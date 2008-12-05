@@ -183,11 +183,7 @@ public class FileTraversalManager implements TraversalManager {
 			///query.append("<querystatement>SELECT Id,CONVERT(VARCHAR,DateLastModified,126),VersionSeriesId FROM ");
 			query.append(tableNameEventToDelete);
 			
-			
 			query.append(getCheckpointClauseToDelete(checkpoint));
-			if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
-				query.append(additionalWhereClause);
-			}
 			
 			query.append(orderByToDelete);
 					
@@ -380,11 +376,8 @@ public class FileTraversalManager implements TraversalManager {
 			logger.info("In stringToDom");
 			DocumentBuilderFactory factory = DocumentBuilderFactory
 			.newInstance();
-
 			builder = factory.newDocumentBuilder();
-
 			return builder.parse(new InputSource(new StringReader(xmlSource)));
-
 		} catch (ParserConfigurationException de) {
 			RepositoryException re = new RepositoryLoginException(de);
 			throw re;
@@ -395,6 +388,5 @@ public class FileTraversalManager implements TraversalManager {
 			RepositoryException re = new RepositoryLoginException(de);
 			throw re;
 		}
-
 	}
 }

@@ -22,6 +22,7 @@ import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.file.filewrap.IVersionSeries;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnDocument implements IDocument {
@@ -37,20 +38,24 @@ public class FnDocument implements IDocument {
 		this.doc = doc;
 	}
 
-	public InputStream getContent() throws RepositoryException{
+	public InputStream getContent() throws RepositoryDocumentException{
 		try {
 			return doc.getContent();
-			
+		} catch (InsufficientPermissionException e) {
+			logger.log(Level.SEVERE,
+					"exception while trying to get the content of file "
+							+ this.doc.getId() + " " + e.getMessage());
+			throw new RepositoryDocumentException();	
 		} catch (BaseRuntimeException e) {
 			logger.log(Level.SEVERE,
 					"exception while trying to get the content of file "
 							+ this.doc.getId() + " " + e.getMessage());
-			throw new RepositoryException();
+			return null;
 		} catch (Error er) {
 			logger.log(Level.SEVERE,
 					"error while trying to get the content of file "
 							+ this.doc.getId() + " " + er.getMessage());
-			throw new RepositoryException();
+			return null;
 		}
 	}
 
