@@ -16,6 +16,7 @@ import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.file.filewrap.IProperty;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
@@ -121,25 +122,27 @@ public class FileDocument implements Document {
 	}
 
 	///public Property findProperty(String name) throws RepositoryException {
-	public Property findProperty(String name){
+	public Property findProperty(String name) throws RepositoryDocumentException{
 		HashSet set = new HashSet();
 		logger.info("in findProperty");
 		if (SpiConstants.ActionType.ADD.equals(action)) {
 			fetch();
 			if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
-				logger.info("before throw new RepositoryException");
-					try {
+					///try {
 						if(document.getContent()!= null){
 							set.add(new BinaryValue(document.getContent()));
 						}else{
 							logger.fine("getContent returns null");
 							set.add(null);
 						}
-					} catch (RepositoryException e) {
-						logger.warning("RepositoryException thrown : "+ e+" on getting property : "+name);
-						logger.warning("RepositoryException thrown message : "+ e.getMessage());
-						set.add(null);
-					}
+						
+					///} catch (RepositoryDocumentException e) {
+						///throw new RepositoryDocumentException();
+					///} catch (RepositoryException e) {
+						///logger.warning("RepositoryException thrown : "+ e+" on getting property : "+name);
+						///logger.warning("RepositoryException thrown message : "+ e.getMessage());
+						///set.add(null);
+					///}
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
 				logger.info("getting property "+name);
