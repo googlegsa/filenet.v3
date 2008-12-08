@@ -1,6 +1,6 @@
 package com.google.enterprise.connector.file.filewrap;
 
-import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 public interface IBaseObject {
 
@@ -148,6 +148,6 @@ public interface IBaseObject {
 
 	public static final int EXPORT_FULL = 128;
 
-	public String getId() throws RepositoryException;
+	public String getId() throws RepositoryDocumentException;
 
 }

@@ -60,7 +60,7 @@ public class FnDocument implements IDocument {
 	}
 
 	public String getPropertyStringValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		String[] valuesName = { name };
 		try {
 			Properties props = doc.getProperties(valuesName);
@@ -100,7 +100,7 @@ public class FnDocument implements IDocument {
 						"error while trying to get the property " + name
 								+ " of the file " + this.doc.getId() + " "
 								+ e1.getMessage());
-				RepositoryException re = new RepositoryException(e1);
+				RepositoryDocumentException re = new RepositoryDocumentException(e1);
 				throw re;
 			}
 
@@ -117,18 +117,18 @@ public class FnDocument implements IDocument {
 
 	}
 
-	public IPermissions getPermissions(Session session) throws RepositoryException {
+	public IPermissions getPermissions(Session session) throws RepositoryDocumentException {
 		try {
 			EntireNetwork en = ObjectFactory.getEntireNetwork(session);
 			Permissions perms = this.doc.getPermissions();
 			return new FnPermissions(en, perms);
 		} catch (Exception e) {
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
-	public long getPropertyLongValue(String name) throws RepositoryException {
+	public long getPropertyLongValue(String name) throws RepositoryDocumentException {
 
 		try {
 			return this.doc.getPropertyIntValue(name);
@@ -136,101 +136,100 @@ public class FnDocument implements IDocument {
 			logger.log(Level.SEVERE, "error while trying to get the property "
 					+ name + " of the file " + this.doc.getId() + " "
 					+ e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
 	public double getPropertyDoubleValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		try {
 			return this.doc.getPropertyDoubleValue(name);
 		} catch (PropertyNotFoundException e) {
 			logger.log(Level.SEVERE, "error while trying to get the property "
 					+ name + " of the file " + this.doc.getId() + " "
 					+ e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
-	public Date getPropertyDateValue(String name) throws RepositoryException {
+	public Date getPropertyDateValue(String name) throws RepositoryDocumentException {
 		try {
 			return this.doc.getPropertyDateValue(name);
 		} catch (PropertyNotFoundException e) {
 			logger.log(Level.SEVERE, "error while trying to get the property "
 					+ name + " of the file " + this.doc.getId() + " "
 					+ e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
 	public boolean getPropertyBooleanValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		try {
 			return this.doc.getPropertyBooleanValue(name);
 		} catch (PropertyNotFoundException e) {
 			logger.log(Level.SEVERE, "error while trying to get the property "
 					+ name + " of the file " + this.doc.getId() + " "
 					+ e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
 	public byte[] getPropertyBinaryValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		try {
 			return this.doc.getPropertyBinaryValue(name);
 		} catch (PropertyNotFoundException e) {
 			logger.log(Level.SEVERE, "error while trying to get the property "
 					+ name + " of the file " + this.doc.getId() + " "
 					+ e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
-	public IProperties getProperties() throws RepositoryException {
+	public IProperties getProperties() throws RepositoryDocumentException {
 		try {
 			return new FnProperties(this.doc.getProperties());
 		} catch (PropertyNotFoundException e) {
 			logger.log(Level.SEVERE,
 					"error while trying to get the properties of the file "
 							+ this.doc.getId() + " " + e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
-	public IVersionSeries getVersionSeries() throws RepositoryException {
+	public IVersionSeries getVersionSeries() throws RepositoryDocumentException {
 		try {
 			return new FnVersionSeries(doc.getVersionSeries());
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,
 					"error while trying to get the properties of the file "
 							+ this.doc.getId() + " " + e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
-	public String getId() throws RepositoryException {
+	public String getId() throws RepositoryDocumentException {
 		try {
 			return doc.getId();
 		} catch (Exception e) {
 			logger.log(Level.SEVERE,
 					"error while trying to get the properties of the file "
 							+ this.doc.getId() + " " + e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 
 	}
 
-	public String getPropertyValue(String name)
-			throws PropertyNotFoundException {
+	public String getPropertyValue(String name) throws PropertyNotFoundException {
 
 		String[] names = { name };
 		Properties props = this.doc.getProperties(names);
@@ -244,12 +243,12 @@ public class FnDocument implements IDocument {
 		return fnprop.getValueType();
 	}
 
-	public IProperties getProperties(String[] names) throws RepositoryException {
+	public IProperties getProperties(String[] names) throws RepositoryDocumentException {
 
 		try {
 			return new FnProperties(this.doc.getProperties(names));
 		} catch (PropertyNotFoundException e) {
-			throw new RepositoryException(e);
+			throw new RepositoryDocumentException(e);
 		}
 	}
 
