@@ -7,6 +7,7 @@ import com.filenet.wcm.api.VersionSeries;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.file.filewrap.IVersionSeries;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnVersionSeries implements IVersionSeries {
@@ -22,12 +23,12 @@ public class FnVersionSeries implements IVersionSeries {
 
 	}
 
-	public IProperties getProperties() throws RepositoryException {
+	public IProperties getProperties() throws RepositoryDocumentException {
 		try {
 			return new FnProperties(this.versionSeries.getProperties());
 		} catch (PropertyNotFoundException e) {
 
-			throw new RepositoryException(e);
+			throw new RepositoryDocumentException(e);
 		}
 	}
 
@@ -40,35 +41,36 @@ public class FnVersionSeries implements IVersionSeries {
 	}
 
 	public String getPropertyStringValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		try {
 			return this.versionSeries.getPropertyStringValue(name);
 		} catch (PropertyNotFoundException e) {
-			throw new RepositoryException(e);
+			throw new RepositoryDocumentException(e);
 		}
 	}
 
-	public long getPropertyLongValue(String name) throws RepositoryException {
+	public long getPropertyLongValue(String name) throws RepositoryDocumentException {
 		return 0;
 	}
 
 	public double getPropertyDoubleValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		return 0;
 	}
 
-	public Date getPropertyDateValue(String name) throws RepositoryException {
+	public Date getPropertyDateValue(String name) throws RepositoryDocumentException {
 		return null;
 	}
 
 	public boolean getPropertyBooleanValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		return false;
 	}
 
 	public byte[] getPropertyBinaryValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		return null;
 	}
+
 
 }

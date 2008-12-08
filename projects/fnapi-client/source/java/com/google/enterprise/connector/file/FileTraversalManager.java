@@ -95,7 +95,6 @@ public class FileTraversalManager implements TraversalManager {
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
-
 	}
 
 	public DocumentList startTraversal() throws RepositoryException {

@@ -91,7 +91,7 @@ public class FileDocumentList implements DocumentList {
 	}
 
 	public com.google.enterprise.connector.spi.Document nextDocument()
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		int dataLen = data.getLength();
 		
 		logger.info("Next Document ");

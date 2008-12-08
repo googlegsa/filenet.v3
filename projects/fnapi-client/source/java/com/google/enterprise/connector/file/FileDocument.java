@@ -14,6 +14,7 @@ import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.file.filewrap.IProperty;
+import com.google.enterprise.connector.file.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -92,24 +93,26 @@ public class FileDocument implements Document {
 		this.action=action;
 	}
 
-	private void fetch(){
+	private void fetch() throws RepositoryDocumentException{
 		if (document != null) {
 			return;
 		}
+		IVersionSeries vSeries = null;
 		document = (IDocument) objectStore.getObject(IBaseObject.TYPE_DOCUMENT,
 				docId);
 
 		logger.fine("fetch doc " + docId);
-        try{
-        	this.vsDocId = document.getVersionSeries().getId();
-    		logger.fine("fetch doc VSID: " + this.vsDocId);
-        }catch(RepositoryException e){
-        	logger.severe("Problem on getting the VSID "+e.getStackTrace());
-        }
+        ///try{
+		vSeries = document.getVersionSeries();
+        this.vsDocId = vSeries.getId();
+    	logger.fine("fetch doc VSID: " + this.vsDocId);
+        ///}catch(RepositoryException e){
+        ///logger.severe("Problem on getting the VSID "+e.getStackTrace());
+        ///}
 	}
 
 	private Calendar getDate(String type, IDocument document)
-			throws IllegalArgumentException, RepositoryException {
+			throws IllegalArgumentException, RepositoryDocumentException {
 
 		Date date = this.document.getPropertyDateValue(type);
 
@@ -128,21 +131,12 @@ public class FileDocument implements Document {
 		if (SpiConstants.ActionType.ADD.equals(action)) {
 			fetch();
 			if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
-					///try {
 						if(document.getContent()!= null){
 							set.add(new BinaryValue(document.getContent()));
 						}else{
 							logger.fine("getContent returns null");
 							set.add(null);
-						}
-						
-					///} catch (RepositoryDocumentException e) {
-						///throw new RepositoryDocumentException();
-					///} catch (RepositoryException e) {
-						///logger.warning("RepositoryException thrown : "+ e+" on getting property : "+name);
-						///logger.warning("RepositoryException thrown message : "+ e.getMessage());
-						///set.add(null);
-					///}
+						}			
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
 				logger.info("getting property "+name);
@@ -177,14 +171,12 @@ public class FileDocument implements Document {
 				logger.fine("Last modify date value : " + tmpDtVal.toString());
 				set.add(tmpDtVal);
 				return new FileDocumentProperty(name, set);
-			
-				
 			} else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
 				logger.info("getting property "+name);
 				try {
 					set.add(new StringValue(document.getPropertyStringValue("MimeType")));
 					logger.fine("Property "+name+" : "+document.getPropertyStringValue("MimeType"));
-				} catch (RepositoryException e) {
+				} catch (RepositoryDocumentException e) {
 					logger.warning("RepositoryException thrown : "+ e+" on getting property : "+name);
 					logger.warning("RepositoryException thrown message : "+ e.getMessage());
 					set.add(null);
@@ -205,7 +197,6 @@ public class FileDocument implements Document {
 				logger.fine("Property "+name+" : "+action.toString());
 				return new FileDocumentProperty(name, set);
 			}
-
 			try{
 				String prop = null;
 				String[] names = { name };
@@ -240,7 +231,7 @@ public class FileDocument implements Document {
 					set.add(new LongValue(document.getPropertyLongValue(name)));
 				}
 			
-			}catch(RepositoryException re){
+			}catch(RepositoryDocumentException re){
 				logger.warning("RepositoryException thrown : "+ re+" on getting property : "+name);
 				logger.warning("RepositoryException thrown message : "+ re.getMessage());
 				set.add(null);
@@ -251,7 +242,6 @@ public class FileDocument implements Document {
 				logger.info("tmpCal del instance : " + tmpCal);
 				
 				
-			
 				try {
 					Date tmpDt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(timeStamp);
 					
@@ -274,8 +264,6 @@ public class FileDocument implements Document {
 				logger.fine("Last modify date value : " + tmpDtVal.toString());
 				set.add(tmpDtVal);
 				return new FileDocumentProperty(name, set);
-				
-				
 			}else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
 				set.add(new StringValue(action.toString()));
 				return new FileDocumentProperty(name, set);
@@ -289,7 +277,7 @@ public class FileDocument implements Document {
 		return new FileDocumentProperty( name, set);
 	}
 
-	public Set getPropertyNames() throws RepositoryException {
+	public Set getPropertyNames() throws RepositoryDocumentException {
 		fetch();
 		HashSet properties = new HashSet();
 		IProperties documentProperties = this.document.getProperties();
