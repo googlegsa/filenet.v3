@@ -102,13 +102,11 @@ public class FileDocument implements Document {
 				docId);
 
 		logger.fine("fetch doc " + docId);
-        ///try{
+  
 		vSeries = document.getVersionSeries();
         this.vsDocId = vSeries.getId();
     	logger.fine("fetch doc VSID: " + this.vsDocId);
-        ///}catch(RepositoryException e){
-        ///logger.severe("Problem on getting the VSID "+e.getStackTrace());
-        ///}
+       
 	}
 
 	private Calendar getDate(String type, IDocument document)
@@ -124,7 +122,6 @@ public class FileDocument implements Document {
 		return c;
 	}
 
-	///public Property findProperty(String name) throws RepositoryException {
 	public Property findProperty(String name) throws RepositoryDocumentException{
 		HashSet set = new HashSet();
 		logger.info("in findProperty");
@@ -151,6 +148,7 @@ public class FileDocument implements Document {
 			
 				Calendar tmpCal = Calendar.getInstance();
 				logger.info("tmpCal instance : " + tmpCal);
+				
 				try {
 					Date tmpDt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(timeStamp);
 					
@@ -164,8 +162,8 @@ public class FileDocument implements Document {
 				} catch (ParseException e) {
 					logger.fine("Error: wrong last modified date");
 					tmpCal.setTime(new Date());	
-					
 				}
+				
 				logger.info("tmpCal after setTime : " + tmpCal);
 				FileDateValue tmpDtVal = new FileDateValue(tmpCal);
 				logger.fine("Last modify date value : " + tmpDtVal.toString());
