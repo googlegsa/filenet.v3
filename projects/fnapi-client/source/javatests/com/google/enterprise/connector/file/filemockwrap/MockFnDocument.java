@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Date;
 
+import com.filenet.wcm.api.PropertyNotFoundException;
 import com.filenet.wcm.api.Session;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IPermissions;
@@ -13,6 +14,7 @@ import com.google.enterprise.connector.mock.MockRepositoryDateTime;
 import com.google.enterprise.connector.mock.MockRepositoryDocument;
 import com.google.enterprise.connector.mock.MockRepositoryProperty;
 import com.google.enterprise.connector.mock.MockRepositoryPropertyList;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 
@@ -24,11 +26,11 @@ public class MockFnDocument implements IDocument {
 		this.document = doc;
 	}
 
-	public InputStream getContent() throws RepositoryException {
+	public InputStream getContent() throws RepositoryDocumentException {
 		try {
 			return this.document.getContentStream();
 		} catch (FileNotFoundException e) {
-			throw new RepositoryException(e);
+			throw new RepositoryDocumentException(e);
 		}
 	}
 
@@ -39,20 +41,20 @@ public class MockFnDocument implements IDocument {
 	}
 
 	public String getPropertyStringValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		MockRepositoryProperty curProp = this.document.getProplist()
 				.getProperty(name);
 		return curProp.getValue();
 	}
 
-	public long getPropertyLongValue(String name) throws RepositoryException {
+	public long getPropertyLongValue(String name) throws RepositoryDocumentException {
 		MockRepositoryProperty curProp = this.document.getProplist()
 				.getProperty(name);
 		if (curProp.getType() == MockRepositoryProperty.PropertyType.INTEGER
 				|| curProp.getType() == MockRepositoryProperty.PropertyType.UNDEFINED) {
 			return Integer.parseInt(curProp.getValue());
 		}
-		throw new RepositoryException(
+		throw new RepositoryDocumentException(
 				"MockRepositoryDocument.getProplist().getProperty("
 						+ name
 						+ ").getType() != Int or Long or double.. whereas MockFnDocument.getPropertyLongValue("
@@ -60,21 +62,21 @@ public class MockFnDocument implements IDocument {
 	}
 
 	public double getPropertyDoubleValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		MockRepositoryProperty curProp = this.document.getProplist()
 				.getProperty(name);
 		if (curProp.getType() == MockRepositoryProperty.PropertyType.INTEGER
 				|| curProp.getType() == MockRepositoryProperty.PropertyType.UNDEFINED) {
 			return Integer.parseInt(curProp.getValue());
 		}
-		throw new RepositoryException(
+		throw new RepositoryDocumentException(
 				"MockRepositoryDocument.getProplist().getProperty("
 						+ name
 						+ ").getType() != Int or Long or double.. whereas MockFnDocument.getPropertyDoubleValue("
 						+ name + ") was called");
 	}
 
-	public Date getPropertyDateValue(String name) throws RepositoryException {
+	public Date getPropertyDateValue(String name) throws RepositoryDocumentException {
 		if (name.equals("DateLastModified")
 				|| name.equals(SpiConstants.PROPNAME_LASTMODIFIED)) {
 			MockRepositoryDateTime curProp = this.document.getTimeStamp();
@@ -87,12 +89,12 @@ public class MockFnDocument implements IDocument {
 	}
 
 	public boolean getPropertyBooleanValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		// TODO Wait to see whether Connector-Manager only gets strings.
 		return false;
 	}
 
-	public IProperties getProperties() throws RepositoryException {
+	public IProperties getProperties() throws RepositoryDocumentException {
 		return new MockFnProperties(this.document.getProplist());
 	}
 
@@ -105,17 +107,22 @@ public class MockFnDocument implements IDocument {
 	}
 
 	public byte[] getPropertyBinaryValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public IProperties getProperties(String[] names) throws RepositoryException {
+	public IProperties getProperties(String[] names) throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public IPermissions getPermissions(Session s) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getPropertyValue(String name) throws PropertyNotFoundException {
 		// TODO Auto-generated method stub
 		return null;
 	}

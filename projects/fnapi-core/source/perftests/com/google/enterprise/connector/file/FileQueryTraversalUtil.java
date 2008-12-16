@@ -1,5 +1,7 @@
 package com.google.enterprise.connector.file;
 
+import java.net.MalformedURLException;
+
 import com.google.enterprise.connector.pusher.DocPusher;
 import com.google.enterprise.connector.pusher.GsaFeedConnection;
 import com.google.enterprise.connector.pusher.PushException;
@@ -45,8 +47,14 @@ public class FileQueryTraversalUtil {
 			return;
 		}
 
-		DocPusher push = new DocPusher(
-				new GsaFeedConnection("8.6.49.36", 19900));
+		DocPusher push = null;
+		try {
+			push = new DocPusher(
+					new GsaFeedConnection("8.6.49.36", 19900));
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		// DocPusher push = new DocPusher(new FileFeedConnection());
 		while (true) {

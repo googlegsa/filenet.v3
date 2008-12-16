@@ -6,6 +6,7 @@ import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.file.filewrap.IVersionSeries;
 import com.google.enterprise.connector.mock.MockRepositoryDocument;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class MockFnVersionSeries implements IVersionSeries {
@@ -17,7 +18,7 @@ public class MockFnVersionSeries implements IVersionSeries {
 		this.versionSeries = doc;
 	}
 
-	public IProperties getProperties() throws RepositoryException {
+	public IProperties getProperties() throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -36,35 +37,35 @@ public class MockFnVersionSeries implements IVersionSeries {
 	}
 
 	public String getPropertyStringValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public long getPropertyLongValue(String name) throws RepositoryException {
+	public long getPropertyLongValue(String name) throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public double getPropertyDoubleValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	public Date getPropertyDateValue(String name) throws RepositoryException {
+	public Date getPropertyDateValue(String name) throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public boolean getPropertyBooleanValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public byte[] getPropertyBinaryValue(String name)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		// TODO Auto-generated method stub
 		return null;
 	}
