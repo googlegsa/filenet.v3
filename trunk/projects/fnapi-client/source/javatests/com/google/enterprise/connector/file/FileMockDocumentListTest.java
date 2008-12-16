@@ -70,7 +70,7 @@ public class FileMockDocumentListTest extends TestCase {
 			throws IllegalArgumentException, RepositoryException {
 		FileDocument propertyMap = new FileDocument("doc2",
 				((FileSession) sess).getObjectStore(), false, "",
-				FnMockConnection.included_meta, FnMockConnection.excluded_meta);
+				FnMockConnection.included_meta, FnMockConnection.excluded_meta, SpiConstants.ActionType.ADD);
 		Calendar calDate = null;
 
 		FileDocumentList fdl = (FileDocumentList) qtm.startTraversal();

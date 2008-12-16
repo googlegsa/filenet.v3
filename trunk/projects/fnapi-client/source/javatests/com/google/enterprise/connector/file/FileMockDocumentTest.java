@@ -6,6 +6,7 @@ import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
+import com.google.enterprise.connector.spi.SpiConstants;
 
 import junit.framework.TestCase;
 
@@ -44,7 +45,7 @@ public class FileMockDocumentTest extends TestCase {
 		FileDocument filePm = new FileDocument(FnMockConnection.FN_ID1,
 				((FileSession) sess).getObjectStore(), false,
 				FnMockConnection.displayUrl, FnMockConnection.included_meta,
-				FnMockConnection.excluded_meta);
+				FnMockConnection.excluded_meta,SpiConstants.ActionType.ADD);
 		Property property = filePm.findProperty("google:docid");
 		assertTrue(property instanceof FileDocumentProperty);
 		Iterator fileProp = filePm.getPropertyNames().iterator();
@@ -65,7 +66,7 @@ public class FileMockDocumentTest extends TestCase {
 		FileDocument filePm = new FileDocument(FnMockConnection.FN_ID1,
 				((FileSession) sess).getObjectStore(), false,
 				FnMockConnection.displayUrl, FnMockConnection.included_meta,
-				FnMockConnection.excluded_meta);
+				FnMockConnection.excluded_meta,SpiConstants.ActionType.ADD);
 
 		Iterator iterator = filePm.getPropertyNames().iterator();
 		int counter = 0;
