@@ -13,6 +13,7 @@ import com.filenet.api.util.Id;
 import com.google.enterprise.connector.file.FileDocument;
 import com.google.enterprise.connector.file.filewrap.IBaseObject;
 
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
@@ -30,11 +31,15 @@ public class FnBaseObject implements IBaseObject {
 		this.object = object;
 	}
 
-	public String getClassNameEvent() throws RepositoryException {
-		return this.object.getClassName();
+	public String getClassNameEvent() throws RepositoryDocumentException {
+		try {
+			return this.object.getClassName();
+		}catch (Exception e){
+			 throw new RepositoryDocumentException(e);
+		}
 	}
 	
-	public String getId(ActionType action) throws RepositoryException {
+	public String getId(ActionType action) throws RepositoryDocumentException {
 		String id;
 		try {
 			
@@ -47,12 +52,12 @@ public class FnBaseObject implements IBaseObject {
 
 			id = id.substring(1,id.length()-1);
 		}catch (Exception e){
-			 throw new RepositoryException(e);
+			 throw new RepositoryDocumentException(e);
 		}
 		return id;
 	}
 	
-	public Date getModifyDate(ActionType action) throws RepositoryException {
+	public Date getModifyDate(ActionType action) throws RepositoryDocumentException {
 		
 		Date ModifyDate = new Date();
 		try {
@@ -62,12 +67,12 @@ public class FnBaseObject implements IBaseObject {
 				ModifyDate = ((Document) this.object).get_DateLastModified();
 			}	
 		}catch (Exception e){
-			 throw new RepositoryException(e);
+			 throw new RepositoryDocumentException(e);
 		}
 		return ModifyDate;
 	}
 	
-	public Date getPropertyDateValueDelete(String name) throws RepositoryException {
+	public Date getPropertyDateValueDelete(String name) throws RepositoryDocumentException {
 		
 		try {
 			Properties props = ((com.filenet.apiimpl.core.DeletionEventImpl) this.object).getProperties();
@@ -83,20 +88,20 @@ public class FnBaseObject implements IBaseObject {
 			logger.log(Level.SEVERE, "error while trying to get the property "
 					+ name + " of the file " + ((com.filenet.apiimpl.core.DeletionEventImpl) this.object).get_Id() + " "
 					+ e.getMessage());
-			RepositoryException re = new RepositoryException(e);
+			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 		return null;
 	}
 	
-	public String getVersionSeriesId() throws RepositoryException {
+	public String getVersionSeriesId() throws RepositoryDocumentException {
 		Id id;
 		String strId;
 		try {
 			id = ((com.filenet.apiimpl.core.DeletionEventImpl) this.object).get_VersionSeriesId();
 			
 		}catch (Exception e){
-			 throw new RepositoryException(e);
+			 throw new RepositoryDocumentException(e);
 		}
 		strId=id.toString();
 		strId = strId.substring(1,strId.length()-1);

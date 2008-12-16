@@ -18,6 +18,7 @@ import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.file.filewrap.IProperty;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
@@ -81,7 +82,7 @@ public class FileDocument implements Document {
 		this.action = action;
 	}
 
-	private void fetch() throws RepositoryException {
+	private void fetch()  throws RepositoryDocumentException{
 		if (document != null) {
 			return;
 		}
@@ -96,21 +97,24 @@ public class FileDocument implements Document {
 		logger.fine("fetch doc VSID: " + this.vsDocId);
 	}
 
-	private Calendar getDate(String type) throws IllegalArgumentException,
-			RepositoryException {
+	private Calendar getDate(String type) throws IllegalArgumentException, RepositoryDocumentException {
 		Date date = this.document.getPropertyDateValue(type);
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);
 		return c;
 	}
 
-	public Property findProperty(String name) throws RepositoryException {
+	public Property findProperty(String name) throws RepositoryDocumentException{
 		HashSet set = new HashSet();
 
 		if (SpiConstants.ActionType.ADD.equals(action)) {
 			fetch();
 			if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
-				set.add(new BinaryValue(document.getContent()));
+				try{
+					set.add(new BinaryValue(document.getContent()));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
 				set.add(new StringValue(this.displayUrl + vsDocId));
@@ -124,9 +128,14 @@ public class FileDocument implements Document {
 				set.add(tmpDtVal);
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
-				set.add(new StringValue(document.getPropertyStringValue("MimeType")));
-				logger.fine("Property " + name + " : "
-						+ document.getPropertyStringValue("MimeType"));
+				try{
+					set.add(new StringValue(document.getPropertyStringValue("MimeType")));
+					logger.fine("Property " + name + " : "
+							+ document.getPropertyStringValue("MimeType"));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}
+				
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_SEARCHURL.equals(name)) {
 				return null;
@@ -139,26 +148,60 @@ public class FileDocument implements Document {
 				logger.fine("Property " + name + " : " + action.toString());
 				return new FileDocumentProperty(name, set);
 			}
-
-			String type = document.getPropertyType(name);
+			
+			String type = null;
+			try{
+				type = document.getPropertyType(name);
+			}catch(RepositoryDocumentException e1){
+				type = null;
+			}
+			
 			if (type == null) // unknows property name
 				return null;
 
 			if (type.equalsIgnoreCase("Binary")) {
-				set.add(new BinaryValue(document.getPropertyBinaryValue(name)));
+				try{
+					set.add(new BinaryValue(document.getPropertyBinaryValue(name)));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}	
 			} else if (type.equalsIgnoreCase("Boolean")) {
-				set.add(BooleanValue.makeBooleanValue(document
+				try{
+					set.add(BooleanValue.makeBooleanValue(document
 						.getPropertyBooleanValue(name)));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}	
 			} else if (type.equalsIgnoreCase("Date")) {
-				set.add(new DateValue(getDate(name)));
+				try{
+					set.add(new DateValue(getDate(name)));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}	
 			} else if (type.equalsIgnoreCase("Double")) {
-				set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
+				try{
+					set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}	
 			} else if (type.equalsIgnoreCase("String")) {
-				set.add(new StringValue(document.getPropertyStringValue(name)));
+				try{
+					set.add(new StringValue(document.getPropertyStringValue(name)));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}	
 			} else if (type.equalsIgnoreCase("guid")) {
-				set.add(new StringValue(document.getPropertyGuidValue(name)));
+				try{
+					set.add(new StringValue(document.getPropertyGuidValue(name)));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}
 			} else if (type.equalsIgnoreCase("Long")) {
-				set.add(new LongValue(document.getPropertyLongValue(name)));
+				try{
+					set.add(new LongValue(document.getPropertyLongValue(name)));
+				}catch(RepositoryDocumentException e1){
+					set.add(null);
+				}	
 			}
 		} else {
 			if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
@@ -183,7 +226,7 @@ public class FileDocument implements Document {
 		return new FileDocumentProperty(name, set);
 	}
 
-	public Set getPropertyNames() throws RepositoryException {
+	public Set getPropertyNames() throws RepositoryDocumentException {
 		return this.document.getPropertyName();
 	}
 }

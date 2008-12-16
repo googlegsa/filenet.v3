@@ -1,6 +1,7 @@
 package com.google.enterprise.connector.file.filejavawrap;
 
 import java.util.Date;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.filenet.api.core.Document;
@@ -9,6 +10,7 @@ import com.filenet.api.util.Id;
 import com.google.enterprise.connector.file.FileDocument;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IVersionSeries;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
@@ -40,26 +42,31 @@ public class FnVersionSeries implements IVersionSeries {
 
 	}
 		
-	public Date getModifyDate(ActionType action) throws RepositoryException {
+	public Date getModifyDate(ActionType action) throws RepositoryDocumentException {
 		Date ModifyDate = new Date();
 		return ModifyDate;
 	}
 	
-	public String getClassNameEvent() throws RepositoryException {
-		return this.versionSeries.getClassName();
+	public String getClassNameEvent() throws RepositoryDocumentException {
+		try {
+			return this.versionSeries.getClassName();
+		} catch (Exception e1) {
+			RepositoryDocumentException re = new RepositoryDocumentException(e1);
+			throw re;
+		}
 	}
 	
-	public Date getPropertyDateValueDelete(String name) throws RepositoryException {
+	public Date getPropertyDateValueDelete(String name) throws RepositoryDocumentException {
 		return new Date();
 	}
 	
-	public String getVersionSeriesId() throws RepositoryException {
+	public String getVersionSeriesId() throws RepositoryDocumentException {
 		Id id;
 		String strId;
 		try {
 			id = ((com.filenet.apiimpl.core.DeletionEventImpl) versionSeries).get_VersionSeriesId();
 		}catch (Exception e){
-			 throw new RepositoryException(e);
+			 throw new RepositoryDocumentException(e);
 		}
 		logger.info("versionId : ID : "+id);
 		strId=id.toString();
