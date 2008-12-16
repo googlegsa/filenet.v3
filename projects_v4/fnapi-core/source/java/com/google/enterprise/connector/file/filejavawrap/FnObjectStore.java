@@ -8,6 +8,7 @@ import com.filenet.api.core.VersionSeries;
 import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IConnection;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
@@ -34,7 +35,7 @@ public class FnObjectStore implements IObjectStore {
 	}
 
 	public IBaseObject getObject(String type, String id)
-			throws RepositoryException {
+			throws RepositoryDocumentException {
 		IndependentObject obj = null;
 		try {
 			obj = objectStore.getObject(type, id);
@@ -47,7 +48,7 @@ public class FnObjectStore implements IObjectStore {
 				return new FnDocument((Document) objectStore.getObject(type, id));
 			}
 		}catch (Exception e){
-			throw new RepositoryException(e);
+			throw new RepositoryDocumentException(e);
 		}
 		return new FnBaseObject(obj);
 
