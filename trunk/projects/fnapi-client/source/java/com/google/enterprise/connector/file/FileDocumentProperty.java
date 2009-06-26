@@ -2,7 +2,6 @@ package com.google.enterprise.connector.file;
 
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -10,19 +9,18 @@ import com.google.enterprise.connector.spi.Value;
 
 public class FileDocumentProperty implements Property {
 
-	private static Logger logger = Logger.getLogger(FileDocumentList.class
-			.getName());
+//	private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
 	private String name;
 
 	private Iterator iter;
 
-	public FileDocumentProperty(String name) {
-		this.name = name;
+	public FileDocumentProperty(String refName) {
+		this.name = refName;
 	}
 
-	public FileDocumentProperty(String name, HashSet value) {
-		this.name = name;
-		this.iter = value.iterator();
+	public FileDocumentProperty(String refName, HashSet refValue) {
+		this.name = refName;
+		this.iter = refValue.iterator();
 	}
 
 	public Value nextValue() throws RepositoryException {

@@ -4,27 +4,27 @@ import java.util.HashSet;
 
 public class FnConnection {
 
-	public static String userName = "xyz";
+	public static String userName = "P8Admin";
 
-	public static String password = "xyz";
+	public static String password = "UnDeuxTrois456";
 
-	public static String objectStoreName = "xyz";
+	public static String objectStoreName = "Test";//"GSA_Filenet";
 
 	public static String appId = "file-connector";
 
 	public static String credTag = "Clear";
 
-	public static String displayUrl = "http://xyz.co.in:8080/Workplace/getContent";
+	public static String displayUrl = "http://swp-vm-fnet352:8080/Workplace/";
 
 	public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
 
 	public static String pathToWcmApiConfig = "WcmApiConfig.properties";
 
-	public static String completePathToWcmApiConfig = "C:\\Program Files\\GoogleConnectors\\FileNET1\\Tomcat\\webapps\\connector-manager\\WEB-INF\\WcmApiConfig.properties";
+	public static String completePathToWcmApiConfig = "C:\\WcmApiConfig.properties";
 
 	public static String wrongObjectStoreName = "GSA_Filen";
 
-	public static String docId = "{D491CE56-F5E7-4C4B-B20B-90494F1978F0}";//"{97E02C4F-7E0D-4874-894E-42CDD456AA97}";
+	public static String docId = "{97E02C4F-7E0D-4874-894E-42CDD456AA97}";
 
 	public static String docVsId = "{56042FFC-976E-4F61-8B32-B789218B9324}";
 
@@ -54,7 +54,7 @@ public class FnConnection {
 
 	public static String checkpoint2 = "{\"uuid\":\"{6AC92243-CE5A-430C-A615-868B088202CD}\",\"lastModified\":\"2007-05-07T12:52:17.000\"}";
 
-	public static String additionalWhereClause = " and Document.This INSUBFOLDER '/Test Folder'";
+	public static String additionalWhereClause = "and Document.This INSUBFOLDER '/testdata'";
 
 	public static final String DM_CHECKPOINT_QUERY_STRING = " AND ((DateLastModified=2007-06-05T14:46:19.019 AND ({97E02C4F-7E0D-4874-894E-42CDD456AA97}>id)) OR DateLastModified>2007-06-05T14:46:19.019)";
 

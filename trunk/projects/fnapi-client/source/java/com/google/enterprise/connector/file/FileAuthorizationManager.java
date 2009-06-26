@@ -3,6 +3,7 @@ package com.google.enterprise.connector.file;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.io.UnsupportedEncodingException;
@@ -32,54 +33,51 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		logger = Logger.getLogger(FileAuthorizationManager.class.getName());
 	}
 
-	public FileAuthorizationManager(IObjectFactory fileObjectFactory,
-			String pathToWcmApiConfig, IObjectStore objectStore,
-			ISession session) {
-		objectFactory = fileObjectFactory;
-		this.pathToWcmApiConfig = pathToWcmApiConfig;
-		this.objectStore = objectStore;
-		this.session = session;
+	public FileAuthorizationManager(IObjectFactory reffileObjectFactory,
+			String refPathToWcmApiConfig, IObjectStore refObjectStore,
+			ISession refSession) {
+		this.objectFactory = reffileObjectFactory;
+		this.pathToWcmApiConfig = refPathToWcmApiConfig;
+		this.objectStore = refObjectStore;
+		this.session = refSession;
 	}
 
-	public Collection authorizeDocids(Collection docids,
-			AuthenticationIdentity username) throws RepositoryException {
-
+	public Collection authorizeDocids(Collection docids, AuthenticationIdentity username) throws RepositoryException {
+		logger.log(Level.FINEST, "Entering into authorizeDocids(Collection docids, AuthenticationIdentity username)");
+		
 		List authorizeDocids = new ArrayList();
 		List docidList = new ArrayList(docids);
 		IVersionSeries versionSeries = null;
 		AuthorizationResponse authorizationResponse;
+		
 		for (int i = 0; i < docidList.size(); i++) {
-			logger.fine("check authorization for doc " + docidList.get(i));
+			String docId = (String)docidList.get(i);
+			logger.log(Level.FINE, "Check Authorization for document ID " + docId);			
 			try {
 				versionSeries = (IVersionSeries) objectStore.getObject(
-						IBaseObject.TYPE_VERSIONSERIES, URLDecoder.decode(
-								(String) docidList.get(i), "UTF-8"));
+						IBaseObject.TYPE_VERSIONSERIES, URLDecoder.decode(docId, "UTF-8"));
 			} catch (UnsupportedEncodingException e) {
+				logger.log(Level.WARNING,"Unable to Decode: Encoding is not supported for the document with ID: " + docId);
 				throw new RepositoryException(e);
-
 			}
 
-			if (versionSeries.getReleasedVersion().getPermissions(
-					session.getSession()).authorize(username.getUsername())) {
-				logger.fine("user: " + username.getUsername()
-						+ " authorized for doc " + docidList.get(i));
-				authorizationResponse = new AuthorizationResponse(true,
-						(String) docidList.get(i));
+			if (versionSeries.getReleasedVersion().getPermissions(session.getSession()).authorize(username.getUsername())) {
+				logger.log(Level.FINE,"User: " + username.getUsername()	+ " is authorized for document ID " + docId);
+				authorizationResponse = new AuthorizationResponse(true, docId);
 			} else {
-				logger.fine("user: " + username.getUsername()
-						+ " NOT authorized for doc " + docidList.get(i));
-				authorizationResponse = new AuthorizationResponse(false,
-						(String) docidList.get(i));
+				logger.fine("User: " + username.getUsername() + " is NOT authorized for document ID " + docId);
+				authorizationResponse = new AuthorizationResponse(false,docId);
 
 			}
 			authorizeDocids.add(authorizationResponse);
 		}
 
+		logger.log(Level.FINEST, "Exiting from authorizeDocids(Collection docids, AuthenticationIdentity username)");
 		return authorizeDocids;
 	}
 
 	public List authorizeTokens(List tokenList, String username)
-			throws RepositoryException {
+	throws RepositoryException {
 
 		return null;
 	}

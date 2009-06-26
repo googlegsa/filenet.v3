@@ -1,9 +1,12 @@
 package com.google.enterprise.connector.file;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
@@ -19,83 +22,78 @@ import com.google.enterprise.connector.spi.Session;
 public class FileSession implements Session {
 
 	private ISession fileSession;
-
 	private IObjectFactory fileObjectFactory;
-
 	private IObjectStore objectStore;
-
 	private String pathToWcmApiConfig;
-
 	private String displayUrl;
-
 	private boolean isPublic;
-
 	private String additionalWhereClause;
-
-	private HashSet included_meta;
-
-	private HashSet excluded_meta;
-
+	private HashSet includedMeta;
+	private HashSet excludedMeta;
 	private static Logger logger;
-
 	static {
 		logger = Logger.getLogger(FileSession.class.getName());
 	}
 
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String objectStoreName,
-			String pathToWcmApiConfig, String displayUrl, boolean isPublic,
-			String additionalWhereClause, HashSet included_meta,
-			HashSet excluded_meta) throws RepositoryException,
-			RepositoryLoginException {
+			String refPathToWcmApiConfig, String refDisplayUrl, boolean refIsPublic,
+			String refAdditionalWhereClause, HashSet refIncludedMeta,
+			HashSet refExcludedMeta) throws RepositoryException {
+		
 		setFileObjectFactory(iObjectFactory);
 
-		fileSession = fileObjectFactory.getSession("gsa-file-connector", null,
-				userName, userPassword);
-		this.pathToWcmApiConfig = pathToWcmApiConfig;
+		logger.info("Getting session for user "+userName);
+		fileSession = fileObjectFactory.getSession("gsa-file-connector", null, userName, userPassword);
+		
+		logger.info("WCMApiConfig.properties path is set to: "+refPathToWcmApiConfig);
+		this.pathToWcmApiConfig = refPathToWcmApiConfig;
 		try {
 
-			URL is = this.getClass().getClassLoader().getResource(
-					this.pathToWcmApiConfig);
+			URL is = this.getClass().getClassLoader().getResource(this.pathToWcmApiConfig);
 
 			if (is == null) {
-				URL f = this.getClass().getClassLoader().getResource("");
-				logger.info(f.toString());
-				logger.info(this.pathToWcmApiConfig + " is not valid.");
+				logger.log(Level.SEVERE,"WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ");
+			}else{
+				String sFile = URLDecoder.decode(is.getFile(), "UTF-8");
+				FileInputStream fis = new FileInputStream(sFile);
+				fileSession.setConfiguration(fis);
 			}
-			String sFile = URLDecoder.decode(is.getFile(), "UTF-8");
-			FileInputStream fis = new FileInputStream(sFile);
-
-			fileSession.setConfiguration(fis);
-		} catch (Exception exp) {
-			exp.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			logger.log(Level.WARNING,"Cannot Decode. Encoding format not supported.");
+			throw new RepositoryException("Cannot Decode. Encoding format not supported.",e);
+		} catch (FileNotFoundException e) {
+			logger.log(Level.SEVERE,"WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ");
+			throw new RepositoryException("WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ",e);
+		} catch (Exception exp) {			
 			throw new RepositoryLoginException(exp);
 		}
-		objectStore = fileObjectFactory.getObjectStore(objectStoreName,
-				fileSession);
-		this.displayUrl = displayUrl + "?objectStoreName=" + objectStoreName
+		objectStore = fileObjectFactory.getObjectStore(objectStoreName, fileSession);
+		this.displayUrl = refDisplayUrl + "?objectStoreName=" + objectStoreName
 				+ "&objectType=document&versionStatus=1&vsId=";
 
-		this.isPublic = isPublic;
+		this.isPublic = refIsPublic;
 		fileSession.verify();
 
-		this.additionalWhereClause = additionalWhereClause;
-		this.included_meta = included_meta;
-		this.excluded_meta = excluded_meta;
+		this.additionalWhereClause = refAdditionalWhereClause;
+		this.includedMeta = refIncludedMeta;
+		this.excludedMeta = refExcludedMeta;
 	}
 
 	private void setFileObjectFactory(String objectFactory)
 			throws RepositoryException {
 
 		try {
-			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory)
-					.newInstance();
+			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
 		} catch (InstantiationException e) {
-			throw new RepositoryException(e);
+			logger.log(Level.WARNING,"Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
+			throw new RepositoryException("Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",e);
 		} catch (IllegalAccessException e) {
-			throw new RepositoryException(e);
+			logger.log(Level.WARNING,"Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
+			throw new RepositoryException("Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",e);
 		} catch (ClassNotFoundException e) {
-			throw new RepositoryException(e);
+			logger.log(Level.WARNING,"The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found");
+			throw new RepositoryException("The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",e);
 		}
 
 	}
@@ -104,7 +102,7 @@ public class FileSession implements Session {
 		FileTraversalManager fileQTM = new FileTraversalManager(
 				fileObjectFactory, objectStore, fileSession, this.isPublic,
 				this.displayUrl, this.additionalWhereClause,
-				this.included_meta, this.excluded_meta);
+				this.includedMeta, this.excludedMeta);
 		return fileQTM;
 	}
 
@@ -127,8 +125,8 @@ public class FileSession implements Session {
 		return objectStore;
 	}
 
-	public void setObjectStore(IObjectStore objectStore) {
-		this.objectStore = objectStore;
+	public void setObjectStore(IObjectStore refObjectStore) {
+		this.objectStore = refObjectStore;
 	}
 
 }

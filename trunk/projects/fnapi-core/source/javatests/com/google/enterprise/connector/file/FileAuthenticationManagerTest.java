@@ -31,26 +31,27 @@ public class FileAuthenticationManagerTest extends TestCase {
 		((FileConnector) connector).setIs_public("false");
 		Session sess = (FileSession) connector.login();
 		FileAuthenticationManager authentManager = (FileAuthenticationManager) sess
-				.getAuthenticationManager();		
-		assertTrue(authentManager.authenticate(
-				new FileAuthenticationIdentity(FnConnection.userName, FnConnection.password))
+				.getAuthenticationManager();
+
+		assertFalse(authentManager.authenticate(
+				new FileAuthenticationIdentity("ebouvier", "falsePassword"))
 				.isValid());
-//		assertFalse(authentManager.authenticate(
-//				new FileAuthenticationIdentity("p8Admin", null)).isValid());
-//		assertFalse(authentManager.authenticate(
-//				new FileAuthenticationIdentity(null, "p@ssw0rd")).isValid());
-//		assertFalse(authentManager.authenticate(
-//				new FileAuthenticationIdentity(null, null)).isValid());
-//
-//		assertTrue(authentManager.authenticate(
-//				new FileAuthenticationIdentity("P8Admin", "UnDeuxTrois456"))
-//				.isValid());
-//		assertTrue(authentManager.authenticate(
-//				new FileAuthenticationIdentity("P8TestUser", "p@ssw0rd"))
-//				.isValid());
-//		assertTrue(authentManager.authenticate(
-//				new FileAuthenticationIdentity("P8TestUser2", "p@ssw0rd"))
-//				.isValid());
+		assertFalse(authentManager.authenticate(
+				new FileAuthenticationIdentity("p8Admin", null)).isValid());
+		assertFalse(authentManager.authenticate(
+				new FileAuthenticationIdentity(null, "p@ssw0rd")).isValid());
+		assertFalse(authentManager.authenticate(
+				new FileAuthenticationIdentity(null, null)).isValid());
+
+		assertTrue(authentManager.authenticate(
+				new FileAuthenticationIdentity("P8Admin", "UnDeuxTrois456"))
+				.isValid());
+		assertTrue(authentManager.authenticate(
+				new FileAuthenticationIdentity("P8TestUser", "p@ssw0rd"))
+				.isValid());
+		assertTrue(authentManager.authenticate(
+				new FileAuthenticationIdentity("P8TestUser2", "p@ssw0rd"))
+				.isValid());
 
 	}
 

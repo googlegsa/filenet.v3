@@ -1,8 +1,11 @@
 package com.google.enterprise.connector.file;
 
+import java.util.HashSet;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
@@ -75,10 +78,19 @@ public class FileDocumentListTest extends TestCase {
 	public void testFetchAndVerifyValueForCheckpoint()
 			throws RepositoryException {
 
-		FileDocument pm = new FileDocument(FnConnection.docId,
+		
+		/*
+		public FileDocument(String docId, String timeStamp, IObjectStore objectStore,
+				boolean isPublic, String displayUrl, HashSet included_meta,
+				HashSet excluded_meta, SpiConstants.ActionType action) 
+		*/
+		
+		
+		
+		FileDocument pm = new FileDocument(FnConnection.docId,FnConnection.date,
 				((FileSession) sess).getObjectStore(), false,
 				FnConnection.displayUrl, FnConnection.included_meta,
-				FnConnection.excluded_meta,SpiConstants.ActionType.ADD);
+				FnConnection.excluded_meta, SpiConstants.ActionType.ADD);
 		fdl = (FileDocumentList) qtm.startTraversal();
 		String result = fdl.fetchAndVerifyValueForCheckpoint(pm,
 				SpiConstants.PROPNAME_DOCID).nextValue().toString();

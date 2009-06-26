@@ -1,41 +1,38 @@
-This readme file presents how to configure the development environment for the Filenet connector.
+Welcome to the Google Enterprise Connector for FileNet P8 3.5.2!
 
-REQUIRED FILES to compile and run the tests
-•	activation.jar (in <Filenet root folder>/Worplace/WEB-INF/libs)
-•	javaapi.jar (in <Filenet root folder>/Worplace/WEB-INF/libs)
-•	listener.jar (in <Filenet root folder>/Worplace/WEB-INF/libs)
-•	log4j-1.2.8.jar (in <Filenet root folder>/Worplace/WEB-INF/libs)
-•	mailapi.jar (in <Filenet root folder>/Worplace/WEB-INF/libs)
-•	xercesImpl.jar (in <Filenet root folder>/Worplace/WEB-INF/libs)
-•	xml-apis.jar (in <Filenet root folder>/Worplace/WEB-INF/libs)
-•	commons-httpclient-3.0.1.jar (in file_third_party/lib folder of the project)
-•	commons-codec-1.3.jar (in file_third_party/lib folder of the project)
-•	soap.jar (in file_third_party/lib folder of the project)
-•	json.jar (in third_party/lib folder of the project)
-•	jcr-1.0.jar
-•	junit.jar (in third_party/lib folder of the project)
-•	spring.jar (in third_party/lib folder of the project)
-•	commons-logging.jar (in third_party/lib folder of the project)
-•	connector-spi.jar (to copy in third_party/lib folder of the project)
-•	connector.jar (to copy in third_party/lib folder of the project
-•	connector-tests.jar (to copy in third_party/lib folder of the project
+The Google Enterprise connector framework enables Google search
+appliances to search and serve documents stored in non-Web
+repositories, such as enterprise content management systems.  
+An enterprise content management (ECM) system provides a central
+repository for large numbers of documents.
+
+This FileNet P8 3.5.2 Connector provides access to documents
+and document meta-data stored in the FileNet P8 Content
+ Manager 3.5.2 developed by the IBM Corporation.
+
+The FileNet P8 3.5.2 Connector communicates with the Content
+Manager using the Java language Application Programming 
+Interface (API). To properly build this connector you will need
+access to the API
+The API is a commercial product from the IBM Corporation and
+is not included in this distribution.
 
 
-To build and run the junit tests for the connector manager, you must download 
-jcr-1.0.jar and put it in the directory third_party/lib.  This jar is part of JSR-170.  
-To get this jar, go to the official JSR-170 site, and follow the links from there:
-http://jcp.org/aboutJava/communityprocess/review/jsr170/index.html
+Documentation Links
 
+    * Developer Introduction to the Google Enterprise Connector Framework
+      http://code.google.com/apis/searchappliance/documentation/46/connector_dev/connector-framework.html
 
-CONFIGURATION
-Open Eclipse and create a java project from the existing source "connector-file"
-Add to the classpath of the project all the jars that are in third_party\lib and file_third_party\lib
-Also, add to the classpath 3 Class folders linked to the folder 
-•	google_enterprise_connector_file/config
+    * Google Enterprise Connector for FileNet P8 3.5.2
+      http://code.google.com/p/google-enterprise-connector-file/
 
+    * FileNet P8 Content Manager
+      FileNet P8 information is available on
+      the IBM web site: http://www.filenet.com
 
-JUNIT TESTS
-To run the unit tests, open the classes 
-•	com.google.enterprise.connector.file.FnConnection in the folder file-core/source/javatests
-•	com.google.enterprise.connector.file.FnMockConnection in the folder file-cilent/source/javatests
-to add your environment configuration.
+Licensing
+
+      This product includes software developed by
+      The Apache Software Foundation (http://www.apache.org/).
+
+      A copy of the licensing terms is available in a file called COPYING.

@@ -32,10 +32,9 @@ public class FileConnectorTypeTest extends TestCase {
 				+ "<tr>\r\n<td><input type=\"hidden\" value=\"false\" name=\"is_public\"/></td>\r\n</tr>\r\n"
 				+ "<tr>\r\n<td><input type=\"hidden\" name=\"additional_where_clause\" value=\"\"/></td>\r\n</tr>"
 				+ "\r\n<tr>\r\n<td><input type=\"hidden\" name=\"authentication_type\" value=\"\"/></td>\r\n</tr>\r\n";
-		String expectedForm1 = "<tr>\r\n<td style='white-space: nowrap'>Username</td>\r\n<td><input type=\"text\" size=\"50\" name=\"login\" value=\"\"/></td>\r\n</tr>\r\n<tr>\r\n<td style='white-space: nowrap'>Password</td>\r\n<td><input type=\"password\" name=\"Password\" value=\"\"/></td>\r\n</tr>\r\n<tr>\r\n<td style='white-space: nowrap'>Object store</td>\r\n<td><input type=\"text\" size=\"50\" name=\"object_store\" value=\"\"/></td>\r\n</tr>\r\n<tr style='display: none'>\r\n<td><input type=\"hidden\" name=\"path_to_WcmApiConfig\" value=\"\"/></td>\r\n</tr>\r\n<tr style='display: none'>\r\n<td><input type=\"hidden\" name=\"object_factory\" value=\"\"/></td>\r\n</tr>\r\n<tr>\r\n<td style='white-space: nowrap'>Workplace URL</td>\r\n<td><input type=\"text\" size=\"50\" name=\"workplace_display_url\" value=\"\"/></td>\r\n</tr>\r\n<tr>\r\n<td colspan='2'><input type=\"checkbox\" name=\"is_public\" />Make public</td>\r\n</tr>\r\n<tr style='display: none'>\r\n<td><input type=\"hidden\" value=\"false\" name=\"is_public\"/></td>\r\n</tr>\r\n<tr>\r\n<td style='white-space: nowrap'>Additional Where Clause</td>\r\n<td><input type=\"text\" size=\"50\" name=\"additional_where_clause\" value=\"\"/></td>\r\n</tr>\r\n<tr style='display: none'>\r\n<td><input type=\"hidden\" name=\"authentication_type\" value=\"\"/></td>\r\n</tr>\r\n";
 
 		System.out.println(test.getConfigForm(Locale.US).getFormSnippet());
-		assertEquals(expectedForm1, test.getConfigForm(Locale.US)
+		assertEquals(expectedForm, test.getConfigForm(Locale.US)
 				.getFormSnippet());
 	}
 
@@ -44,7 +43,7 @@ public class FileConnectorTypeTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.FileConnectorType.validateConfig(Map,
 	 * String)'
 	 */
-	public void estValidateConfig() {
+	public void testValidateConfig() {
 		HashMap map = new HashMap();
 		String[] fiels = { "login", "Password", "object_store",
 				"path_to_WcmApiConfig", "object_factory",
@@ -61,13 +60,11 @@ public class FileConnectorTypeTest extends TestCase {
 		FileConnectorType test = new FileConnectorType();
 		test.setConfigKeys(fiels);
 		ConfigureResponse resp = test.validateConfig(map, Locale.US, null);
-		String initialConfigForm = resp.getFormSnippet();
-		System.out.println(initialConfigForm);
 		assertNull(resp);
 
 	}
 
-	public void estValidateConfigWithWrongObjectStoreName() {
+	public void testValidateConfigWithWrongObjectStoreName() {
 		HashMap map = new HashMap();
 		String[] fiels = { "login", "Password", "object_store",
 				"path_to_WcmApiConfig", "object_factory",
@@ -91,7 +88,7 @@ public class FileConnectorTypeTest extends TestCase {
 						"<p><font color=\"#FF0000\">Could not connect to the remote server. Please check the Object Store name."));
 	}
 
-	public void estValidateConfigWithWrongusername() {
+	public void testValidateConfigWithWrongusername() {
 		HashMap map = new HashMap();
 		String[] fiels = { "login", "Password", "object_store",
 				"path_to_WcmApiConfig", "object_factory",
@@ -116,7 +113,7 @@ public class FileConnectorTypeTest extends TestCase {
 						"<p><font color=\"#FF0000\">Invalid credentials. Please enter correct credentials."));
 	}
 
-	public void estValidateConfigWithWrongServerOfWorkplaceUrl() {
+	public void testValidateConfigWithWrongServerOfWorkplaceUrl() {
 		HashMap map = new HashMap();
 		String[] fiels = { "login", "Password", "object_store",
 				"path_to_WcmApiConfig", "object_factory",
@@ -143,7 +140,7 @@ public class FileConnectorTypeTest extends TestCase {
 						"<p><font color=\"#FF0000\">Could not connect to the Workplace. Please check the Display URL value"));
 	}
 
-	public void estValidateConfigWithWrongWorkplaceUrl() {
+	public void testValidateConfigWithWrongWorkplaceUrl() {
 		HashMap map = new HashMap();
 		String[] fiels = { "login", "Password", "object_store",
 				"path_to_WcmApiConfig", "object_factory",
@@ -156,7 +153,7 @@ public class FileConnectorTypeTest extends TestCase {
 		map.put("path_to_WcmApiConfig", FnConnection.pathToWcmApiConfig);
 		map
 				.put("workplace_display_url",
-						"http://xyz.co.in:8080/Workplac/");
+						"http://swp-vm-fnet352:8080/Workplac/");
 		map.put("is_public", "false");
 		map.put("additional_where_clause", FnConnection.additionalWhereClause);
 		map.put("authentication_type", "API");
@@ -174,7 +171,7 @@ public class FileConnectorTypeTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.FileConnectorType.getPopulatedConfigForm(Map,
 	 * String)'
 	 */
-	public void estGetPopulatedConfigForm() {
+	public void testGetPopulatedConfigForm() {
 		FileConnectorType test = new FileConnectorType();
 		HashMap map = new HashMap();
 		String[] fiels = { "login", "Password", "object_store",
@@ -188,18 +185,18 @@ public class FileConnectorTypeTest extends TestCase {
 		map.put("object_store", FnConnection.objectStoreName);
 		map.put("path_to_WcmApiConfig", FnConnection.pathToWcmApiConfig);
 		map.put("workplace_display_url",
-				"http://xyz.co.in:8080/Workplace/");
+				"http://swp-vm-fnet352:8080/Workplace/");
 		map.put("is_public", "on");
 		map.put("additional_where_clause", FnConnection.additionalWhereClause);
 		map.put("authentication_type", "API");
 
 		String expectedForm = "<tr>\r\n"
-				+ "<td>Username</td>\r\n<td><input type=\"text\" size=\"50\" name=\"login\" value=\"xyz\"/></td>\r\n</tr>"
-				+ "\r\n<tr>\r\n<td>Password</td>\r\n<td><input type=\"Password\" name=\"Password\" value=\"xyz\"/></td>"
-				+ "\r\n</tr>\r\n<tr>\r\n<td>Object store</td>\r\n<td><input type=\"text\" size=\"50\" name=\"object_store\" value=\"FilenetObjectStore\"/></td>"
+				+ "<td>Username</td>\r\n<td><input type=\"text\" size=\"50\" name=\"login\" value=\"P8Admin\"/></td>\r\n</tr>"
+				+ "\r\n<tr>\r\n<td>Password</td>\r\n<td><input type=\"Password\" name=\"Password\" value=\"UnDeuxTrois456\"/></td>"
+				+ "\r\n</tr>\r\n<tr>\r\n<td>Object store</td>\r\n<td><input type=\"text\" size=\"50\" name=\"object_store\" value=\"GSA_Filenet\"/></td>"
 				+ "\r\n</tr>\r\n<tr>\r\n<td><input type=\"hidden\" name=\"path_to_WcmApiConfig\" value=\"WcmApiConfig.properties\"/></td>\r\n</tr>\r\n<tr>\r\n"
 				+ "<td><input type=\"hidden\" name=\"object_factory\" value=\"com.google.enterprise.connector.file.filejavawrap.FnObjectFactory\"/></td>"
-				+ "\r\n</tr>\r\n<tr>\r\n<td>Workplace URL</td>\r\n<td><input type=\"text\" size=\"50\" name=\"workplace_display_url\" value=\"http://xyz.co.in:8080/Workplace/\"/></td>"
+				+ "\r\n</tr>\r\n<tr>\r\n<td>Workplace URL</td>\r\n<td><input type=\"text\" size=\"50\" name=\"workplace_display_url\" value=\"http://swp-vm-fnet352:8080/Workplace/\"/></td>"
 				+ "\r\n</tr>\r\n<tr>\r\n<td><input type=CHECKBOX name=\"is_public\" CHECKED/>Make public</td>\r\n</tr>\r\n"
 				+ "<tr>\r\n<td><input type=\"hidden\" value=\"false\" name=\"is_public\"/></td>\r\n</tr>\r\n"
 				+ "<tr>\r\n<td><input type=\"hidden\" name=\"additional_where_clause\" value=\"and Document.This INSUBFOLDER '/testdata'\"/></td>\r\n</tr>"
@@ -214,7 +211,7 @@ public class FileConnectorTypeTest extends TestCase {
 	 * 'com.google.enterprise.connector.file.FileConnectorType.getPopulatedConfigForm(Map,
 	 * String)'
 	 */
-	public void estGetPopulatedConfigFormWihtoutIsPublic() {
+	public void testGetPopulatedConfigFormWihtoutIsPublic() {
 		FileConnectorType test = new FileConnectorType();
 		HashMap map = new HashMap();
 		String[] fiels = { "login", "Password", "object_store",
@@ -228,17 +225,17 @@ public class FileConnectorTypeTest extends TestCase {
 		map.put("object_store", FnConnection.objectStoreName);
 		map.put("path_to_WcmApiConfig", FnConnection.pathToWcmApiConfig);
 		map.put("workplace_display_url",
-				"http://xyz.co.in:8080/Workplace/");
+				"http://swp-vm-fnet352:8080/Workplace/");
 		map.put("additional_where_clause", FnConnection.additionalWhereClause);
 		map.put("authentication_type", "API");
 
 		String expectedForm = "<tr>\r\n"
-				+ "<td>Username</td>\r\n<td><input type=\"text\" size=\"50\" name=\"login\" value=\"xyz\"/></td>\r\n</tr>"
-				+ "\r\n<tr>\r\n<td>Password</td>\r\n<td><input type=\"Password\" name=\"Password\" value=\"xyz\"/></td>"
-				+ "\r\n</tr>\r\n<tr>\r\n<td>Object store</td>\r\n<td><input type=\"text\" size=\"50\" name=\"object_store\" value=\"FilenetObjectStore\"/></td>"
+				+ "<td>Username</td>\r\n<td><input type=\"text\" size=\"50\" name=\"login\" value=\"P8Admin\"/></td>\r\n</tr>"
+				+ "\r\n<tr>\r\n<td>Password</td>\r\n<td><input type=\"Password\" name=\"Password\" value=\"UnDeuxTrois456\"/></td>"
+				+ "\r\n</tr>\r\n<tr>\r\n<td>Object store</td>\r\n<td><input type=\"text\" size=\"50\" name=\"object_store\" value=\"GSA_Filenet\"/></td>"
 				+ "\r\n</tr>\r\n<tr>\r\n<td><input type=\"hidden\" name=\"path_to_WcmApiConfig\" value=\"WcmApiConfig.properties\"/></td>\r\n</tr>\r\n<tr>\r\n"
 				+ "<td><input type=\"hidden\" name=\"object_factory\" value=\"com.google.enterprise.connector.file.filejavawrap.FnObjectFactory\"/></td>"
-				+ "\r\n</tr>\r\n<tr>\r\n<td>Workplace URL</td>\r\n<td><input type=\"text\" size=\"50\" name=\"workplace_display_url\" value=\"http://xyz.co.in:8080/Workplace/\"/></td>"
+				+ "\r\n</tr>\r\n<tr>\r\n<td>Workplace URL</td>\r\n<td><input type=\"text\" size=\"50\" name=\"workplace_display_url\" value=\"http://swp-vm-fnet352:8080/Workplace/\"/></td>"
 				+ "\r\n</tr>\r\n<tr>\r\n<td><input type=CHECKBOX name=\"is_public\" />Make public</td>\r\n</tr>\r\n"
 				+ "<tr>\r\n<td><input type=\"hidden\" value=\"false\" name=\"is_public\"/></td>\r\n</tr>\r\n"
 				+ "<tr>\r\n<td><input type=\"hidden\" name=\"additional_where_clause\" value=\"and Document.This INSUBFOLDER '/testdata'\"/></td>\r\n</tr>"

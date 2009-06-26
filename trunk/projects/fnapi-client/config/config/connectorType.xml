@@ -5,7 +5,7 @@
 		class="com.google.enterprise.connector.file.FileConnectorType">
 		<property name="configKeys">
 			<list>
-				<value>login</value>
+				<value>username</value>
 				<value>Password</value>
 				<value>object_store</value>
 				<value>path_to_WcmApiConfig</value>

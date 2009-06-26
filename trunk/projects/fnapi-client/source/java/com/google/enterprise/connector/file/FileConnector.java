@@ -4,17 +4,16 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.enterprise.connector.file.FileSession;
 import com.google.enterprise.connector.spi.Connector;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
+
 
 public class FileConnector implements Connector {
 
 	private String object_factory;
 
-	private String login;
+	private String username;
 
 	private String password;
 
@@ -41,35 +40,37 @@ public class FileConnector implements Connector {
 		logger = Logger.getLogger(FileConnectorType.class.getName());
 	}
 	
-	public Session login() throws RepositoryLoginException, RepositoryException {
+	public Session login() throws RepositoryException {
 		Session sess = null;
-		if (!(object_factory == null || login == null || password == null
+		if (!(object_factory == null || username == null || password == null
 				|| object_store == null || workplace_display_url == null)) {
 
-			sess = new FileSession(object_factory, login, password,
+			logger.info("creating FileNet session");
+			sess = new FileSession(object_factory, username, password,
 					object_store, path_to_WcmApiConfig, workplace_display_url,
 					is_public.equals("on"), additional_where_clause,
 					included_meta, excluded_meta);
+			logger.info("FileNet Seesion creation succeeded");
 		}
 		return sess;
 
 	}
 
-	public String getLogin() {
-		return login;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setLogin(String login) {
-		this.login = login;
-		logger.log(Level.CONFIG,"Set login to "+login);
+	public void setUsername(String refUsername) {
+		this.username = refUsername;
+		logger.log(Level.CONFIG,"Set login to "+refUsername);
 	}
 
 	public String getPassword() {
 		return password;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setPassword(String refPassword) {
+		this.password = refPassword;
 		logger.log(Level.CONFIG,"Set password");
 	}
 

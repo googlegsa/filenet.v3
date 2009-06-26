@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IDocument;
@@ -27,30 +28,22 @@ import com.google.enterprise.connector.spiimpl.StringValue;
 public class FileDocument implements Document {
 
 	private IObjectStore objectStore;
-
 	private IDocument document = null;
-
 	private boolean isPublic = false;
-
 	private String displayUrl;
-
 	private String docId;
 	private String versionId;
 	private String timeStamp;
-
 	private String vsDocId;
-
 	private HashSet included_meta = null;
-
 	private HashSet excluded_meta = null;
-
 	private static Logger logger = null;
 	{
 		logger = Logger.getLogger(FileDocument.class.getName());
 	}
-
 	private SpiConstants.ActionType action;
 	private final static String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+	private final static int ONE_SECOND = 1000;
 
 	public FileDocument(String docId, IObjectStore objectStore,
 			boolean isPublic, String displayUrl, HashSet included_meta,
@@ -96,14 +89,13 @@ public class FileDocument implements Document {
 			return;
 		}
 		IVersionSeries vSeries = null;
-		document = (IDocument) objectStore.getObject(IBaseObject.TYPE_DOCUMENT,
-				docId);
+		document = (IDocument) objectStore.getObject(IBaseObject.TYPE_DOCUMENT,	docId);
 
-		logger.fine("fetch doc " + docId);
+		logger.log(Level.FINE, "Fetch document for docId " + docId);
 
 		vSeries = document.getVersionSeries();
 		this.vsDocId = vSeries.getId();
-		logger.fine("fetch doc VSID: " + this.vsDocId);
+		logger.log(Level.FINE, "VersionSeriesID for document is : " + this.vsDocId);
 
 	}
 
@@ -112,78 +104,74 @@ public class FileDocument implements Document {
 
 		Date date = this.document.getPropertyDateValue(type);
 
-		logger.info("date ADD: "+date.toString());
+		logger.log(Level.FINE, "Property date of the document is: "+date.toString());
 		Calendar c = Calendar.getInstance();
 
 		c.setTime(date);
-		logger.info("calendar c after setTime : "+c);
+		logger.log(Level.FINE, "Calendar after setTime : "+c);
 		return c;
 	}
 
 	public Property findProperty(String name) throws RepositoryDocumentException{
 		HashSet set = new HashSet();
-		logger.entering("FileDocument","findProperty(String name)");
+		logger.log(Level.FINE, "Entering into function findProperty(String name)");
 		if (SpiConstants.ActionType.ADD.equals(action)) {
 			fetch();
 			if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
 				if(document.getContent()!= null){
 					set.add(new BinaryValue(document.getContent()));
 				}else{
-					logger.fine("getContent returns null");
+					logger.log(Level.FINE, "Content is null for docId "+this.docId);
 					set.add(null);
 				}			
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
-				logger.info("getting property "+name);
+				logger.log(Level.INFO, "Getting property: "+name);
 				set.add(new StringValue(this.displayUrl + vsDocId));
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
-				logger.info("getting property "+name);
+				logger.log(Level.INFO, "Getting property: "+name);
 				set.add(BooleanValue.makeBooleanValue(this.isPublic ? true : false));
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
-				logger.info("getting property "+name);
+				logger.log(Level.INFO, "Getting property: "+name);
 
 				Calendar tmpCal = Calendar.getInstance();
-				logger.info("tmpCal instance : " + tmpCal);
-
 				try {
 					Date tmpDt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(timeStamp);
 
 					long timeDateMod=tmpDt.getTime();
-					logger.fine("last modified date before setTime "+tmpDt.getSeconds());
-					tmpDt.setTime(timeDateMod+1000);
-					logger.fine("last modified date after setTime "+tmpDt.getSeconds());
+//					logger.log(Level.FINE,"Last Modified Mate before setTime "+tmpDt.getSeconds());
+					tmpDt.setTime(timeDateMod+ONE_SECOND);
+//					logger.fine("Last Modified Date after setTime "+tmpDt.getSeconds());
 					tmpCal.setTime(tmpDt);
 
-					logger.fine("Right last modified date : "+tmpDt.toString());
+//					logger.fine("Right last modified date : "+tmpDt.toString());
 				} catch (ParseException e) {
-					logger.warning("Warning: wrong last modified date");
+					logger.log(Level.WARNING,"Warning: Wrong Last Modified Date");
 					tmpCal.setTime(new Date());	
 				}
 
-				logger.info("tmpCal after setTime : " + tmpCal);
+//				logger.info("tmpCal after setTime : " + tmpCal);
 				FileDateValue tmpDtVal = new FileDateValue(tmpCal);
-				logger.fine("Last modify date value : " + tmpDtVal.toString());
+				logger.log(Level.FINE,"Last Modified Date value : " + tmpDtVal.toString());
 				set.add(tmpDtVal);
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
-				logger.info("getting property "+name);
+				logger.log(Level.INFO, "Getting property: "+name);
 				try {
-					set.add(new StringValue(document.getPropertyStringValue("MimeType")));
-					logger.fine("Property "+name+" : "+document.getPropertyStringValue("MimeType"));
+					set.add(new StringValue(document.getPropertyStringValue("MimeType")));					
 				} catch (RepositoryDocumentException e) {
-					logger.warning("RepositoryException thrown : "+ e+" on getting property : "+name);
-					logger.warning("RepositoryException thrown message : "+ e.getMessage());
+					logger.log(Level.WARNING,"Unable to get Property "+name+": "+ e.getLocalizedMessage());
 					set.add(null);
 				}
 
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_SEARCHURL.equals(name)) {
-				logger.info("getting property "+name);
+				logger.log(Level.INFO, "Getting property: "+name);
 				return null;
 			} else if(SpiConstants.PROPNAME_TITLE.equals(name)){
-				logger.info("getting property "+name);
+				logger.log(Level.INFO, "Getting property: "+name);
 //				try{
 //					set.add(new StringValue(document.getPropertyStringValue("Title")));
 //					logger.fine("Property "+name+" : "+document.getPropertyStringValue("Title"));
@@ -195,14 +183,14 @@ public class FileDocument implements Document {
 				return null;
 
 			}else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
-				logger.info("getting property "+name);
+				logger.log(Level.INFO, "Getting property: "+name);
 				set.add(new StringValue(vsDocId));
-				logger.fine("Property "+name+" : "+vsDocId);
+				logger.log(Level.FINE, "Property "+name+" : "+vsDocId);
 				return new FileDocumentProperty(name, set);
 			}else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
-				logger.info("getting property "+name);
+				logger.log(Level.INFO, "Getting property: "+name);
 				set.add(new StringValue(action.toString()));
-				logger.fine("Property "+name+" : "+action.toString());
+				logger.log(Level.FINE, "Property "+name+" : "+action.toString());
 				return new FileDocumentProperty(name, set);
 			}
 			try{
@@ -219,35 +207,37 @@ public class FileDocument implements Document {
 				
 				if(prop != null){
 					if (prop.equals("Binary")) {
-						logger.info("getting property "+name);
+						logger.log(Level.INFO, "Getting property: "+name);
 						set.add(new BinaryValue(document.getPropertyBinaryValue(name)));
 					} else if (prop.equals("Boolean")) {
-						logger.info("getting property "+name);
+						logger.log(Level.INFO, "Getting property: "+name);
 						set.add(BooleanValue.makeBooleanValue(document.getPropertyBooleanValue(name)));
-						logger.fine("Property "+name+" : "+BooleanValue.makeBooleanValue(document.getPropertyBooleanValue(name)));
+						logger.log(Level.FINE, "Property "+name+" : "+BooleanValue.makeBooleanValue(document.getPropertyBooleanValue(name)));
 					} else if (prop.equals("Date")) {
+						logger.log(Level.INFO, "Getting property: "+name);
 						set.add(new DateValue(getDate(name, document)));
-						logger.fine("Property "+name+" : "+getDate(name, document));
+						logger.log(Level.FINE, "Property "+name+" : "+getDate(name, document));
 					} else if (prop.equals("Double")) {
+						logger.log(Level.INFO, "Getting property: "+name);
 						set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
 					} else if (prop.equals("String")) {
+						logger.log(Level.INFO, "Getting property: "+name);
 						set.add(new StringValue(document.getPropertyStringValue(name)));
-						logger.fine("Property "+name+" : "+document.getPropertyStringValue(name));
+						logger.log(Level.FINE, "Property "+name+" : "+document.getPropertyStringValue(name));
 					} else if (prop.equals("Long")) {
-						logger.info("getting property "+name);
+						logger.log(Level.INFO, "Getting property: "+name);
 						set.add(new LongValue(document.getPropertyLongValue(name)));
 					}
 				}
 
 			}catch(RepositoryDocumentException re){
-				logger.warning("RepositoryException thrown : "+ re+" on getting property : "+name);
-				logger.warning("RepositoryException thrown message : "+ re.getMessage());
+				logger.log(Level.WARNING,"Unable to get Property "+name+": "+ re.getLocalizedMessage());
 				set.add(null);
 			}
 		}else{
 			if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
 				Calendar tmpCal = Calendar.getInstance();
-				logger.info("tmpCal del instance : " + tmpCal);
+				logger.log(Level.FINE, "Calendar del instance : " + tmpCal);
 
 
 				try {
@@ -255,21 +245,21 @@ public class FileDocument implements Document {
 
 					///
 					long timeDateMod=tmpDt.getTime();
-					logger.fine("last modified date before setTime "+tmpDt.getSeconds());
-					tmpDt.setTime(timeDateMod+1000);
-					logger.fine("last modified date after setTime "+tmpDt.getSeconds());
+//					logger.fine("last modified date before setTime "+tmpDt.getSeconds());
+					tmpDt.setTime(timeDateMod+ONE_SECOND);
+//					logger.fine("last modified date after setTime "+tmpDt.getSeconds());
 					tmpCal.setTime(tmpDt);
 
 
-					logger.fine("Right last modified date : "+tmpDt.toString());
+//					logger.fine("Right last modified date : "+tmpDt.toString());
 				} catch (ParseException e) {
 
-					logger.fine("Error: wrong last modified date");
+					logger.log(Level.WARNING, "Warning: wrong last modified date");
 					tmpCal.setTime(new Date());	
 				}
-				logger.info("tmpCal after setTime : " + tmpCal);
+//				logger.info("tmpCal after setTime : " + tmpCal);
 				FileDateValue tmpDtVal = new FileDateValue(tmpCal);
-				logger.fine("Last modify date value : " + tmpDtVal.toString());
+				logger.log(Level.FINE, "Last modify date value : " + tmpDtVal.toString());
 				set.add(tmpDtVal);
 				return new FileDocumentProperty(name, set);
 			}else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
@@ -277,12 +267,12 @@ public class FileDocument implements Document {
 				return new FileDocumentProperty(name, set);
 			}else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
 				set.add(new StringValue(versionId));
-				logger.fine("versionId : " + versionId);
+				logger.log(Level.FINE, "VersionId : " + versionId);
 				return new FileDocumentProperty(name, set);
 			}
 		}		
 
-		return new FileDocumentProperty( name, set);
+		return new FileDocumentProperty(name, set);
 	}
 
 	public Set getPropertyNames() throws RepositoryDocumentException {
@@ -292,10 +282,23 @@ public class FileDocument implements Document {
 		IProperty property;
 		for (int i = 0; i < documentProperties.size(); i++) {
 			property = (IProperty) documentProperties.get(i);
-			if ((!excluded_meta.contains(property.getName()) || included_meta
-					.contains(property.getName()))
-					&& (property.getValue() != null)) {
-				properties.add(property.getName());
+			//Added by Pankaj on 06/05/09 to solve the include/exclude metadata policy
+			if(property.getValue() != null){
+				if(included_meta.size() != 0){
+					//includeMeta - exludeMeta
+					logger.log(Level.FINE, "Metadata set will be (includeMeta - exludeMeta)");
+					if ((!excluded_meta.contains(property.getName()) 
+							&& included_meta.contains(property.getName()))){
+						properties.add(property.getName());
+					}
+				}else {
+					//superSet - exludeMeta
+					logger.log(Level.FINE, "Metadata set will be (superSet - exludeMeta)");
+					if ((!excluded_meta.contains(property.getName()) 
+							|| included_meta.contains(property.getName()))){
+						properties.add(property.getName());
+					}
+				}
 			}
 		}
 		return properties;

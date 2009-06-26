@@ -1,7 +1,11 @@
 package com.google.enterprise.connector.file.filejavawrap;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.filenet.wcm.api.Document;
 import com.filenet.wcm.api.GettableObject;
+import com.filenet.wcm.api.InsufficientPermissionException;
 import com.filenet.wcm.api.ObjectStore;
 import com.filenet.wcm.api.RemoteServerException;
 import com.filenet.wcm.api.VersionSeries;
@@ -12,7 +16,10 @@ import com.filenet.wcm.api.BaseObject;
 
 public class FnObjectStore implements IObjectStore {
 	private ObjectStore objectStore;
-
+	private static Logger logger = null;
+	{
+		logger = Logger.getLogger(FnDocument.class.getName());
+	}
 	public FnObjectStore(ObjectStore objectStore) {
 		this.objectStore = objectStore;
 
@@ -41,6 +48,10 @@ public class FnObjectStore implements IObjectStore {
 		try {
 			objectStoreName = this.objectStore.getName();
 		} catch (RemoteServerException e) {
+			logger.log(Level.WARNING, "Unable to connect to the remote server");
+			throw new RepositoryException(e);
+		}catch(InsufficientPermissionException e){
+			logger.log(Level.WARNING, "User does not have sufficient permissions to access the Object Store");
 			throw new RepositoryException(e);
 		}
 		return objectStoreName;

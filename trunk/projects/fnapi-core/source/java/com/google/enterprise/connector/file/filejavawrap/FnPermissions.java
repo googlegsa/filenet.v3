@@ -1,6 +1,7 @@
 package com.google.enterprise.connector.file.filejavawrap;
 
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.enterprise.connector.file.filewrap.IPermissions;
@@ -27,10 +28,10 @@ public class FnPermissions implements IPermissions {
 		logger = Logger.getLogger(FnPermissions.class.getName());
 	}
 
-	public FnPermissions(EntireNetwork en, Permissions perms) {
-		logger.finest("FnPermissions:" + perms.toString());
-		this.en = en;
-		this.perms = perms;
+	public FnPermissions(EntireNetwork refEn, Permissions refPerms) {
+		logger.finest("FnPermissions:" + refPerms.toString());
+		this.en = refEn;
+		this.perms = refPerms;
 	}
 
 	public boolean authorize(String username) {
@@ -45,8 +46,10 @@ public class FnPermissions implements IPermissions {
 				if (perm.getGranteeType() == BaseObject.TYPE_USER) {
 					if (granteeName.equalsIgnoreCase(username)
 							|| granteeName.split("@")[0]
-									.equalsIgnoreCase(username))
+									.equalsIgnoreCase(username)){
+						logger.log(Level.INFO, "Authorization for user: " + username + " is Successful");
 						return true;
+					}
 				} else if (perm.getGranteeType() == BaseObject.TYPE_GROUP) { // GROUP
 					Groups groups = en.getUserRealm().findGroups(
 							perm.getGranteeName().split("@")[0],
@@ -62,12 +65,15 @@ public class FnPermissions implements IPermissions {
 
 					if (group != null) {
 						found = searchUserInGroup(username, group);
-						if (found)
+						if (found){
+							logger.log(Level.INFO, "Authorization for user: " + username + " is Successful");
 							return true;
+						}
 					}
 				}
 			}
 		}
+		logger.log(Level.INFO, "Authorization for user: " + username + " FAILED");
 		return false;
 	}
 
@@ -89,8 +95,9 @@ public class FnPermissions implements IPermissions {
 		while (itGroup.hasNext()) {
 			subGroup = (Group) itGroup.next();
 			found = searchUserInGroup(username, subGroup);
-			if (found)
+			if (found){
 				return true;
+			}
 		}
 		return false;
 	}
