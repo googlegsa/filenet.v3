@@ -6,9 +6,7 @@ import java.util.Date;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.logging.Logger;
-
 import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
@@ -18,7 +16,6 @@ import com.google.enterprise.connector.file.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
 import com.google.enterprise.connector.spiimpl.BooleanValue;
@@ -36,11 +33,11 @@ public class FileDocument implements Document {
 	private boolean isPublic = false;
 
 	private String displayUrl;
-    
+
 	private String docId;
 	private String versionId;
 	private String timeStamp;
-	
+
 	private String vsDocId;
 
 	private HashSet included_meta = null;
@@ -51,8 +48,9 @@ public class FileDocument implements Document {
 	{
 		logger = Logger.getLogger(FileDocument.class.getName());
 	}
-	
+
 	private SpiConstants.ActionType action;
+	private final static String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
 	public FileDocument(String docId, IObjectStore objectStore,
 			boolean isPublic, String displayUrl, HashSet included_meta,
@@ -65,7 +63,7 @@ public class FileDocument implements Document {
 		this.excluded_meta = excluded_meta;
 		this.action=action;
 	}
-	
+
 	public FileDocument(String docId, String timeStamp, IObjectStore objectStore,
 			boolean isPublic, String displayUrl, HashSet included_meta,
 			HashSet excluded_meta, SpiConstants.ActionType action) {
@@ -78,7 +76,7 @@ public class FileDocument implements Document {
 		this.excluded_meta = excluded_meta;
 		this.action=action;
 	}
-	
+
 	public FileDocument(String docId, String commonVersionId, String timeStamp, IObjectStore objectStore,
 			boolean isPublic, String displayUrl, HashSet included_meta,
 			HashSet excluded_meta, SpiConstants.ActionType action) {
@@ -102,15 +100,15 @@ public class FileDocument implements Document {
 				docId);
 
 		logger.fine("fetch doc " + docId);
-  
+
 		vSeries = document.getVersionSeries();
-        this.vsDocId = vSeries.getId();
-    	logger.fine("fetch doc VSID: " + this.vsDocId);
-       
+		this.vsDocId = vSeries.getId();
+		logger.fine("fetch doc VSID: " + this.vsDocId);
+
 	}
 
 	private Calendar getDate(String type, IDocument document)
-			throws IllegalArgumentException, RepositoryDocumentException {
+	throws IllegalArgumentException, RepositoryDocumentException {
 
 		Date date = this.document.getPropertyDateValue(type);
 
@@ -124,16 +122,16 @@ public class FileDocument implements Document {
 
 	public Property findProperty(String name) throws RepositoryDocumentException{
 		HashSet set = new HashSet();
-		logger.info("in findProperty");
+		logger.entering("FileDocument","findProperty(String name)");
 		if (SpiConstants.ActionType.ADD.equals(action)) {
 			fetch();
 			if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
-						if(document.getContent()!= null){
-							set.add(new BinaryValue(document.getContent()));
-						}else{
-							logger.fine("getContent returns null");
-							set.add(null);
-						}			
+				if(document.getContent()!= null){
+					set.add(new BinaryValue(document.getContent()));
+				}else{
+					logger.fine("getContent returns null");
+					set.add(null);
+				}			
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
 				logger.info("getting property "+name);
@@ -145,13 +143,13 @@ public class FileDocument implements Document {
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
 				logger.info("getting property "+name);
-			
+
 				Calendar tmpCal = Calendar.getInstance();
 				logger.info("tmpCal instance : " + tmpCal);
-				
+
 				try {
 					Date tmpDt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(timeStamp);
-					
+
 					long timeDateMod=tmpDt.getTime();
 					logger.fine("last modified date before setTime "+tmpDt.getSeconds());
 					tmpDt.setTime(timeDateMod+1000);
@@ -160,10 +158,10 @@ public class FileDocument implements Document {
 
 					logger.fine("Right last modified date : "+tmpDt.toString());
 				} catch (ParseException e) {
-					logger.fine("Error: wrong last modified date");
+					logger.warning("Warning: wrong last modified date");
 					tmpCal.setTime(new Date());	
 				}
-				
+
 				logger.info("tmpCal after setTime : " + tmpCal);
 				FileDateValue tmpDtVal = new FileDateValue(tmpCal);
 				logger.fine("Last modify date value : " + tmpDtVal.toString());
@@ -179,12 +177,24 @@ public class FileDocument implements Document {
 					logger.warning("RepositoryException thrown message : "+ e.getMessage());
 					set.add(null);
 				}
-				
+
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_SEARCHURL.equals(name)) {
 				logger.info("getting property "+name);
 				return null;
-			} else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
+			} else if(SpiConstants.PROPNAME_TITLE.equals(name)){
+				logger.info("getting property "+name);
+//				try{
+//					set.add(new StringValue(document.getPropertyStringValue("Title")));
+//					logger.fine("Property "+name+" : "+document.getPropertyStringValue("Title"));
+//				} catch(RepositoryDocumentException e){
+//					logger.warning("RepositoryException thrown : "+ e+" on getting property : "+name);
+//					logger.warning("RepositoryException thrown message : "+ e.getMessage());
+//					set.add(null);
+//				}
+				return null;
+
+			}else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
 				logger.info("getting property "+name);
 				set.add(new StringValue(vsDocId));
 				logger.fine("Property "+name+" : "+vsDocId);
@@ -200,35 +210,35 @@ public class FileDocument implements Document {
 				String[] names = { name };
 				IProperties props = document.getProperties(names);
 				IProperty property = null;
-	
+
 				int ps = props.size();
 				for (int i = 0; i < ps; i++) {
 					property = props.get(i);
 					prop = property.getValueType();
 				}
-	
-				if (prop.equals("Binary")) {
-					logger.info("getting property "+name);
-					set.add(new BinaryValue(document.getPropertyBinaryValue(name)));
-				} else if (prop.equals("Boolean")) {
-					logger.info("getting property "+name);
-					set.add(BooleanValue.makeBooleanValue(document
-							.getPropertyBooleanValue(name)));
-					logger.fine("Property "+name+" : "+BooleanValue.makeBooleanValue(document
-							.getPropertyBooleanValue(name)));
-				} else if (prop.equals("Date")) {
-					set.add(new DateValue(getDate(name, document)));
-					logger.fine("Property "+name+" : "+getDate(name, document));
-				} else if (prop.equals("Double")) {
-					set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
-				} else if (prop.equals("String")) {
-					set.add(new StringValue(document.getPropertyStringValue(name)));
-					logger.fine("Property "+name+" : "+document.getPropertyStringValue(name));
-				} else if (prop.equals("Long")) {
-					logger.info("getting property "+name);
-					set.add(new LongValue(document.getPropertyLongValue(name)));
+				
+				if(prop != null){
+					if (prop.equals("Binary")) {
+						logger.info("getting property "+name);
+						set.add(new BinaryValue(document.getPropertyBinaryValue(name)));
+					} else if (prop.equals("Boolean")) {
+						logger.info("getting property "+name);
+						set.add(BooleanValue.makeBooleanValue(document.getPropertyBooleanValue(name)));
+						logger.fine("Property "+name+" : "+BooleanValue.makeBooleanValue(document.getPropertyBooleanValue(name)));
+					} else if (prop.equals("Date")) {
+						set.add(new DateValue(getDate(name, document)));
+						logger.fine("Property "+name+" : "+getDate(name, document));
+					} else if (prop.equals("Double")) {
+						set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
+					} else if (prop.equals("String")) {
+						set.add(new StringValue(document.getPropertyStringValue(name)));
+						logger.fine("Property "+name+" : "+document.getPropertyStringValue(name));
+					} else if (prop.equals("Long")) {
+						logger.info("getting property "+name);
+						set.add(new LongValue(document.getPropertyLongValue(name)));
+					}
 				}
-			
+
 			}catch(RepositoryDocumentException re){
 				logger.warning("RepositoryException thrown : "+ re+" on getting property : "+name);
 				logger.warning("RepositoryException thrown message : "+ re.getMessage());
@@ -238,22 +248,22 @@ public class FileDocument implements Document {
 			if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
 				Calendar tmpCal = Calendar.getInstance();
 				logger.info("tmpCal del instance : " + tmpCal);
-				
-				
+
+
 				try {
-					Date tmpDt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(timeStamp);
-					
+					Date tmpDt = new SimpleDateFormat(DATE_FORMAT).parse(timeStamp);
+
 					///
 					long timeDateMod=tmpDt.getTime();
 					logger.fine("last modified date before setTime "+tmpDt.getSeconds());
 					tmpDt.setTime(timeDateMod+1000);
 					logger.fine("last modified date after setTime "+tmpDt.getSeconds());
 					tmpCal.setTime(tmpDt);
-		
-					
+
+
 					logger.fine("Right last modified date : "+tmpDt.toString());
 				} catch (ParseException e) {
-					
+
 					logger.fine("Error: wrong last modified date");
 					tmpCal.setTime(new Date());	
 				}
@@ -271,7 +281,7 @@ public class FileDocument implements Document {
 				return new FileDocumentProperty(name, set);
 			}
 		}		
-		
+
 		return new FileDocumentProperty( name, set);
 	}
 

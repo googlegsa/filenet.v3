@@ -1,22 +1,16 @@
 package com.google.enterprise.connector.file;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import org.w3c.dom.Document;
-
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
@@ -27,41 +21,30 @@ import com.google.enterprise.connector.spi.SpiConstants;
 public class FileDocumentList implements DocumentList {
 
 	private static final long serialVersionUID = 1L;
-
+	private static final String RS_DATA = "rs:data";
+	private static final String RS_ROW = "z:row";
+	private static final String ID = "Id";
+	private static final String UUID = "uuid";
+	private static final String LAST_MODIFIED_DATE = "lastModified";
+	private static final String UUID_TO_DELETE = "uuidToDelete";
+	private static final String LAST_REMOVE_DATE = "lastRemoveDate";
 	private Document resultDoc = null;
-	
 	private Document resultDocToDelete = null;
-
 	private FileDocument fileDocument = null;
-	
 	private FileDocument fileDocumentToDelete = null;
-
 	private IObjectStore objectStore = null;
-
 	private String docId = "";
-	
 	private String displayUrl;
-	
 	private String lastCheckPoint;
-	
 	private String dateFirstPush;
-	
 	private String docIdToDelete = "";
-
 	private boolean isPublic;
-
 	private HashSet included_meta;
-
 	private HashSet excluded_meta;
-
 	private int index = -1;
-
 	private NodeList data = null;
-	
 	private NodeList dataToDelete = null;
-
-	private static Logger logger = Logger.getLogger(FileDocumentList.class
-			.getName());
+	private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
 
 	public FileDocumentList(Document document,Document documentToDelete, IObjectStore objectStore,
 			boolean isPublic, String displayUrl, HashSet included_meta,
@@ -71,14 +54,14 @@ public class FileDocumentList implements DocumentList {
 		this.objectStore = objectStore;
 		this.displayUrl = displayUrl;
 		this.index = 1;
-		this.data = resultDoc.getElementsByTagName("rs:data").item(0)
+		this.data = resultDoc.getElementsByTagName(RS_DATA).item(0)
 				.getChildNodes();
-		logger.info(resultDoc.getElementsByTagName("z:row").getLength()
+		logger.info(resultDoc.getElementsByTagName(RS_ROW).getLength()
 				+ " new documents found");
 		logger.info("data : "+data);
 		
-		this.dataToDelete = resultDocToDelete.getElementsByTagName("rs:data").item(0).getChildNodes();
-		logger.info(resultDocToDelete.getElementsByTagName("z:row").getLength()
+		this.dataToDelete = resultDocToDelete.getElementsByTagName(RS_DATA).item(0).getChildNodes();
+		logger.info(resultDocToDelete.getElementsByTagName(RS_ROW).getLength()
 				+ " new documents to remove found");
 		logger.info("resultDocToDelete : "+resultDocToDelete.getChildNodes());
 		
@@ -94,16 +77,16 @@ public class FileDocumentList implements DocumentList {
 			throws RepositoryDocumentException {
 		int dataLen = data.getLength();
 		
-		logger.info("Next Document ");
-		logger.info("data.getLength() " + data.getLength());
-		logger.info("dataToDelete.getLength() " + dataToDelete.getLength());
-		logger.info("index " + index);
+		logger.entering("FileDocumentList", "nextDocument()");
+		logger.fine("data.getLength() " + data.getLength());
+		logger.fine("dataToDelete.getLength() " + dataToDelete.getLength());
+		logger.fine("index " + index);
 		
 		if (index > -1 && index < dataLen) {
-			logger.info("Next Document : IF");
+			
 			NamedNodeMap nodeMap = data.item(index).getAttributes();
 			for (int j = 0; j < nodeMap.getLength(); j++) {
-				if (nodeMap.item(j).getNodeName().equals("Id")) {
+				if (nodeMap.item(j).getNodeName().equals(ID)) {
 					index++;
 					if (data.item(index).getNodeType() == Node.TEXT_NODE) {
 						index++;
@@ -130,34 +113,36 @@ public class FileDocumentList implements DocumentList {
 		} else if ((index >=dataLen) && index<(dataToDelete.getLength()+dataLen-1)) {
 			int indexDelete = index - dataLen + 1 ;
 			NamedNodeMap nodeMap = dataToDelete.item(indexDelete).getAttributes();
-			
 			for (int j = 0; j < nodeMap.getLength(); j++) {
-				
-				if (nodeMap.item(j).getNodeName().equals("Id")) {
+				if (nodeMap.item(j).getNodeName().equals(ID)) {
 					index++;
 					logger.info("dataToDelete.item(indexDelete).getNodeType() : "+dataToDelete.item(indexDelete).getNodeType());
+					logger.info("data.item(index)"+data.item(index));
 					
-					if (data.item(index).getNodeType() == Node.TEXT_NODE) {
-						index++;
-					}
-					try {					
-						docIdToDelete = (String) nodeMap.item(j).getNodeValue();
-						logger.info("docIdToDelete : "+ docIdToDelete);
-						
-						String commonVersionId = nodeMap.item(j+1).getNodeValue();
-						String dateLastModified = nodeMap.item(j-1).getNodeValue();
-						logger.info("dateLastModified : "+dateLastModified);
-						
-						fileDocumentToDelete = new FileDocument(docIdToDelete, commonVersionId, dateLastModified, this.objectStore, this.isPublic,
-								this.displayUrl, this.included_meta,
-								this.excluded_meta, SpiConstants.ActionType.DELETE);
-						index++;
-						return fileDocumentToDelete;
-					} catch (DOMException e) {
-//						 skip this document
-						logger.severe("Unable to retrieve docId for item: " + e);
-						throw new RepositoryDocumentException(
-								"Unable to retrieve docId for item", e);
+//					if(data.item(index) != null){
+					if(dataToDelete.item(indexDelete) != null){
+//						if (data.item(index).getNodeType() == Node.TEXT_NODE) {
+						if (dataToDelete.item(indexDelete).getNodeType() == Node.TEXT_NODE) {
+							index++;
+						}
+						try {	
+							docIdToDelete = (String) nodeMap.item(j).getNodeValue();
+							logger.info("docIdToDelete : "+ docIdToDelete);
+							String commonVersionId = nodeMap.item(j+1).getNodeValue();
+							String dateLastModified = nodeMap.item(j-1).getNodeValue();
+							logger.info("dateLastModified : "+dateLastModified);
+
+							fileDocumentToDelete = new FileDocument(docIdToDelete, commonVersionId, dateLastModified, this.objectStore, this.isPublic,
+									this.displayUrl, this.included_meta,
+									this.excluded_meta, SpiConstants.ActionType.DELETE);
+							index++;
+							return fileDocumentToDelete;
+						} catch (DOMException e) {
+//							skip this document
+							logger.severe("Unable to retrieve docId for item: " + e);
+							throw new RepositoryDocumentException(
+									"Unable to retrieve docId for item", e);
+						}
 					}
 				}
 			}
@@ -198,8 +183,8 @@ public class FileDocumentList implements DocumentList {
 			JSONObject jo;
 			try {
 				jo = new JSONObject(lastCheckPoint);
-				docId = jo.getString("uuid");
-				dateString = jo.getString("lastModified");
+				docId = jo.getString(UUID);
+				dateString = jo.getString(LAST_MODIFIED_DATE);
 			}catch (JSONException e) {
 				logger.severe("JSON exception, while getting last checkpoint.");
 			}
@@ -231,8 +216,8 @@ public class FileDocumentList implements DocumentList {
 			JSONObject jo;
 			try {
 				jo = new JSONObject(lastCheckPoint);
-				dateStringDocumentToDelete = jo.getString("lastRemoveDate");
-				docIdToDelete = jo.getString("uuidToDelete");
+				dateStringDocumentToDelete = jo.getString(LAST_REMOVE_DATE);
+				docIdToDelete = jo.getString(UUID_TO_DELETE);
 			} catch (JSONException e) {
 				logger.severe("JSON exception, while getting last removed date.");
 			}
@@ -247,10 +232,10 @@ public class FileDocumentList implements DocumentList {
 		String result = null;
 		try {
 			JSONObject jo = new JSONObject();
-			jo.put("uuid", docId);
-			jo.put("lastModified", dateString);
-			jo.put("uuidToDelete", docIdToDelete);
-			jo.put("lastRemoveDate", dateStringDocumentToDelete);
+			jo.put(UUID, docId);
+			jo.put(LAST_MODIFIED_DATE, dateString);
+			jo.put(UUID_TO_DELETE, docIdToDelete);
+			jo.put(LAST_REMOVE_DATE, dateStringDocumentToDelete);
 			result = jo.toString();
 		} catch (JSONException e) {
 			throw new RepositoryException("Unexpected JSON problem", e);
