@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="Filenet_P8_3.5.2"
+		class="com.google.enterprise.connector.file.FileConnectorType">
+		<property name="configKeys">
+			<list>
+				<value>login</value>
+				<value>Password</value>
+				<value>object_store</value>
+				<value>path_to_WcmApiConfig</value>
+				<value>workplace_display_url</value>
+				<value>object_factory</value>
+				<value>authentication_type</value>
+				<value>additional_where_clause</value>
+				<value>is_public</value>
+			</list>
+		</property>
+	</bean>
+</beans>
