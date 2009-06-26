@@ -5,13 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.google.enterprise.connector.file.FileAuthenticationIdentity;
-import com.google.enterprise.connector.file.FileAuthenticationManager;
 import com.google.enterprise.connector.file.FileAuthorizationManager;
 import com.google.enterprise.connector.file.FileConnector;
 import com.google.enterprise.connector.file.FileSession;
-import com.google.enterprise.connector.spi.AuthenticationResponse;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
@@ -23,12 +20,12 @@ public class FileAuthorizationManagerTest extends TestCase {
 	public void testAuthorizeDocids() throws RepositoryLoginException, RepositoryException {
 	
 		FileConnector connec = new FileConnector();
-		connec.setLogin(TestConnection.adminUsername);
+		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
 		connec.setObject_store(TestConnection.objectStore);
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
-		connec.setContent_engine_uri(TestConnection.uri);
+		connec.setContent_engine_url(TestConnection.uri);
 		
 		FileSession fs = (FileSession)connec.login();
 		FileAuthorizationManager fam = (FileAuthorizationManager) fs.getAuthorizationManager();

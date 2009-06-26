@@ -41,9 +41,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 public class FileTraversalManager implements TraversalManager {
 
 	private static Logger logger;
-	
 	private static String dateFirstPush ;
-	
 	static{
 		logger = Logger.getLogger(FileTraversalManager.class.getName());
 	}
@@ -51,21 +49,15 @@ public class FileTraversalManager implements TraversalManager {
 	private IObjectStore objectStore;
 	private int batchint;
 	private ISession fileSession;
-	
 	private String tableName = "Document";
 	private String order_by = " ORDER BY DateLastModified,Id";
 	private String whereClause = " AND ((DateLastModified={0} AND (''{1}''<id)) OR (DateLastModified>{0}))";
-	
 	private String orderByToDelete  = " ORDER BY "+PropertyNames.DATE_CREATED +","+PropertyNames.ID;
 	private String whereClauseToDelete = " WHERE (("+PropertyNames.DATE_CREATED +"={0} AND (''{1}''<"+PropertyNames.ID+")) OR ("+PropertyNames.DATE_CREATED +">{0}))";
 	private String whereClauseToDeleteOnlyDate = " WHERE ("+PropertyNames.DATE_CREATED +">{0})";
-		
 	private String additionalWhereClause;
-	
 	private String displayUrl;
-
 	private boolean isPublic;
-
 	private HashSet included_meta;
 	private HashSet excluded_meta;
 
@@ -104,7 +96,7 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	public DocumentList resumeTraversal(String checkPoint) throws RepositoryException {
-		logger.info((checkPoint == null) ? "Start traversal" : "Resume traversal");
+		logger.info((checkPoint == null) ? "Starting traversal..." : "Resuming traversal...");
 		DocumentList resultSet = null;
 		objectStore.refreshSUserContext();
 		
@@ -112,16 +104,20 @@ public class FileTraversalManager implements TraversalManager {
 		String query = buildQueryString(checkPoint);
 		
 		ISearch search = fileObjectFactory.getSearch(objectStore);
-		logger.log(Level.INFO, "Query add : " + query);
+		logger.log(Level.INFO, "Query to Add document: " + query);
 		IObjectSet objectSet = search.execute(query);
 				
 		//to delete
 		String queryStringToDelete = buildQueryToDelete(checkPoint);
 		
 		ISearch searchToDelete = fileObjectFactory.getSearch(objectStore);
-		logger.log(Level.INFO, "Query del : " + queryStringToDelete);
+		logger.log(Level.INFO, "Query to get deleted documents: " + queryStringToDelete);
 		IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
 		
+		logger.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
+		logger.log(Level.INFO, "Number of documents sent to GSA: "+objectSet.getSize());
+		logger.log(Level.INFO, "Number of documents whose index will be deleted from GSA: "+objectSetToDelete.getSize());
+
 		if ((objectSet.getSize() > 0) || (objectSetToDelete.getSize() > 0)) {
 			resultSet = new FileDocumentList(objectSet, objectSetToDelete, objectStore, this.isPublic,
 					this.displayUrl, this.included_meta, this.excluded_meta,dateFirstPush,checkPoint);
@@ -178,8 +174,6 @@ public class FileTraversalManager implements TraversalManager {
 			Date d=cal.getTime();
 			java.text.SimpleDateFormat dateStandard = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			dateFirstPush = dateStandard.format(d);
-			logger.info("buildQueryToDelete dateFirstPush : " + dateFirstPush);
-									
 			if (batchint > 0) {
 				query.append("TOP " + batchint + " ");
 			}
@@ -204,8 +198,8 @@ public class FileTraversalManager implements TraversalManager {
 		try {
 			jo = new JSONObject(checkPoint);
 		} catch (JSONException e) {
-			throw new IllegalArgumentException(
-					"checkPoint string does not parse as JSON: " + checkPoint);
+			logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: " + checkPoint);
+			throw new IllegalArgumentException("CheckPoint string does not parse as JSON: " + checkPoint);
 		}
 		String uuid = extractDocidFromCheckpoint(jo, checkPoint);
 		String c = extractNativeDateFromCheckpoint(jo, checkPoint);
@@ -221,8 +215,8 @@ public class FileTraversalManager implements TraversalManager {
 		try {
 			jo = new JSONObject(checkPoint);
 		} catch (JSONException e) {
-			throw new IllegalArgumentException(
-					"checkPoint string does not parse as JSON: " + checkPoint);
+			logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: " + checkPoint);
+			throw new IllegalArgumentException("CheckPoint string does not parse as JSON: " + checkPoint);
 		}
 		String uuid = extractDocidFromCheckpointToDelete(jo, checkPoint);
 		String c = extractNativeDateFromCheckpointToDelete(jo, checkPoint);
@@ -236,8 +230,8 @@ public class FileTraversalManager implements TraversalManager {
 		try {
 			uuid = jo.getString("uuidToDelete");
 		} catch (JSONException e) {
-			throw new IllegalArgumentException(
-					"could not get uuid from checkPoint string: " + checkPoint);
+			logger.log(Level.WARNING, "Could not get uuid from checkPoint string: " + checkPoint);
+			throw new IllegalArgumentException("Could not get uuid from checkPoint string: " + checkPoint);
 		}
 		return uuid;
 	}
@@ -245,14 +239,13 @@ public class FileTraversalManager implements TraversalManager {
 	protected String extractNativeDateFromCheckpointToDelete(JSONObject jo,
 			String checkPoint) {
 		String dateString = null;
-		Date d=null;
+//		Date d=null;
 		try {
 			dateString = jo.getString("lastRemoveDate");
 			//dateString = "2008-09-04T11:00:16.000";
 		}catch (JSONException e) {
-			throw new IllegalArgumentException(
-					"could not get lastmodify from checkPoint string: "
-					+ checkPoint);
+			logger.log(Level.WARNING, "Could not get last modified date from checkPoint string: " + checkPoint);
+			throw new IllegalArgumentException("Could not get last modified date from checkPoint string: " + checkPoint);
 		}
 
 		return dateString;
@@ -267,6 +260,8 @@ public class FileTraversalManager implements TraversalManager {
 		}else{
 			statement = MessageFormat.format(whereClauseToDelete, arguments);
 		}
+		logger.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
+		logger.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
 		return statement;
 	}
 
@@ -280,8 +275,8 @@ public class FileTraversalManager implements TraversalManager {
 		try {
 			uuid = jo.getString("uuid");
 		} catch (JSONException e) {
-			throw new IllegalArgumentException(
-					"could not get uuid from checkPoint string: " + checkPoint);
+			logger.log(Level.WARNING, "Could not get uuid from checkPoint string: " + checkPoint);
+			throw new IllegalArgumentException("Could not get uuid from checkPoint string: " + checkPoint);
 		}
 		return uuid;
 	}
@@ -293,9 +288,8 @@ public class FileTraversalManager implements TraversalManager {
 			dateString = jo.getString("lastModified");
 			//dateString = "2008-09-05T09:40:04.073";
 		} catch (JSONException e) {
-			throw new IllegalArgumentException(
-					"could not get lastmodify from checkPoint string: "
-							+ checkPoint);
+			logger.log(Level.WARNING, "Could not get last modified date from checkPoint string: " + checkPoint);
+			throw new IllegalArgumentException("Could not get last modified date from checkPoint string: " + checkPoint);
 		}
 
 		return dateString;
@@ -306,27 +300,26 @@ public class FileTraversalManager implements TraversalManager {
 
 		Object[] arguments = { c, uuid};
 		String statement = MessageFormat.format(whereClause, arguments);
+		logger.log(Level.INFO, "MakeCheckpointQueryString ID: " + uuid);
 		return statement;
 	}
 	private Document stringToDom(String xmlSource) throws RepositoryException {
 		DocumentBuilder builder = null;
 		try {
-			logger.info("In stringToDom");
-			DocumentBuilderFactory factory = DocumentBuilderFactory
-			.newInstance();
-
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 			builder = factory.newDocumentBuilder();
-
 			return builder.parse(new InputSource(new StringReader(xmlSource)));
-
 		} catch (ParserConfigurationException de) {
-			RepositoryException re = new RepositoryLoginException(de);
+			logger.log(Level.WARNING, "Unable to configure parser for parsing XML string");
+			RepositoryException re = new RepositoryLoginException("Unable to configure parser for parsing XML string", de);
 			throw re;
 		} catch (SAXException de) {
-			RepositoryException re = new RepositoryLoginException(de);
+			logger.log(Level.WARNING, "Unable to parse XML string");
+			RepositoryException re = new RepositoryLoginException("Unable to parse XML string", de);
 			throw re;
 		} catch (IOException de) {
-			RepositoryException re = new RepositoryLoginException(de);
+			logger.log(Level.WARNING, "XML source string to be parsed not found.");
+			RepositoryException re = new RepositoryLoginException("XML source string to be parsed not found.", de);
 			throw re;
 		}
 

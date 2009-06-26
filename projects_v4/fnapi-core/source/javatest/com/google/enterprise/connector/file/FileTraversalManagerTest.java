@@ -17,12 +17,12 @@ public class FileTraversalManagerTest extends TestCase {
 	
 	protected void setUp() throws RepositoryException {
 		FileConnector connec = new FileConnector();
-		connec.setLogin(TestConnection.adminUsername);
+		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
 		connec.setObject_store(TestConnection.objectStore);
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
-		connec.setContent_engine_uri(TestConnection.uri);
+		connec.setContent_engine_url(TestConnection.uri);
 		
 		fs = (FileSession)connec.login();
 		ftm = (FileTraversalManager) fs.getTraversalManager();

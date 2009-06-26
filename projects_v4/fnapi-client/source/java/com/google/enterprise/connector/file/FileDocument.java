@@ -1,25 +1,17 @@
 package com.google.enterprise.connector.file;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.google.enterprise.connector.file.filewrap.IBaseObject;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.IProperties;
-import com.google.enterprise.connector.file.filewrap.IProperty;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
 import com.google.enterprise.connector.spiimpl.BooleanValue;
@@ -28,30 +20,23 @@ import com.google.enterprise.connector.spiimpl.DoubleValue;
 import com.google.enterprise.connector.spiimpl.LongValue;
 import com.google.enterprise.connector.spiimpl.StringValue;
 import com.filenet.api.constants.ClassNames;
-import com.filenet.api.property.Properties;
 
 public class FileDocument implements Document {
 
 	private String docId;
-
 	private IObjectStore objectStore;
-
 	private IDocument document = null;
 	private boolean isPublic = false;
-
 	private String displayUrl;
 	private String versionId;
 	private Date timeStamp;
 	private String vsDocId;
-
 	private HashSet included_meta = null;
 	private HashSet excluded_meta = null;
-
 	private static Logger logger = null;
 	{
 		logger = Logger.getLogger(FileDocument.class.getName());
 	}
-
 	private SpiConstants.ActionType action;
 
 	public FileDocument(String docId, Date timeStamp,
@@ -82,129 +67,91 @@ public class FileDocument implements Document {
 		this.action = action;
 	}
 
-	private void fetch()  throws RepositoryDocumentException{
+	private void fetch() throws RepositoryDocumentException {
 		if (document != null) {
 			return;
 		}
-		document = (IDocument) objectStore
-				.getObject(ClassNames.DOCUMENT, docId);
-
+		document = (IDocument) objectStore.getObject(ClassNames.DOCUMENT, docId);
 		document.fetch(included_meta);
-
-		logger.fine("fetch doc " + docId);
-
+		logger.log(Level.FINE, "Fetch document for docId " + docId);
 		this.vsDocId = document.getVersionSeries().getId(action);
-		logger.fine("fetch doc VSID: " + this.vsDocId);
+		logger.log(Level.FINE, "VersionSeriesID for document is : " + this.vsDocId);
 	}
 
-	private Calendar getDate(String type) throws IllegalArgumentException, RepositoryDocumentException {
+	private Calendar getDate(String type) throws IllegalArgumentException,
+	RepositoryDocumentException {
 		Date date = this.document.getPropertyDateValue(type);
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);
 		return c;
 	}
 
-	public Property findProperty(String name) throws RepositoryDocumentException{
+	public Property findProperty(String name) throws RepositoryDocumentException {
 		HashSet set = new HashSet();
 
 		if (SpiConstants.ActionType.ADD.equals(action)) {
 			fetch();
 			if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
-				try{
-					set.add(new BinaryValue(document.getContent()));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}
+				logger.log(Level.FINEST, "Getting property: "+name);
+				set.add(new BinaryValue(document.getContent()));
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
+				logger.log(Level.FINEST, "Getting property: "+name);
 				set.add(new StringValue(this.displayUrl + vsDocId));
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
-				set.add(BooleanValue.makeBooleanValue(this.isPublic ? true
-						: false));
+				logger.log(Level.FINEST, "Getting property: "+name);
+				set.add(BooleanValue.makeBooleanValue(this.isPublic ? true : false));
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
+				logger.log(Level.FINEST, "Getting property: "+name);
 				DateValue tmpDtVal=new DateValue(getDate("DateLastModified"));
 				set.add(tmpDtVal);
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
-				try{
-					set.add(new StringValue(document.getPropertyStringValue("MimeType")));
-					logger.fine("Property " + name + " : "
-							+ document.getPropertyStringValue("MimeType"));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}
-				
+				set.add(new StringValue(document.getPropertyStringValue("MimeType")));
+				logger.log(Level.FINEST, "Getting property: "+name);
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_SEARCHURL.equals(name)) {
 				return null;
 			} else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
+				logger.log(Level.FINEST, "Getting property: "+name);
 				set.add(new StringValue(vsDocId));
-				logger.fine("Property " + name + " : " + vsDocId);
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
 				set.add(new StringValue(action.toString()));
-				logger.fine("Property " + name + " : " + action.toString());
+				logger.fine("Getting Property " + name + " : " + action.toString());
 				return new FileDocumentProperty(name, set);
 			}
-			
-			String type = null;
-			try{
-				type = document.getPropertyType(name);
-			}catch(RepositoryDocumentException e1){
-				type = null;
-			}
-			
+
+			String type = document.getPropertyType(name);
 			if (type == null) // unknows property name
 				return null;
 
 			if (type.equalsIgnoreCase("Binary")) {
-				try{
-					set.add(new BinaryValue(document.getPropertyBinaryValue(name)));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}	
+				logger.log(Level.FINEST, "Getting property: "+name);
+				set.add(new BinaryValue(document.getPropertyBinaryValue(name)));
 			} else if (type.equalsIgnoreCase("Boolean")) {
-				try{
-					set.add(BooleanValue.makeBooleanValue(document
-						.getPropertyBooleanValue(name)));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}	
+				logger.log(Level.FINEST, "Getting property: "+name);
+				set.add(BooleanValue.makeBooleanValue(document.getPropertyBooleanValue(name)));
 			} else if (type.equalsIgnoreCase("Date")) {
-				try{
-					set.add(new DateValue(getDate(name)));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}	
+				logger.log(Level.FINEST, "Getting property: "+name);
+				set.add(new DateValue(getDate(name)));
 			} else if (type.equalsIgnoreCase("Double")) {
-				try{
-					set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}	
-			} else if (type.equalsIgnoreCase("String")) {
-				try{
-					set.add(new StringValue(document.getPropertyStringValue(name)));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}	
+				logger.log(Level.FINEST, "Getting property: "+name);
+				set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
+//			} else if (type.equalsIgnoreCase("String")) {
+//				set.add(new StringValue(document.getPropertyStringValue(name)));
 			} else if (type.equalsIgnoreCase("guid")) {
-				try{
-					set.add(new StringValue(document.getPropertyGuidValue(name)));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}
+				logger.log(Level.FINEST, "Getting property: "+name);
+				set.add(new StringValue(document.getPropertyGuidValue(name)));
 			} else if (type.equalsIgnoreCase("Long")) {
-				try{
-					set.add(new LongValue(document.getPropertyLongValue(name)));
-				}catch(RepositoryDocumentException e1){
-					set.add(null);
-				}	
+				logger.log(Level.FINEST, "Getting property: "+name);
+				set.add(new LongValue(document.getPropertyLongValue(name)));
 			}
 		} else {
 			if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
+				logger.log(Level.FINEST, "Getting property: "+name);
 				Calendar tmpCal = Calendar.getInstance();
 				
 				long timeDateMod = timeStamp.getTime();
@@ -215,11 +162,13 @@ public class FileDocument implements Document {
 				set.add(tmpDtVal);
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
+				logger.log(Level.FINEST, "Getting property: "+name);
 				set.add(new StringValue(action.toString()));
 				return new FileDocumentProperty(name, set);
 			} else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
+				logger.log(Level.FINEST, "Getting property: "+name);
 				set.add(new StringValue(versionId));
-				logger.fine("versionId : " + versionId);
+//				logger.fine("versionId : " + versionId);
 				return new FileDocumentProperty(name, set);
 			}
 		}
@@ -227,6 +176,31 @@ public class FileDocument implements Document {
 	}
 
 	public Set getPropertyNames() throws RepositoryDocumentException {
-		return this.document.getPropertyName();
+		fetch();
+		HashSet properties = new HashSet();
+		Set documentProperties = this.document.getPropertyName();
+		String property;
+		for (Iterator iter = documentProperties.iterator(); iter.hasNext();) {
+			property = (String) iter.next();
+			if(property != null){
+				if(included_meta.size() != 0){
+					//includeMeta - exludeMeta
+					logger.log(Level.FINE, "Metadata set will be (includeMeta - exludeMeta)");
+					if ((!excluded_meta.contains(property) 
+							&& included_meta.contains(property))){
+						properties.add(property);
+					}
+				}else {
+					//superSet - exludeMeta
+					logger.log(Level.FINE, "Metadata set will be (superSet - exludeMeta)");
+					if ((!excluded_meta.contains(property) 
+							|| included_meta.contains(property))){
+						properties.add(property);
+					}
+				}
+			}
+		}
+		
+		return properties;
 	}
 }

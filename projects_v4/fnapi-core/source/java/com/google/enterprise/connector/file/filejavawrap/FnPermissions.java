@@ -1,6 +1,8 @@
 package com.google.enterprise.connector.file.filejavawrap;
 
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.filenet.api.collection.GroupSet;
 import com.filenet.api.collection.PermissionList;
@@ -16,9 +18,11 @@ import com.google.enterprise.connector.file.filewrap.IPermissions;
 public class FnPermissions implements IPermissions {
 
 	PermissionList perms;
-
 	public static int ACCESS_LEVEL = AccessLevel.VIEW_AS_INT;
-
+	private static Logger logger = null;
+	{
+		logger = Logger.getLogger(FnDocument.class.getName());
+	}
 	public FnPermissions(PermissionList perms) {	
 		this.perms = perms;
 	}
@@ -29,23 +33,34 @@ public class FnPermissions implements IPermissions {
 		String granteeName;
 		while(iter.hasNext()){
 			AccessPermission perm = (AccessPermission)iter.next();
-			
 			if ((perm.get_AccessMask().intValue() & ACCESS_LEVEL) == ACCESS_LEVEL){
 				granteeName = perm.get_GranteeName();
 				
 				if (perm.get_GranteeType() == SecurityPrincipalType.USER){
-					if (granteeName.equalsIgnoreCase(username) 
-							|| granteeName.split("@")[0].equalsIgnoreCase(username)) 
+					if (//granteeName.indexOf(username.toLowerCase()) > -1 || 
+							granteeName.equalsIgnoreCase(username) 
+							|| granteeName.split("@")[0].equalsIgnoreCase(username)){ 
+						logger.log(Level.INFO, "Authorization for user: " + username + " is Successful");
 						return true;
+					}
 				}
 				else if(perm.get_GranteeType() == SecurityPrincipalType.GROUP){ //GROUP
 					Connection conn = perm.getConnection();
-					Group group = com.filenet.api.core.Factory.Group.fetchInstance(conn,perm.get_GranteeName(),null);
-					found = searchUserInGroup(username,group);
-					if (found) return true;
+					Group group = null;
+					try{
+						group = com.filenet.api.core.Factory.Group.fetchInstance(conn,perm.get_GranteeName(),null);
+						found = searchUserInGroup(username,group);
+						if (found){
+							logger.log(Level.INFO, "Authorization for user: " + username + " is Successful");
+							return true;
+						}
+					} catch (Exception e){
+						logger.warning("Skipping Group "+group+", as it is not found.");
+					}
 				}	
 			}
 		}
+		logger.log(Level.INFO, "Authorization for user: " + username + " FAILED");
 		return false;
 	}
 
@@ -57,7 +72,8 @@ public class FnPermissions implements IPermissions {
 		Iterator itUser = us.iterator();
 		while (itUser.hasNext()){
 			user = (User) itUser.next();
-			if (user.get_Name().equalsIgnoreCase(username) 
+			if (//user.get_Name().indexOf(username.toLowerCase()) > -1 ||
+					user.get_Name().equalsIgnoreCase(username) 
 					|| user.get_Name().split("@")[0].equalsIgnoreCase(username)) {
 				return true;
 			}					

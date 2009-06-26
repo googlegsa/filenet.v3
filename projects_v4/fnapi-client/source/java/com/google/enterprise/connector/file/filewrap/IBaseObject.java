@@ -3,7 +3,6 @@ package com.google.enterprise.connector.file.filewrap;
 import java.util.Date;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 public interface IBaseObject {

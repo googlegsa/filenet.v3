@@ -1,6 +1,7 @@
 package com.google.enterprise.connector.file;
 
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.enterprise.connector.file.filewrap.IConnection;
@@ -16,23 +17,14 @@ import com.google.enterprise.connector.spi.Session;
 public class FileSession implements Session {
 
 	private IObjectFactory fileObjectFactory;
-
 	private IObjectStore objectStore;
-
 	private IConnection connection;
-
 	private String displayUrl;
-
 	private boolean isPublic;
-
 	private String additionalWhereClause;
-
 	private HashSet included_meta;
-
 	private HashSet excluded_meta;
-
 	private static Logger logger;
-
 	static {
 		logger = Logger.getLogger(FileSession.class.getName());
 	}
@@ -46,19 +38,16 @@ public class FileSession implements Session {
 
 		setFileObjectFactory(iObjectFactory);
 
+		logger.info("getting connection for content engine: "+contentEngineUri);
 		connection = fileObjectFactory.getConnection(contentEngineUri);
-
-		objectStore = fileObjectFactory.getObjectStore(objectStoreName,
-				connection, userName, userPassword);
+		
+		logger.info("trying to access object store: "+objectStoreName+" for user: "+userName);
+		objectStore = fileObjectFactory.getObjectStore(objectStoreName, connection, userName, userPassword);
 		
 		logger.info("objectStore ok user:"+userName);
-		logger.info("thread : "+Thread.currentThread().getName());
-
-		this.displayUrl = displayUrl + "/getContent?objectStoreName=" + objectStoreName
-				+ "&objectType=document&versionStatus=1&vsId=";
-
+		
+		this.displayUrl = displayUrl + "/getContent?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
 		this.isPublic = isPublic;
-
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
@@ -68,20 +57,22 @@ public class FileSession implements Session {
 			throws RepositoryException {
 
 		try {
-			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory)
-					.newInstance();
+			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
 		} catch (InstantiationException e) {
-			throw new RepositoryException(e);
+			logger.log(Level.WARNING,"Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
+			throw new RepositoryException("Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",e);
 		} catch (IllegalAccessException e) {
-			throw new RepositoryException(e);
+			logger.log(Level.WARNING,"Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
+			throw new RepositoryException("Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",e);
 		} catch (ClassNotFoundException e) {
-			throw new RepositoryException(e);
+			logger.log(Level.WARNING,"The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found");
+			throw new RepositoryException("The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",e);
 		}
 
 	}
 
 	public TraversalManager getTraversalManager() throws RepositoryException {
-		logger.info("getTraversalManager");
+//		logger.info("getTraversalManager");
 		FileTraversalManager fileQTM = new FileTraversalManager(
 				fileObjectFactory, objectStore, this.isPublic, this.displayUrl,
 				this.additionalWhereClause, this.included_meta,
@@ -91,16 +82,14 @@ public class FileSession implements Session {
 
 	public AuthenticationManager getAuthenticationManager()
 			throws RepositoryException {
-		FileAuthenticationManager fileAm = new FileAuthenticationManager(
-				connection);
+		FileAuthenticationManager fileAm = new FileAuthenticationManager(connection);
 		return fileAm;
 	}
 
 	public AuthorizationManager getAuthorizationManager()
 			throws RepositoryException {
 
-		FileAuthorizationManager fileAzm = new FileAuthorizationManager(
-				connection, objectStore);
+		FileAuthorizationManager fileAzm = new FileAuthorizationManager(connection, objectStore);
 		return fileAzm;
 	}
 

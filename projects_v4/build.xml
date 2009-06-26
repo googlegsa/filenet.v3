@@ -21,7 +21,7 @@
 	<property name="classes-core" value="${build-core}/classes" />	
 
 	<property name="jar.dir"  value="${dist}/jar" />
-	<property name="jarfile"  value="${jar.dir}/connector-fileV4.jar" />
+	<property name="jarfile"  value="${jar.dir}/connector-file4.jar" />
 	
 	<property name="file.jarfile" location="${jarfile.dir}/Jace.jar" />
 	<property name="json.jarfile" location="${jarfile.dir}/json.jar" />
@@ -31,16 +31,17 @@
 	<property name="connector.jarfile" value="${jarfile.dir}/connector.jar" />
 	<property name="tests.jarfile" value="${jarfile.dir}/connector-tests.jar" />
 	<property name="spring.jarfile" value="${jarfile.dir}/spring.jar" />
+	<property name="javaapi.jarfile" value="${jarfile.dir}/javaapi.jar" />
 
 	<!-- =========================== TASKS =============================== -->
-	<target name="connector-fileV4" depends="init,compile_tests,compile-client,jar">
+	<target name="connector-fileV4" depends="clean,init,compile_tests,compile-client,jar">
 	</target>
 
 	<target name="init">
 		<echo message="*********************** " />
 		<echo message="*   Ant demo script   *" />
 		<echo message="*********************** " />
-		<echo message="Author	                 : HackTrack" />
+		<echo message="Author	                 : Amit Agrawal" />
 		<echo message="Script version            : 1.0.0" />
 		<echo message="Ant  version              : ${ant.version}" />
 		<echo message="Java version              : ${ant.java.version}" />
@@ -58,8 +59,10 @@
 
 	<target name="compile-client" depends="init">
 		<!-- compile java source files -->
-		<javac srcdir="${src-core}" destdir="${classes-core}" debug="${COMPILE_DEBUG_FLAG}">
+		<javac srcdir="${src-core}" destdir="${classes-core}" debug="${COMPILE_DEBUG_FLAG}" source="1.5">
 			<classpath>
+				<pathelement location="${javaapi.jarfile}" />
+				<pathelement location="${file.jarfile}" />
 				<pathelement location="${spi.jarfile}" />
 				<pathelement location="${file.jarfile}" />
 				<pathelement location="${json.jarfile}" />
@@ -74,6 +77,7 @@
 		<!-- compile java source files for tests -->
 		<javac srcdir="${src-client}" destdir="${classes-client}" debug="${COMPILE_DEBUG_FLAG} ">
 			<classpath>
+				<pathelement location="${javaapi.jarfile}" />
 				<pathelement location="${file.jarfile}" />
 				<pathelement location="${connector.jarfile}" />
 				<pathelement location="${tests.jarfile}" />
@@ -89,16 +93,35 @@
 
 	<target name="jar" description="connector-file">
 		<jar jarfile="${jarfile}">
-			<fileset dir="${config}"/>
+			<fileset dir="${config}">
+					<include name="**/*.xml"/>
+					<exclude name="**/logging.properties"/>
+					<include name="**/*.properties"/>
+			</fileset>
 			<fileset dir="${classes-client}"/>
 			<fileset dir="${classes-core}"/>
 			<fileset file="jaas.conf"/>
+			
+			<!--creation of manifest file-->
+			<manifest>
+			    <attribute name="Implementation-Title" value="Filenet Connector"/>
+  		        <attribute name="Implementation-Version" value="2.0.0"/>
+			    <attribute name="Implementation-Vendor" value="Google Inc."/>
+			    <attribute name="Specification-Title" value="Connector Manager SPI"/>
+			    <attribute name="Specification-Version" value="2.0.0_Build1"/>
+			    <attribute name="Specification-Vendor" value="Google Inc."/> 
+				<attribute name="Main-Class" value="com.google.enterprise.connector.file.FileMain" />
+			</manifest>
 		</jar>
 	</target>
 
 	<target name="clean" description="Deletes all build files.">
 		<delete dir="${build}" />
 		<delete dir="${dist}" />
+		<delete dir="${build-core}" />
+		<delete dir="${build-client}" />
+		<delete dir="${classes-core}" />
+		<delete dir="${classes-client}" />
 	</target>
 
 </project>
