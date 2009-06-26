@@ -8,8 +8,8 @@ public class FnSearch implements ISearch {
 
 	Search search;
 
-	public FnSearch(Search search) {
-		this.search = search;
+	public FnSearch(Search refSearch) {
+		this.search = refSearch;
 	}
 
 	public String executeXml(String query, IObjectStore objectStore) {

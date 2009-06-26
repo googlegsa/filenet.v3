@@ -20,8 +20,8 @@ public class FnProperty implements IProperty {
 		correspondancevalueTypes[7] = "String";
 	}
 
-	public FnProperty(Property property) {
-		this.property = property;
+	public FnProperty(Property refProperty) {
+		this.property = refProperty;
 	}
 
 	public String getName() {

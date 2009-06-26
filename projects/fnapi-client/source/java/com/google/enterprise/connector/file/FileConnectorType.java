@@ -1,6 +1,5 @@
 package com.google.enterprise.connector.file;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -8,24 +7,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+
 import com.google.enterprise.connector.spi.ConfigureResponse;
 import com.google.enterprise.connector.spi.ConnectorFactory;
 import com.google.enterprise.connector.spi.ConnectorType;
 import com.google.enterprise.connector.spi.RepositoryException;
 
+/**
+ * Represents FileNetConnectortype. Contains methods for creating and validating FileNet user form.
+ * @author amit_kagrawal
+ * */
 public class FileConnectorType implements ConnectorType {
 
 	private static final String HIDDEN = "hidden";
@@ -38,7 +34,7 @@ public class FileConnectorType implements ConnectorType {
 	private static final String OPEN_ELEMENT = "<";
 	private static final String PASSWORD = "password";
 	private static final String PASSWORD_KEY = "Password";
-	private static final String USERNAME = "login";
+	private static final String USERNAME = "username";
 	private static final String OBJECT_STORE = "object_store";
 	private static final String WORKPLACE_URL = "workplace_display_url";
 	private static final String DIV_START_LABEL = "<div style='";
@@ -66,8 +62,9 @@ public class FileConnectorType implements ConnectorType {
 	private static final String CHECKBOX = "checkbox";
 	private static final String CHECKED = "checked='checked'";
 	private static final String LOCALE_FILE = "FileConnectorResources";
-	private static final String CONNECTOR_INSTANCE_XML = "config/connectorInstance.xml";
-	private static final String FILE_CONNECTOR_INSTANCE = "FileConnectorInstance";
+//	private static final String CONNECTOR_INSTANCE_XML = "config/connectorInstance.xml";
+//	private static final String FILE_CONNECTOR_INSTANCE = "FileConnectorInstance";
+	private static final int BUFFER_SIZE = 2048;
 	private static Logger logger = null;
 	private List keys = null;
 	private Set keySet = null;
@@ -166,114 +163,108 @@ public class FileConnectorType implements ConnectorType {
 		return "";
 	}
 
-	public ConfigureResponse validateConfig(Map configData, Locale language,
-			ConnectorFactory connectorFactory) {
+	public ConfigureResponse validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory) {
+
+		logger.log(Level.FINEST, "Entering into function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
 		try {
 			resource = ResourceBundle.getBundle(LOCALE_FILE,
 					language);
 		} catch (MissingResourceException e) {
 			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
+
 		String form = null;
 		String validation = validateConfigMap(configData);
 		this.validation = validation;
 		FileSession session;
 		if (validation.equals("")) {
 			try {
-				logger.log(Level.CONFIG, "Test Connection to the object store "
-						+ (String) configData.get(OBJECT_STORE));
+				logger.log(Level.CONFIG, "Start Test Connection to the object store ..."+ (String) configData.get(OBJECT_STORE));
 
-				Properties p = new Properties();
-				p.putAll(configData);
-				String isPublic = (String) configData.get(ISPUBLIC);
-				if (isPublic == null) {
-					p.put(ISPUBLIC, "false");
+				logger.info("attempting to create FileNet connector instance for verification");
+				FileConnector conn =(FileConnector) connectorFactory.makeConnector(configData);
+
+				if(null!=conn){
+					logger.info("able to craete FileNet connector instance. Trying to login with provided credentials.");
+					session = (FileSession) conn.login();
+					logger.info("login succeeded. Trying to retrieve the traversal manager.");
+					session.getTraversalManager();// test on the objectStore name
+					logger.info("got traversal manager");
+				}else{
+					logger.severe("Unable to craete a FileNet connector instance");
 				}
-				Resource res = new ClassPathResource(
-						CONNECTOR_INSTANCE_XML);
 
-				XmlBeanFactory factory = new XmlBeanFactory(res);
-				PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
-				cfg.setProperties(p);
-				cfg.postProcessBeanFactory(factory);
-				FileConnector conn = (FileConnector) factory
-						.getBean(FILE_CONNECTOR_INSTANCE);
-				session = (FileSession) conn.login();
-				// test on the objectStore name
-				session.getTraversalManager();
-				logger.log(Level.CONFIG, "Test Connection to Workplace server "
-						+ (String) configData.get(WORKPLACE_URL));
-				testWorkplaceUrl((String) configData
-						.get(WORKPLACE_URL));
+				logger.log(Level.INFO, "Connecttion to Object Store "+ (String) configData.get(OBJECT_STORE)+ " is Successful");
+				logger.log(Level.CONFIG, "Start Test Connection to Workplace server ..."+ (String) configData.get(WORKPLACE_URL));
+				testWorkplaceUrl((String) configData.get(WORKPLACE_URL));
+
 			} catch (RepositoryException e) {
-				String extractErrorMessage = e.getCause().getClass().getName();
+				String extractErrorMessage = null;
 				String bundleMessage;
 				try {
-					bundleMessage = resource.getString(extractErrorMessage);
+					extractErrorMessage = e.getCause().getClass().getName();
+					logger.info("extractErrorMessage: "+extractErrorMessage);
+					if(extractErrorMessage.equalsIgnoreCase("com.filenet.wcm.api.InvalidCredentialsException")){
+						bundleMessage = resource.getString("invalid_credentials_error");
+						logger.log(Level.SEVERE, bundleMessage);
+					}else if(extractErrorMessage.equalsIgnoreCase("com.filenet.wcm.api.RemoteServerException")){
+						bundleMessage = resource.getString("object_store_invalid");
+						logger.log(Level.SEVERE, bundleMessage);
+					}else if(extractErrorMessage.equalsIgnoreCase("com.filenet.wcm.api.InsufficientPermissionException")){
+						bundleMessage = resource.getString("invalid_credentials_error");
+						logger.log(Level.SEVERE, bundleMessage+" Insufficient permission to user on a given ObjectStore.");
+					}else{
+						bundleMessage = resource.getString(extractErrorMessage);
+						logger.log(Level.SEVERE, bundleMessage);
+					}
 				} catch (MissingResourceException mre) {
-					bundleMessage = resource.getString("DEFAULT_ERROR_MESSAGE")
-							+ " " + e.getMessage();
+					//bundleMessage = resource.getString("required_field_error");
+					bundleMessage = e.getLocalizedMessage();//This will get prin
+					logger.log(Level.SEVERE, mre.getLocalizedMessage());
+				}catch(NullPointerException npe){
+					bundleMessage = e.getLocalizedMessage();
+					logger.log(Level.SEVERE, bundleMessage);
 				}
 				form = makeConfigForm(configData, validation);
-				logger.severe(e.getMessage() + " "
-						+ e.getCause().getClass().getName() + " "
-						+ e.getStackTrace().toString());
-//				e.printStackTrace();
-//				return new ConfigureResponse("<p><font color=\"#FF0000\">"+ bundleMessage + "</font></p>","<p><font color=\"#FF0000\">" + bundleMessage + "</font></p>" + "<br>" + form);
-				return new ConfigureResponse(bundleMessage ,form);
+				logger.log(Level.SEVERE, e.getLocalizedMessage());
 
+				return new ConfigureResponse(bundleMessage ,form);
 			}
 			return null;
 		}
 		form = makeConfigForm(configData, validation);
-//		return new ConfigureResponse(resource.getString(validation + "_error"), "<p><font color=\"#FF0000\">"+ resource.getString(validation + "_error")+ "</font></p>" + "<br>" + form);
 		String errorMsg =resource.getString(validation + "_error"); //added here
+		logger.log(Level.FINEST, "Exiting from function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
 		return new ConfigureResponse(errorMsg,form);
 	}
 
 	private void testWorkplaceUrl(String workplaceServerUrl)
-			throws RepositoryException {
-		logger.log(Level.CONFIG, "Test Connection to the Workplace server : "
-				+ workplaceServerUrl);
+	throws RepositoryException {
 
-		HttpClient client = new HttpClient();
-		GetMethod getMethod = new GetMethod(workplaceServerUrl);
+		//Added by Pankaj on 04/05/2009 to remove the dependency of Httpclient.jar file
 		try {
-			int status = client.executeMethod(getMethod);
-			if (status != 200) {
-				logger.log(Level.INFO, "status " + status);
-
-				throw new RepositoryException("status Http request returned a "
-						+ status + " status", new HttpException("status is "
-						+ status));
-			}
-		} catch (HttpException e) {
-			RepositoryException re = new RepositoryException("HttpException", e);
-			throw new RepositoryException(re);
-		} catch (IOException e) {
-			RepositoryException re = new RepositoryException("IOException", e);
-			throw new RepositoryException(re);
+			new FileUrlValidator().validate(workplaceServerUrl);
+			logger.log(Level.INFO, "Connecttion to Workplace server is Successful");
+		} catch (FileUrlValidatorException e) {
+			logger.log(Level.SEVERE, resource.getString("workplace_url_error"));
+			throw new RepositoryException(resource.getString("workplace_url_error"));
+		} catch (Throwable t) {
+			logger.log(Level.SEVERE, resource.getString("workplace_url_error"));
+			throw new RepositoryException(resource.getString("workplace_url_error"));
 		}
-/*		try {
-	          new UrlValidator().validate(workplaceServerUrl);
-	        } catch (UrlValidatorException e) {
-	          throw new RepositoryException("Workplace URL Validation failed: ", e);
-	        } catch (Throwable t) {
-	            logger.log(Level.WARNING, "Error in FileNET Workplace URL validation", t);
-	            throw new RepositoryException("Workplace URL Validation failed: ", t);
-	        }
-*/
+
 	}
 
 	/**
 	 * Make a config form snippet using the keys (in the supplied order) and, if
-	 * passed a non-null config map, pre-filling values in from that map
+	 * passed a non-null config map, pre-filling values in from that map.
 	 * 
 	 * @param configMap
 	 * @return config form snippet
 	 */
 	private String makeConfigForm(Map configMap, String validate) {
-		StringBuffer buf = new StringBuffer(2048);
+		logger.log(Level.FINEST, "Entering into function makeConfigForm(Map configMap, String validate)");
+		StringBuffer buf = new StringBuffer(BUFFER_SIZE);
 		String value = "";
 		for (Iterator i = keys.iterator(); i.hasNext();) {
 			String key = (String) i.next();
@@ -293,13 +284,13 @@ public class FileConnectorType implements ConnectorType {
 				value = "";
 			} else {
 				if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
-						&& !key.equals(WHERECLAUSE) && !key.equals(FILEPATH)) {
+						/*&& !key.equals(WHERECLAUSE)*/ && !key.equals(FILEPATH)) {
 					if(validate.equals(key)){
 						appendStartRow(buf, key, validate);
 					}else{
 						appendStartRow(buf, key, "");
 					}
-					
+
 				} else {
 					appendStartHiddenRow(buf);
 				}
@@ -310,7 +301,7 @@ public class FileConnectorType implements ConnectorType {
 					appendAttribute(buf, TYPE, PASSWORD);
 				} else if (key.equals(FNCLASS)
 						|| key.equals(AUTHENTICATIONTYPE)
-						|| key.equals(WHERECLAUSE) || key.equals(FILEPATH)) {
+						/*|| key.equals(WHERECLAUSE)*/ || key.equals(FILEPATH)) {
 					appendAttribute(buf, TYPE, HIDDEN);
 				} else {
 					appendAttribute(buf, TYPE, TEXT);
@@ -323,28 +314,32 @@ public class FileConnectorType implements ConnectorType {
 				value = "";
 			}
 		}
+		
 		if (configMap != null) {
 			appendStartHiddenRow(buf);
 			Iterator i = new TreeSet(configMap.keySet()).iterator();
-			while (i.hasNext()) {
-				String key = (String) i.next();
-				if (!keySet.contains(key)) {
-					// add another hidden field to preserve this data
-					String val = (String) configMap.get(key);
-					buf.append("<input type=\"hidden\" value=\"");
-					buf.append(val);
-					buf.append("\" name=\"");
-					buf.append(key);
-					buf.append("\"/>\r\n");
+			
+			//added: NULL checks
+			if(null!=i){
+				while (i.hasNext()) {
+					String key = (String) i.next();
+					if (!keySet.contains(key)) {
+						String val = (String) configMap.get(key);// add another hidden field to preserve this data
+						buf.append("<input type=\"hidden\" value=\"");
+						buf.append(val);
+						buf.append("\" name=\"");
+						buf.append(key);
+						buf.append("\"/>\r\n");
+					}
 				}
 			}
 			appendEndRow(buf);
 		}
+		logger.log(Level.FINEST, "Exiting from function makeConfigForm(Map configMap, String validate)");
 		return buf.toString();
 	}
 
 	private void appendStartHiddenRow(StringBuffer buf) {
-//		buf.append(TR_START);
 		buf.append(TR_START_HIDDEN);
 		buf.append(TD_START);
 
@@ -352,11 +347,10 @@ public class FileConnectorType implements ConnectorType {
 
 	private void appendStartRow(StringBuffer buf, String key, String validate) {
 		buf.append(TR_START);
-//		buf.append(TD_START);
 		buf.append(TD_START_LABEL);
 		buf.append(TD_WHITE_SPACE);
 		if(isRequired(key)){
-			
+
 			buf.append(TD_END_START_LABEL);
 			buf.append(DIV_START_LABEL);
 			buf.append(TD_FLOAT_LEFT);
@@ -369,7 +363,7 @@ public class FileConnectorType implements ConnectorType {
 			buf.append(TD_END_START_LABEL);
 			buf.append(resource.getString(key));
 			buf.append(DIV_END);
-			
+
 			buf.append(DIV_START_LABEL);
 			buf.append(TD_TEXT_ALIGN_RIGHT);
 			buf.append(TD_DELIMITER);
@@ -390,7 +384,6 @@ public class FileConnectorType implements ConnectorType {
 	}
 
 	private void appendEndRow(StringBuffer buf) {
-//		buf.append(CLOSE_ELEMENT);
 		buf.append(TD_END);
 		buf.append(TR_END);
 	}
@@ -408,7 +401,6 @@ public class FileConnectorType implements ConnectorType {
 
 	private void appendCheckBox(StringBuffer buf, String key, String label,	String value) {
 		buf.append(TR_START);
-//		buf.append(TD_START);
 		buf.append(TD_START_COLSPAN);
 		buf.append(OPEN_ELEMENT);
 		buf.append(INPUT);
@@ -423,7 +415,7 @@ public class FileConnectorType implements ConnectorType {
 		buf.append(TR_END);
 
 	}
-	
+
 	private boolean isRequired(final String configKey){
 		final boolean bValue = false;
 		if(configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL) || configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME)){
