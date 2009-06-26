@@ -37,7 +37,7 @@ public class FileDocumentTest extends TestCase {
 
 		FileDocument fdpm = new FileDocument(FnConnection.docId2, objectStore,
 				false, FnConnection.displayUrl, FnConnection.included_meta,
-				FnConnection.excluded_meta,SpiConstants.ActionType.ADD);
+				FnConnection.excluded_meta, SpiConstants.ActionType.ADD);
 
 		Property property = fdpm.findProperty("google:docid");
 

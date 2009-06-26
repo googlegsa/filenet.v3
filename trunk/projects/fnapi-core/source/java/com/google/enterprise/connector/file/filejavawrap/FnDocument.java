@@ -23,7 +23,6 @@ import com.google.enterprise.connector.file.filewrap.IPermissions;
 import com.google.enterprise.connector.file.filewrap.IProperties;
 import com.google.enterprise.connector.file.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnDocument implements IDocument {
 
@@ -42,10 +41,11 @@ public class FnDocument implements IDocument {
 		try {
 			return doc.getContent();
 		} catch (InsufficientPermissionException e) {
-			logger.log(Level.SEVERE,
-					"exception while trying to get the content of file "
+			logger.log(Level.WARNING,
+					"Unable to retrieve the content of file "
 							+ this.doc.getId() + " " + e.getMessage());
-			throw new RepositoryDocumentException();	
+//			throw new RepositoryDocumentException();
+			return null;
 		} catch (BaseRuntimeException e) {
 			logger.log(Level.SEVERE,
 					"exception while trying to get the content of file "
@@ -67,6 +67,8 @@ public class FnDocument implements IDocument {
 			Iterator it = props.iterator();
 			while (it.hasNext()) {
 				Property prop = (Property) it.next();
+				//Value of 7 i.e. TYPE_OBJECT; object data type; also returned if the value is a Values  
+				//collection (that is, if the property in question is a multi-valued property).
 				if (prop.getType() == 7) {
 
 					Values values = prop.getValuesValue();
@@ -95,7 +97,9 @@ public class FnDocument implements IDocument {
 			} else if (name.equals(Property.PERMISSIONS)) {
 
 				return "security";
-			} else {
+			} else if(name.equals(Property.TITLE)){
+				return doc.getFilename();
+			}else {
 				logger.log(Level.SEVERE,
 						"error while trying to get the property " + name
 								+ " of the file " + this.doc.getId() + " "

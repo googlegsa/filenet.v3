@@ -30,7 +30,7 @@ public class FileTraversalManagerTest extends TestCase {
 		((FileConnector) connector)
 				.setPath_to_WcmApiConfig(FnConnection.pathToWcmApiConfig);
 		((FileConnector) connector)
-				.setAdditional_where_clause(FnConnection.additionalWhereClause);
+				.setAdditional_where_clause("");//FnConnection.additionalWhereClause);
 		((FileConnector) connector).setIs_public("false");
 		sess = (FileSession) connector.login();
 		qtm = (FileTraversalManager) sess.getTraversalManager();

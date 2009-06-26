@@ -38,4 +38,9 @@ public class FileAuthenticationIdentity implements AuthenticationIdentity {
 		return null;
 	}
 
+	public String getDomain() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

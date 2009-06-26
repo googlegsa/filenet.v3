@@ -3,8 +3,6 @@ package com.google.enterprise.connector.file;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.TimeZone;
@@ -33,52 +31,35 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FileTraversalManager implements TraversalManager {
 
-	private static Logger logger;
-	
-	private static String dateFirstPush ;
-	
+	private static Logger logger;	
+	private static String dateFirstPush ;	
 	static{
 		logger = Logger.getLogger(FileTraversalManager.class.getName());
 	}
-
 	private IObjectFactory fileObjectFactory;
-
 	private IObjectStore objectStore;
-
 	private ISession fileSession;
-
 	private String order_by = " ORDER BY DateLastModified,Id";
-
 	private String objectStoresQuery = "<objectstores mergeoption=\"none\"><objectstore id=\"{0}\"/></objectstores>";
-
 	// TODO: add possibility for an administrator to change it
 	private String tableName = "Document";
-
 	//private String whereClause = " AND ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&lt;{2} AND ({1}&lt;>id)))";
 	//private String whereClause = " AND ((DateLastModified={0} AND ({1}<id)) OR (DateLastModified<{2} AND ({1}<>id)))";
 	private String whereClause = " AND ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&gt;{0}))";
-		
 	private String tableNameEventToDelete = "Event";
-
-	
 	//private String whereClauseToDelete = " WHERE ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&gt;{0}))";
 	private String whereClauseToDelete = " WHERE ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&gt;{0}))";
 	private String whereClauseToDeleteOnlyDate = " WHERE (DateLastModified&gt;{0})";
-		
 	private String orderByToDelete  = " ORDER BY DateLastModified,Id";
-
 	private String displayUrl;
-	
 	private String additionalWhereClause;
-	
 	private int batchint;
-
 	private boolean isPublic;
-
 	private HashSet included_meta;
-
 	private HashSet excluded_meta;
-
+	private final static String eventAllias = " e";
+	private final static String AND_OPERATOR = " AND ";
+	private final static String EVENT_DELETE = "DeletionEvent";
 
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession, boolean b,
@@ -181,9 +162,11 @@ public class FileTraversalManager implements TraversalManager {
 			query.append("<querystatement>SELECT Id,DateLastModified,VersionSeriesId  FROM ");
 			///query.append("<querystatement>SELECT Id,CONVERT(VARCHAR,DateLastModified,126),VersionSeriesId FROM ");
 			query.append(tableNameEventToDelete);
+			query.append(eventAllias);
 			
 			query.append(getCheckpointClauseToDelete(checkpoint));
-			
+			query.append(AND_OPERATOR);
+			query.append(isClassSQLFunction(eventAllias, EVENT_DELETE));
 			query.append(orderByToDelete);
 					
 			query.append("</querystatement>");
@@ -219,22 +202,21 @@ public class FileTraversalManager implements TraversalManager {
 			query.append(objectStoresQuery);
 			query.append("<querystatement>SELECT Id,DateLastModified,VersionSeriesId  FROM ");
 			query.append(tableNameEventToDelete);
-			 	
+			query.append(eventAllias);
 			query.append(" WHERE ");
-			if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
-				query.append(additionalWhereClause);
-			}
-			
-			
-			
 			////////////////////////////////////////////////////////////////////////
 			// a enlever
 			query.append(" (DateLastModified >" + dateFirstPush + ")");	
 			///query.append(" (DateLastModified >" + "2008-06-16T14:20:41.006" + ")");	 
 			
-			
+			query.append(AND_OPERATOR);
+			query.append(isClassSQLFunction(eventAllias, EVENT_DELETE));
 			////////////////////////////////////////////////////////////////////////			
-						
+			
+//			if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
+//				query.append(additionalWhereClause);
+//			}
+			
 			query.append(orderByToDelete);
 			
 			query.append("</querystatement>");
@@ -305,7 +287,7 @@ public class FileTraversalManager implements TraversalManager {
 	protected String extractNativeDateFromCheckpointToDelete(JSONObject jo,
 			String checkPoint) {
 		String dateString = null;
-		Date d=null;
+//		Date d=null;
 		try {
 			dateString = jo.getString("lastRemoveDate");
 		}catch (JSONException e) {
@@ -387,5 +369,9 @@ public class FileTraversalManager implements TraversalManager {
 			RepositoryException re = new RepositoryLoginException(de);
 			throw re;
 		}
+	}
+	
+	private String isClassSQLFunction(String eventAllias, String eventType){
+		return new String("IsClass("+eventAllias+", "+eventType+" )");
 	}
 }

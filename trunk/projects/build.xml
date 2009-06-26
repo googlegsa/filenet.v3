@@ -42,7 +42,7 @@
 		<echo message="*********************** " />
 		<echo message="*   Ant demo script   *" />
 		<echo message="*********************** " />
-		<echo message="Author	                 : HackTrack" />
+		<echo message="Author	                 : Pankaj Chouhan" />
 		<echo message="Script version            : 1.0.0" />
 		<echo message="Ant  version              : ${ant.version}" />
 		<echo message="Java version              : ${ant.java.version}" />
@@ -70,14 +70,17 @@
 				<pathelement location="${classes-client}" />
 				<pathelement location="${spring-framework.jarfile}" />
 				<pathelement location="${spring.jarfile}" />
+				<pathelement location="${classes-core}" />
 			</classpath>
 		</javac>
 	</target>
+
 
 	<target name="compile_tests" depends="init">
 		<!-- compile java source files for tests -->
 		<javac srcdir="${src-client}" destdir="${classes-client}" debug="${COMPILE_DEBUG_FLAG} ">
 			<classpath>
+				<pathelement location="${file.jarfile}" />
 				<pathelement location="${connector.jarfile}" />
 				<pathelement location="${tests.jarfile}" />
 				<pathelement location="${spi.jarfile}" />
@@ -87,16 +90,27 @@
 				<pathelement location="${httpclient.jarfile}" />
 				<pathelement location="${spring-framework.jarfile}" />
 				<pathelement location="${spring.jarfile}" />
+				<pathelement location="${classes-core}" />
 				
 			</classpath>
 		</javac>
 	</target>
-
 	<target name="jar" description="connector-file">
 		<jar jarfile="${jarfile}">
 			<fileset dir="${config}"/>
 			<fileset dir="${classes-client}"/>
 			<fileset dir="${classes-core}"/>
+			
+			<!--added by Pankaj Chouhan-->
+			<!--creation of manifest file-->
+			<manifest>
+			    <attribute name="Implementation-Title" value="Filenet Connector"/>
+  		        <attribute name="Implementation-Version" value="1.3.2"/>
+			    <attribute name="Implementation-Vendor" value="Google Inc."/>
+			    <attribute name="Specification-Title" value="Connector Manager SPI"/>
+			    <attribute name="Specification-Version" value="1.3.2"/>
+			    <attribute name="Specification-Vendor" value="Google Inc."/> 
+			</manifest>
 		</jar>
 	</target>
 

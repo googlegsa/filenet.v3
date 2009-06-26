@@ -88,7 +88,7 @@ public class FileAuthorizationManagerTest extends TestCase {
 		List docids = new LinkedList(expectedResults.keySet());
 
 		List resultSet = (List) authorizationManager.authorizeDocids(docids,
-				new FileAuthenticationIdentity(username, null));
+				new FileAuthenticationIdentity(username, FnConnection.password));
 
 		Boolean expected;
 		AuthorizationResponse authorizationResponse;
@@ -123,38 +123,38 @@ public class FileAuthorizationManagerTest extends TestCase {
 			authorizationManager = (FileAuthorizationManager) sess
 					.getAuthorizationManager();
 			{
-				String username = "jbombonati";
+				String username = FnConnection.userName;
 
 				Map expectedResults = new HashMap();
 				expectedResults.put(
-						"%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
-						Boolean.FALSE);
-
-				testAuthorization(authorizationManager, expectedResults,
-						username);
-			}
-			{
-				String username = "jpasquon";
-
-				Map expectedResults = new HashMap();
-				expectedResults.put(
-						"%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
+						"%7BC0EA2FAC-D5CC-4486-B1FD-8E21C131613C%7D",//"%7BA3DE3139-152E-4DA5-B94F-A3E5D57C933D%7D"
 						Boolean.TRUE);
 
 				testAuthorization(authorizationManager, expectedResults,
 						username);
 			}
-			{
-				String username = "scauchy";
-
-				Map expectedResults = new HashMap();
-				expectedResults.put(
-						"%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
-						Boolean.TRUE);
-
-				testAuthorization(authorizationManager, expectedResults,
-						username);
-			}
+//			{
+//				String username = "jpasquon";
+//
+//				Map expectedResults = new HashMap();
+//				expectedResults.put(
+//						"%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
+//						Boolean.TRUE);
+//
+//				testAuthorization(authorizationManager, expectedResults,
+//						username);
+//			}
+//			{
+//				String username = "scauchy";
+//
+//				Map expectedResults = new HashMap();
+//				expectedResults.put(
+//						"%7B488A0F52-9F4A-48A8-8175-C32C6A422C16%7D",
+//						Boolean.TRUE);
+//
+//				testAuthorization(authorizationManager, expectedResults,
+//						username);
+//			}
 		}
 
 	}
