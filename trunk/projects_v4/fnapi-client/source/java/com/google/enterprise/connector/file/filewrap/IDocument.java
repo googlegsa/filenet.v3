@@ -15,7 +15,7 @@ public interface IDocument extends IBaseObject {
 
 	public InputStream getContent() throws RepositoryDocumentException;
 
-	public IVersionSeries getVersionSeries() throws RepositoryDocumentException;
+	public IVersionSeries getVersionSeries() throws RepositoryDocumentException;;
 
 	public Set getPropertyName() throws RepositoryDocumentException;
 

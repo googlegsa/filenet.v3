@@ -10,11 +10,9 @@ import com.filenet.api.core.IndependentObject;
 import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
 import com.filenet.api.util.Id;
-import com.google.enterprise.connector.file.FileDocument;
 import com.google.enterprise.connector.file.filewrap.IBaseObject;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
@@ -32,11 +30,7 @@ public class FnBaseObject implements IBaseObject {
 	}
 
 	public String getClassNameEvent() throws RepositoryDocumentException {
-		try {
-			return this.object.getClassName();
-		}catch (Exception e){
-			 throw new RepositoryDocumentException(e);
-		}
+		return this.object.getClassName();
 	}
 	
 	public String getId(ActionType action) throws RepositoryDocumentException {
@@ -44,21 +38,22 @@ public class FnBaseObject implements IBaseObject {
 		try {
 			
 			if(SpiConstants.ActionType.DELETE.equals(action)){
-				logger.info("delete");
+				logger.info("Delete Action...");
 				id = ((com.filenet.apiimpl.core.DeletionEventImpl) this.object).get_Id().toString();
 			}else{//if action==SpiConstants.ActionType.ADD
+				logger.info("Add Action...");
 				id = ((Document) this.object).get_Id().toString();
 			}			
 
 			id = id.substring(1,id.length()-1);
 		}catch (Exception e){
-			 throw new RepositoryDocumentException(e);
+			logger.warning("Unable to get Id for action "+action);
+			throw new RepositoryDocumentException(e);
 		}
 		return id;
 	}
 	
 	public Date getModifyDate(ActionType action) throws RepositoryDocumentException {
-		
 		Date ModifyDate = new Date();
 		try {
 			if(SpiConstants.ActionType.DELETE.equals(action)){
@@ -67,6 +62,7 @@ public class FnBaseObject implements IBaseObject {
 				ModifyDate = ((Document) this.object).get_DateLastModified();
 			}	
 		}catch (Exception e){
+			logger.warning("Unable to get Modified Date for action "+action);
 			 throw new RepositoryDocumentException(e);
 		}
 		return ModifyDate;
@@ -85,7 +81,7 @@ public class FnBaseObject implements IBaseObject {
 				}
 			}
 		} catch (Exception e) {
-			logger.log(Level.SEVERE, "error while trying to get the property "
+			logger.log(Level.WARNING, "Error while trying to get the property "
 					+ name + " of the file " + ((com.filenet.apiimpl.core.DeletionEventImpl) this.object).get_Id() + " "
 					+ e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
@@ -101,6 +97,7 @@ public class FnBaseObject implements IBaseObject {
 			id = ((com.filenet.apiimpl.core.DeletionEventImpl) this.object).get_VersionSeriesId();
 			
 		}catch (Exception e){
+			logger.warning("Unable to get Version Series Id ");
 			 throw new RepositoryDocumentException(e);
 		}
 		strId=id.toString();

@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.VersionSeries;
 import com.filenet.api.util.Id;
-import com.google.enterprise.connector.file.FileDocument;
 import com.google.enterprise.connector.file.filewrap.IDocument;
 import com.google.enterprise.connector.file.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -22,18 +21,9 @@ public class FnVersionSeries implements IVersionSeries {
 	{
 		logger = Logger.getLogger(FnVersionSeries.class.getName());
 	}
-	
+
 	public FnVersionSeries(VersionSeries versionSeries) {
 		this.versionSeries = versionSeries;
-		
-		try {
-			
-		}catch (Exception e){
-			// TODO change this
-			//System.out.println("REFRESH EXCEPTION");
-			e.printStackTrace();
-		}
-		
 	}
 
 	public String getId(ActionType action) {
@@ -41,38 +31,34 @@ public class FnVersionSeries implements IVersionSeries {
 		return versionSeries.get_Id().toString();
 
 	}
-		
+
 	public Date getModifyDate(ActionType action) throws RepositoryDocumentException {
 		Date ModifyDate = new Date();
 		return ModifyDate;
 	}
-	
+
 	public String getClassNameEvent() throws RepositoryDocumentException {
-		try {
-			return this.versionSeries.getClassName();
-		} catch (Exception e1) {
-			RepositoryDocumentException re = new RepositoryDocumentException(e1);
-			throw re;
-		}
+		return this.versionSeries.getClassName();
 	}
-	
+
 	public Date getPropertyDateValueDelete(String name) throws RepositoryDocumentException {
 		return new Date();
 	}
-	
+
 	public String getVersionSeriesId() throws RepositoryDocumentException {
 		Id id;
 		String strId;
 		try {
 			id = ((com.filenet.apiimpl.core.DeletionEventImpl) versionSeries).get_VersionSeriesId();
 		}catch (Exception e){
-			 throw new RepositoryDocumentException(e);
+			logger.log(Level.WARNING, "Unable to get the VersionSeriesId");
+			throw new RepositoryDocumentException(e);
 		}
-		logger.info("versionId : ID : "+id);
+//		logger.info("versionId : ID : "+id);
 		strId=id.toString();
-		logger.info("versionId : tostring : "+strId);
+//		logger.info("versionId : tostring : "+strId);
 		strId = strId.substring(1,strId.length()-1);
-		logger.info("versionId : cut start/end : "+strId);
+//		logger.info("versionId : cut start/end : "+strId);
 		return strId;
 	}
 

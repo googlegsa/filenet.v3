@@ -19,12 +19,12 @@ public class FileAuthenticationManagerTest extends TestCase {
 	public void testAuthenticate() throws RepositoryLoginException, RepositoryException  {
 
 		FileConnector connec = new FileConnector();
-		connec.setLogin(TestConnection.adminUsername);
+		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
 		connec.setObject_store(TestConnection.objectStore);
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
-		connec.setContent_engine_uri(TestConnection.uri);
+		connec.setContent_engine_url(TestConnection.uri);
 		
 		FileSession fs = (FileSession)connec.login();
 		FileAuthenticationManager fatm = (FileAuthenticationManager) fs.getAuthenticationManager();		

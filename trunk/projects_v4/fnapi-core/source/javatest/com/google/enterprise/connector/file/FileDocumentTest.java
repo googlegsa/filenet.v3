@@ -1,9 +1,6 @@
 package com.google.enterprise.connector.file;
 
 import java.util.Iterator;
-
-import com.filenet.api.core.Domain;
-import com.filenet.api.core.Factory;
 import com.filenet.api.util.UserContext;
 import com.google.enterprise.connector.file.FileConnector;
 import com.google.enterprise.connector.file.FileDocument;
@@ -29,18 +26,18 @@ public class FileDocumentTest extends TestCase {
 	protected void setUp() throws Exception {
 		
 		FileConnector connec = new FileConnector();
-		connec.setLogin(TestConnection.adminUsername);
+		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
 		connec.setObject_store(TestConnection.objectStore);
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
-		connec.setContent_engine_uri(TestConnection.uri);
+		connec.setContent_engine_url(TestConnection.uri);
 		
 		fs = (FileSession)connec.login();
 
 		iof= (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
 		IConnection conn = iof.getConnection(TestConnection.uri);
-		Domain domain = Factory.Domain.getInstance(conn.getConnection(), "P8.V4");
+//		Domain domain = Factory.Domain.getInstance(conn.getConnection(), "P8.V4");
 		ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.username, TestConnection.password);
 
 	}

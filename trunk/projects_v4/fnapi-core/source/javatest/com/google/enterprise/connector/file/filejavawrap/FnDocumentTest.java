@@ -2,17 +2,10 @@ package com.google.enterprise.connector.file.filejavawrap;
 
 import java.io.InputStream;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Set;
-
 import com.filenet.api.constants.ClassNames;
-import com.filenet.api.core.Domain;
-import com.filenet.api.core.Factory;
-import com.filenet.api.property.Property;
-import com.filenet.api.util.UserContext;
 import com.google.enterprise.connector.file.FileConnector;
-import com.google.enterprise.connector.file.FileDocument;
 import com.google.enterprise.connector.file.FileSession;
 import com.google.enterprise.connector.file.filejavawrap.FnUserContext;
 import com.google.enterprise.connector.file.filewrap.IConnection;
@@ -41,12 +34,12 @@ public class FnDocumentTest extends TestCase {
 
 	protected void setUp() throws RepositoryLoginException, RepositoryException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		FileConnector connec = new FileConnector();
-		connec.setLogin(TestConnection.adminUsername);
+		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
 		connec.setObject_store(TestConnection.objectStore);
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
-		connec.setContent_engine_uri(TestConnection.uri);
+		connec.setContent_engine_url(TestConnection.uri);
 		
 		fs = (FileSession)connec.login();
 
@@ -54,7 +47,7 @@ public class FnDocumentTest extends TestCase {
 		
 		iof= (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
 		IConnection conn = iof.getConnection(TestConnection.uri);
-		Domain domain = Factory.Domain.getInstance(conn.getConnection(), null);
+//		Domain domain = Factory.Domain.getInstance(conn.getConnection(), null);
 		ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.adminUsername, TestConnection.adminPassword);
 
 		fd = (IDocument) ios.getObject(ClassNames.DOCUMENT, TestConnection.docId1);
