@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#Manual Installation Steps for FileNet Connector 3.5.2
 
 = Introduction =
 
