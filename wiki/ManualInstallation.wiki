@@ -1,4 +1,4 @@
-Manual Installation Steps for FileNet Connector 3.5.2
+#summary Manual Installation Steps for FileNet Connector 3.5.2
 
 = Introduction =
 
