@@ -47,7 +47,7 @@ To install the connector manually, follow the instructions given below:
 
      {{{
        Add the following lines in the start of the file:
-       set JRE-HOME=<JRE_HOME>
+       set JRE_HOME=<JRE_HOME>
        set PATH=%PATH%;
 
       Add the following lines just before “rem Set standard command for invoking Java”:
