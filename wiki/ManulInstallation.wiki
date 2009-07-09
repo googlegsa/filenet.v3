@@ -17,6 +17,7 @@ You are installing a patch release that is not packaged with an installer.
 • Apache Tomcat 6. You can download it from it from http://tomcat.apache.org/download-  60.cgi
 • JRE1.5 or above. Refer to http://java.sun.com/javase/downloads/index_jdk5.jsp for downloads
 • Make sure that Jace.jar is present.
+• Make sure that jaas.conf is present.
 • Make sure that  these files are available in your FileNet Workplace installation in the “WSI” directory or folder:
 
   Files under “lib” folder
@@ -91,9 +92,7 @@ Please make sure that all the shell scripts (with “.sh” as extension) have e
 
 7. Copy the connector-file.jar file from the root directory to the $CATALINA_HOME/webapps/connector-manager/WEB-INF/lib directory. 
 
-8. Copy the jar files from the pre-requisite section to the $CATALINA_HOME/webapps/connector-manager/WEB-INF/lib directory. 
-
-9. Do the following changes in $CATALINA_HOME/bin/catalina.bat (catalina.sh on Linux):
+8. Do the following changes in $CATALINA_HOME/bin/catalina.bat (catalina.sh on Linux):
    o Find the following line:
      {{{
       set JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager -Djava.util.logging.config.file="%CATALINA_BASE%\conf\logging.properties"
@@ -101,18 +100,20 @@ Please make sure that all the shell scripts (with “.sh” as extension) have e
 
    o Change it to the following:
      {{{
-      set JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=java.util.logging.LogManager -Djava.util.logging.config.file=”%CATALINA_BASE%\webapps\connector-manager\WEB-INF\classes\logging.properties"
+      set JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=java.util.logging.LogManager -Djava.util.logging.config.file=”%CATALINA_BASE%\webapps\connector-manager\WEB-INF\classes\logging.properties" -Dwasp.location="<WSI_DIRECTORY_PATH>"
      }}}
 
-10. For Linux use $CATALINA_BASE
+For Linux use $CATALINA_BASE
 
-11. In the $CATALINA_HOME/webapps/connector-manager/WEB-INF folder, create a directory or folder called classes. 
+9. In the $CATALINA_HOME/webapps/connector-manager/WEB-INF folder, create a directory or folder called classes. 
 
-12. Copy the logging.properties file from the /Config folder to the /classes folder. 
+10. Copy the logging.properties file from the /Config folder to the /classes folder. 
 
-13. Open the logging.properties file in a text editor. Set the value of java.util.logging.FileHandler.pattern equal to the absolute path of the log file.
+11. Copy the jaas.conf file to the /classes folder.
+
+12. Open the logging.properties file in a text editor. Set the value of java.util.logging.FileHandler.pattern equal to the absolute path of the log file.
 		java.util.logging.FileHandler.pattern=<value of $CATALINA_HOME>/logs/google-connectors%g.log
 
-14. Start the Tomcat server. 
+13. Start the Tomcat server. 
 
-15. To confirm whether the Tomcat server has started correctly and the connector is installed, navigate to the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors directory, and verify that the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors/Filenet_P8_3.5.2 directory exists. 
+14. To confirm whether the Tomcat server has started correctly and the connector is installed, navigate to the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors directory, and verify that the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors/Filenet_P8_3.5.2 directory exists. 
