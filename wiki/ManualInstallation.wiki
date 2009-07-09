@@ -92,17 +92,17 @@ Please make sure that all the shell scripts (with “.sh” as extension) have e
       set JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=java.util.logging.LogManager -Djava.util.logging.config.file=”%CATALINA_BASE%\webapps\connector-manager\WEB-INF\classes\logging.properties"
      }}}
 
-10. For Linux use $CATALINA_BASE
+For Linux use $CATALINA_BASE
 
-11. Copy file “WcmApiConfig.properties” mentioned from the pre-requisite section to the $CATALINA_HOME/webapps/connector-manager/WEB-INF directory. 
+10. Copy file “WcmApiConfig.properties” mentioned from the pre-requisite section to the $CATALINA_HOME/webapps/connector-manager/WEB-INF directory. 
 
-12. In the $CATALINA_HOME/webapps/connector-manager/WEB-INF folder, create a directory or folder called classes. 
+11. In the $CATALINA_HOME/webapps/connector-manager/WEB-INF folder, create a directory or folder called classes. 
 
-13. Copy the logging.properties file from the /Config folder to the /classes folder. 
+12. Copy the logging.properties file from the /Config folder to the /classes folder. 
 
-14. Open the logging.properties file in a text editor. Set the value of java.util.logging.FileHandler.pattern equal to the absolute path of the log file.
+13. Open the logging.properties file in a text editor. Set the value of java.util.logging.FileHandler.pattern equal to the absolute path of the log file.
 		java.util.logging.FileHandler.pattern=<value of $CATALINA_HOME>/logs/google-connectors%g.log
 
-15. Start the Tomcat server. 
+14. Start the Tomcat server. 
 
 16. To confirm whether the Tomcat server has started correctly and the connector is installed, navigate to the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors directory, and verify that the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors/Filenet_P8_3.5.2 directory exists. 
