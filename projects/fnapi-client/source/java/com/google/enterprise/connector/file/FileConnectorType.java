@@ -260,7 +260,7 @@ public class FileConnectorType implements ConnectorType {
 
 			try{	
 				logger.log(Level.CONFIG, "Start Test Connection to Workplace server ..."+ (String) configData.get(WORKPLACE_URL));
-				configData.put(WORKPLACE_URL, getFQDNHostName((String) configData.get(WORKPLACE_URL)));
+				configData.put(WORKPLACE_URL, getFQDNHostNameURL((String) configData.get(WORKPLACE_URL)));
 				testWorkplaceUrl((String) configData.get(WORKPLACE_URL));
 			} catch (RepositoryException e) {
 				form = makeConfigForm(configData, this.validation);
@@ -482,7 +482,7 @@ public class FileConnectorType implements ConnectorType {
 		return bValue;
 	}
 	
-	private String getFQDNHostName(String strUrl){
+	private String getFQDNHostNameURL(String strUrl){
 
 		InetAddress ia = null;
 		URL url = null;
