@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import com.google.enterprise.connector.file.filewrap.IObjectFactory;
 import com.google.enterprise.connector.file.filewrap.IObjectStore;
+import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.file.filewrap.ISession;
 import com.google.enterprise.connector.spi.AuthenticationManager;
 import com.google.enterprise.connector.spi.AuthorizationManager;
@@ -128,5 +129,10 @@ public class FileSession implements Session {
 	public void setObjectStore(IObjectStore refObjectStore) {
 		this.objectStore = refObjectStore;
 	}
+
+	public ISearch getSearch() {
+		ISearch search = fileObjectFactory.getSearch(fileSession);
+		return search;
+	}	
 
 }
