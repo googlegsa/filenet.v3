@@ -1,5 +1,25 @@
+/*
+ * Copyright 2009 Google Inc.
+ 
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+ */
 package com.google.enterprise.connector.file;
 
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,6 +33,7 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.spi.ConfigureResponse;
 import com.google.enterprise.connector.spi.ConnectorFactory;
 import com.google.enterprise.connector.spi.ConnectorType;
@@ -176,63 +197,81 @@ public class FileConnectorType implements ConnectorType {
 		String form = null;
 		String validation = validateConfigMap(configData);
 		this.validation = validation;
-		FileSession session;
+		FileSession session = null;
 		if (validation.equals("")) {
+
+			FileConnector conn = null;
 			try {
 				logger.log(Level.CONFIG, "Start Test Connection to the object store ..."+ (String) configData.get(OBJECT_STORE));
 
-				logger.info("attempting to create FileNet connector instance for verification");
-				FileConnector conn =(FileConnector) connectorFactory.makeConnector(configData);
+				logger.info("Attempting to create FileNet connector instance for verification");
+				conn =(FileConnector) connectorFactory.makeConnector(configData);
 
 				if(null!=conn){
-					logger.info("able to craete FileNet connector instance. Trying to login with provided credentials.");
+					logger.info("Able to create FileNet connector instance. Trying to login with provided credentials.");
 					session = (FileSession) conn.login();
-					logger.info("login succeeded. Trying to retrieve the traversal manager.");
-					session.getTraversalManager();// test on the objectStore name
-					logger.info("got traversal manager");
-				}else{
-					logger.severe("Unable to craete a FileNet connector instance");
 				}
-
-				logger.log(Level.INFO, "Connecttion to Object Store "+ (String) configData.get(OBJECT_STORE)+ " is Successful");
-				logger.log(Level.CONFIG, "Start Test Connection to Workplace server ..."+ (String) configData.get(WORKPLACE_URL));
-				testWorkplaceUrl((String) configData.get(WORKPLACE_URL));
-
-			} catch (RepositoryException e) {
-				String extractErrorMessage = null;
-				String bundleMessage;
-				try {
-					extractErrorMessage = e.getCause().getClass().getName();
-					logger.info("extractErrorMessage: "+extractErrorMessage);
-					if(extractErrorMessage.equalsIgnoreCase("com.filenet.wcm.api.InvalidCredentialsException")){
-						bundleMessage = resource.getString("invalid_credentials_error");
-						logger.log(Level.SEVERE, bundleMessage);
-					}else if(extractErrorMessage.equalsIgnoreCase("com.filenet.wcm.api.RemoteServerException")){
-						bundleMessage = resource.getString("object_store_invalid");
-						logger.log(Level.SEVERE, bundleMessage);
-					}else if(extractErrorMessage.equalsIgnoreCase("com.filenet.wcm.api.InsufficientPermissionException")){
-						bundleMessage = resource.getString("invalid_credentials_error");
-						logger.log(Level.SEVERE, bundleMessage+" Insufficient permission to user on a given ObjectStore.");
-					}else{
-						bundleMessage = resource.getString(extractErrorMessage);
-						logger.log(Level.SEVERE, bundleMessage);
-					}
-				} catch (MissingResourceException mre) {
-					//bundleMessage = resource.getString("required_field_error");
-					bundleMessage = e.getLocalizedMessage();//This will get prin
-					logger.log(Level.SEVERE, mre.getLocalizedMessage());
-				}catch(NullPointerException npe){
-					bundleMessage = e.getLocalizedMessage();
-					logger.log(Level.SEVERE, bundleMessage);
-				}
-				form = makeConfigForm(configData, validation);
+			}catch(RepositoryException e){
+				form = makeConfigForm(configData, this.validation);
 				logger.log(Level.SEVERE, e.getLocalizedMessage());
 
-				return new ConfigureResponse(bundleMessage ,form);
+				return new ConfigureResponse(resource.getString("invalid_credentials_error"), form);
+			}
+			logger.info("Login succeeded. Trying to retrieve the traversal manager.");
+			
+			try{
+				if(session != null){
+					session.getTraversalManager();// test on the objectStore name
+				}
+			}catch(RepositoryException e){
+				this.validation=OBJECT_STORE;
+
+				form = makeConfigForm(configData, this.validation);
+				logger.log(Level.SEVERE, e.getLocalizedMessage());
+
+				return new ConfigureResponse(resource.getString("object_store_invalid"), form);
+			}
+			logger.log(Level.INFO, "Connecttion to Object Store "+ (String) configData.get(OBJECT_STORE)+ " is Successful");
+
+
+			if(null!=conn){
+				logger.info("Got traversal manager");
+				StringBuffer query = new StringBuffer("<?xml version=\"1.0\" ?><request>");
+				query.append("<objectstores mergeoption=\"none\"><objectstore id=\"");
+				query.append((String)configData.get(OBJECT_STORE));
+				query.append("\"/></objectstores>");
+				query.append("<querystatement>SELECT Id FROM Document WHERE VersionStatus=1 ");
+				query.append((String)configData.get(WHERECLAUSE));
+				query.append("</querystatement><options maxrecords='100' objectasid=\"false\"/></request>");
+
+				try{
+					if(session != null){
+						ISearch search = session.getSearch();
+						search.executeXml(query.toString(),session.getObjectStore());
+					}
+				}catch(Exception e){
+					this.validation = WHERECLAUSE;
+					form = makeConfigForm(configData, this.validation);
+					return new ConfigureResponse(resource.getString("additional_where_clause_invalid"), form);
+				}
+			}else{
+				logger.severe("Unable to create a FileNet connector instance");
+			}
+
+			try{	
+				logger.log(Level.CONFIG, "Start Test Connection to Workplace server ..."+ (String) configData.get(WORKPLACE_URL));
+				configData.put(WORKPLACE_URL, getFQDNHostName((String) configData.get(WORKPLACE_URL)));
+				testWorkplaceUrl((String) configData.get(WORKPLACE_URL));
+			} catch (RepositoryException e) {
+				form = makeConfigForm(configData, this.validation);
+				logger.log(Level.SEVERE, e.getLocalizedMessage());
+
+				return new ConfigureResponse(resource.getString("workplace_url_error") ,form);
 			}
 			return null;
 		}
-		form = makeConfigForm(configData, validation);
+
+		form = makeConfigForm(configData, this.validation);
 		String errorMsg =resource.getString(validation + "_error"); //added here
 		logger.log(Level.FINEST, "Exiting from function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
 		return new ConfigureResponse(errorMsg,form);
@@ -246,9 +285,11 @@ public class FileConnectorType implements ConnectorType {
 			new FileUrlValidator().validate(workplaceServerUrl);
 			logger.log(Level.INFO, "Connecttion to Workplace server is Successful");
 		} catch (FileUrlValidatorException e) {
+			this.validation=WORKPLACE_URL;
 			logger.log(Level.SEVERE, resource.getString("workplace_url_error"));
 			throw new RepositoryException(resource.getString("workplace_url_error"));
 		} catch (Throwable t) {
+			this.validation=WORKPLACE_URL;
 			logger.log(Level.SEVERE, resource.getString("workplace_url_error"));
 			throw new RepositoryException(resource.getString("workplace_url_error"));
 		}
@@ -264,6 +305,7 @@ public class FileConnectorType implements ConnectorType {
 	 */
 	private String makeConfigForm(Map configMap, String validate) {
 		logger.log(Level.FINEST, "Entering into function makeConfigForm(Map configMap, String validate)");
+		logger.log(Level.FINEST, "validate: "+validate);
 		StringBuffer buf = new StringBuffer(BUFFER_SIZE);
 		String value = "";
 		for (Iterator i = keys.iterator(); i.hasNext();) {
@@ -286,6 +328,7 @@ public class FileConnectorType implements ConnectorType {
 				if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
 						/*&& !key.equals(WHERECLAUSE)*/ && !key.equals(FILEPATH)) {
 					if(validate.equals(key)){
+						logger.log(Level.FINEST, "key: "+key);
 						appendStartRow(buf, key, validate);
 					}else{
 						appendStartRow(buf, key, "");
@@ -314,11 +357,11 @@ public class FileConnectorType implements ConnectorType {
 				value = "";
 			}
 		}
-		
+
 		if (configMap != null) {
 			appendStartHiddenRow(buf);
 			Iterator i = new TreeSet(configMap.keySet()).iterator();
-			
+
 			//added: NULL checks
 			if(null!=i){
 				while (i.hasNext()) {
@@ -335,7 +378,7 @@ public class FileConnectorType implements ConnectorType {
 			}
 			appendEndRow(buf);
 		}
-		logger.log(Level.FINEST, "Exiting from function makeConfigForm(Map configMap, String validate)");
+		logger.log(Level.FINEST, "Exiting from function makeConfigForm(Map configMap, String validate)" + buf.toString());
 		return buf.toString();
 	}
 
@@ -377,8 +420,23 @@ public class FileConnectorType implements ConnectorType {
 		}
 		else{
 			buf.append(TD_END_START_LABEL);
+			if(key.equals(WHERECLAUSE)){
+				buf.append(DIV_START_LABEL);
+				buf.append(TD_FLOAT_LEFT);
+				buf.append(TD_DELIMITER);
+				if(!validate.equals("")){
+					buf.append(TD_FONT_COLOR);
+					buf.append(TD_DELIMITER);
+					buf.append(TD_FONT_WEIGHT);
+				}
+				buf.append(TD_END_START_LABEL);
+				buf.append(resource.getString(key));
+				buf.append(DIV_END);
+				buf.append(TD_END);
+			}else{
 			buf.append(resource.getString(key));
 			buf.append(TD_END);
+			}
 		}
 		buf.append(TD_START);
 	}
@@ -423,5 +481,25 @@ public class FileConnectorType implements ConnectorType {
 		}		
 		return bValue;
 	}
+	
+	private String getFQDNHostName(String strUrl){
+
+		InetAddress ia = null;
+		URL url = null;
+		try {
+			url = new URL(strUrl);
+        	ia = InetAddress.getByName(url.getHost());
+		} catch (final UnknownHostException e) {
+			logger.log(Level.WARNING,"Exception occurred while converting to FQDN.",e);
+		} catch (MalformedURLException e) {
+			logger.log(Level.WARNING,"URL is not in a correct format.",e);
+		}
+		if(ia != null && url != null){
+			return strUrl = strUrl.replaceAll(url.getHost(), ia.getCanonicalHostName());
+		}
+
+		return strUrl;
+	}
+
 
 }
