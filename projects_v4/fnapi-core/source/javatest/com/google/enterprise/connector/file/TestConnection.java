@@ -1,26 +1,39 @@
+/*
+ * Copyright 2009 Google Inc.
+ 
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+ */
 package com.google.enterprise.connector.file;
 
 import java.util.HashSet;
 
 public class TestConnection {
 
-	public static String adminUsername = "Administrator";
-
-	public static String adminPassword = "root";
-	
-	public static String username = "userTest";
-	
-	public static String password = "p@ssw0rd";
-	
+	public static String adminUsername = "FNCE_gdc07";
+	public static String adminPassword = "Admin1234";
+	public static String username = "FNCE_gdc07";
+	public static String password = "Admin1234";
 	public static String wrongPassword ="password";
-	
-	public static String uri = "http://swp-vm-fncltv4:7001/wsi/FNCEWS40DIME";
-	
+	public static String uri = "http://gdc07:7001/wsi/FNCEWS40DIME";
 	public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
-	
-	public static String displayURL = "http://swp-vm-fncltv4:7001/Workplace";
-	
-	public static String objectStore = "GED";
+	public static String displayURL = "http://gdc07.persistent.co.in:7001/Workplace/getContent";
+	public static String objectStore = "PanObj";
+	public static String property_wasp_location = "wasp.location";
+	public static String wsi_path = "E:\\FileNet Connector\\share\\wsi";
+	public static String wrong_additional_where_clause = "andDocument.this INSUBFOLDER";
+	public static String additional_where_clause = "and Document.this INSUBFOLDER '/Fold1'";
+	public static String error_message = "Where Clause is syntactically incorrect.";
 
 //	docId1 is Doc1 available for Administrator only
 	public static String docId1 = "3811870F-410F-4C25-B853-CAC56014C552";
@@ -48,12 +61,11 @@ public class TestConnection {
 	
 //	CHeckpoint of the last modified document TestAuthentication.pdf
 	public static String checkpoint1 = "{\"uuidToDelete\":\"\",\"uuid\":\"4E26DEC8-CDEE-4146-961B-E43E85400D8C\",\"lastRemoveDate\":\"2008-09-15T09:38:58.781\",\"lastModified\":\"2008-01-16T10:35:00.327\"}";
-	 
 	public static String checkpoint2 = "{\"uuidToDelete\":\"\",\"uuid\":\"4E26DEC8-CDEE-4146-961B-E43E85400D8C\",\"lastRemoveDate\":\"2008-09-15T09:38:58.781\",\"lastModified\":\"2008-01-16T10:35:00.327\"}"; 
 	
-	public static HashSet included_meta = null;
+	public static HashSet<String> included_meta = null;
 	static {
-		included_meta = new HashSet();
+		included_meta = new HashSet<String>();
 		included_meta.add("ClassificationStatus");
 		included_meta.add("ContentRetentionDate");
 		included_meta.add("ContentSize");
@@ -75,10 +87,10 @@ public class TestConnection {
 
 	}
 
-	public static HashSet excluded_meta = null;
+	public static HashSet<String> excluded_meta = null;
 
 	static {
-		excluded_meta = new HashSet();
+		excluded_meta = new HashSet<String>();
 		excluded_meta.add("ActiveMarkings");
 		excluded_meta.add("Annotations");
 		excluded_meta.add("AuditedEvents");

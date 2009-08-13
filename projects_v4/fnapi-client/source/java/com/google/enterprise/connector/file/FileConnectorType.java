@@ -1,3 +1,20 @@
+/*
+ * Copyright 2009 Google Inc.
+ 
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+ */
+
 package com.google.enterprise.connector.file;
 
 import java.util.Arrays;
@@ -7,14 +24,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.idoox.util.RuntimeWrappedException;
+import org.idoox.wasp.UnknownProtocolException;
+
 import com.filenet.api.exception.EngineRuntimeException;
+import com.google.enterprise.connector.file.filewrap.ISearch;
 import com.google.enterprise.connector.spi.ConfigureResponse;
 import com.google.enterprise.connector.spi.ConnectorFactory;
 import com.google.enterprise.connector.spi.ConnectorType;
@@ -183,28 +203,28 @@ public class FileConnectorType implements ConnectorType {
 			logger.severe("No configuration information is available");
 			return null;
 		}
-		
+
 		String form = null;
-		
+
 		logger.info("validating the configuration data...");
 		String validation = validateConfigMap(configData);
 		this.validation = validation;
-		
+
 		logger.info("Configuration data validation.. succeeded");
 
 		FileSession session =null;
 		if (validation.equals("")) {
 			try {
-				Properties p = new Properties();
-				p.putAll(configData);
-				String isPublic = (String) configData.get(ISPUBLIC);
-				if (isPublic == null) {
-					p.put(ISPUBLIC, "false");
-					logger.config("isPulic is set to false, documents will not be seen using public searches");
-				}
-				
+				//				Properties p = new Properties();
+				//				p.putAll(configData);
+				//				String isPublic = (String) configData.get(ISPUBLIC);
+				//				if (isPublic == null) {
+				//					p.put(ISPUBLIC, "false");
+				//					logger.config("isPulic is set to false, documents will not be seen using public searches");
+				//				}
+
 				/*Amit: removed the hard coded filenet instantiation*/
-				
+
 				/*Resource res = new ClassPathResource("config/connectorInstance.xml");
 				XmlBeanFactory factory = new XmlBeanFactory(res);
 				PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
@@ -218,10 +238,10 @@ public class FileConnectorType implements ConnectorType {
 					logger.severe("Unable to establish connection with FileNet server");
 					return null;
 				}
-				
+
 				logger.info("FileNet4 connector instance creation succeeded. Trying to Login into FileNet server.");
 				session = (FileSession) conn.login();
-				
+
 				if(session != null){
 					logger.log(Level.INFO, "Connection to Content Engine URL is Successful");
 					session.getTraversalManager();//test on the objectStore name
@@ -231,7 +251,23 @@ public class FileConnectorType implements ConnectorType {
 				}
 
 				testWorkplaceUrl((String) configData.get("workplace_display_url"));
-			} catch (EngineRuntimeException e){
+
+				StringBuffer query = new StringBuffer();
+				query.append("SELECT TOP 100 d.Id, d.DateLastModified FROM Document AS d WHERE VersionStatus=1 and ContentSize IS NOT NULL");
+				query.append((String)configData.get(WHERECLAUSE));
+
+				try{
+					if(session != null){
+						ISearch search = session.getSearch();
+						search.execute(query.toString());
+					}
+				}catch(Exception e){
+					logger.log(Level.SEVERE, "Pankaj: "+ e.getLocalizedMessage(),e);
+					this.validation = WHERECLAUSE;
+					form = makeConfigForm(configData, this.validation);
+					return new ConfigureResponse(resource.getString("additional_where_clause_invalid"), form);
+				}
+			}catch (EngineRuntimeException e){
 				String errorKey = e.getExceptionCode().getKey();
 				String bundleMessage;
 				try{
@@ -239,24 +275,24 @@ public class FileConnectorType implements ConnectorType {
 						bundleMessage = resource.getString("content_engine_url_invalid") +" "+ e.getLocalizedMessage();
 						logger.log(Level.SEVERE,bundleMessage,e);
 					}else{
-//						bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
+						//						bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
 						bundleMessage = e.getLocalizedMessage();
 						logger.log(Level.SEVERE,bundleMessage,e);
 					}
 				}catch(MissingResourceException mre){
-//					bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
+					//					bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
 					bundleMessage = e.getLocalizedMessage();
 					logger.log(Level.SEVERE,bundleMessage,mre);
 				}
 				form = makeConfigForm(configData, validation);
 				return new ConfigureResponse( bundleMessage, form);
-//				}catch (RepositoryException e) {
-			}catch (Throwable e) {
+			}catch (RepositoryException e) {
+				//			}catch (Throwable e) {
 				String extractErrorMessage = null;
 				String bundleMessage;
 				try {
 					extractErrorMessage = e.getCause().getClass().getName();
-					if(extractErrorMessage.equalsIgnoreCase("com.filenet.api.exception.EngineRuntimeException")){
+					if(e.getCause() instanceof EngineRuntimeException){
 						EngineRuntimeException ere = (EngineRuntimeException)e.getCause();
 						String errorKey = ere.getExceptionCode().getKey();
 						if(errorKey.equalsIgnoreCase("E_OBJECT_NOT_FOUND")){
@@ -265,7 +301,7 @@ public class FileConnectorType implements ConnectorType {
 							bundleMessage = resource.getString("invalid_credentials_error")+" "+ere.getLocalizedMessage();
 						}else if(errorKey.equalsIgnoreCase("E_UNEXPECTED_EXCEPTION")){
 							String errorMsg = ere.getCause().getClass().getName();
-							if(errorMsg.equalsIgnoreCase("java.lang.NoClassDefFoundError")){
+							if(ere.getCause() instanceof NoClassDefFoundError){
 								NoClassDefFoundError ncdf = (NoClassDefFoundError)ere.getCause();
 								errorMsg = ncdf.getMessage();
 								if(errorMsg.indexOf("activation") != -1){
@@ -273,22 +309,22 @@ public class FileConnectorType implements ConnectorType {
 								}else{
 									bundleMessage = resource.getString("content_engine_url_invalid");
 								}
-							}else if(errorMsg.equalsIgnoreCase("org.idoox.util.RuntimeWrappedException")){
+							}else if(ere.getCause() instanceof RuntimeWrappedException){
 								errorMsg = ere.getCause().getMessage();
 								if(errorMsg.indexOf("Jetty") != -1){
 									bundleMessage = "Connector dependency file jetty.jar is corrupted or its classpath has been reset.";
 								}else{
 									bundleMessage = "Connector dependency file builtin_serialization.jar is corrupted or its classpath has been reset.";
 								}
-							}else if(errorMsg.equalsIgnoreCase("java.lang.ExceptionInInitializerError")){
+							}else if(ere.getCause() instanceof ExceptionInInitializerError){
 								bundleMessage = "Connector dependency file jaxrpc.jar is corrupted or its classpath has been reset.";
-							}else if(errorMsg.equalsIgnoreCase("org.idoox.wasp.UnknownProtocolException")){
+							}else if(ere.getCause() instanceof UnknownProtocolException){
 								bundleMessage = "Connector dependency file saaj.jar is corrupted or its classpath has been reset.";
 							}else{
 								bundleMessage = resource.getString("content_engine_url_invalid");
 							}
 							//e.printStackTrace();
-							
+
 						}else if(errorKey.equalsIgnoreCase("API_INVALID_URI")){
 							bundleMessage = resource.getString("content_engine_url_invalid");
 						}else if(errorKey.equalsIgnoreCase("TRANSPORT_WSI_LOOKUP_FAILURE")){
@@ -305,14 +341,14 @@ public class FileConnectorType implements ConnectorType {
 					//logger.severe(bundleMessage);
 					logger.log(Level.SEVERE,bundleMessage,mre);
 				}catch(NullPointerException npe){
-//					bundleMessage = resource.getString("required_field_error") +" "+ e.getMessage();
+					//					bundleMessage = resource.getString("required_field_error") +" "+ e.getMessage();
 					bundleMessage = npe.getLocalizedMessage();
 					logger.log(Level.SEVERE,"Unable to connect to FileNet server. Got exception: ",npe);
 				}catch(Throwable th){
 					bundleMessage = th.getLocalizedMessage();
 					logger.log(Level.SEVERE,"Unable to connect to FileNet server. Got exception: ",th);
 				}
-				
+
 				logger.info("request to make configuration form..");
 				form = makeConfigForm(configData, validation);
 				return new ConfigureResponse( bundleMessage, form);
@@ -417,7 +453,7 @@ public class FileConnectorType implements ConnectorType {
 	}
 
 	private void appendStartHiddenRow(StringBuffer buf) {
-//		buf.append(TR_START);
+		//		buf.append(TR_START);
 		buf.append(TR_START_HIDDEN);
 		buf.append(TD_START);
 
@@ -425,7 +461,7 @@ public class FileConnectorType implements ConnectorType {
 
 	private void appendStartRow(StringBuffer buf, String key, String validate) {
 		buf.append(TR_START);
-//		buf.append(TD_START);
+		//		buf.append(TD_START);
 		buf.append(TD_START_LABEL);
 		buf.append(TD_WHITE_SPACE);
 		if(isRequired(key)){
@@ -463,7 +499,7 @@ public class FileConnectorType implements ConnectorType {
 	}
 
 	private void appendEndRow(StringBuffer buf) {
-//		buf.append(CLOSE_ELEMENT);
+		//		buf.append(CLOSE_ELEMENT);
 		buf.append(TD_END);
 		buf.append(TR_END);
 	}
@@ -483,7 +519,7 @@ public class FileConnectorType implements ConnectorType {
 	private void appendCheckBox(StringBuffer buf, String key, String label,
 			String value) {
 		buf.append(TR_START);
-//		buf.append(TD_START);
+		//		buf.append(TD_START);
 		buf.append(TD_START_COLSPAN);
 		buf.append(OPEN_ELEMENT);
 		buf.append(INPUT);
