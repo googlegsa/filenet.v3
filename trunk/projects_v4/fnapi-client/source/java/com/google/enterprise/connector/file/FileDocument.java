@@ -140,8 +140,9 @@ public class FileDocument implements Document {
 			} else if (type.equalsIgnoreCase("Double")) {
 				logger.log(Level.FINEST, "Getting property: "+name);
 				set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
-//			} else if (type.equalsIgnoreCase("String")) {
-//				set.add(new StringValue(document.getPropertyStringValue(name)));
+			} else if (type.equalsIgnoreCase("String")) {
+				logger.info("String Type:");
+				set.add(new StringValue(document.getPropertyStringValue(name)));
 			} else if (type.equalsIgnoreCase("guid")) {
 				logger.log(Level.FINEST, "Getting property: "+name);
 				set.add(new StringValue(document.getPropertyGuidValue(name)));
