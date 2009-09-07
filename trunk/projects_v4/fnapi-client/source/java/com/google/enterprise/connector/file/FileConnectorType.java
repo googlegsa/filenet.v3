@@ -84,6 +84,7 @@ public class FileConnectorType implements ConnectorType {
 	private static final String ISPUBLIC = "is_public";
 	private static final String CHECKBOX = "checkbox";
 	private static final String CHECKED = "checked='checked'";
+	private static final String LOCALE_FILE = "FileConnectorResources";
 	private static Logger logger = null;
 	private List keys = null;
 	private Set keySet = null;
@@ -141,10 +142,10 @@ public class FileConnectorType implements ConnectorType {
 
 		try {
 			logger.info("language used " + language.getLanguage());
-			resource = ResourceBundle.getBundle("FileConnectorResources",
+			resource = ResourceBundle.getBundle(LOCALE_FILE,
 					language);
 		} catch (MissingResourceException e) {
-			resource = ResourceBundle.getBundle("FileConnectorResources");
+			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
 		if (initialConfigForm != null) {
 			return new ConfigureResponse("", initialConfigForm);
@@ -159,11 +160,10 @@ public class FileConnectorType implements ConnectorType {
 	public ConfigureResponse getPopulatedConfigForm(Map configMap,
 			Locale language) {
 		try {
-			logger.info("language used " + language.getLanguage());
-			resource = ResourceBundle.getBundle("FileConnectorResources",language);
+			resource = ResourceBundle.getBundle(LOCALE_FILE,language);
 
 		} catch (MissingResourceException e) {
-			resource = ResourceBundle.getBundle("FileConnectorResources");
+			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
 		ConfigureResponse response = new ConfigureResponse("",makeConfigForm(configMap,this.validation));
 		return response;
@@ -191,12 +191,12 @@ public class FileConnectorType implements ConnectorType {
 	}
 
 	public ConfigureResponse validateConfig(Map configData, Locale language,ConnectorFactory connectorFactory) {
+		logger.log(Level.FINEST, "Entering into function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
 		try {
-			logger.info("language used " + language.getLanguage());
-			resource = ResourceBundle.getBundle("FileConnectorResources",language);
+			resource = ResourceBundle.getBundle(LOCALE_FILE,language);
 		} catch (MissingResourceException e) {
 			logger.log(Level.SEVERE, "Unable to find the resource bundle file for language "+language,e);
-			resource = ResourceBundle.getBundle("FileConnectorResources");
+			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
 
 		if(configData==null){
@@ -216,6 +216,8 @@ public class FileConnectorType implements ConnectorType {
 		if (validation.equals("")) {
 			try {
 				logger.info("Attempting to create FileNet4 connector instance");
+				configData.put(CONTENT_ENGINE_URL, rightTrim((String)configData.get(CONTENT_ENGINE_URL), '/'));//Removing the extra slashes at the right end of content engine url
+				
 				FileConnector conn =(FileConnector) connectorFactory.makeConnector(configData);
 				if(null==conn){
 					logger.severe("Unable to establish connection with FileNet server");
@@ -523,4 +525,9 @@ public class FileConnectorType implements ConnectorType {
 		return bValue;
 	}
 
+	private String rightTrim(String strTarget, char separator){
+		String regex = separator + "+$";
+		
+		return strTarget.replaceFirst(regex, "");
+	}
 }
