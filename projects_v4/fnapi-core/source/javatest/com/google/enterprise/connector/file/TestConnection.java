@@ -29,13 +29,15 @@ public class TestConnection {
 	public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
 	public static String displayURL = "http://<servername>:<port>/Workplace/getContent";
 	public static String incorrectDisplayURL = "http://<incorrectservername>:<port>/Workplace/getContent";
-	public static String objectStore = "objectstorename";
+	public static String objectStore = "objectstore";
 	public static String property_wasp_location = "wasp.location";
 	public static String wsi_path = "E:\\FileNet Connector\\share\\wsi";
 	public static String wrong_additional_where_clause = "and Document.this INSUBFOLDER";
 	public static String additional_where_clause = "and Document.this INSUBFOLDER '/Fold1'";
 	public static String where_clause_error_message = "Where Clause is syntactically incorrect.";
 	public static String workplace_url__error_message = "Unable to validate Workplace URL. Could not connect to the Workplace. Either remote server is down or URL is not in proper format.: ";
+	public static String repeatedSlashContentEngineURL = "http://<servername>:<port>/wsi/FNCEWS40DIME/////////////";
+	
 
 //	docId1 is Doc1 available for Administrator only
 	public static String docId1 = "3811870F-410F-4C25-B853-CAC56014C552";
