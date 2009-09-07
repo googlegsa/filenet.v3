@@ -20,20 +20,22 @@ import java.util.HashSet;
 
 public class TestConnection {
 
-	public static String adminUsername = "FNCE_gdc07";
-	public static String adminPassword = "Admin1234";
-	public static String username = "FNCE_gdc07";
-	public static String password = "Admin1234";
-	public static String wrongPassword ="password";
-	public static String uri = "http://gdc07:7001/wsi/FNCEWS40DIME";
+	public static String adminUsername = "username";
+	public static String adminPassword = "password";
+	public static String username = "username";
+	public static String password = "password";
+	public static String wrongPassword ="incorrectpassword";
+	public static String uri = "http://<servername>:<port>/wsi/FNCEWS40DIME";
 	public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
-	public static String displayURL = "http://gdc07.persistent.co.in:7001/Workplace/getContent";
-	public static String objectStore = "PanObj";
+	public static String displayURL = "http://<servername>:<port>/Workplace/getContent";
+	public static String incorrectDisplayURL = "http://<incorrectservername>:<port>/Workplace/getContent";
+	public static String objectStore = "objectstorename";
 	public static String property_wasp_location = "wasp.location";
 	public static String wsi_path = "E:\\FileNet Connector\\share\\wsi";
-	public static String wrong_additional_where_clause = "andDocument.this INSUBFOLDER";
+	public static String wrong_additional_where_clause = "and Document.this INSUBFOLDER";
 	public static String additional_where_clause = "and Document.this INSUBFOLDER '/Fold1'";
-	public static String error_message = "Where Clause is syntactically incorrect.";
+	public static String where_clause_error_message = "Where Clause is syntactically incorrect.";
+	public static String workplace_url__error_message = "Unable to validate Workplace URL. Could not connect to the Workplace. Either remote server is down or URL is not in proper format.: ";
 
 //	docId1 is Doc1 available for Administrator only
 	public static String docId1 = "3811870F-410F-4C25-B853-CAC56014C552";
