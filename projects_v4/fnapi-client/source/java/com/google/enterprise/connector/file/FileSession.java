@@ -63,7 +63,12 @@ public class FileSession implements Session {
 		
 		logger.info("objectStore ok user:"+userName);
 		
-		this.displayUrl = displayUrl + "/getContent?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
+		if(displayUrl.contains("getContent")){
+			this.displayUrl = displayUrl + "?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
+		}else{
+			this.displayUrl = displayUrl + "/getContent?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
+		}
+
 		this.isPublic = isPublic;
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
