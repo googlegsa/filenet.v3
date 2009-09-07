@@ -215,23 +215,6 @@ public class FileConnectorType implements ConnectorType {
 		FileSession session =null;
 		if (validation.equals("")) {
 			try {
-				//				Properties p = new Properties();
-				//				p.putAll(configData);
-				//				String isPublic = (String) configData.get(ISPUBLIC);
-				//				if (isPublic == null) {
-				//					p.put(ISPUBLIC, "false");
-				//					logger.config("isPulic is set to false, documents will not be seen using public searches");
-				//				}
-
-				/*Amit: removed the hard coded filenet instantiation*/
-
-				/*Resource res = new ClassPathResource("config/connectorInstance.xml");
-				XmlBeanFactory factory = new XmlBeanFactory(res);
-				PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
-				cfg.setProperties(p);
-				cfg.postProcessBeanFactory(factory);
-				FileConnector conn = (FileConnector) factory.getBean("FileConnectorInstance");*/
-
 				logger.info("Attempting to create FileNet4 connector instance");
 				FileConnector conn =(FileConnector) connectorFactory.makeConnector(configData);
 				if(null==conn){
@@ -262,7 +245,7 @@ public class FileConnectorType implements ConnectorType {
 						search.execute(query.toString());
 					}
 				}catch(Exception e){
-					logger.log(Level.SEVERE, "Pankaj: "+ e.getLocalizedMessage(),e);
+					logger.log(Level.SEVERE, e.getLocalizedMessage(),e);
 					this.validation = WHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
 					return new ConfigureResponse(resource.getString("additional_where_clause_invalid"), form);
@@ -287,11 +270,8 @@ public class FileConnectorType implements ConnectorType {
 				form = makeConfigForm(configData, validation);
 				return new ConfigureResponse( bundleMessage, form);
 			}catch (RepositoryException e) {
-				//			}catch (Throwable e) {
-				String extractErrorMessage = null;
 				String bundleMessage;
 				try {
-					extractErrorMessage = e.getCause().getClass().getName();
 					if(e.getCause() instanceof EngineRuntimeException){
 						EngineRuntimeException ere = (EngineRuntimeException)e.getCause();
 						String errorKey = ere.getExceptionCode().getKey();
@@ -333,7 +313,7 @@ public class FileConnectorType implements ConnectorType {
 							bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
 						}
 					}else{
-						bundleMessage = resource.getString(extractErrorMessage);
+						bundleMessage = e.getLocalizedMessage();
 					}
 					logger.log(Level.SEVERE,bundleMessage,e);
 				} catch (MissingResourceException mre) {
@@ -367,10 +347,10 @@ public class FileConnectorType implements ConnectorType {
 			logger.log(Level.INFO, "Connection to Workplace URL is Successful");
 		} catch (FileUrlValidatorException e) {
 			logger.log(Level.WARNING, resource.getString("workplace_url_error"));
-			throw new RepositoryException(resource.getString("workplace_url_error"));
+			throw new RepositoryException(resource.getString("workplace_url_error"), e);
 		} catch (Throwable t) {
 			logger.log(Level.WARNING, resource.getString("workplace_url_error"));
-			throw new RepositoryException(resource.getString("workplace_url_error"));
+			throw new RepositoryException(resource.getString("workplace_url_error"), t);
 		}
 	}
 
