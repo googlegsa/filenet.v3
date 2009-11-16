@@ -3,20 +3,17 @@
 	<classpathentry kind="src" path="fnapi-client/source/java"/>
 	<classpathentry kind="src" path="fnapi-core/source/javatest"/>
 	<classpathentry kind="src" path="fnapi-core/source/java"/>
-	<classpathentry kind="lib" path="file_third_party/lib/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="file_third_party/lib/commons-httpclient-3.0.1.jar"/>
-	<classpathentry kind="lib" path="file_third_party/lib/json.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Release/FnetV4DocRemoval Release/projects/third_party/lib/connector-util.jar"/>
-	<classpathentry kind="lib" path="C:/Release/FnetV4DocRemoval Release/projects/third_party/lib/connector.jar"/>
-	<classpathentry kind="lib" path="C:/Release/FnetV4DocRemoval Release/projects/third_party/lib/connector-spi.jar"/>
-	<classpathentry kind="lib" path="C:/Release/FnetV4DocRemoval Release/projects/third_party/lib/connector-tests.jar"/>
-	<classpathentry kind="lib" path="C:/Release/FnetV4DocRemoval Release/projects/file_third_party/lib/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="C:/Release/FnetV4DocRemoval Release/projects/file_third_party/lib/commons-httpclient-3.0.1.jar"/>
-	<classpathentry kind="lib" path="C:/Release/FnetV4DocRemoval Release/projects/file_third_party/lib/Jace.jar"/>
-	<classpathentry kind="lib" path="C:/Release/FnetV4DocRemoval Release/projects/file_third_party/lib/json.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/3"/>
-	<classpathentry kind="lib" path="/fileNet4SourceSylvain/lib/Jace.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.5.0_16"/>
+	<classpathentry kind="lib" path="third_party/lib/connector-logging.jar"/>
+	<classpathentry kind="lib" path="third_party/lib/connector-spi.jar"/>
+	<classpathentry kind="lib" path="third_party/lib/connector-tests.jar"/>
+	<classpathentry kind="lib" path="third_party/lib/connector-util.jar"/>
+	<classpathentry kind="lib" path="third_party/lib/connector.jar"/>
+	<classpathentry kind="lib" path="third_party/lib/json.jar"/>
+	<classpathentry kind="lib" path="third_party/lib/Jace.jar"/>
+	<classpathentry kind="lib" path="third_party/lib/wasp.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/spring.jar"/>
+	<classpathentry kind="lib" path="third_party/lib/javaapi.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
