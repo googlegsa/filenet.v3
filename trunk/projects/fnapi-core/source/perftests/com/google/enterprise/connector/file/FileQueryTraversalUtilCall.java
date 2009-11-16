@@ -2,6 +2,9 @@ package com.google.enterprise.connector.file;
 
 import junit.framework.TestCase;
 
+import com.google.enterprise.connector.filenet3.FileConnector;
+import com.google.enterprise.connector.filenet3.FileSession;
+import com.google.enterprise.connector.filenet3.FileTraversalManager;
 import com.google.enterprise.connector.pusher.PushException;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
@@ -52,7 +55,7 @@ public class FileQueryTraversalUtilCall extends TestCase {
 		/**
 		 * Simulation of the setters used by Instance.xml
 		 */
-		((FileConnector) connector).setLogin(user);
+		((FileConnector) connector).setUsername(user);
 		((FileConnector) connector).setPassword(password);
 		((FileConnector) connector).setObject_store(objectStoreName);
 		((FileConnector) connector).setWorkplace_display_url(displayUrl);
