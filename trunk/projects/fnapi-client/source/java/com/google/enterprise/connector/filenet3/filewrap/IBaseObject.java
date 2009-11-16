@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filewrap;
+package com.google.enterprise.connector.filenet3.filewrap;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
