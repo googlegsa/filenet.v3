@@ -1,15 +1,15 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.filenet.api.core.Connection;
 import com.filenet.api.util.UserContext;
-import com.google.enterprise.connector.file.FileConnector;
-import com.google.enterprise.connector.file.FileSession;
-import com.google.enterprise.connector.file.filewrap.IConnection;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IObjectFactory;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.IUserContext;
-import com.google.enterprise.connector.file.TestConnection;
+import com.google.enterprise.connector.filenet4.FileConnector;
+import com.google.enterprise.connector.filenet4.FileSession;
+import com.google.enterprise.connector.filenet4.TestConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 

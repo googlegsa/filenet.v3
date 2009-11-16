@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -10,7 +10,7 @@ import com.filenet.api.core.IndependentObject;
 import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
 import com.filenet.api.util.Id;
-import com.google.enterprise.connector.file.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;

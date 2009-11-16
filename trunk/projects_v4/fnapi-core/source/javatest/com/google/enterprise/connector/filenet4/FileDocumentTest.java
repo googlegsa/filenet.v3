@@ -1,30 +1,30 @@
-package com.google.enterprise.connector.filenet4.filejavawrap;
+package com.google.enterprise.connector.filenet4;
 
-import com.filenet.api.constants.ClassNames;
+import java.util.Iterator;
 import com.filenet.api.util.UserContext;
 import com.google.enterprise.connector.filenet4.FileConnector;
+import com.google.enterprise.connector.filenet4.FileDocument;
+import com.google.enterprise.connector.filenet4.FileDocumentProperty;
 import com.google.enterprise.connector.filenet4.FileSession;
-import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
-import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 import junit.framework.TestCase;
 
-public class FnObjectStoreTest extends TestCase {
+public class FileDocumentTest extends TestCase {
 
 	FileSession fs;
 	IObjectStore ios;
 	IConnection conn;
 	UserContext uc;
 	IObjectFactory iof;
-	IDocument fd;
-
-	protected void setUp() throws RepositoryLoginException, RepositoryException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+	
+	protected void setUp() throws Exception {
+		
 		FileConnector connec = new FileConnector();
 		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
@@ -42,29 +42,40 @@ public class FnObjectStoreTest extends TestCase {
 
 	}
 
+	
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getObject(String, String)'
+	 * Test method for 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
 	 */
-	public void testGetObject() throws RepositoryException {
-		fd = (IDocument) ios.getObject(ClassNames.DOCUMENT, TestConnection.docId1);
-		fd.fetch(TestConnection.included_meta);
-		assertNotNull(fd);
-		 assertEquals("{"+TestConnection.docId1+"}", fd.getId(ActionType.ADD));
-	}
+	public void testFindProperty() throws RepositoryException {
+				
+		FileDocument fd = new FileDocument(TestConnection.docId1, null, ios, false, TestConnection.displayURL, TestConnection.included_meta, TestConnection.excluded_meta, ActionType.ADD);
+		
+		Property prop = fd.findProperty("Id");
 
-	/*
-	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getName()'
-	 */
-	public void testGetName() throws RepositoryException {
-		assertEquals("GED", ios.getName());
+		assertTrue(prop instanceof FileDocumentProperty);
+		assertEquals(TestConnection.docId1, prop.nextValue().toString());
 
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getObjectStore()'
+	 * Test method for 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
 	 */
-	public void testGetObjectStore() throws RepositoryException {
-		assertNotNull(ios.getObjectStore());
+	public void testGetPropertyNames() throws RepositoryException {
+
+		FileDocument fd = new FileDocument(TestConnection.docId2, null, ios,
+			false, TestConnection.displayURL, TestConnection.included_meta,
+				TestConnection.excluded_meta, ActionType.ADD);
+	//	 Set set = fdpm.getPropertyNames();
+
+		Iterator properties = fd.getPropertyNames().iterator();
+
+		int counter = 0;
+		while (properties.hasNext()) {
+			properties.next();
+			counter++;
+		}
+
+		assertEquals(19, counter);
 
 	}
 

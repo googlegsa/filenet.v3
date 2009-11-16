@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -20,9 +20,9 @@ import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.util.Id;
 import com.filenet.wcm.api.BaseRuntimeException;
 import com.filenet.wcm.api.InsufficientPermissionException;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IPermissions;
-import com.google.enterprise.connector.file.filewrap.IVersionSeries;
+import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 //import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;

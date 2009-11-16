@@ -1,9 +1,9 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import com.google.enterprise.connector.file.filewrap.IObjectSet;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 
 public class FnObjectList implements IObjectSet {
 	LinkedList objectList;

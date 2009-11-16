@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,10 +11,10 @@ import com.filenet.api.core.Factory;
 import com.filenet.api.core.ObjectStore;
 import com.filenet.api.query.SearchScope;
 import com.filenet.api.util.UserContext;
-import com.google.enterprise.connector.file.filewrap.IConnection;
-import com.google.enterprise.connector.file.filewrap.IObjectFactory;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.ISearch;
+import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 

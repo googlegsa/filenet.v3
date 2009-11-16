@@ -1,9 +1,9 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.filenet.api.core.Connection;
 import com.filenet.api.core.Factory;
-import com.google.enterprise.connector.file.filewrap.IConnection;
-import com.google.enterprise.connector.file.filewrap.IUserContext;
+import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnConnection implements IConnection {
