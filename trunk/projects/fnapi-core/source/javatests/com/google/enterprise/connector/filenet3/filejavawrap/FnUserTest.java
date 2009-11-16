@@ -1,11 +1,12 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import com.filenet.wcm.api.ObjectFactory;
 import com.filenet.wcm.api.Session;
-import com.google.enterprise.connector.file.FnConnection;
+import com.google.enterprise.connector.filenet3.FnConnection;
+import com.google.enterprise.connector.filenet3.filejavawrap.FnUser;
 
 import junit.framework.TestCase;
 

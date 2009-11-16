@@ -1,7 +1,7 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import com.filenet.wcm.api.Property;
-import com.google.enterprise.connector.file.filewrap.IProperty;
+import com.google.enterprise.connector.filenet3.filewrap.IProperty;
 
 public class FnProperty implements IProperty {
 	Property property;

@@ -1,12 +1,16 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-import com.google.enterprise.connector.file.FnConnection;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.ISearch;
-import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.filenet3.FnConnection;
+import com.google.enterprise.connector.filenet3.filejavawrap.FnObjectFactory;
+import com.google.enterprise.connector.filenet3.filejavawrap.FnObjectStore;
+import com.google.enterprise.connector.filenet3.filejavawrap.FnSearch;
+import com.google.enterprise.connector.filenet3.filejavawrap.FnSession;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet3.filewrap.ISearch;
+import com.google.enterprise.connector.filenet3.filewrap.ISession;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 

@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 	<bean id="FileConnectorInstance" 
-		  class="com.google.enterprise.connector.file.FileConnector" 
+		  class="com.google.enterprise.connector.filenet3.FileConnector" 
 		  parent="filenet-connector-defaults" 
 		  singleton="false">
 		 <!-- 	

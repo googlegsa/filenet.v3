@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import java.io.FileInputStream;
 import java.util.logging.Level;
@@ -6,8 +6,8 @@ import java.util.logging.Logger;
 
 import com.filenet.wcm.api.InvalidCredentialsException;
 import com.filenet.wcm.api.Session;
-import com.google.enterprise.connector.file.filewrap.ISession;
-import com.google.enterprise.connector.file.filewrap.IUser;
+import com.google.enterprise.connector.filenet3.filewrap.ISession;
+import com.google.enterprise.connector.filenet3.filewrap.IUser;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 

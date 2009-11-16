@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import java.io.FileInputStream;
 
@@ -6,11 +6,11 @@ import javax.jcr.Credentials;
 import javax.jcr.SimpleCredentials;
 
 import com.filenet.wcm.api.Session;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IGettableObject;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.ISession;
-import com.google.enterprise.connector.file.filewrap.IUser;
+import com.google.enterprise.connector.filenet3.filewrap.IDocument;
+import com.google.enterprise.connector.filenet3.filewrap.IGettableObject;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet3.filewrap.ISession;
+import com.google.enterprise.connector.filenet3.filewrap.IUser;
 import com.google.enterprise.connector.mock.MockRepository;
 import com.google.enterprise.connector.mock.MockRepositoryDocument;
 import com.google.enterprise.connector.mock.MockRepositoryDocumentStore;

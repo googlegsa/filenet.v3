@@ -1,10 +1,10 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import java.util.Iterator;
 import java.util.Vector;
 
-import com.google.enterprise.connector.file.filewrap.IProperties;
-import com.google.enterprise.connector.file.filewrap.IProperty;
+import com.google.enterprise.connector.filenet3.filewrap.IProperties;
+import com.google.enterprise.connector.filenet3.filewrap.IProperty;
 import com.google.enterprise.connector.mock.MockRepositoryProperty;
 import com.google.enterprise.connector.mock.MockRepositoryPropertyList;
 

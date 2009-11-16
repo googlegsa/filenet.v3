@@ -2,8 +2,9 @@ package com.google.enterprise.connector.fileWhereClause;
 
 import java.util.HashMap;
 import java.util.Locale;
-import com.google.enterprise.connector.file.FileConnectorType;
-import com.google.enterprise.connector.file.FileNetConnectorFactory;
+
+import com.google.enterprise.connector.filenet3.FileConnectorType;
+import com.google.enterprise.connector.filenet3.FileNetConnectorFactory;
 import com.google.enterprise.connector.spi.ConfigureResponse;
 
 

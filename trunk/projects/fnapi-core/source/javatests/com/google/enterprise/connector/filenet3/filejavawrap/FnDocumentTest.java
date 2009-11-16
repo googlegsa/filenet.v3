@@ -1,15 +1,16 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-import com.google.enterprise.connector.file.FnConnection;
-import com.google.enterprise.connector.file.filewrap.IBaseObject;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IObjectFactory;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.IPermissions;
-import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.filenet3.FnConnection;
+import com.google.enterprise.connector.filenet3.filejavawrap.FnObjectFactory;
+import com.google.enterprise.connector.filenet3.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet3.filewrap.IDocument;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet3.filewrap.ISession;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;

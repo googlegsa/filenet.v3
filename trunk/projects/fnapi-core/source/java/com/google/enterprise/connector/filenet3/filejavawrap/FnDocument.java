@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -18,10 +18,10 @@ import com.filenet.wcm.api.PropertyNotFoundException;
 import com.filenet.wcm.api.Session;
 import com.filenet.wcm.api.Value;
 import com.filenet.wcm.api.Values;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IPermissions;
-import com.google.enterprise.connector.file.filewrap.IProperties;
-import com.google.enterprise.connector.file.filewrap.IVersionSeries;
+import com.google.enterprise.connector.filenet3.filewrap.IDocument;
+import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet3.filewrap.IProperties;
+import com.google.enterprise.connector.filenet3.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 public class FnDocument implements IDocument {

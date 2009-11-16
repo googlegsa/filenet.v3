@@ -1,11 +1,11 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import com.google.enterprise.connector.file.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
 import com.google.enterprise.connector.mock.MockRepository;
 import com.google.enterprise.connector.mock.MockRepositoryDocument;
 import com.google.enterprise.connector.mock.MockRepositoryEventList;

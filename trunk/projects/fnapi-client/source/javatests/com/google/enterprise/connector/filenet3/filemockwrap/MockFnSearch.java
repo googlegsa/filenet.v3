@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -10,8 +10,8 @@ import javax.jcr.query.InvalidQueryException;
 import javax.jcr.query.Query;
 import javax.jcr.query.QueryResult;
 
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.ISearch;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet3.filewrap.ISearch;
 import com.google.enterprise.connector.jcr.JcrDocument;
 import com.google.enterprise.connector.jcr.JcrDocumentList;
 import com.google.enterprise.connector.mock.jcr.MockJcrQueryManager;

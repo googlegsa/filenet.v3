@@ -1,12 +1,12 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-import com.google.enterprise.connector.file.FnMockConnection;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.ISearch;
-import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.filenet3.FnMockConnection;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet3.filewrap.ISearch;
+import com.google.enterprise.connector.filenet3.filewrap.ISession;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.RepositoryException;
 

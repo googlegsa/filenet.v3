@@ -1,9 +1,9 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
-import com.google.enterprise.connector.file.filewrap.IObjectFactory;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.ISearch;
-import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet3.filewrap.ISearch;
+import com.google.enterprise.connector.filenet3.filewrap.ISession;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class MockFnObjectFactory implements IObjectFactory {
