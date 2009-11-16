@@ -538,8 +538,9 @@ public class FileConnectorType implements ConnectorType {
 	}
 
 	private String rightTrim(String strTarget, char separator){
-		String regex = separator + "+$";
-		
-		return strTarget.replaceFirst(regex, "");
+		String regex = separator + "+";
+		strTarget = strTarget.replaceAll(regex, "/");
+		strTarget = strTarget.replaceFirst(":/", "://");
+		return strTarget;
 	}
 }
