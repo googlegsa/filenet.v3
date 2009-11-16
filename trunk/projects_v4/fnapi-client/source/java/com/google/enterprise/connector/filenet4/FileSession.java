@@ -63,7 +63,7 @@ public class FileSession implements Session {
 		
 		logger.info("objectStore ok user:"+userName);
 		
-		if(displayUrl.contains("getContent")){
+		if(displayUrl.contains("/getContent") && displayUrl.endsWith("/getContent")){
 			this.displayUrl = displayUrl + "?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
 		}else{
 			this.displayUrl = displayUrl + "/getContent?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
