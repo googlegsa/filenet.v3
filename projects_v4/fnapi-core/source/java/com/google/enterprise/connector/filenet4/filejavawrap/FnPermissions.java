@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -13,7 +13,7 @@ import com.filenet.api.core.Connection;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.security.Group;
 import com.filenet.api.security.User;
-import com.google.enterprise.connector.file.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 
 public class FnPermissions implements IPermissions {
 

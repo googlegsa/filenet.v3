@@ -1,18 +1,18 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.util.Iterator;
 
 import com.filenet.api.util.UserContext;
-import com.google.enterprise.connector.file.FileConnector;
-import com.google.enterprise.connector.file.FileSession;
-import com.google.enterprise.connector.file.filewrap.IBaseObject;
-import com.google.enterprise.connector.file.filewrap.IConnection;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IObjectFactory;
-import com.google.enterprise.connector.file.filewrap.IObjectSet;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.ISearch;
-import com.google.enterprise.connector.file.TestConnection;
+import com.google.enterprise.connector.filenet4.FileConnector;
+import com.google.enterprise.connector.filenet4.FileSession;
+import com.google.enterprise.connector.filenet4.TestConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;

@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -6,8 +6,8 @@ import javax.security.auth.Subject;
 import com.filenet.api.core.Factory;
 import com.filenet.api.security.User;
 import com.filenet.api.util.UserContext;
-import com.google.enterprise.connector.file.filewrap.IConnection;
-import com.google.enterprise.connector.file.filewrap.IUserContext;
+import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
