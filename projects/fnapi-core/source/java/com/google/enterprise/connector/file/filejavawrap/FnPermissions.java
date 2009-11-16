@@ -43,6 +43,7 @@ public class FnPermissions implements IPermissions {
 			if ((perm.getAccess() & LEVEL_VIEW) == LEVEL_VIEW) {
 				granteeName = perm.getGranteeName();
 
+				logger.log(Level.INFO, "Grantee Name is: " + granteeName);
 				if (perm.getGranteeType() == BaseObject.TYPE_USER) {
 					if (granteeName.equalsIgnoreCase(username)
 							|| granteeName.split("@")[0]
@@ -51,23 +52,27 @@ public class FnPermissions implements IPermissions {
 						return true;
 					}
 				} else if (perm.getGranteeType() == BaseObject.TYPE_GROUP) { // GROUP
-					Groups groups = en.getUserRealm().findGroups(
-							perm.getGranteeName().split("@")[0],
-							Realm.PRINCIPAL_SEARCH_TYPE_EXACT,
-							Realm.PRINCIPAL_SEARCH_ATTR_DISPLAY_NAME,
-							Realm.PRINCIPAL_SEARCH_SORT_NONE, 1);
+					if(perm.getGranteeName().equalsIgnoreCase("#AUTHENTICATED-USERS")){
+						logger.log(Level.INFO, "Document have access permission for #AUTHENTICATED-USERS");
+						return true;
+					}else{
+						Groups groups = en.getUserRealm().findGroups(
+								perm.getGranteeName().split("@")[0],
+								Realm.PRINCIPAL_SEARCH_TYPE_EXACT,
+								Realm.PRINCIPAL_SEARCH_ATTR_DISPLAY_NAME,
+								Realm.PRINCIPAL_SEARCH_SORT_NONE, 0);
 
-					Group group = null;
-					Iterator it = groups.iterator();
-					while (it.hasNext()) {
-						group = (Group) it.next();
-					}
-
-					if (group != null) {
-						found = searchUserInGroup(username, group);
-						if (found){
-							logger.log(Level.INFO, "Authorization for user: " + username + " is Successful");
-							return true;
+						Group group = null;
+						Iterator it = groups.iterator();
+						while (it.hasNext()) {
+							group = (Group) it.next();
+						}
+						if (group != null) {
+							found = searchUserInGroup(username, group);
+							if (found){
+								logger.log(Level.INFO, "Authorization for user: " + username + " is Successful");
+								return true;
+							}
 						}
 					}
 				}

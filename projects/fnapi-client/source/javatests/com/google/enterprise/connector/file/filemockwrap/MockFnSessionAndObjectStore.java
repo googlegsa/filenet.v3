@@ -91,10 +91,12 @@ public class MockFnSessionAndObjectStore implements IObjectStore, ISession {
 			}
 			this.isAuthenticated = true;
 			return new MockFnUser(userId);
-		} catch (javax.jcr.LoginException e) {
-			throw new RepositoryLoginException(e);
-		} catch (javax.jcr.RepositoryException e) {
-			throw new com.google.enterprise.connector.spi.RepositoryException(e);
+//		} catch (javax.jcr.LoginException e) {
+//			throw new RepositoryLoginException(e);
+//		} catch (javax.jcr.RepositoryException e) {
+//			throw new com.google.enterprise.connector.spi.RepositoryException(e);
+		}catch(Exception e){
+			throw new RepositoryException(e);
 		}
 	}
 

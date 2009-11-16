@@ -5,31 +5,21 @@ import java.util.HashSet;
 public class FileNETConnection {
 
 	public static String userName = "FNCE_gdc02";
-
 	public static String password = "Admin1234";
-
-	public static String objectStoreName = "DemoObjectStore";//"GSA_Filenet";
-
+	public static String objectStoreName = "FNOStore";//"GSA_Filenet";
 	public static String appId = "FnConnector";
-
 	public static String credTag = "Clear";
-
-	public static String displayUrl = "http://gdc02.persistent.co.in:8080//Workplace/getContent";
-
+	public static String displayUrl = "http://gdc02.persistent.co.in:8080/Workplace/getContent";
 	public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
-
 	public static String pathToWcmApiConfig = "WcmApiConfig.properties";
-
 	public static String completePathToWcmApiConfig = "C:\\Program Files\\GoogleConnectors\\FileNET1\\Tomcat\\webapps\\connector-manager\\WEB-INF\\WcmApiConfig.properties";
-
 	public static String wrongObjectStoreName = "GSA_Filen";
-
-	public static String additionalWhereClause = "and Document.This INSUBFOLDER '/testdata'";
-
-	
-	public static HashSet included_meta = null;
+	public static String additionalWhereClause = "and Document.This INSUBFOLDER '/Test/another'";
+	public static String wrongAdditionalWhereClause = "andDocument.This INSUBFOLDER '/Test/another'";
+	public static String error_message = "Where Clause is syntactically incorrect.";
+	public static HashSet<String> included_meta = null;
 	static {
-		included_meta = new HashSet();
+		included_meta = new HashSet<String>();
 		included_meta.add("ClassificationStatus");
 		included_meta.add("ContentRetentionDate");
 		included_meta.add("ContentSize");
@@ -54,10 +44,10 @@ public class FileNETConnection {
 
 	}
 
-	public static HashSet excluded_meta = null;
+	public static HashSet<String> excluded_meta = null;
 
 	static {
-		excluded_meta = new HashSet();
+		excluded_meta = new HashSet<String>();
 		excluded_meta.add("AccessMask");
 		excluded_meta.add("ActiveMarkings");
 		excluded_meta.add("Annotations");
