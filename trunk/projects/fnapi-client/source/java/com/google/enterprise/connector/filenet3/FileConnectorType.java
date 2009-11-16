@@ -1,12 +1,12 @@
 /*
  * Copyright 2009 Google Inc.
- 
+
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
 	Unless required by applicable law or agreed to in writing, software
 	distributed under the License is distributed on an "AS IS" BASIS,
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,7 @@
  */
 package com.google.enterprise.connector.filenet3;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,6 +39,7 @@ import com.google.enterprise.connector.spi.ConfigureResponse;
 import com.google.enterprise.connector.spi.ConnectorFactory;
 import com.google.enterprise.connector.spi.ConnectorType;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.XmlUtils;
 
 /**
  * Represents FileNetConnectortype. Contains methods for creating and validating FileNet user form.
@@ -83,8 +85,8 @@ public class FileConnectorType implements ConnectorType {
 	private static final String CHECKBOX = "checkbox";
 	private static final String CHECKED = "checked='checked'";
 	private static final String LOCALE_FILE = "FileConnectorResources";
-//	private static final String CONNECTOR_INSTANCE_XML = "config/connectorInstance.xml";
-//	private static final String FILE_CONNECTOR_INSTANCE = "FileConnectorInstance";
+	//	private static final String CONNECTOR_INSTANCE_XML = "config/connectorInstance.xml";
+	//	private static final String FILE_CONNECTOR_INSTANCE = "FileConnectorInstance";
 	private static final int BUFFER_SIZE = 2048;
 	private static Logger logger = null;
 	private List keys = null;
@@ -218,7 +220,7 @@ public class FileConnectorType implements ConnectorType {
 				return new ConfigureResponse(resource.getString("invalid_credentials_error"), form);
 			}
 			logger.info("Login succeeded. Trying to retrieve the traversal manager.");
-			
+
 			try{
 				if(session != null){
 					session.getTraversalManager();// test on the objectStore name
@@ -434,8 +436,8 @@ public class FileConnectorType implements ConnectorType {
 				buf.append(DIV_END);
 				buf.append(TD_END);
 			}else{
-			buf.append(resource.getString(key));
-			buf.append(TD_END);
+				buf.append(resource.getString(key));
+				buf.append(TD_END);
 			}
 		}
 		buf.append(TD_START);
@@ -450,7 +452,16 @@ public class FileConnectorType implements ConnectorType {
 		buf.append(" ");
 		buf.append(attrName);
 		buf.append("=\"");
-		buf.append(attrValue);
+		try {
+			// XML-encode the special characters (< > " etc.)
+			// Check the basic requirement mentioned in ConnectorType as part of
+			// CM-Issue 186
+			XmlUtils.xmlAppendAttrValue(attrValue, buf);
+		} catch (IOException e) {
+			String msg = new StringBuffer(
+					"Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
+			logger.log(Level.WARNING, msg, e);
+		}
 		buf.append("\"");
 		if (attrName == TYPE && attrValue == TEXT) {
 			buf.append(" size=\"50\"");
@@ -481,14 +492,14 @@ public class FileConnectorType implements ConnectorType {
 		}		
 		return bValue;
 	}
-	
+
 	private String getFQDNHostNameURL(String strUrl){
 
 		InetAddress ia = null;
 		URL url = null;
 		try {
 			url = new URL(strUrl);
-        	ia = InetAddress.getByName(url.getHost());
+			ia = InetAddress.getByName(url.getHost());
 		} catch (final UnknownHostException e) {
 			logger.log(Level.WARNING,"Exception occurred while converting to FQDN.",e);
 		} catch (MalformedURLException e) {
