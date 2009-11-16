@@ -1,6 +1,6 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
-import com.google.enterprise.connector.file.filewrap.IProperty;
+import com.google.enterprise.connector.filenet3.filewrap.IProperty;
 import com.google.enterprise.connector.mock.MockRepositoryProperty;
 
 public class MockFnProperty implements IProperty {

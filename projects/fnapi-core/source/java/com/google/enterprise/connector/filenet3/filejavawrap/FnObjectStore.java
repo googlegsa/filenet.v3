@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -9,8 +9,8 @@ import com.filenet.wcm.api.InsufficientPermissionException;
 import com.filenet.wcm.api.ObjectStore;
 import com.filenet.wcm.api.RemoteServerException;
 import com.filenet.wcm.api.VersionSeries;
-import com.google.enterprise.connector.file.filewrap.IGettableObject;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet3.filewrap.IGettableObject;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.filenet.wcm.api.BaseObject;
 

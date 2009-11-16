@@ -1,7 +1,7 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import com.filenet.wcm.api.GettableObject;
-import com.google.enterprise.connector.file.filewrap.IGettableObject;
+import com.google.enterprise.connector.filenet3.filewrap.IGettableObject;
 
 public class FnGettableObject implements IGettableObject {
 

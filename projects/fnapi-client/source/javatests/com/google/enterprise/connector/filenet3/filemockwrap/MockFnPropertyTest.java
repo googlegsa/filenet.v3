@@ -1,15 +1,15 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import java.io.FileInputStream;
 
-import com.google.enterprise.connector.file.FnMockConnection;
-import com.google.enterprise.connector.file.filewrap.IBaseObject;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IObjectFactory;
-import com.google.enterprise.connector.file.filewrap.IObjectStore;
-import com.google.enterprise.connector.file.filewrap.IProperties;
-import com.google.enterprise.connector.file.filewrap.IProperty;
-import com.google.enterprise.connector.file.filewrap.ISession;
+import com.google.enterprise.connector.filenet3.FnMockConnection;
+import com.google.enterprise.connector.filenet3.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet3.filewrap.IDocument;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet3.filewrap.IProperties;
+import com.google.enterprise.connector.filenet3.filewrap.IProperty;
+import com.google.enterprise.connector.filenet3.filewrap.ISession;
 
 import junit.framework.TestCase;
 

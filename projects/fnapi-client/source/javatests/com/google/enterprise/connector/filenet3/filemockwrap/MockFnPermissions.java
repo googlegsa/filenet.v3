@@ -1,6 +1,6 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
-import com.google.enterprise.connector.file.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
 
 public class MockFnPermissions implements IPermissions {
 

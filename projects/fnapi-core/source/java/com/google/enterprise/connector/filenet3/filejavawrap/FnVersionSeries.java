@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import java.util.Date;
 import java.util.logging.Level;
@@ -6,9 +6,9 @@ import java.util.logging.Logger;
 
 import com.filenet.wcm.api.PropertyNotFoundException;
 import com.filenet.wcm.api.VersionSeries;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IProperties;
-import com.google.enterprise.connector.file.filewrap.IVersionSeries;
+import com.google.enterprise.connector.filenet3.filewrap.IDocument;
+import com.google.enterprise.connector.filenet3.filewrap.IProperties;
+import com.google.enterprise.connector.filenet3.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 

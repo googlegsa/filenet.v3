@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
 	<bean id="Filenet_P8_3.5.2"
-		class="com.google.enterprise.connector.file.FileConnectorType">
+		class="com.google.enterprise.connector.filenet3.FileConnectorType">
 		<property name="configKeys">
 			<list>
 				<value>username</value>

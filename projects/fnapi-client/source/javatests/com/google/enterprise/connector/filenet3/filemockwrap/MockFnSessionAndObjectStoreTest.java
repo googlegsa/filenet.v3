@@ -1,10 +1,10 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import java.io.FileInputStream;
 
-import com.google.enterprise.connector.file.FnMockConnection;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet3.FnMockConnection;
+import com.google.enterprise.connector.filenet3.filewrap.IDocument;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectFactory;
 
 import junit.framework.TestCase;
 

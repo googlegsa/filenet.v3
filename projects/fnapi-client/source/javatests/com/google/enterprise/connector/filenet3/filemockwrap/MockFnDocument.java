@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -6,10 +6,10 @@ import java.util.Date;
 
 import com.filenet.wcm.api.PropertyNotFoundException;
 import com.filenet.wcm.api.Session;
-import com.google.enterprise.connector.file.filewrap.IDocument;
-import com.google.enterprise.connector.file.filewrap.IPermissions;
-import com.google.enterprise.connector.file.filewrap.IProperties;
-import com.google.enterprise.connector.file.filewrap.IVersionSeries;
+import com.google.enterprise.connector.filenet3.filewrap.IDocument;
+import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet3.filewrap.IProperties;
+import com.google.enterprise.connector.filenet3.filewrap.IVersionSeries;
 import com.google.enterprise.connector.mock.MockRepositoryDateTime;
 import com.google.enterprise.connector.mock.MockRepositoryDocument;
 import com.google.enterprise.connector.mock.MockRepositoryProperty;

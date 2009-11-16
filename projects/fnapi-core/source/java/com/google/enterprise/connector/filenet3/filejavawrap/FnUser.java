@@ -1,7 +1,7 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import com.filenet.wcm.api.User;
-import com.google.enterprise.connector.file.filewrap.IUser;
+import com.google.enterprise.connector.filenet3.filewrap.IUser;
 
 public class FnUser implements IUser {
 

@@ -1,10 +1,10 @@
-package com.google.enterprise.connector.file.filejavawrap;
+package com.google.enterprise.connector.filenet3.filejavawrap;
 
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.enterprise.connector.file.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
 import com.filenet.wcm.api.BaseObject;
 import com.filenet.wcm.api.EntireNetwork;
 import com.filenet.wcm.api.Group;

@@ -1,4 +1,4 @@
-package com.google.enterprise.connector.file.filemockwrap;
+package com.google.enterprise.connector.filenet3.filemockwrap;
 
 import junit.framework.TestCase;
 
