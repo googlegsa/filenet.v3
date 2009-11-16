@@ -20,7 +20,7 @@ public class FileMockDocumentTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		connector = new FileConnector();
-		((FileConnector) connector).setLogin(FnMockConnection.userName);
+		((FileConnector) connector).setUsername(FnMockConnection.userName);
 		((FileConnector) connector).setPassword(FnMockConnection.password);
 		((FileConnector) connector)
 				.setObject_store(FnMockConnection.objectStoreName);

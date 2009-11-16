@@ -4,18 +4,18 @@ import java.util.HashSet;
 
 public class FnConnection {
 
-	public static String userName = "P8Admin";
+	public static String userName = "FNCE_gdc02";
 
-	public static String password = "UnDeuxTrois456";
+	public static String password = "Admin1234";
 
-	public static String objectStoreName = "Test";//"GSA_Filenet";
+	public static String objectStoreName = "FNOStore";//"GSA_Filenet";
 
 	public static String appId = "file-connector";
 
 	public static String credTag = "Clear";
 
-	public static String displayUrl = "http://swp-vm-fnet352:8080/Workplace/";
 
+	public static String displayUrl = "http://gdc02.persistent.co.in:8080/Workplace/";
 	public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
 
 	public static String pathToWcmApiConfig = "WcmApiConfig.properties";

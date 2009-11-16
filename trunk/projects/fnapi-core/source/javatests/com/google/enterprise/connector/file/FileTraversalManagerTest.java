@@ -19,7 +19,7 @@ public class FileTraversalManagerTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		connector = new FileConnector();
-		((FileConnector) connector).setLogin(FnConnection.userName);
+		((FileConnector) connector).setUsername(FnConnection.userName);
 		((FileConnector) connector).setPassword(FnConnection.password);
 		((FileConnector) connector)
 				.setObject_store(FnConnection.objectStoreName);
