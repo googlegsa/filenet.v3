@@ -17,6 +17,7 @@
 
 package com.google.enterprise.connector.file;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import com.google.enterprise.connector.spi.ConfigureResponse;
 import com.google.enterprise.connector.spi.ConnectorFactory;
 import com.google.enterprise.connector.spi.ConnectorType;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.XmlUtils;
 
 /**
  *Represents FileNet connector type information. Contains methods for creating and validating user form. 
@@ -491,7 +493,17 @@ public class FileConnectorType implements ConnectorType {
 		buf.append(" ");
 		buf.append(attrName);
 		buf.append("=\"");
-		buf.append(attrValue);
+//		buf.append(attrValue);
+		try {
+            // XML-encode the special characters (< > " etc.)
+            // Check the basic requirement mentioned in ConnectorType as part of
+            // CM-Issue 186
+            XmlUtils.xmlAppendAttrValue(attrValue, buf);
+        } catch (IOException e) {
+            String msg = new StringBuffer(
+                    "Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
+            logger.log(Level.WARNING, msg, e);
+        }
 		buf.append("\"");
 		if (attrName == TYPE && attrValue == TEXT) {
 			buf.append(" size=\"50\"");
