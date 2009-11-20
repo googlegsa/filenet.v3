@@ -52,7 +52,7 @@ public class FileQueryTraversalUtil {
 		DocPusher push = null;
 		try {
 			push = new DocPusher(
-					new GsaFeedConnection("8.6.49.36", 19900));
+					new GsaFeedConnection("8.6.49.36", 19900), "TestConnector");
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -84,7 +84,7 @@ public class FileQueryTraversalUtil {
 				System.out.println(doc.findProperty(
 						SpiConstants.PROPNAME_DISPLAYURL).nextValue());
 				try {
-					push.take(doc, "file");
+					push.take(doc);
 				} catch (FeedException e) {
 					System.out.println("FeedException occured");
 				}

@@ -26,7 +26,7 @@ public class MockFnDocumentTest extends TestCase {
 		StringBuffer sb = new StringBuffer();
 		try {
 			while (is.read(arg0) > 0) {
-				sb.append(new String(arg0, DocPusher.XML_DEFAULT_ENCODING));
+				sb.append(new String(arg0, "UTF-8"));
 			}
 		} catch (IOException e) {
 			assertEquals(true, false);
