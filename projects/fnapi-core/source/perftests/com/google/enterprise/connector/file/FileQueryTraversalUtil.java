@@ -2,9 +2,7 @@ package com.google.enterprise.connector.file;
 
 import java.net.MalformedURLException;
 
-import com.google.enterprise.connector.filenet3.FileTraversalManager;
 import com.google.enterprise.connector.pusher.DocPusher;
-import com.google.enterprise.connector.pusher.FeedException;
 import com.google.enterprise.connector.pusher.GsaFeedConnection;
 import com.google.enterprise.connector.pusher.PushException;
 import com.google.enterprise.connector.spi.Document;
@@ -52,7 +50,7 @@ public class FileQueryTraversalUtil {
 		DocPusher push = null;
 		try {
 			push = new DocPusher(
-					new GsaFeedConnection("8.6.49.36", 19900), "TestConnector");
+					new GsaFeedConnection("8.6.49.36", 19900));
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -83,11 +81,7 @@ public class FileQueryTraversalUtil {
 				System.out.println("counter " + counter);
 				System.out.println(doc.findProperty(
 						SpiConstants.PROPNAME_DISPLAYURL).nextValue());
-				try {
-					push.take(doc);
-				} catch (FeedException e) {
-					System.out.println("FeedException occured");
-				}
+				push.take(doc, "file");
 
 			}
 

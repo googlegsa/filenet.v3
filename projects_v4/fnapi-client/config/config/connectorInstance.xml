@@ -3,7 +3,7 @@
 
 
 <beans>
-	<bean id="Filenet_P8" class="com.google.enterprise.connector.filenet4.FileConnector" parent="filenet-connector-defaults" singleton="false">
+	<bean id="Filenet_P8" class="com.google.enterprise.connector.file.FileConnector" parent="filenet-connector-defaults" singleton="false">
 	<!-- 
 		<property name="included_meta">
 			<set>
