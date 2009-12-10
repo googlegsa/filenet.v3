@@ -1,0 +1,30 @@
+Release Notes:
+===============
+
+Google Enterprise Connector for IBM FileNet P8 3.5.2
+
+This document contains the release notes for Google Enterprise Connector for IBM FileNet P8 3.5.2.
+The following sections describe the release in detail and provide information that supplements the main documentation.  
+See the Issues Tab on the Code Site for the current list of known issues and workarounds.
+
+Web Site: http://code.google.com/p/google-enterprise-connector-file/issues/list
+
+
+Release 2.4.0, Dec 1, 2009
+==========================
+
+Introduction
+------------
+This is a major release with new features. Users of previous releases should check the "Version Compatibility" section below for instructions on how to use existing data with this new release.
+
+Version Compatibility
+---------------------
+Connector instances created using 1.x versions cannot be used with this version. This version works with Connector Manager version 2.4.0. Earlier versions of the Connector Manager will not work correctly with this version of the connector.
+
+Issues Fixed
+------------
+No new issues are fixed since 2.0.0 release.
+
+Known Issues/Limitations
+------------------------
+- Issue 11: Documents which are checked in as only minor version and don't have any major version at all, will not be crawled.

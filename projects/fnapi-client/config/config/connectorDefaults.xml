@@ -7,7 +7,7 @@
 		<property name="object_store" value="${object_store}" />
 		<property name="path_to_WcmApiConfig" value="WcmApiConfig.properties" />
 		<property name="workplace_display_url" value="${workplace_display_url}" />
-		<property name="object_factory" value="com.google.enterprise.connector.filenet3.filejavawrap.FnObjectFactory" />
+		<property name="object_factory" value="com.google.enterprise.connector.file.filejavawrap.FnObjectFactory" />
 		<property name="authentication_type" value="api" />
 		<property name="additional_where_clause" value="${additional_where_clause}" />
 		<property name="is_public" value="${is_public}" />

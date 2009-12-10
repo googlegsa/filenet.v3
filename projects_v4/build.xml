@@ -32,9 +32,6 @@
 	<property name="tests.jarfile" value="${jarfile.dir}/connector-tests.jar" />
 	<property name="spring.jarfile" value="${jarfile.dir}/spring.jar" />
 	<property name="javaapi.jarfile" value="${jarfile.dir}/javaapi.jar" />
-	<property name="conn_logging.jarfile" value="${jarfile.dir}/connector-logging.jar" />
-	<property name="conn_util.jarfile" value="${jarfile.dir}/connector-util.jar" />
-	<property name="wasp.jarfile" value="${jarfile.dir}/wasp.jar" />
 
 	<!-- =========================== TASKS =============================== -->
 	<target name="connector-fileV4" depends="clean,init,compile_tests,compile-client,jar">
@@ -72,9 +69,6 @@
 				<pathelement location="${httpclient.jarfile}" />
 				<pathelement location="${classes-client}" />
 				<pathelement location="${spring.jarfile}" />
-				<pathelement location="${conn_logging.jarfile}" />
-				<pathelement location="${conn_util.jarfile}" />
-				<pathelement location="${wasp.jarfile}" />
 			</classpath>
 		</javac>
 	</target>
@@ -92,9 +86,7 @@
 				<pathelement location="${json.jarfile}" />
 				<pathelement location="${httpclient.jarfile}" />
 				<pathelement location="${spring.jarfile}" />
-				<pathelement location="${conn_logging.jarfile}" />
-				<pathelement location="${conn_util.jarfile}" />
-				<pathelement location="${wasp.jarfile}" />
+				
 			</classpath>
 		</javac>
 	</target>
@@ -113,7 +105,7 @@
 			<!--creation of manifest file-->
 			<manifest>
 			    <attribute name="Implementation-Title" value="Filenet Connector"/>
-  		        <attribute name="Implementation-Version" value="2.4.0_Build2"/>
+  		        <attribute name="Implementation-Version" value="2.4.0_Build1"/>
 			    <attribute name="Implementation-Vendor" value="Google Inc."/>
 			    <attribute name="Specification-Title" value="Connector Manager SPI"/>
 			    <attribute name="Specification-Version" value="2.4.0"/>
