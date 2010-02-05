@@ -1,3 +1,16 @@
+// Copyright (C) 2007-2010 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.google.enterprise.connector.file;
 
 import java.util.Iterator;
@@ -15,16 +28,16 @@ import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 import junit.framework.TestCase;
 
-public class FileDocumentTest extends TestCase {
+public class FileDocumentTest extends FileSystemLevelTest {
 
 	FileSession fs;
 	IObjectStore ios;
 	IConnection conn;
 	UserContext uc;
 	IObjectFactory iof;
-	
+
 	protected void setUp() throws Exception {
-		
+
 		FileConnector connec = new FileConnector();
 		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
@@ -32,7 +45,7 @@ public class FileDocumentTest extends TestCase {
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
 		connec.setContent_engine_url(TestConnection.uri);
-		
+
 		fs = (FileSession)connec.login();
 
 		iof= (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
@@ -42,14 +55,14 @@ public class FileDocumentTest extends TestCase {
 
 	}
 
-	
+
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
 	 */
 	public void testFindProperty() throws RepositoryException {
-				
+
 		FileDocument fd = new FileDocument(TestConnection.docId1, null, ios, false, TestConnection.displayURL, TestConnection.included_meta, TestConnection.excluded_meta, ActionType.ADD);
-		
+
 		Property prop = fd.findProperty("Id");
 
 		assertTrue(prop instanceof FileDocumentProperty);

@@ -1,3 +1,17 @@
+// Copyright (C) 2007-2010 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.enterprise.connector.file;
 
 import java.util.logging.Level;
@@ -38,22 +52,32 @@ public class FileAuthenticationManager implements AuthenticationManager {
 		IUserContext uc = conn.getUserContext();
 
 		try {
-			uc.authenticate(username, password);
-			logger.info("Authentication Succeeded for user " + username);
-			return new AuthenticationResponse(true, "");
+			return authenticate(username, password, uc);
 		} catch (Throwable e) {
 			logger.log(Level.WARNING,"Authentication Failed for user " + username);
 			String shortName = FileUtil.getShortName(username);
 			logger.log(Level.INFO,"Trying to authenticate with Short Name: " + shortName);
 			try{
-				uc.authenticate(shortName, password);
-				logger.info("Authentication Succeeded for user " + shortName);
-				return new AuthenticationResponse(true, "");
+				return authenticate(shortName, password, uc);
 			}catch(Throwable th){
 				logger.log(Level.WARNING,"Authentication Failed for user " + shortName);
 				logger.log(Level.FINE,"While authenticating got exception",th);
 				return new AuthenticationResponse(false, "");
 			}
 		}
+	}
+
+	/**
+	 * Wrapper over authenticate method of UserContext class.
+	 * @param username UserName which needs to be authenticated
+	 * @param password Valid password of the user name
+	 * @param uc	   UserContext reference
+	 * @return		   Returns the Authentication response
+	 * @throws RepositoryException
+	 */
+	private AuthenticationResponse authenticate(String username, String password, IUserContext uc) throws RepositoryException {
+		uc.authenticate(username, password);
+		logger.info("Authentication Succeeded for user " + username);
+		return new AuthenticationResponse(true, "");
 	}
 }
