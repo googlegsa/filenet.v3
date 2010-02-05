@@ -21,7 +21,7 @@ import com.google.enterprise.connector.spi.Session;
 
 import junit.framework.TestCase;
 
-public class FileConnectorTest extends FileSystemLevelTest {
+public class FileConnectorTest extends FileNetTestCase {
 
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.FileConnector.login()'

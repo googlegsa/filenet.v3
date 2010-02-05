@@ -22,7 +22,7 @@ import com.google.enterprise.connector.spi.AuthenticationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
-public class FileAuthenticationManagerTest extends FileSystemLevelTest {
+public class FileAuthenticationManagerTest extends FileNetTestCase {
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.FileAuthenticationManager.authenticate(AuthenticationIdentity)'
 	 */

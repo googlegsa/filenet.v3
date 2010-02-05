@@ -28,7 +28,7 @@ import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 import junit.framework.TestCase;
 
-public class FileDocumentTest extends FileSystemLevelTest {
+public class FileDocumentTest extends FileNetTestCase {
 
 	FileSession fs;
 	IObjectStore ios;

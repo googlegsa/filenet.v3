@@ -21,7 +21,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;
 
-public class FileDocumentListTest extends FileSystemLevelTest {
+public class FileDocumentListTest extends FileNetTestCase {
 
 	FileSession fs;
 	FileTraversalManager ftm;

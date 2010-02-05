@@ -96,9 +96,8 @@ public class FnObjectFactory implements IObjectFactory {
 		uc.pushSubject(s);
 		logger.info("Creating the FileNet object store instance..");
 		ObjectStore os = Factory.ObjectStore.fetchInstance(domain,objectStoreName, null);
-		logger.info("FileNet object store creation succeeded..");
 		os.refresh();
-		logger.config("FileNet object store is refreshed..");
+		logger.config("Connection to FileNet ObjectStore is successful...");
 		return os;
 	}
 }

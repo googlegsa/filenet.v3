@@ -22,7 +22,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 import junit.framework.TestCase;
 
-public class FileTraversalManagerTest extends FileSystemLevelTest {
+public class FileTraversalManagerTest extends FileNetTestCase {
 
 	FileSession fs;
 

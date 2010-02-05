@@ -28,7 +28,7 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import junit.framework.TestCase;
 
-public class FileAuthorizationManagerTest extends FileSystemLevelTest {
+public class FileAuthorizationManagerTest extends FileNetTestCase {
 
 	public void testAuthorizeDocids() throws RepositoryLoginException, RepositoryException {
 
