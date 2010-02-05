@@ -40,13 +40,17 @@ public class FileSession implements Session {
 
 		logger.info("getting connection for content engine: "+contentEngineUri);
 		connection = fileObjectFactory.getConnection(contentEngineUri);
-		
+
 		logger.info("trying to access object store: "+objectStoreName+" for user: "+userName);
 		objectStore = fileObjectFactory.getObjectStore(objectStoreName, connection, userName, userPassword);
-		
+
 		logger.info("objectStore ok user:"+userName);
-		
-		this.displayUrl = displayUrl + "/getContent?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
+
+		if(displayUrl.contains("/getContent") && displayUrl.endsWith("/getContent")){
+			this.displayUrl = displayUrl + "?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
+		}else{
+			this.displayUrl = displayUrl + "/getContent?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
+		}
 		this.isPublic = isPublic;
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;

@@ -16,9 +16,12 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 import junit.framework.TestCase;
 
 public class FileAuthorizationManagerTest extends TestCase {
+	static {
+		System.setProperty(TestConnection.property_wasp_location, TestConnection.wsi_path);
+	}
 
 	public void testAuthorizeDocids() throws RepositoryLoginException, RepositoryException {
-	
+
 		FileConnector connec = new FileConnector();
 		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
@@ -26,32 +29,32 @@ public class FileAuthorizationManagerTest extends TestCase {
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
 		connec.setContent_engine_url(TestConnection.uri);
-		
+
 		FileSession fs = (FileSession)connec.login();
 		FileAuthorizationManager fam = (FileAuthorizationManager) fs.getAuthorizationManager();
-//		FileAuthenticationManager fatm = (FileAuthenticationManager) fs.getAuthenticationManager();		
+//		FileAuthenticationManager fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
 //		FileAuthenticationIdentity fai = new FileAuthenticationIdentity(TestConnection.username, TestConnection.password);
 //		AuthenticationResponse ar = fatm.authenticate(fai);
-		
+
 		Map expectedResults = new HashMap();
 		expectedResults.put(TestConnection.docVsId1, Boolean.FALSE);
 		expectedResults.put(TestConnection.docVsId2, Boolean.FALSE);
 		expectedResults.put(TestConnection.docVsId3, Boolean.TRUE);
 		expectedResults.put(TestConnection.docVsId4, Boolean.TRUE);
-		
+
 		testAuthorization(fam, expectedResults, TestConnection.username, TestConnection.password);
-		
+
 	}
-	
+
 	private void testAuthorization(FileAuthorizationManager fam, Map expectedResults, String username, String password) throws RepositoryException {
-	
+
 		List docids = new LinkedList(expectedResults.keySet());
-		
+
 //		List resultSet = (List) fam.authorizeDocids(docids,
 //				new FileAuthenticationIdentity(username, password));
 		List resultSet = (List) fam.authorizeDocids(docids,
 				new FileAuthenticationIdentity(username, null));
-		
+
 		Boolean expected;
 		AuthorizationResponse ar;
 		for (Iterator i = resultSet.iterator(); i.hasNext();) {
@@ -62,7 +65,7 @@ public class FileAuthorizationManagerTest extends TestCase {
 			assertEquals(username + " access to " + uuid, expected
 					.booleanValue(), ar.isValid());
 
-		
+
 		}
 	}
 }

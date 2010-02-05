@@ -40,7 +40,7 @@ public class FileDocument implements Document {
 	private SpiConstants.ActionType action;
 
 	public FileDocument(String docId, Date timeStamp,
-			IObjectStore objectStore, boolean isPublic, String displayUrl, 
+			IObjectStore objectStore, boolean isPublic, String displayUrl,
 			HashSet included_meta, HashSet excluded_meta, SpiConstants.ActionType action) {
 		this.docId = docId;
 		this.timeStamp = timeStamp;
@@ -140,8 +140,8 @@ public class FileDocument implements Document {
 			} else if (type.equalsIgnoreCase("Double")) {
 				logger.log(Level.FINEST, "Getting property: "+name);
 				set.add(new DoubleValue(document.getPropertyDoubleValue(name)));
-//			} else if (type.equalsIgnoreCase("String")) {
-//				set.add(new StringValue(document.getPropertyStringValue(name)));
+			} else if (type.equalsIgnoreCase("String")) {
+				set.add(new StringValue(document.getPropertyStringValue(name)));
 			} else if (type.equalsIgnoreCase("guid")) {
 				logger.log(Level.FINEST, "Getting property: "+name);
 				set.add(new StringValue(document.getPropertyGuidValue(name)));
@@ -153,11 +153,11 @@ public class FileDocument implements Document {
 			if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
 				logger.log(Level.FINEST, "Getting property: "+name);
 				Calendar tmpCal = Calendar.getInstance();
-				
+
 				long timeDateMod = timeStamp.getTime();
-				timeStamp.setTime(timeDateMod + 1000);		
+				timeStamp.setTime(timeDateMod + 1000);
 				tmpCal.setTime(timeStamp);
-				
+
 				DateValue tmpDtVal=new DateValue(tmpCal);
 				set.add(tmpDtVal);
 				return new FileDocumentProperty(name, set);
@@ -186,21 +186,21 @@ public class FileDocument implements Document {
 				if(included_meta.size() != 0){
 					//includeMeta - exludeMeta
 					logger.log(Level.FINE, "Metadata set will be (includeMeta - exludeMeta)");
-					if ((!excluded_meta.contains(property) 
+					if ((!excluded_meta.contains(property)
 							&& included_meta.contains(property))){
 						properties.add(property);
 					}
 				}else {
 					//superSet - exludeMeta
 					logger.log(Level.FINE, "Metadata set will be (superSet - exludeMeta)");
-					if ((!excluded_meta.contains(property) 
+					if ((!excluded_meta.contains(property)
 							|| included_meta.contains(property))){
 						properties.add(property);
 					}
 				}
 			}
 		}
-		
+
 		return properties;
 	}
 }
