@@ -25,7 +25,7 @@ import com.google.enterprise.connector.spi.ConfigureResponse;
 
 import junit.framework.TestCase;
 
-public class FileConnectorTypeTest extends TestCase {
+public class FileConnectorTypeTest extends FileNetTestCase {
 
 	static {
 		System.setProperty(TestConnection.property_wasp_location, TestConnection.wsi_path);
@@ -33,7 +33,7 @@ public class FileConnectorTypeTest extends TestCase {
 	public void testValidateConfigWithBlankWhereClause() {
 		HashMap<String, String> map = new HashMap<String, String>();
 		String[] fields = { "username", "Password", "object_store",
-				"object_factory", "workplace_display_url", 
+				"object_factory", "workplace_display_url",
 				"content_engine_url", "is_public",
 				"additional_where_clause", "authentication_type" };
 		map.put("username", TestConnection.adminUsername);
@@ -55,7 +55,7 @@ public class FileConnectorTypeTest extends TestCase {
 	public void testValidateConfigIncorrectWhereClause() {
 		HashMap<String, String> map = new HashMap<String, String>();
 		String[] fields = { "username", "Password", "object_store",
-				"object_factory", "workplace_display_url", 
+				"object_factory", "workplace_display_url",
 				"content_engine_url", "is_public",
 				"additional_where_clause", "authentication_type" };
 		map.put("username", TestConnection.adminUsername);
@@ -78,7 +78,7 @@ public class FileConnectorTypeTest extends TestCase {
 	public void testValidateConfigCorrectWhereClause() {
 		HashMap<String, String> map = new HashMap<String, String>();
 		String[] fields = { "username", "Password", "object_store",
-				"object_factory", "workplace_display_url", 
+				"object_factory", "workplace_display_url",
 				"content_engine_url", "is_public",
 				"additional_where_clause", "authentication_type" };
 		map.put("username", TestConnection.adminUsername);
@@ -101,7 +101,7 @@ public class FileConnectorTypeTest extends TestCase {
 		try{
 			HashMap<String, String> map = new HashMap<String, String>();
 			String[] fields = { "username", "Password", "object_store",
-					"object_factory", "workplace_display_url", 
+					"object_factory", "workplace_display_url",
 					"content_engine_url", "is_public",
 					"additional_where_clause", "authentication_type" };
 			map.put("username", TestConnection.adminUsername);
@@ -127,7 +127,7 @@ public class FileConnectorTypeTest extends TestCase {
 
 		HashMap<String, String> map = new HashMap<String, String>();
 		String[] fields = { "username", "Password", "object_store",
-				"object_factory", "workplace_display_url", 
+				"object_factory", "workplace_display_url",
 				"content_engine_url", "is_public",
 				"additional_where_clause", "authentication_type" };
 		map.put("username", TestConnection.adminUsername);
