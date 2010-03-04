@@ -1,3 +1,17 @@
+// Copyright (C) 2007-2010 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.enterprise.connector.filenet4;
 
 import java.util.StringTokenizer;
@@ -13,7 +27,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 /**
  * FileNet Authentication Manager. It contains method for authenticating the user while search is performed.
- * @author amit_kagrawal
+ * @author pankaj_chouhan
  * */
 public class FileAuthenticationManager implements AuthenticationManager {
 
@@ -39,47 +53,32 @@ public class FileAuthenticationManager implements AuthenticationManager {
 		IUserContext uc = conn.getUserContext();
 
 		try {
-			uc.authenticate(username, password);
+			return authenticate(username, password, uc);
 		} catch (Throwable e) {
 			logger.log(Level.WARNING,"Authentication Failed for user " + username);
-			
-//			tokenize the string on comma
-			StringTokenizer strtok = new StringTokenizer(username,",");
-			while ((null!=strtok) && (strtok.hasMoreTokens())){
-
-				String mytok1 = strtok.nextToken();
-				if(null!=mytok1){
-					//filter for the shortened name
-					StringTokenizer innerToken = new StringTokenizer(mytok1,"=");
-					if((null!=innerToken)&&(innerToken.countTokens()==2)){
-						String key = innerToken.nextToken();
-						if(null!=key){
-							if((key.equalsIgnoreCase("cn"))||(key.equalsIgnoreCase("uid"))){
-								String shortUserName = innerToken.nextToken();
-//								System.out.println("User: "+shortUserName);
-								logger.info("Trying user Authentication with simple name: "+shortUserName);
-								
-								try{
-									uc.authenticate(shortUserName, password);
-									return new AuthenticationResponse(true, ""); 
-								}catch(Throwable th){
-									logger.log(Level.WARNING,"Authentication Failed for user " + shortUserName);
-									logger.log(Level.FINE,"While authenticating got exception",th);
-									return new AuthenticationResponse(false, "");
-								}
-								
-							}
-						}
-					}
-				}//end:if(null!=mytok1){
-			}//end: while
-			
-			return new AuthenticationResponse(false, "");
+			String shortName = FileUtil.getShortName(username);
+			logger.log(Level.INFO,"Trying to authenticate with Short Name: " + shortName);
+			try{
+				return authenticate(shortName, password, uc);
+			}catch(Throwable th){
+				logger.log(Level.WARNING,"Authentication Failed for user " + shortName);
+				logger.log(Level.FINE,"While authenticating got exception",th);
+				return new AuthenticationResponse(false, "");
+			}
 		}
-		
-		logger.info("Authentication Succeeded for user " + username);
-		return new AuthenticationResponse(true, "");
-
 	}
 
+	/**
+	 * Wrapper over authenticate method of UserContext class.
+	 * @param username UserName which needs to be authenticated
+	 * @param password Valid password of the user name
+	 * @param uc	   UserContext reference
+	 * @return		   Returns the Authentication response
+	 * @throws RepositoryException
+	 */
+	private AuthenticationResponse authenticate(String username, String password, IUserContext uc) throws RepositoryException {
+		uc.authenticate(username, password);
+		logger.info("Authentication Succeeded for user " + username);
+		return new AuthenticationResponse(true, "");
+	}
 }
