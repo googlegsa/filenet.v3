@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#summary Troubleshooting guide for FileNet P8 4.0,4.5 Connector 2.4
 = Troubleshooting guide for FileNet P8 4.0,4.5 Connector 2.4 =
 
 
