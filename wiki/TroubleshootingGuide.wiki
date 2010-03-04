@@ -1,0 +1,121 @@
+#summary One-sentence summary of this page.
+= Troubleshooting guide for FileNet P8 4.0,4.5 Connector 2.4 =
+
+
+
+= Introduction =
+This document has a list of FAQs and troubleshooting tips to quickly identify if connector has been configured correctly and is discovering & crawling as intended.
+Add your content here.
+
+
+= Details =
+
+||*1. Unable to configure the connector instance:*||
+
+**Problem Description:*
+
+Following Error message is displayed in the connector logs:
+Caused by: javax.xml.rpc.JAXRPCException: Exception while performing call. Unable to read server response. Server returned status code: 200 OK (Content-type: text/xml; charset=utf-8) Incoming message is not SOAP 1.1 nor SOAP 1.2
+
+*Root Cause:*
+
+Looking at the logs and exception it was found that, connector is unable to refer to the classes which are provided at the time of installation of connector. Currently the classpath in Service.bat file under Tomcat/bin is set with absolute path for all the dependency jar files. But somehow connector is unable to refer those files and throwing the above exception.
+
+*Resolution/Quick Workaround:*
+
+Need to copy all the dependency jars file needed by FileNet Connector in the WEB-INF/lib directory. This can be done by following the below mentioned steps:
+
+  #    Stop the connector service (If running)
+  #    Copy all the 9 jars (i.e. activation.jar, builtin_serialization.jar, javaapi.jar, jaxrpc.jar, jetty.jar, log4j.1.2.15.jar, saaj.jar, wasp.jar, wsdl_api.jar) from wsi\lib to CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib
+  #    Navigate to CONNECTOR_HOME\Tomcat\bin folder
+  #    Open service.bat in text editor
+  #    Go to line number 99. Set PR_CLASSPATH with “%CATALINA_HOME%\bin\bootstrap.jar;”. Remove all other classpath entries. For e.g.
+       set PR_CLASSPATH=%CATALINA_HOME%\bin\bootstrap.jar;
+       Save service.bat and close it.
+  #    Open DOS command window
+  #    Change directory to CONNECTOR_HOME\Tomcat\bin
+  #    Run following command in the same order, as mentioned below, on command prompt:
+    #    service.bat remove
+    #    service.bat install
+  #    Start the connector service.
+  #    Try to register connector instance.
+
+||*2. Search Results not displayed:*||
+
+*Problem Description:*
+
+I have crawled certain documents with user U1. I am searching documents with user U2. I am not getting any search results. I got following in the logs:
+"User U2 is not authorized for document Id %7B11225236-5855-499E-9C27-00C670190DC0%7D"
+
+*Root Cause:*
+
+FileNet requires Full Distinguished Name or User Principle Name at search time. If the username provided is shortname then authorization fails.
+
+*Resolution/Quick Workaround:*
+
+Provide the username in Full Distinguished Name or User Principle Name, depending on the LDAP server configured.
+
+||*3. Unable to configure connector instance:*||
+
+*Problem Description:*
+
+Following error message is displayed in red on the configuration page:
+"Unable to validate Content Engine URL. Could not connect to the Content Engine. Either Content Engine server is down or URL is not in proper format."
+
+*Root Cause:*
+
+Following can be the probable reasons:
+  #    Content Engine URL is in-correct or FileNet server is down
+  #    There can be three forms of Content Engine URL:
+    #    http://<server-ip or name>:`<`port>/wsi/FNCEWS40DIME: This is used to connect Content Engine Web Service through JAVA client.
+    #    http://<server-ip or name>:`<`port>/wsi/FNCEWS40MTOM: This is used to connect Content Engine Web Service through .NET client.
+    #    http://<server-ip or name>:`<`port>/FileNet/Engine: This is used for EJB as the transport protocol.
+
+FileNet connector uses Content Engine Web Service (CEWS) as the transport protocol and it uses JAVA client. Thus URL mentioned in 2.1 should be used as content engine URL while configuring the FileNet connector instance. URL in any other format will cause the above error in red.
+
+*Resolution/Quick Workaround:*
+
+  #    Check the connection to FileNet Server.
+  #    Use the Content Engine URL in the format shown in 2.1 above.
+
+||*4. Some documents are not getting crawled and indexed:*||
+
+*Problem Description:*
+
+I configured FileNet connector to crawl an ObjectStore. It seems that some of the documents under the target ObjectStore are left out and not indexed.
+
+*Root Cause:*
+
+Following may be, one of the reasons for documents getting skipped:
+  #    *Versioning*: FileNet Connector crawls only released documents, whereas FileNet version systems can have documents in 4 states i.e. Released, Superseded, In Process, Reservation. FileNet connector crawls only documents which are in released state i.e. VERSIONSTATUS=1. So if the target ObjectStore is having documents in states other than Released one then those documents are the candidates to be skipped and will not be crawled by connector.
+  #    *TimeZone*: Last Modified Date stored as checkpoint is not same as the Last Modified Date stored in database for a particular document. Both the dates for the same document should be same.
+
+*Resolution/Quick Workaround:*
+
+  #    Make sure that target ObjectStore contains documents in released state i.e. in VERSIONSTATUS=1.
+  #    Please verify that Last Modified Date stored in checkpoint in file
+\GoogleConnectors\<FileNET Connector Name>\Tomcat\webapps\connector-manager\WEB-INF\connectors\Filenet_P8\`<`connector-instance>\`<`connector-instance>_state.txt
+and the Last Modified Date in the Table "DocVersion" of the configured Database for a particular document. Both the Dates should be same for the same document and should be present in "UTC" TimeZone.
+
+||*5. Delete Feeds are not sent by connector:*||
+
+*Problem Description:*
+
+I have deleted some documents from the ObjectStore, still those document's indexes are present on GSA.
+
+*Root Cause:*
+
+This can be due to the reason that Auditing is disabled on the FileNet Server. Until the Auditing is the disabled on FileNet Server for a particular ObjectStore, nothing gets logged into the Event table of the Database. FileNet connector compares the dates from checkpoint and Event table and send Delete feed accordingly. Thus if Auditing is not enabled on ObjectStore then, Event table will be empty and hence no delete feed will be send to GSA.
+
+*Resolution/Quick Workaround:*
+
+Enable the Auditing for delete event on FileNet server for target Object Store through FileNet Enterprise Manager as follows:
+  #    Right click on the target ObjectStore and select "Properties".
+  #    Go to "General" tab and select "Auditing Enabled" check-box.
+  #    Apply the changes and select Ok.
+  #    Expand the target Object Store and right click on the "Document Class" and select "Properties".
+  #    Go to the "Audit Definitions" tab.
+  #    Select event as "Deletion", select "Success" check-box.
+  #    Click "Add" button
+
+All the documents deleted after Auditing is enabled, will be sent for Delete Feed to GSA
