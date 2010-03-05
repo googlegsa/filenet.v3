@@ -7,7 +7,7 @@
 		<property name="object_store" value="${object_store}" />
 		<property name="content_engine_url" value="${content_engine_url}" />
 		<property name="workplace_display_url" value="${workplace_display_url}" />
-		<property name="object_factory" value="com.google.enterprise.connector.file.filejavawrap.FnObjectFactory" />
+		<property name="object_factory" value="com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory" />
 	 	<property name="additional_where_clause" value="${additional_where_clause}" />
 		<property name="is_public" value="${is_public}" />
 		<property name="included_meta">
@@ -77,24 +77,24 @@
 			</set>
 		</property>
 	</bean>
-	
-	<bean id="propertyPlaceholderConfigurer" 
-          class="com.google.enterprise.connector.instantiator.EncryptedPropertyPlaceholderConfigurer"> 
-        <property name="properties"> 
-            <props> 
+
+	<bean id="propertyPlaceholderConfigurer"
+          class="com.google.enterprise.connector.instantiator.EncryptedPropertyPlaceholderConfigurer">
+        <property name="properties">
+            <props>
                 <prop key="username"></prop>
                 <prop key="password"></prop>
                 <prop key="object_store"></prop>
                 <prop key="content_engine_url"></prop>
-                <prop key="workplace_display_url"></prop> 
+                <prop key="workplace_display_url"></prop>
                 <prop key="object_factory"></prop>
                 <prop key="additional_where_clause"></prop>
                 <prop key="is_public"></prop>
-                <!-- 
+                <!--
                 <prop key="included_meta"></prop>
-                <prop key="excluded_meta"></prop>                
+                <prop key="excluded_meta"></prop>
                  -->
-            </props> 
-        </property> 
+            </props>
+        </property>
     </bean>
 </beans>
