@@ -1,3 +1,16 @@
+// Copyright (C) 2007-2010 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.util.Iterator;
@@ -15,55 +28,82 @@ import com.filenet.api.security.Group;
 import com.filenet.api.security.User;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 
+/**
+ * Wrapper class over the FileNet API class Permissions. This class is responsible to authorize a target user
+ * against all the Access Control Entries of a target document.
+ * @author pankaj_chouhan
+ *
+ */
 public class FnPermissions implements IPermissions {
 
-	PermissionList perms;
-	public static int ACCESS_LEVEL = AccessLevel.VIEW_AS_INT;
-	private static Logger logger = null;
-	{
+	private PermissionList perms;
+	private int ACCESS_LEVEL = AccessLevel.VIEW_AS_INT;
+	private String ACTIVE_DIRECTORY_SYMBOL = "@";
+	private Logger logger = null;
+	public FnPermissions(PermissionList perms) {
+		this.perms = perms;
 		logger = Logger.getLogger(FnDocument.class.getName());
 	}
-	public FnPermissions(PermissionList perms) {	
-		this.perms = perms;
-	}
 
+	/**
+	 * To authorize a given username against the grantee-names, present in all the Access Control Entries for all the
+	 * permission of the target document.
+	 *
+	 * @param Username which needs to be authorized.
+	 * @return True or False, depending on the success or failure of authorization.
+	 */
 	public boolean authorize(String username) {
 		boolean found;
 		Iterator iter = perms.iterator();
 		String granteeName;
+		logger.log(Level.INFO, "Authorization Starts for user:["+username+"]");
 		while(iter.hasNext()){
 			AccessPermission perm = (AccessPermission)iter.next();
-			if ((perm.get_AccessMask().intValue() & ACCESS_LEVEL) == ACCESS_LEVEL){
+			Integer accessMask = perm.get_AccessMask();
+			logger.log(Level.INFO, "Access Mask is:["+accessMask+"]");
+			if ((accessMask & ACCESS_LEVEL) == ACCESS_LEVEL){
 				granteeName = perm.get_GranteeName();
-				
 				if (perm.get_GranteeType() == SecurityPrincipalType.USER){
-					if (//granteeName.indexOf(username.toLowerCase()) > -1 || 
-							granteeName.equalsIgnoreCase(username) 
-							|| granteeName.split("@")[0].equalsIgnoreCase(username)){ 
-						logger.log(Level.INFO, "Authorization for user: " + username + " is Successful");
+					logger.log(Level.INFO, "Grantee Name is ["+granteeName+"] is of type USER");
+					if (//granteeName.indexOf(username.toLowerCase()) > -1 ||
+							granteeName.equalsIgnoreCase(username)
+							|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)){
+						logger.log(Level.INFO, "Authorization for user: [" + username + "] is Successful");
 						return true;
+					} else {
+						logger.log(Level.INFO, "Grantee Name ["+granteeName+"] does not match with search user ["+username+"]. Authorization will continue with the next Grantee Name");
 					}
 				}
 				else if(perm.get_GranteeType() == SecurityPrincipalType.GROUP){ //GROUP
-					Connection conn = perm.getConnection();
-					Group group = null;
-					try{
-						group = com.filenet.api.core.Factory.Group.fetchInstance(conn,perm.get_GranteeName(),null);
-						found = searchUserInGroup(username,group);
-						if (found){
-							logger.log(Level.INFO, "Authorization for user: " + username + " is Successful");
-							return true;
+					logger.log(Level.INFO, "Grantee Name ["+granteeName+"] is of type GROUP");
+					if(granteeName.equalsIgnoreCase("#AUTHENTICATED-USERS")){
+						logger.log(Level.INFO, "Authorization for user: [" + username + "] is Successful");
+						return true;
+					} else {
+						Connection conn = perm.getConnection();
+						Group group = null;
+						try{
+							group = com.filenet.api.core.Factory.Group.fetchInstance(conn,perm.get_GranteeName(),null);
+							found = searchUserInGroup(username,group);
+							if (found){
+								logger.log(Level.INFO, "Authorization for user: [" + username + "] is Successful");
+								return true;
+							}
+						} catch (Exception e){
+							logger.log(Level.WARNING, "Skipping Group ["+granteeName+"], as it is not found.", e);
 						}
-					} catch (Exception e){
-						logger.warning("Skipping Group "+group+", as it is not found.");
 					}
-				}	
+				}
 			}
 		}
 		logger.log(Level.INFO, "Authorization for user: " + username + " FAILED");
 		return false;
 	}
 
+	/*
+	 * It is a recursive function which will search a target user in the provided group. If the group
+	 * contains some other group then it recursively searches the target user in those groups as well.
+	 */
 	private boolean searchUserInGroup(String username, Group group) {
 		User user;
 		Group subGroup;
@@ -72,11 +112,13 @@ public class FnPermissions implements IPermissions {
 		Iterator itUser = us.iterator();
 		while (itUser.hasNext()){
 			user = (User) itUser.next();
+			logger.log(Level.INFO, "Authorization for USER [" + user.get_Name() + "] of GROUP ["+group.get_Name()+"]");
 			if (//user.get_Name().indexOf(username.toLowerCase()) > -1 ||
-					user.get_Name().equalsIgnoreCase(username) 
-					|| user.get_Name().split("@")[0].equalsIgnoreCase(username)) {
+					user.get_Name().equalsIgnoreCase(username)
+					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
+				logger.log(Level.INFO, "Authorization for USER [" + user.get_Name() + "] of GROUP ["+group.get_Name()+"] is successful");
 				return true;
-			}					
+			}
 		}
 		GroupSet gs = group.get_Groups();
 		Iterator itGroup = gs.iterator();
@@ -84,10 +126,10 @@ public class FnPermissions implements IPermissions {
 		{
 			subGroup = (Group) itGroup.next();
 			found = searchUserInGroup(username, subGroup);
-			if (found) return true; 
+			if (found) return true;
 		}
 		return false;
 	}
 
-	
+
 }
