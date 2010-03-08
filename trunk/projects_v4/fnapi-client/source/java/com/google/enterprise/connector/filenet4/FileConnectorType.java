@@ -1,12 +1,12 @@
 /*
  * Copyright 2009 Google Inc.
- 
+
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
 	Unless required by applicable law or agreed to in writing, software
 	distributed under the License is distributed on an "AS IS" BASIS,
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,8 +43,8 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.XmlUtils;
 
 /**
- *Represents FileNet connector type information. Contains methods for creating and validating user form. 
- *@author amit_kagrawal
+ *Represents FileNet connector type information. Contains methods for creating and validating user form.
+ *@author pankaj_chouhan
  **/
 public class FileConnectorType implements ConnectorType {
 
@@ -102,7 +102,7 @@ public class FileConnectorType implements ConnectorType {
 	 * Set the keys that are required for configuration. One of the overloadings
 	 * of this method must be called exactly once before the SPI methods are
 	 * used.
-	 * 
+	 *
 	 * @param keys
 	 *            A list of String keys
 	 */
@@ -118,7 +118,7 @@ public class FileConnectorType implements ConnectorType {
 	 * Set the keys that are required for configuration. One of the overloadings
 	 * of this method must be called exactly once before the SPI methods are
 	 * used.
-	 * 
+	 *
 	 * @param keys
 	 *            An array of String keys
 	 */
@@ -129,7 +129,7 @@ public class FileConnectorType implements ConnectorType {
 	/**
 	 * Sets the form to be used by this configurer. This is optional. If this
 	 * method is used, it must be called before the SPI methods are used.
-	 * 
+	 *
 	 * @param formSnippet
 	 *            A String snippet of html - see the Configurer interface
 	 */
@@ -219,7 +219,7 @@ public class FileConnectorType implements ConnectorType {
 			try {
 				logger.info("Attempting to create FileNet4 connector instance");
 				configData.put(CONTENT_ENGINE_URL, rightTrim((String)configData.get(CONTENT_ENGINE_URL), '/'));//Removing the extra slashes at the right end of content engine url
-				
+
 				FileConnector conn =(FileConnector) connectorFactory.makeConnector(configData);
 				if(null==conn){
 					logger.severe("Unable to establish connection with FileNet server");
@@ -240,7 +240,7 @@ public class FileConnectorType implements ConnectorType {
 				testWorkplaceUrl((String) configData.get("workplace_display_url"));
 
 				StringBuffer query = new StringBuffer();
-				query.append("SELECT TOP 100 d.Id, d.DateLastModified FROM Document AS d WHERE VersionStatus=1 and ContentSize IS NOT NULL");
+				query.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 				query.append((String)configData.get(WHERECLAUSE));
 
 				try{
@@ -336,7 +336,7 @@ public class FileConnectorType implements ConnectorType {
 				logger.info("request to make configuration form..");
 				form = makeConfigForm(configData, validation);
 				return new ConfigureResponse( bundleMessage, form);
-			} 
+			}
 			return null;
 		}
 		form = makeConfigForm(configData, validation);
@@ -361,7 +361,7 @@ public class FileConnectorType implements ConnectorType {
 	/**
 	 * Make a config form snippet using the keys (in the supplied order) and, if
 	 * passed a non-null config map, pre-filling values in from that map
-	 * 
+	 *
 	 * @param configMap
 	 * @return config form snippet
 	 */
@@ -468,7 +468,7 @@ public class FileConnectorType implements ConnectorType {
 			buf.append(TD_DELIMITER);
 			buf.append(TD_FONT_WEIGHT);
 			buf.append(TD_DELIMITER);
-			buf.append(TD_FONT_COLOR);			
+			buf.append(TD_FONT_COLOR);
 			buf.append(TD_END_START_LABEL);
 			buf.append(ASTERISK);
 			buf.append(DIV_END);
@@ -533,7 +533,7 @@ public class FileConnectorType implements ConnectorType {
 		final boolean bValue = false;
 		if(configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL) || configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME) || configKey.equals(CONTENT_ENGINE_URL)){
 			return true;
-		}		
+		}
 		return bValue;
 	}
 
