@@ -1,10 +1,24 @@
+/*
+ * Copyright 2009 Google Inc.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+ */
 package com.google.enterprise.connector.filenet4;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.TimeZone;
@@ -24,10 +38,6 @@ import org.xml.sax.SAXException;
 
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PropertyNames;
-import com.filenet.api.core.IndependentObject;
-import com.filenet.api.core.ObjectStore;
-import com.filenet.api.core.Factory.ObjectChangeEvent;
-import com.filenet.api.util.Id;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -37,7 +47,14 @@ import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.TraversalManager;
 import com.google.enterprise.connector.spi.RepositoryException;
-
+/**
+ * Responsible for:
+ * 1. Construction of FileNet SQL queries for adding and deleting index of documents to GSA.
+ * 2. Execution of the SQL query constructed in step 1.
+ * 3. Retrieve the results of step 2 and wrap it in DocumentList
+ * @author pankaj_chouhan
+ *
+ */
 public class FileTraversalManager implements TraversalManager {
 
 	private static Logger logger;
@@ -73,7 +90,7 @@ public class FileTraversalManager implements TraversalManager {
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
 	}
-	
+
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession, boolean b,
 			String displayUrl, String additionalWhereClause,
@@ -99,21 +116,21 @@ public class FileTraversalManager implements TraversalManager {
 		logger.info((checkPoint == null) ? "Starting traversal..." : "Resuming traversal...");
 		DocumentList resultSet = null;
 		objectStore.refreshSUserContext();
-		
+
 		//to add
 		String query = buildQueryString(checkPoint);
-		
+
 		ISearch search = fileObjectFactory.getSearch(objectStore);
 		logger.log(Level.INFO, "Query to Add document: " + query);
 		IObjectSet objectSet = search.execute(query);
-				
+
 		//to delete
 		String queryStringToDelete = buildQueryToDelete(checkPoint);
-		
+
 		ISearch searchToDelete = fileObjectFactory.getSearch(objectStore);
 		logger.log(Level.INFO, "Query to get deleted documents: " + queryStringToDelete);
 		IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
-		
+
 		logger.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
 		logger.log(Level.INFO, "Number of documents sent to GSA: "+objectSet.getSize());
 		logger.log(Level.INFO, "Number of documents whose index will be deleted from GSA: "+objectSetToDelete.getSize());
@@ -131,12 +148,13 @@ public class FileTraversalManager implements TraversalManager {
 		if (batchint > 0) {
 			query.append("TOP " + batchint + " ");
 		}
-		query.append("d.Id, d.DateLastModified FROM ");
+		query.append(PropertyNames.ID);
+		query.append(",");
+		query.append(PropertyNames.DATE_LAST_MODIFIED);
+		query.append(" FROM ");
 		query.append(tableName);
-		query.append(" AS d");
 		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-		query.append(" AND (ISCLASS(d, Document) OR ISCLASS(d, WorkflowDefinition)) ");
-		
+
 		if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
 			query.append(additionalWhereClause);
 		}
@@ -144,51 +162,50 @@ public class FileTraversalManager implements TraversalManager {
 			query.append(getCheckpointClause(checkpoint));
 		}
 		query.append(order_by);
-		
+
 		return query.toString();
 	}
 	private String buildQueryToDelete(String checkpoint) throws RepositoryException {
-		
+
 		logger.fine("Build query to get the documents removed : ");
 		StringBuffer query= new StringBuffer("SELECT ");
+		if (batchint > 0) {
+			query.append("TOP " + batchint + " ");
+		}
+		//GuidConstants.Class_DeletionEvent = Only deleted objects in event table
+		query.append(PropertyNames.ID +","+PropertyNames.DATE_CREATED+","+PropertyNames.VERSION_SERIES_ID +" FROM " +GuidConstants.Class_DeletionEvent);
 		if(checkpoint != null)
 		{
 			logger.fine("Checkpoint is not null");
-			if (batchint > 0) {
-				query.append("TOP " + batchint + " ");
-			}
-			//GuidConstants.Class_DeletionEvent = Only deleted objects in event table
-			query.append(PropertyNames.ID +","+PropertyNames.DATE_CREATED+","+PropertyNames.VERSION_SERIES_ID +" FROM " +GuidConstants.Class_DeletionEvent);
 			query.append(getCheckpointClauseToDelete(checkpoint));
-			if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
+			//Commented the below code so that additionial where clause should not be included in FileNet
+			//query. In some cases like finding all the deleted records of a particular folder, query
+			//does not work i.e. "DOCUMENT.this INSUBFOLDER '/folder_name', throws exception: Document
+			//class not found.
+			/*if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
 				query.append(additionalWhereClause);
-			}
+			}*/
 			query.append(orderByToDelete);
 		}else{
 			//Get the date of today, corresponding to the date of first push
 			logger.fine("Checkpoint is null");
-			
 			TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 			Calendar cal = Calendar.getInstance();
-			
 			Date d=cal.getTime();
 			java.text.SimpleDateFormat dateStandard = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			dateFirstPush = dateStandard.format(d);
-			if (batchint > 0) {
-				query.append("TOP " + batchint + " ");
-			}
-			//GuidConstants.Class_DeletionEvent = Only deleted objects in event table
-			query.append(PropertyNames.ID +","+PropertyNames.DATE_CREATED+","+PropertyNames.VERSION_SERIES_ID +" FROM " +GuidConstants.Class_DeletionEvent);
 			query.append(" WHERE ");
-			if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
+			//Commented the below code so that additionial where clause should not be included in FileNet
+			//query. In some cases like finding all the deleted records of a particular folder, query
+			//does not work i.e. "DOCUMENT.this INSUBFOLDER '/folder_name', throws exception: Document
+			//class not found.
+			/*if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
 				query.append(additionalWhereClause);
-			}
-			query.append(" ("+PropertyNames.DATE_CREATED +">" + dateFirstPush + ")");		
+			}*/
+			query.append(" ("+PropertyNames.DATE_CREATED +">" + dateFirstPush + ")");
 			query.append(orderByToDelete);
-			
-			
 		}
-		return query.toString();		
+		return query.toString();
 	}
 
 	private String getCheckpointClause(String checkPoint)
