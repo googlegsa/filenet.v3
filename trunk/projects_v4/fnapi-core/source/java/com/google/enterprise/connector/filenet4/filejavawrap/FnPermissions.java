@@ -56,27 +56,34 @@ public class FnPermissions implements IPermissions {
 		boolean found;
 		Iterator iter = perms.iterator();
 		String granteeName;
-		logger.log(Level.INFO, "Authorization Starts for user:["+username+"]");
+		logger.log(Level.FINE, "Authorizing user:["+username+"]");
 		while(iter.hasNext()){
 			AccessPermission perm = (AccessPermission)iter.next();
 			Integer accessMask = perm.get_AccessMask();
-			logger.log(Level.INFO, "Access Mask is:["+accessMask+"]");
+			logger.log(Level.FINEST, "Access Mask is:["+accessMask+"]");
+
+			//Compare to make sure that the access level, to user for a document, is atleast view or above
 			if ((accessMask & ACCESS_LEVEL) == ACCESS_LEVEL){
 				granteeName = perm.get_GranteeName();
 				if (perm.get_GranteeType() == SecurityPrincipalType.USER){
 					logger.log(Level.INFO, "Grantee Name is ["+granteeName+"] is of type USER");
-					if (//granteeName.indexOf(username.toLowerCase()) > -1 ||
-							granteeName.equalsIgnoreCase(username)
+					if (granteeName.equalsIgnoreCase(username)
 							|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)){
 						logger.log(Level.INFO, "Authorization for user: [" + username + "] is Successful");
 						return true;
 					} else {
-						logger.log(Level.INFO, "Grantee Name ["+granteeName+"] does not match with search user ["+username+"]. Authorization will continue with the next Grantee Name");
+						logger.log(Level.FINER, "Grantee Name ["+granteeName+"] does not match with search user ["+username+"]. Authorization will continue with the next Grantee Name");
 					}
 				}
 				else if(perm.get_GranteeType() == SecurityPrincipalType.GROUP){ //GROUP
 					logger.log(Level.INFO, "Grantee Name ["+granteeName+"] is of type GROUP");
 					if(granteeName.equalsIgnoreCase("#AUTHENTICATED-USERS")){
+						//#AUTHENTICATED-USERS is a logical group in FileNet P8 Systems, which gets automatically
+						//created at the time of FileNet installation. This group contains all the FileNet users.
+						//This group cannot be edited by admin i.e. it is not possible to delete the user from
+						//this group. Thus every FileNet user is a part of #AUTHENTICATED-USERS group. This is the
+						//reason to authenticate a user for a document, if that document contains #AUTHENTICATED-USERS
+						//group in its ACL or ACE.
 						logger.log(Level.INFO, "Authorization for user: [" + username + "] is Successful");
 						return true;
 					} else {
@@ -112,9 +119,8 @@ public class FnPermissions implements IPermissions {
 		Iterator itUser = us.iterator();
 		while (itUser.hasNext()){
 			user = (User) itUser.next();
-			logger.log(Level.INFO, "Authorization for USER [" + user.get_Name() + "] of GROUP ["+group.get_Name()+"]");
-			if (//user.get_Name().indexOf(username.toLowerCase()) > -1 ||
-					user.get_Name().equalsIgnoreCase(username)
+			logger.log(Level.FINER, "Authorization for USER [" + user.get_Name() + "] of GROUP ["+group.get_Name()+"]");
+			if (user.get_Name().equalsIgnoreCase(username)
 					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
 				logger.log(Level.INFO, "Authorization for USER [" + user.get_Name() + "] of GROUP ["+group.get_Name()+"] is successful");
 				return true;
