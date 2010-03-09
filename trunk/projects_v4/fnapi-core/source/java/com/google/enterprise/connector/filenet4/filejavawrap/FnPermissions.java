@@ -54,6 +54,7 @@ public class FnPermissions implements IPermissions {
 	 */
 	public boolean authorize(String username) {
 		boolean found;
+		boolean accessLevelFailure = true;
 		Iterator iter = perms.iterator();
 		String granteeName;
 		logger.log(Level.FINE, "Authorizing user:["+username+"]");
@@ -64,6 +65,7 @@ public class FnPermissions implements IPermissions {
 
 			//Compare to make sure that the access level, to user for a document, is atleast view or above
 			if ((accessMask & ACCESS_LEVEL) == ACCESS_LEVEL){
+				accessLevelFailure = false;
 				granteeName = perm.get_GranteeName();
 				if (perm.get_GranteeType() == SecurityPrincipalType.USER){
 					logger.log(Level.INFO, "Grantee Name is ["+granteeName+"] is of type USER");
@@ -103,7 +105,13 @@ public class FnPermissions implements IPermissions {
 				}
 			}
 		}
-		logger.log(Level.INFO, "Authorization for user: " + username + " FAILED");
+		if(accessLevelFailure){
+			//If the document have no view content or more Access Security Level to any user
+			logger.log(Level.WARNING, "Authorization for user: [" + username + "] FAILED due to insufficient Access Security Levels. Minimum expected Access Security Level is \"View Content\"");
+		}else{
+			logger.log(Level.WARNING, "Authorization for user: [" + username + "] FAILED.");
+		}
+
 		return false;
 	}
 
