@@ -109,7 +109,7 @@ public class FnPermissions implements IPermissions {
 			//If the document have no view content or more Access Security Level to any user
 			logger.log(Level.WARNING, "Authorization for user: [" + username + "] FAILED due to insufficient Access Security Levels. Minimum expected Access Security Level is \"View Content\"");
 		}else{
-			logger.log(Level.WARNING, "Authorization for user: [" + username + "] FAILED.");
+			logger.log(Level.WARNING, "Authorization for user: [" + username + "] FAILED. One of the probable reason can be that, ["+ username + "] does not have security access rights, as it does not match with any of the Grantee Name");
 		}
 
 		return false;
