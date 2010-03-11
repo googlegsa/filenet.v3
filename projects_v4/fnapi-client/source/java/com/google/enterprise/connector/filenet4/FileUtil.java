@@ -18,6 +18,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility class, which will have independent utility methods, that can be used by other classes.
@@ -25,6 +27,11 @@ import java.util.StringTokenizer;
  *
  */
 public class FileUtil {
+
+	private static Logger logger = null;
+	static {
+		logger = Logger.getLogger(FileUtil.class.getName());
+	}
 
 	private FileUtil() {
 	}
@@ -87,12 +94,6 @@ public class FileUtil {
         if (serverName.indexOf(".") == -1
                 || serverName.lastIndexOf(".") == serverName.length() - 1) {
             return false;
-        } else {
-            try {
-                InetAddress.getByName(serverName);
-            } catch (UnknownHostException e) {
-                return false;
-            }
         }
         return true;
     }
@@ -107,6 +108,7 @@ public class FileUtil {
 			URL url = new URL(strURL);
 			return url.getHost();
 		} catch (MalformedURLException e) {
+			logger.log(Level.WARNING, "Malformed URL has occurred. Either no legal protocol could be found in a URL string or the URL string could not be parsed. URL string is: ["+strURL+"]", e);
 			return null;
 		}
 	}
@@ -120,6 +122,7 @@ public class FileUtil {
 		try {
 			return InetAddress.getByName(host).getCanonicalHostName();
 		} catch (UnknownHostException e) {
+			logger.log(Level.WARNING, "Unable to reach the Host: ["+host+"]", e);
 			return null;
 		}
 	}

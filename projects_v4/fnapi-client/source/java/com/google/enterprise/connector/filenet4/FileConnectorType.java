@@ -247,7 +247,7 @@ public class FileConnectorType implements ConnectorType {
 					if(fqhn!=null && fqhn.contains(host))
 						configData.put("workplace_display_url", workplaceDisplURL.replace(host, fqhn));
 					else
-						logger.log(Level.WARNING, "It seems that there is misconfiguration in DNS settings, so not converting Workplace URL's hostname in FQDN foramt.");
+						logger.log(Level.WARNING, "FQHN conversion failed. Reason: DNS resolution of host resolves to a value without the givern hostname. DNS resolved FQHN: [" + fqhn+ "]");
 				}
 				testWorkplaceUrl((String) configData.get("workplace_display_url"));
 
