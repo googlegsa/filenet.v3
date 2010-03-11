@@ -240,6 +240,15 @@ public class FileConnectorType implements ConnectorType {
 					logger.log(Level.INFO, "Connection to Content Engine URL Failed");
 				}
 
+				String workplaceDisplURL = (String) configData.get("workplace_display_url");
+				String host = FileUtil.getHost(workplaceDisplURL);
+				if(host!=null && !FileUtil.isIPAddress(host) && !FileUtil.isFQHN(host)){
+					String fqhn = FileUtil.getFQHN(host);
+					if(fqhn!=null && fqhn.contains(host))
+						configData.put("workplace_display_url", workplaceDisplURL.replace(host, fqhn));
+					else
+						logger.log(Level.WARNING, "It seems that there is misconfiguration in DNS settings, so not converting Workplace URL's hostname in FQDN foramt.");
+				}
 				testWorkplaceUrl((String) configData.get("workplace_display_url"));
 
 				StringBuffer query = new StringBuffer();
