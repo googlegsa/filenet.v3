@@ -13,7 +13,12 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4;
 
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.StringTokenizer;
+
 /**
  * Utility class, which will have independent utility methods, that can be used by other classes.
  * @author pankaj_chouhan
@@ -54,5 +59,68 @@ public class FileUtil {
 			shortUserName = longName.substring(0, longName.indexOf("@"));
 		}
 		return shortUserName;
+	}
+
+	/**
+     * Validates the String to check whether it represents an IP address or not
+     * and returns the boolean status.
+     *
+     * @param ip IP adress to be validated in the form of string.
+     * @return If ip address matches the regular expression then true else false
+     *         is returned.
+     */
+    public static boolean isIPAddress(String ip) {
+        if (ip.matches("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"))
+            return true;
+        else
+            return false;
+    }
+
+    /**
+     * Validates the server name to check whether it is in FQDN format or not
+     * and returns the boolean status.
+     *
+     * @param serverName Server Name to be validated in the form of string.
+     * @return Returns true if Server Name is in FQDN format else returns false.
+     */
+    public static boolean isFQHN(String serverName){
+        if (serverName.indexOf(".") == -1
+                || serverName.lastIndexOf(".") == serverName.length() - 1) {
+            return false;
+        } else {
+            try {
+                InetAddress.getByName(serverName);
+            } catch (UnknownHostException e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * To fetch the host name or host ip address from a given URL.
+     * @param strURL Target URL, whose host name is to be fetched.
+     * @return Return the Host Name or Host IP. Returns null, if URL is in malformed state.
+     */
+    public static String getHost(String strURL){
+		try {
+			URL url = new URL(strURL);
+			return url.getHost();
+		} catch (MalformedURLException e) {
+			return null;
+		}
+	}
+
+    /**
+     * To fetch the Fully Qualified Host Name.
+     * @param host ShortName of the host.
+     * @return Returns Fully Qualified Host Name
+     */
+    public static String getFQHN(String host){
+		try {
+			return InetAddress.getByName(host).getCanonicalHostName();
+		} catch (UnknownHostException e) {
+			return null;
+		}
 	}
 }
