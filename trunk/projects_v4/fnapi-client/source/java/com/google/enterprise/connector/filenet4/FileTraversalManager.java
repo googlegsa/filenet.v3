@@ -153,6 +153,7 @@ public class FileTraversalManager implements TraversalManager {
 		query.append(PropertyNames.DATE_LAST_MODIFIED);
 		query.append(" FROM ");
 		query.append(tableName);
+		query.append(" AS d");
 		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
 		if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
@@ -178,13 +179,10 @@ public class FileTraversalManager implements TraversalManager {
 		{
 			logger.fine("Checkpoint is not null");
 			query.append(getCheckpointClauseToDelete(checkpoint));
-			//Commented the below code so that additionial where clause should not be included in FileNet
-			//query. In some cases like finding all the deleted records of a particular folder, query
-			//does not work i.e. "DOCUMENT.this INSUBFOLDER '/folder_name', throws exception: Document
-			//class not found.
-			/*if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
+
+			if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
 				query.append(additionalWhereClause);
-			}*/
+			}
 			query.append(orderByToDelete);
 		}else{
 			//Get the date of today, corresponding to the date of first push
@@ -195,14 +193,12 @@ public class FileTraversalManager implements TraversalManager {
 			java.text.SimpleDateFormat dateStandard = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			dateFirstPush = dateStandard.format(d);
 			query.append(" WHERE ");
-			//Commented the below code so that additionial where clause should not be included in FileNet
-			//query. In some cases like finding all the deleted records of a particular folder, query
-			//does not work i.e. "DOCUMENT.this INSUBFOLDER '/folder_name', throws exception: Document
-			//class not found.
-			/*if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
-				query.append(additionalWhereClause);
-			}*/
+
 			query.append(" ("+PropertyNames.DATE_CREATED +">" + dateFirstPush + ")");
+
+			if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
+				query.append(additionalWhereClause);
+			}
 			query.append(orderByToDelete);
 		}
 		return query.toString();
