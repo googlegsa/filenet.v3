@@ -11,18 +11,18 @@
 	<property name="config" value="fnapi-client/config" />
 	<property name="jarfile.dir" value="third_party/lib"/>
 	<property name="file_jarfile.dir" value="file_third_party/lib"/>
-	
-	<property name="build-client" value="fnapi-client/build" />	
+
+	<property name="build-client" value="fnapi-client/build" />
 	<property name="src-client" value="fnapi-client/source/java" />
-	<property name="classes-client" value="${build-client}/classes" />	
-		
-	<property name="build-core" value="fnapi-core/build" />	
+	<property name="classes-client" value="${build-client}/classes" />
+
+	<property name="build-core" value="fnapi-core/build" />
 	<property name="src-core" value="fnapi-core/source/java" />
-	<property name="classes-core" value="${build-core}/classes" />	
+	<property name="classes-core" value="${build-core}/classes" />
 
 	<property name="jar.dir"  value="${dist}/jar" />
 	<property name="jarfile"  value="${jar.dir}/connector-file4.jar" />
-	
+
 	<property name="file.jarfile" location="${jarfile.dir}/Jace.jar" />
 	<property name="json.jarfile" location="${jarfile.dir}/json.jar" />
 	<property name="httpclient.jarfile" value="${file_jarfile.dir}/commons-httpclient-3.0.1.jar" />
@@ -57,7 +57,7 @@
 		<mkdir dir="${classes-core}" />
 		<mkdir dir="${classes-client}" />
 		<mkdir dir="${jar.dir}" />
-		
+
 	</target>
 
 	<target name="compile-client" depends="init">
@@ -109,15 +109,15 @@
 			<fileset dir="${classes-client}"/>
 			<fileset dir="${classes-core}"/>
 			<fileset file="jaas.conf"/>
-			
+
 			<!--creation of manifest file-->
 			<manifest>
 			    <attribute name="Implementation-Title" value="Filenet Connector"/>
-  		        <attribute name="Implementation-Version" value="2.4.0_Build2"/>
+  		        <attribute name="Implementation-Version" value="2.4.4_Build1"/>
 			    <attribute name="Implementation-Vendor" value="Google Inc."/>
 			    <attribute name="Specification-Title" value="Connector Manager SPI"/>
-			    <attribute name="Specification-Version" value="2.4.0"/>
-			    <attribute name="Specification-Vendor" value="Google Inc."/> 
+			    <attribute name="Specification-Version" value="2.4.4"/>
+			    <attribute name="Specification-Vendor" value="Google Inc."/>
 				<attribute name="Main-Class" value="com.google.enterprise.connector.file.FileMain" />
 			</manifest>
 		</jar>
