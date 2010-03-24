@@ -18,13 +18,14 @@ package com.google.enterprise.connector.filenet4;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -187,13 +188,12 @@ public class FileTraversalManager implements TraversalManager {
 		}else{
 			//Get the date of today, corresponding to the date of first push
 			logger.fine("Checkpoint is null");
-			TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 			Calendar cal = Calendar.getInstance();
-			Date d=cal.getTime();
-			java.text.SimpleDateFormat dateStandard = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			dateFirstPush = dateStandard.format(d);
-			query.append(" WHERE ");
+			DateFormat dateStandard = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			dateStandard.setTimeZone(TimeZone.getTimeZone("UTC"));
+			dateFirstPush = dateStandard.format(cal.getTime());
 
+			query.append(" WHERE ");
 			query.append(" ("+PropertyNames.DATE_CREATED +">" + dateFirstPush + ")");
 
 			if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
