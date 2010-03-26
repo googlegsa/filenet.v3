@@ -18,7 +18,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 public class FnObjectStore implements IObjectStore {
-	
+
 	private ObjectStore objectStore;
 	private IConnection connection;
 	private String login;
@@ -34,7 +34,7 @@ public class FnObjectStore implements IObjectStore {
 		this.login = login;
 		this.password = password;
 	}
-	
+
 	public void refreshSUserContext() throws RepositoryLoginException{
 		connection.getUserContext().authenticate(login, password);
 	}
@@ -53,7 +53,7 @@ public class FnObjectStore implements IObjectStore {
 				return new FnDocument((Document) objectStore.getObject(type, id));
 			}
 		}catch (Exception e){
-			logger.log(Level.WARNING, "Unable to get Object got VersionSeries or Document");
+			logger.log(Level.WARNING, "Unable to get Object got VersionSeries or Document",e);
 			throw new RepositoryDocumentException(e);
 		}
 		return new FnBaseObject(obj);
@@ -85,7 +85,7 @@ public class FnObjectStore implements IObjectStore {
 	public String getSUserLogin(){
 		return login;
 	}
-	
+
 	public String getSUserPassword(){
 		return password;
 	}

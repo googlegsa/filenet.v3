@@ -1,14 +1,30 @@
+// Copyright (C) 2007-2010 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import com.filenet.api.collection.PropertyDescriptionList;
 import com.filenet.api.core.ContentTransfer;
 import com.filenet.api.core.Document;
@@ -27,6 +43,17 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 //import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
+import com.google.enterprise.connector.spiimpl.BinaryValue;
+import com.google.enterprise.connector.spiimpl.BooleanValue;
+import com.google.enterprise.connector.spiimpl.DateValue;
+import com.google.enterprise.connector.spiimpl.DoubleValue;
+import com.google.enterprise.connector.spiimpl.LongValue;
+import com.google.enterprise.connector.spiimpl.StringValue;
+/**
+ * Core document class, which directly interacts with the core FileNet APIs related to Documents.
+ * @author pankaj_chouhan
+ *
+ */
 public class FnDocument implements IDocument {
 
 	Document doc;
@@ -50,16 +77,19 @@ public class FnDocument implements IDocument {
 			}else{
 				pf.addIncludeProperty(new FilterElement(null, null, null,"Id ClassDescription ContentElements DateLastModified MimeType VersionSeries"));
 			}
-			
-			Iterator it = includedMeta.iterator();
-			while (it.hasNext()){
-				pf.addIncludeProperty(new FilterElement(null, null, null,(String)it.next()));
+
+			for (Object object : includedMeta) {
+				pf.addIncludeProperty(new FilterElement(null, null, null,(String)object));
 			}
 		}
-		
+
 		pf.setMaxRecursion(1);
+		try{
 		doc.fetchProperties(pf);
-		
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+
 		setMetaTypes();
 		setMeta();
 	}
@@ -73,7 +103,7 @@ public class FnDocument implements IDocument {
 		Iterator it8 = propDescList.iterator();
 		while (it8.hasNext()) {
 			PropertyDescription propDesc = (PropertyDescription) it8.next();
-			propertyName = propDesc.get_Name().replaceAll(" ", "").toUpperCase();
+			propertyName = propDesc.get_SymbolicName().toUpperCase();
 			propertyType = propDesc.get_DataType().toString();
 			metaTypes.put(propertyName, propertyType);
 		}
@@ -82,16 +112,14 @@ public class FnDocument implements IDocument {
 	private void setMeta() {
 		metas = new HashMap();
 		Properties props;
-		String propertyName;
 		Object value;
 		props = doc.getProperties();
-		Iterator it = props.iterator();
-		while (it.hasNext()) {
-			Property prop = (Property) it.next();
-			propertyName = prop.getPropertyName();
-			value = prop.getObjectValue();
-			if (value != null)
-				metas.put(propertyName, value);			
+		Property[] prop = props.toArray();
+		for (Property property : prop) {
+			value = property.getObjectValue();
+			if (value != null){
+				metas.put(property.getPropertyName(), value);
+			}
 		}
 	}
 
@@ -110,7 +138,7 @@ public class FnDocument implements IDocument {
 	public String getId(ActionType action) {
 		return doc.get_Id().toString();
 	}
-	
+
 	public Date getModifyDate(ActionType action) throws RepositoryDocumentException {
 		//String ModifyDate;
 		Date ModifyDate = new Date();
@@ -119,19 +147,19 @@ public class FnDocument implements IDocument {
 				ModifyDate = ((com.filenet.apiimpl.core.DeletionEventImpl) doc).get_DateLastModified();
 			}else{//if action==SpiConstants.ActionType.ADD
 				ModifyDate = doc.get_DateLastModified();
-			}	
+			}
 		}catch (Exception e){
 			 throw new RepositoryDocumentException(e);
 		}
 		return ModifyDate;
 	}
-		
-	
+
+
 	public String getClassNameEvent() throws RepositoryDocumentException {
 		return doc.getClassName();
 	}
-	
-	
+
+
 	public String getVersionSeriesId() throws RepositoryDocumentException {
 		Id id;
 		String strId;
@@ -140,14 +168,11 @@ public class FnDocument implements IDocument {
 		}catch (Exception e){
 			 throw new RepositoryDocumentException(e);
 		}
-//		logger.info("versionId : ID : "+id);
 		strId=id.toString();
-//		logger.info("versionId : tostring : "+strId);
 		strId = strId.substring(1,strId.length()-1);
-//		logger.info("versionId : cut start/end : "+strId);
 		return strId;
 	}
-	
+
 	public IPermissions getPermissions() {
 		return new FnPermissions(doc.get_Permissions());
 	}
@@ -169,192 +194,249 @@ public class FnDocument implements IDocument {
 			return ip;
 		} catch (Exception er) {
 			logger.log(Level.WARNING, "Unable to retrieve the content of file for "
-					+ this.doc.get_Id() + " " + er.getLocalizedMessage());
+					+ this.doc.get_Id() + " " + er.getLocalizedMessage(), er);
 			return ip;
 		}
 	}
 
-	public String getPropertyStringValue(String name)
-			throws RepositoryDocumentException {
+
+	public void getPropertyStringValue(String name, LinkedList list) throws RepositoryDocumentException{
 		try {
 			Properties props = doc.getProperties();
-			Iterator it = props.iterator();
-			while (it.hasNext()) {
-				Property prop = (Property) it.next();
+			Property[] property = props.toArray();
+			Object value;
+			for (Property prop : property) {
 				String propName = prop.getPropertyName();
 
 				if (propName.equalsIgnoreCase(name)) {
-					Object o = prop.getStringValue();
-					if (o == null)
-						return null;
-					return o.toString();
+					value = prop.getObjectValue();
+					if(value!=null){
+						if(value instanceof List){
+							for (Object object : (List)value) {
+								list.add(new StringValue(object.toString()));
+							}
+						}else{
+							list.add(new StringValue(prop.getStringValue()));
+						}
+					}
+					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
 					+ name + " of the file " + this.doc.get_Id() + " "
-					+ e1.getMessage());
+					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
-		return null;
 	}
-	
-	public String getPropertyGuidValue(String name) throws RepositoryDocumentException {
+	public void getPropertyGuidValue(String name, LinkedList list) throws RepositoryDocumentException {
 		try {
 			String id = null;
 			Properties props = doc.getProperties();
-			Iterator it = props.iterator();
-			while (it.hasNext()) {
-				Property prop = (Property) it.next();
+			Property[] property = props.toArray();
+			Object value;
+			for (Property prop : property) {
 				String propName = prop.getPropertyName();
 
 				if (propName.equalsIgnoreCase(name)) {
-					Object o = prop.getIdValue();
-					if (o == null)
-						return null;
-					id = o.toString();	
-					return id.substring(1,id.length()-1);
+					value = prop.getObjectValue();
+					if(value!=null){
+						if(value instanceof List){
+							for (Object object : (List)value) {
+								id = object.toString();
+								if(id != null)
+									list.add(new StringValue(id.substring(1,id.length()-1)));
+							}
+						}else{
+							id = prop.getIdValue().toString();
+							if(id != null)
+								list.add(new StringValue(id.substring(1,id.length()-1)));
+						}
+					}
+					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
 					+ name + " of the file " + this.doc.get_Id() + " "
-					+ e1.getMessage());
+					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
-		return null;
 	}
 
-	public long getPropertyLongValue(String name) throws RepositoryDocumentException {
+	public void getPropertyLongValue(String name, LinkedList list) throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
-			Iterator it = props.iterator();
-			while (it.hasNext()) {
-				Property prop = (Property) it.next();
+			Property[] property = props.toArray();
+			Object value;
+			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-
 				if (propName.equalsIgnoreCase(name)) {
-					return prop.getInteger32Value().longValue();
+					value = prop.getObjectValue();
+					if(value!=null){
+						if(value instanceof List){
+							for (Object object : (List)value) {
+								list.add(new LongValue(((Integer)object).longValue()));
+							}
+						}else{
+							list.add(new LongValue(prop.getInteger32Value().longValue()));
+						}
+					}
+					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
 					+ name + " of the file " + this.doc.get_Id() + " "
-					+ e1.getMessage());
+					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
-		return -1;
 	}
 
-	public double getPropertyDoubleValue(String name)
+	public void getPropertyDoubleValue(String name, LinkedList list)
 			throws RepositoryDocumentException {
 		try {
 
 			Properties props = doc.getProperties();
-			Iterator it = props.iterator();
-			while (it.hasNext()) {
-				Property prop = (Property) it.next();
+			Property[] property = props.toArray();
+			Object value;
+			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-
 				if (propName.equalsIgnoreCase(name)) {
-					return prop.getFloat64Value().doubleValue();
+					value = prop.getObjectValue();
+					if(value!=null){
+						if(value instanceof List){
+							for (Object object : (List)value) {
+								list.add(new DoubleValue(((Double)object).doubleValue()));
+							}
+						}else{
+							list.add(new DoubleValue(prop.getFloat64Value().doubleValue()));
+						}
+					}
+					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
 					+ name + " of the file " + this.doc.get_Id() + " "
-					+ e1.getMessage());
+					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
-		return -1;
 	}
 	public Date getPropertyDateValueDelete(String name) throws RepositoryDocumentException {
 		return new Date();
 	}
-	
-	public Date getPropertyDateValue(String name) throws RepositoryDocumentException {
+
+	public void getPropertyDateValue(String name, LinkedList list) throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
+			Property[] property = props.toArray();
+			Object value;
 			Iterator it = props.iterator();
-			while (it.hasNext()) {
-				Property prop = (Property) it.next();
+			for (Property prop : property) {
 				String propName = prop.getPropertyName();
 				if (propName.equalsIgnoreCase(name)) {
-					return prop.getDateTimeValue();
+					value = prop.getObjectValue();
+					if(value!=null){
+						if(value instanceof List){
+							for (Object object : (List)value) {
+								Calendar c = Calendar.getInstance();
+								c.setTime((Date)object);
+								list.add(new DateValue(c));
+							}
+						}else{
+							Calendar c = Calendar.getInstance();
+							c.setTime(prop.getDateTimeValue());
+							list.add(new DateValue(c));
+						}
+					}
+					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
 					+ name + " of the file " + this.doc.get_Id() + " "
-					+ e1.getMessage());
+					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
-		return null;
 	}
 
-	public boolean getPropertyBooleanValue(String name)
+	public void getPropertyBooleanValue(String name, LinkedList list)
 			throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
-			Iterator it = props.iterator();
-			while (it.hasNext()) {
-				Property prop = (Property) it.next();
+			Property[] property = props.toArray();
+			Object value;
+			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-
 				if (propName.equalsIgnoreCase(name)) {
-					return prop.getBooleanValue().booleanValue();
+					value = prop.getObjectValue();
+					if(value!=null){
+						if(value instanceof List){
+							for (Object object : (List)value) {
+								list.add(BooleanValue.makeBooleanValue(((Boolean)object).booleanValue()));
+							}
+						}else{
+							list.add(BooleanValue.makeBooleanValue((prop.getBooleanValue().booleanValue())));
+						}
+					}
+					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
 					+ name + " of the file " + this.doc.get_Id() + " "
-					+ e1.getMessage());
+					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
-		return false;
 	}
 
-	public byte[] getPropertyBinaryValue(String name)
+	public void getPropertyBinaryValue(String name, LinkedList list)
 			throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
-			Iterator it = props.iterator();
-			while (it.hasNext()) {
-				Property prop = (Property) it.next();
+			Property[] property = props.toArray();
+			Object value;
+			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-
 				if (propName.equalsIgnoreCase(name)) {
-					return prop.getBinaryValue();
+					value = prop.getObjectValue();
+					if(value!=null){
+						if(value instanceof List){
+							logger.log(Level.WARNING, "Binary MultiValued Metadat is currently not supported. Binary MultiValued metadata will not be fed to GSA");
+						}else{
+							list.add(new BinaryValue(prop.getBinaryValue()));
+						}
+					}
+					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
 					+ name + " of the file " + this.doc.get_Id() + " "
-					+ e1.getMessage());
+					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
-		return null;
 	}
-
 }
