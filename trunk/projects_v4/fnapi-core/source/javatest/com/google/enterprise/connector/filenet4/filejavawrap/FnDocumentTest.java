@@ -1,11 +1,26 @@
+// Copyright (C) 2007-2010 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.io.InputStream;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 import com.filenet.api.constants.ClassNames;
 import com.google.enterprise.connector.filenet4.FileConnector;
+import com.google.enterprise.connector.filenet4.FileNetTestCase;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnUserContext;
@@ -22,8 +37,12 @@ import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 import junit.framework.TestCase;
 
-public class FnDocumentTest extends TestCase {
-
+/**
+ * JUnit TestCases related to Core Document class.
+ * @author pankaj_chouhan
+ *
+ */
+public class FnDocumentTest extends FileNetTestCase{
 	FileSession fs;
 	IObjectStore ios;
 	IConnection conn;
@@ -40,11 +59,11 @@ public class FnDocumentTest extends TestCase {
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
 		connec.setContent_engine_url(TestConnection.uri);
-		
+
 		fs = (FileSession)connec.login();
 
-		
-		
+
+
 		iof= (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
 		IConnection conn = iof.getConnection(TestConnection.uri);
 //		Domain domain = Factory.Domain.getInstance(conn.getConnection(), null);
@@ -52,19 +71,19 @@ public class FnDocumentTest extends TestCase {
 
 		fd = (IDocument) ios.getObject(ClassNames.DOCUMENT, TestConnection.docId1);
 		fd.fetch(TestConnection.included_meta);
-		
+
 		uc = new FnUserContext(conn);
 		uc.authenticate(TestConnection.username,TestConnection.password);
 		vs = (IVersionSeries) ios.getObject(ClassNames.VERSION_SERIES, TestConnection.docVsId1);
 		fd2 = vs.getReleasedVersion();
-		
+
 
 	}
-	
+
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyName()'
 	 */
-	public void testGetPropertyName() throws RepositoryException {
+	public void ftestGetPropertyName() throws RepositoryException {
 
 		Set test = fd.getPropertyName();
 		assertNotNull(test);
@@ -81,7 +100,7 @@ public class FnDocumentTest extends TestCase {
 		Test2.remove("LockToken");
 		Test2.remove("StorageLocation");
 		Iterator it = Test2.iterator();
-		
+
 		while (it.hasNext()) {
 			String comp1 = it.next().toString();
 			String comp2 = null;
@@ -102,11 +121,11 @@ public class FnDocumentTest extends TestCase {
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyType(String)'
 	 */
-	public void testGetPropertyType() throws RepositoryException {
-		
+	public void ftestGetPropertyType() throws RepositoryException {
+
 		String[][] typeArray = TestConnection.type;
-		
-		
+
+
 		Set meta = TestConnection.included_meta;
 		meta.add("Id");
 		meta.add("ClassDescription");
@@ -132,7 +151,7 @@ public class FnDocumentTest extends TestCase {
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getVersionSeries()'
 	 */
-	public void testGetVersionSeries() throws RepositoryException {
+	public void ftestGetVersionSeries() throws RepositoryException {
 		IVersionSeries vs = fd.getVersionSeries();
 		assertEquals("{"+TestConnection.docVsId1+"}", vs.getId(ActionType.ADD));
 	}
@@ -140,14 +159,14 @@ public class FnDocumentTest extends TestCase {
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getId()'
 	 */
-	public void testGetId() throws RepositoryException {
-		assertEquals("{"+TestConnection.docId1+"}", fd.getId(ActionType.ADD)); 
+	public void ftestGetId() throws RepositoryException {
+		assertEquals("{"+TestConnection.docId1+"}", fd.getId(ActionType.ADD));
 	}
 
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPermissions()'
 	 */
-	public void testGetPermissions() throws RepositoryException {
+	public void ftestGetPermissions() throws RepositoryException {
 		IPermissions perm = fd2.getPermissions();
 		boolean test = perm.authorize("");
 		assertEquals(false, test);
@@ -156,7 +175,7 @@ public class FnDocumentTest extends TestCase {
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getContent()'
 	 */
-	public void testGetContent() throws RepositoryException {
+	public void ftestGetContent() throws RepositoryException {
 		uc.authenticate(TestConnection.adminUsername, TestConnection.adminPassword);
 		InputStream is = fd.getContent();
 		assertNotNull(is);
@@ -167,64 +186,102 @@ public class FnDocumentTest extends TestCase {
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyStringValue(String)'
 	 */
 	public void testGetPropertyStringValue() throws RepositoryException {
-		String test = fd.getPropertyStringValue("DocumentTitle");
-		assertEquals("Doc1", test);
+		LinkedList list = new LinkedList();
+		fd.getPropertyStringValue("Name", list);
+		try{
+			assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
+		}catch(AssertionError e){
+			System.out.println(e.getLocalizedMessage());
+			assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+		}
+
+//		assertEquals("Doc1", test);
 	}
 
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyGuidValue(String)'
 	 */
-	public void testGetPropertyGuidValue() throws RepositoryException {
-		String test = fd.getPropertyGuidValue("Id");
-		assertEquals(TestConnection.docId1, test);
-
+	public void ftestGetPropertyGuidValue() throws RepositoryException {
+		LinkedList list = new LinkedList();
+		fd.getPropertyGuidValue("MyID", list);
+		try{
+			assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
+		}catch(AssertionError e){
+			System.out.println(e.getLocalizedMessage());
+			assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+		}
 	}
 
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyLongValue(String)'
 	 */
-	public void testGetPropertyLongValue() throws RepositoryException {
-		long test = fd.getPropertyLongValue("MajorVersionNumber");
-		assertEquals(1, test);
+	public void ftestGetPropertyLongValue() throws RepositoryException {
+		LinkedList list = new LinkedList();
+		fd.getPropertyLongValue("MyInteger", list);
+		try{
+			assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
+		}catch(AssertionError e){
+			System.out.println(e.getLocalizedMessage());
+			assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+		}
 	}
 
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyDoubleValue(String)'
 	 */
-	public void testGetPropertyDoubleValue() throws RepositoryException {
-		Double test = new Double(fd.getPropertyDoubleValue("ContentSize"));
+	public void ftestGetPropertyDoubleValue() throws RepositoryException {
+		LinkedList list = new LinkedList();
+		fd.getPropertyDoubleValue("MyFloat", list);
 		Double value = new Double(2998306.0);
-		assertEquals(value, test);
+		try{
+			assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
+		}catch(AssertionError e){
+			System.out.println(e.getLocalizedMessage());
+			assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+		}
 	}
 
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyDateValue(String)'
 	 */
-	public void testGetPropertyDateValue() throws RepositoryException {
-		Date testGetted = fd.getPropertyDateValue("DateCreated");
+	public void ftestGetPropertyDateValue() throws RepositoryException {
+		LinkedList list = new LinkedList();
+		fd.getPropertyDateValue("MyDate", list);
 		Date testSetted = new Date(1183555393920L);
-
-		assertEquals(testSetted, testGetted);
+		try{
+			assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
+		}catch(AssertionError e){
+			System.out.println(e.getLocalizedMessage());
+			assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+		}
 	}
 
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyBooleanValue(String)'
 	 */
-	public void testGetPropertyBooleanValue() throws RepositoryException {
-		boolean test = fd.getPropertyBooleanValue("IsCurrentVersion");
-		assertEquals(true, test);
+	public void ftestGetPropertyBooleanValue() throws RepositoryException {
+		LinkedList list = new LinkedList();
+		fd.getPropertyBooleanValue("MyBoolean", list);
+		try{
+			assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
+		}catch(AssertionError e){
+			System.out.println(e.getLocalizedMessage());
+			assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+		}
 	}
 
 	/*
 	 * Test method for 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyBinaryValue(String)'
 	 */
-	public void testGetPropertyBinaryValue() throws RepositoryException {
-		byte[] test = fd.getPropertyBinaryValue("PublicationInfo");
-		if(test != null)
-		{
-			assertTrue(test instanceof byte[]);
+	public void ftestGetPropertyBinaryValue() throws RepositoryException {
+		LinkedList list = new LinkedList();
+		fd.getPropertyBinaryValue("MyBinary", list);
+		try{
+			assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
+		}catch(AssertionError e){
+			System.out.println(e.getLocalizedMessage());
+			assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
 		}
-		
 	}
 
 }
