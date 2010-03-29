@@ -1,12 +1,12 @@
 /*
  * Copyright 2009 Google Inc.
- 
+
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
 	Unless required by applicable law or agreed to in writing, software
 	distributed under the License is distributed on an "AS IS" BASIS,
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,10 +57,10 @@ public class FileSession implements Session {
 
 		logger.info("getting connection for content engine: "+contentEngineUri);
 		connection = fileObjectFactory.getConnection(contentEngineUri);
-		
+
 		logger.info("trying to access object store: "+objectStoreName+" for user: "+userName);
 		objectStore = fileObjectFactory.getObjectStore(objectStoreName, connection, userName, userPassword);
-		
+
 		logger.info("objectStore ok user:"+userName);
 
 		this.displayUrl = getDisplayURL(displayUrl, objectStoreName);
@@ -71,6 +71,9 @@ public class FileSession implements Session {
 	}
 
 	private String getDisplayURL(String displayUrl, String objectStoreName){
+		if(displayUrl.endsWith("/getContent/")){
+			displayUrl = new StringBuilder(displayUrl).deleteCharAt(displayUrl.length()-1).toString();
+		}
 		if(displayUrl.contains("/getContent") && displayUrl.endsWith("/getContent")){
 			return displayUrl + "?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
 		}else{
@@ -117,10 +120,10 @@ public class FileSession implements Session {
 		FileAuthorizationManager fileAzm = new FileAuthorizationManager(connection, objectStore);
 		return fileAzm;
 	}
-	
+
 	public ISearch getSearch() throws RepositoryException{
 		ISearch search = fileObjectFactory.getSearch(objectStore);
 		return search;
-	}	
+	}
 
 }
