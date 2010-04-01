@@ -41,6 +41,7 @@ public class FileSession implements Session {
 	private String additionalWhereClause;
 	private HashSet included_meta;
 	private HashSet excluded_meta;
+	private String db_timezone;
 	private static Logger logger;
 	static {
 		logger = Logger.getLogger(FileSession.class.getName());
@@ -50,7 +51,7 @@ public class FileSession implements Session {
 			String userPassword, String objectStoreName, String displayUrl,
 			String contentEngineUri, boolean isPublic,
 			String additionalWhereClause, HashSet included_meta,
-			HashSet excluded_meta) throws RepositoryException,
+			HashSet excluded_meta, String db_timezone) throws RepositoryException,
 			RepositoryLoginException {
 
 		setFileObjectFactory(iObjectFactory);
@@ -68,6 +69,7 @@ public class FileSession implements Session {
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
+		this.db_timezone = db_timezone;
 	}
 
 	private String getDisplayURL(String displayUrl, String objectStoreName){
@@ -104,7 +106,7 @@ public class FileSession implements Session {
 		FileTraversalManager fileQTM = new FileTraversalManager(
 				fileObjectFactory, objectStore, this.isPublic, this.displayUrl,
 				this.additionalWhereClause, this.included_meta,
-				this.excluded_meta);
+				this.excluded_meta, this.db_timezone);
 		return fileQTM;
 	}
 

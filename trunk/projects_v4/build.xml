@@ -66,8 +66,8 @@
 			<classpath>
 				<pathelement location="${javaapi.jarfile}" />
 				<pathelement location="${file.jarfile}" />
+				<pathelement location="${connector.jarfile}" />
 				<pathelement location="${spi.jarfile}" />
-				<pathelement location="${file.jarfile}" />
 				<pathelement location="${json.jarfile}" />
 				<pathelement location="${httpclient.jarfile}" />
 				<pathelement location="${classes-client}" />

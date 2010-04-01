@@ -78,11 +78,12 @@ public class FileTraversalManager implements TraversalManager {
 	private boolean isPublic;
 	private HashSet included_meta;
 	private HashSet excluded_meta;
+	private String db_timezone;
 
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, boolean b, String displayUrl,
 			String additionalWhereClause, HashSet included_meta,
-			HashSet excluded_meta) throws RepositoryException {
+			HashSet excluded_meta, String db_timezone) throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
 		this.isPublic = b;
@@ -90,12 +91,13 @@ public class FileTraversalManager implements TraversalManager {
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
+		this.db_timezone = db_timezone;
 	}
 
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession, boolean b,
 			String displayUrl, String additionalWhereClause,
-			HashSet included_meta, HashSet excluded_meta)
+			HashSet included_meta, HashSet excluded_meta, String db_timezone)
 	throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
@@ -106,7 +108,7 @@ public class FileTraversalManager implements TraversalManager {
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
-
+		this.db_timezone=db_timezone;
 	}
 
 	public DocumentList startTraversal() throws RepositoryException {
@@ -261,7 +263,7 @@ public class FileTraversalManager implements TraversalManager {
 			throw new IllegalArgumentException("Could not get last modified date from checkPoint string: " + checkPoint);
 		}
 
-		return dateString;
+		return dateString+FileUtil.getTimeZone(this.db_timezone);
 	}
 	protected String makeCheckpointQueryStringToDelete(String uuid, String c)
 	throws RepositoryException {
@@ -305,7 +307,7 @@ public class FileTraversalManager implements TraversalManager {
 			throw new IllegalArgumentException("Could not get last modified date from checkPoint string: " + checkPoint);
 		}
 
-		return dateString;
+		return dateString+FileUtil.getTimeZone(this.db_timezone);
 	}
 
 	protected String makeCheckpointQueryString(String uuid, String c)

@@ -10,6 +10,7 @@
 		<property name="object_factory" value="com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory" />
 	 	<property name="additional_where_clause" value="${additional_where_clause}" />
 		<property name="is_public" value="${is_public}" />
+		<property name="db_timezone" value=""/>
 		<property name="included_meta">
 			<set>
 				<value>ClassificationStatus</value>
@@ -82,7 +83,7 @@
           class="com.google.enterprise.connector.instantiator.EncryptedPropertyPlaceholderConfigurer">
         <property name="properties">
             <props>
-                <prop key="username"></prop>
+                <prop key="username1"></prop>
                 <prop key="password"></prop>
                 <prop key="object_store"></prop>
                 <prop key="content_engine_url"></prop>
