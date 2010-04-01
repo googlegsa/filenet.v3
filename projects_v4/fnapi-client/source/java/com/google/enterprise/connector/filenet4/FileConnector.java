@@ -25,14 +25,24 @@ public class FileConnector implements Connector {
 	private String additional_where_clause;
 	private HashSet included_meta;
 	private HashSet excluded_meta;
+	private String db_timezone;
+	public String getDb_timezone() {
+		return db_timezone;
+	}
+
+	public void setDb_timezone(String dbTimezone) {
+		db_timezone = dbTimezone;
+		logger.config("Set Database Server's TimeZone to "+this.db_timezone);
+	}
+
 	private static Logger logger = null;
 	{
 		logger = Logger.getLogger(FileConnector.class.getName());
 	}
-	
+
 	public Session login() throws RepositoryLoginException, RepositoryException {
 
-		
+
 		URL conf = FileConnector.class.getResource("/jaas.conf");
 		if (conf!=null){
 			logger.info("setting sytem property java.security.auth.login.config to "+conf.getPath());
@@ -41,10 +51,10 @@ public class FileConnector implements Connector {
 			logger.warning("Unable to find URL of file jaas.conf");
 //			System.setProperty("java.security.auth.login.config", "F:\\Program Files\\GoogleConnectors\\FileNET2\\Tomcat\\webapps\\connector-manager\\WEB-INF\\classes\\jaas.conf");
 		}
-		
+
 		HostnameVerifier aa = new FileHNV();
 		HttpsURLConnection.setDefaultHostnameVerifier(aa);
-		
+
 		Session sess = null;
 		if (!(object_factory == null || username == null || password == null
 				|| object_store == null || workplace_display_url == null || content_engine_url == null)) {
@@ -53,7 +63,7 @@ public class FileConnector implements Connector {
 			sess = new FileSession(object_factory, username, password,
 					object_store, workplace_display_url, content_engine_url,
 					is_public.equals("on"), additional_where_clause,
-					included_meta, excluded_meta);
+					included_meta, excluded_meta, db_timezone);
 		}
 		return sess;
 
@@ -148,5 +158,5 @@ public class FileConnector implements Connector {
 		this.username = username;
 		logger.config("Set UserName to "+this.username);
 	}
-	
+
 }

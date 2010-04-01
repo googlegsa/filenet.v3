@@ -126,4 +126,8 @@ public class FileUtil {
 			return null;
 		}
 	}
+
+    public static String getTimeZone(String time){
+    	return time.replaceFirst("GMT", "");
+    }
 }
