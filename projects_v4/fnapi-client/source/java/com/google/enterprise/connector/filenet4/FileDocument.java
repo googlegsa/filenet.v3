@@ -147,7 +147,7 @@ public class FileDocument implements Document {
 				document.getPropertyBooleanValue(name,list);
 			} else if (type.equalsIgnoreCase("Date")) {
 				logger.log(Level.FINEST, "Getting Date property: ["+name+"]");
-				document.getPropertyDateValue(type, list);
+				document.getPropertyDateValue(name, list);
 			} else if (type.equalsIgnoreCase("Double") || type.equalsIgnoreCase("Float")) {
 				logger.log(Level.FINEST, "Getting Double/Float property: ["+name+"]");
 				document.getPropertyDoubleValue(name, list);
