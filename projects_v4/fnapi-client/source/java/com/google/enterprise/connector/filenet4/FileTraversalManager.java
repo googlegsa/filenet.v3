@@ -216,8 +216,8 @@ public class FileTraversalManager implements TraversalManager {
 			logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: " + checkPoint);
 			throw new IllegalArgumentException("CheckPoint string does not parse as JSON: " + checkPoint);
 		}
-		String uuid = extractDocidFromCheckpoint(jo, checkPoint);
-		String c = extractNativeDateFromCheckpoint(jo, checkPoint);
+		String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuid");
+		String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastModified");
 		String queryString = makeCheckpointQueryString(uuid, c);
 		return queryString;
 	}
@@ -233,44 +233,13 @@ public class FileTraversalManager implements TraversalManager {
 			logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: " + checkPoint);
 			throw new IllegalArgumentException("CheckPoint string does not parse as JSON: " + checkPoint);
 		}
-		String uuid = extractDocidFromCheckpointToDelete(jo, checkPoint);
-		String c = extractNativeDateFromCheckpointToDelete(jo, checkPoint);
+		String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuidToDelete");
+		String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastRemoveDate");
 		String queryString = makeCheckpointQueryStringToDelete(uuid, c);
 		return queryString;
 
 	}
 
-	protected String extractDocidFromCheckpointToDelete(JSONObject jo, String checkPoint) {
-		String uuid = null;
-		try {
-			uuid = jo.getString("uuidToDelete");
-		} catch (JSONException e) {
-			logger.log(Level.WARNING, "Could not get uuid from checkPoint string: " + checkPoint);
-			throw new IllegalArgumentException("Could not get uuid from checkPoint string: " + checkPoint);
-		}
-		return uuid;
-	}
-
-	protected String extractNativeDateFromCheckpointToDelete(JSONObject jo,
-			String checkPoint) {
-		String dateString = null;
-//		Date d=null;
-		try {
-			dateString = jo.getString("lastRemoveDate");
-			//dateString = "2008-09-04T11:00:16.000";
-		}catch (JSONException e) {
-			logger.log(Level.WARNING, "Could not get last modified date from checkPoint string: " + checkPoint);
-			throw new IllegalArgumentException("Could not get last modified date from checkPoint string: " + checkPoint);
-		}
-
-		String timeZoneOffset = null;
-		if(this.db_timezone == null || this.db_timezone.equalsIgnoreCase("")){
-			timeZoneOffset = FileUtil.getTimeZone(Calendar.getInstance());
-		}else{
-			timeZoneOffset = FileUtil.getTimeZone(this.db_timezone);
-		}
-		return dateString + timeZoneOffset;
-	}
 	protected String makeCheckpointQueryStringToDelete(String uuid, String c)
 	throws RepositoryException {
 		String statement="";
@@ -291,10 +260,10 @@ public class FileTraversalManager implements TraversalManager {
 
 	}
 
-	protected String extractDocidFromCheckpoint(JSONObject jo, String checkPoint) {
+	protected String extractDocidFromCheckpoint(JSONObject jo, String checkPoint, String param) {
 		String uuid = null;
 		try {
-			uuid = jo.getString("uuid");
+			uuid = jo.getString(param);
 		} catch (JSONException e) {
 			logger.log(Level.WARNING, "Could not get uuid from checkPoint string: " + checkPoint);
 			throw new IllegalArgumentException("Could not get uuid from checkPoint string: " + checkPoint);
@@ -303,14 +272,14 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	protected String extractNativeDateFromCheckpoint(JSONObject jo,
-			String checkPoint) {
+			String checkPoint, String param) {
 		String dateString = null;
 		try {
-			dateString = jo.getString("lastModified");
+			dateString = jo.getString(param);
 			//dateString = "2008-09-05T09:40:04.073";
 		} catch (JSONException e) {
-			logger.log(Level.WARNING, "Could not get last modified date from checkPoint string: " + checkPoint);
-			throw new IllegalArgumentException("Could not get last modified date from checkPoint string: " + checkPoint);
+			logger.log(Level.WARNING, "Could not get last modified/removed date from checkPoint string: " + checkPoint,e);
+			throw new IllegalArgumentException("Could not get last modified/removed date from checkPoint string: " + checkPoint,e);
 		}
 
 		String timeZoneOffset = null;

@@ -130,13 +130,25 @@ public class FileUtil {
 		}
 	}
 
-    public static String getTimeZone(String time){
-    	return time.replaceFirst("GMT", "");
+    /**
+     * Converts the Timezone offset from the format GMT(+|-)hh:mm to (+|-)hh:mm
+     * @param offset Offset in the format GMT(+|-)hh:mm
+     * @return Timezone offset in the format (+|-)hh:mm
+     */
+    public static String getTimeZone(String offset){
+    	return offset.replaceFirst("GMT", "");
     }
 
+    /**
+     * Takes the Calendar instance and fetches the current timezone offset in the format (+|-)hhmm.
+     * Inserts the ":" in the above format and returns the timezonezone offset in the format (+|-)hh:mm
+     * @param cal Local Calendar instance
+     * @return Timezone offset in the format (+|-)hh:mm
+     */
     public static String getTimeZone(Calendar cal){
 		DateFormat dateStandard = new SimpleDateFormat("Z");
 		StringBuffer strDate = new StringBuffer(dateStandard.format(cal.getTime()));
+		//Insert the ":" to convert the result in the format (+|-)hh:mm
 		return (strDate.insert(strDate.length()-2, ':')).toString();
 	}
 }
