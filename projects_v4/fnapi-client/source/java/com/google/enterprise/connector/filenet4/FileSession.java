@@ -74,7 +74,7 @@ public class FileSession implements Session {
 
 	private String getDisplayURL(String displayUrl, String objectStoreName){
 		if(displayUrl.endsWith("/getContent/")){
-			displayUrl = new StringBuilder(displayUrl).deleteCharAt(displayUrl.length()-1).toString();
+			displayUrl = displayUrl.substring(0, displayUrl.length() - 1);
 		}
 		if(displayUrl.contains("/getContent") && displayUrl.endsWith("/getContent")){
 			return displayUrl + "?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
