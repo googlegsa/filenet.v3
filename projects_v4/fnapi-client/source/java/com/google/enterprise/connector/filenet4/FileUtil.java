@@ -17,6 +17,9 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,4 +133,10 @@ public class FileUtil {
     public static String getTimeZone(String time){
     	return time.replaceFirst("GMT", "");
     }
+
+    public static String getTimeZone(Calendar cal){
+		DateFormat dateStandard = new SimpleDateFormat("Z");
+		StringBuffer strDate = new StringBuffer(dateStandard.format(cal.getTime()));
+		return (strDate.insert(strDate.length()-2, ':')).toString();
+	}
 }

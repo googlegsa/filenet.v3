@@ -263,7 +263,13 @@ public class FileTraversalManager implements TraversalManager {
 			throw new IllegalArgumentException("Could not get last modified date from checkPoint string: " + checkPoint);
 		}
 
-		return dateString+FileUtil.getTimeZone(this.db_timezone);
+		String timeZoneOffset = null;
+		if(this.db_timezone == null || this.db_timezone.equalsIgnoreCase("")){
+			timeZoneOffset = FileUtil.getTimeZone(Calendar.getInstance());
+		}else{
+			timeZoneOffset = FileUtil.getTimeZone(this.db_timezone);
+		}
+		return dateString + timeZoneOffset;
 	}
 	protected String makeCheckpointQueryStringToDelete(String uuid, String c)
 	throws RepositoryException {
@@ -307,7 +313,14 @@ public class FileTraversalManager implements TraversalManager {
 			throw new IllegalArgumentException("Could not get last modified date from checkPoint string: " + checkPoint);
 		}
 
-		return dateString+FileUtil.getTimeZone(this.db_timezone);
+		String timeZoneOffset = null;
+		if(this.db_timezone == null || this.db_timezone.equalsIgnoreCase("")){
+			timeZoneOffset = FileUtil.getTimeZone(Calendar.getInstance());
+		}else{
+			timeZoneOffset = FileUtil.getTimeZone(this.db_timezone);
+		}
+
+		return dateString + timeZoneOffset;
 	}
 
 	protected String makeCheckpointQueryString(String uuid, String c)
