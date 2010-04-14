@@ -40,7 +40,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-//import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
@@ -199,12 +198,14 @@ public class FnDocument implements IDocument {
 		}
 	}
 
-
-	public void getPropertyStringValue(String name, LinkedList list) throws RepositoryDocumentException{
+	/**
+	 * Fetches the String type metadata from FileNet.
+	 */
+	public void getPropertyStringValue(String name, List list) throws RepositoryDocumentException{
+		Object value = null;
 		try {
 			Properties props = doc.getProperties();
 			Property[] property = props.toArray();
-			Object value;
 			for (Property prop : property) {
 				String propName = prop.getPropertyName();
 
@@ -223,7 +224,7 @@ public class FnDocument implements IDocument {
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
+			logger.log(Level.SEVERE, "Encountered ClassCastException while fetching values for property ["+ name +"] Skipping the current value [" + (String)value +"]",e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
 					+ name + " of the file " + this.doc.get_Id() + " "
@@ -232,7 +233,11 @@ public class FnDocument implements IDocument {
 			throw re;
 		}
 	}
-	public void getPropertyGuidValue(String name, LinkedList list) throws RepositoryDocumentException {
+
+	/**
+	 * Fetches the GUID type metadata from FileNet.
+	 */
+	public void getPropertyGuidValue(String name, List list) throws RepositoryDocumentException {
 		try {
 			String id = null;
 			Properties props = doc.getProperties();
@@ -248,11 +253,19 @@ public class FnDocument implements IDocument {
 							for (Object object : (List)value) {
 								id = object.toString();
 								if(id != null)
+									//Whenever the ID is retrieved from FileNet, it comes with "{"
+									// and "}" surrounded and ID is in between these curly braces
+									//FileNEt connector needs ID without curly braces. Thus removing
+									//the curly braces.
 									list.add(new StringValue(id.substring(1,id.length()-1)));
 							}
 						}else{
 							id = prop.getIdValue().toString();
 							if(id != null)
+								//Whenever the ID is retrieved from FileNet, it comes with "{"
+								// and "}" surrounded and ID is in between these curly braces
+								//FileNEt connector needs ID without curly braces. Thus removing
+								//the curly braces.
 								list.add(new StringValue(id.substring(1,id.length()-1)));
 						}
 					}
@@ -270,7 +283,10 @@ public class FnDocument implements IDocument {
 		}
 	}
 
-	public void getPropertyLongValue(String name, LinkedList list) throws RepositoryDocumentException {
+	/**
+	 * Fetches the Integer type metadata from FileNet.
+	 */
+	public void getPropertyLongValue(String name, List list) throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
 			Property[] property = props.toArray();
@@ -282,6 +298,8 @@ public class FnDocument implements IDocument {
 					if(value!=null){
 						if(value instanceof List){
 							for (Object object : (List)value) {
+								//FileNet only supports Integer type and connector-manager contains only LongValue
+								//Thus need to map Integer value of FileNet to LongValue.
 								list.add(new LongValue(((Integer)object).longValue()));
 							}
 						}else{
@@ -302,7 +320,10 @@ public class FnDocument implements IDocument {
 		}
 	}
 
-	public void getPropertyDoubleValue(String name, LinkedList list)
+	/**
+	 * Fetches the Double/Float type metadata from FileNet.
+	 */
+	public void getPropertyDoubleValue(String name, List list)
 			throws RepositoryDocumentException {
 		try {
 
@@ -316,7 +337,8 @@ public class FnDocument implements IDocument {
 					if(value!=null){
 						if(value instanceof List){
 							for (Object object : (List)value) {
-								list.add(new DoubleValue(((Double)object).doubleValue()));
+								if(object instanceof Double)
+									list.add(new DoubleValue(((Double)object).doubleValue()));
 							}
 						}else{
 							list.add(new DoubleValue(prop.getFloat64Value().doubleValue()));
@@ -339,7 +361,10 @@ public class FnDocument implements IDocument {
 		return new Date();
 	}
 
-	public void getPropertyDateValue(String name, LinkedList list) throws RepositoryDocumentException {
+	/**
+	 * Fetches the Date type metadata from FileNet.
+	 */
+	public void getPropertyDateValue(String name, List list) throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
 			Property[] property = props.toArray();
@@ -376,7 +401,10 @@ public class FnDocument implements IDocument {
 		}
 	}
 
-	public void getPropertyBooleanValue(String name, LinkedList list)
+	/**
+	 * Fetches the Boolean type metadata from FileNet.
+	 */
+	public void getPropertyBooleanValue(String name, List list)
 			throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
@@ -409,7 +437,7 @@ public class FnDocument implements IDocument {
 		}
 	}
 
-	public void getPropertyBinaryValue(String name, LinkedList list)
+	public void getPropertyBinaryValue(String name, List list)
 			throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
