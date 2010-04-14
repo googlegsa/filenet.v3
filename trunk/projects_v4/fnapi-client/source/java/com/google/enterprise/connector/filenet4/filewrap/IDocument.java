@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -44,22 +45,22 @@ public interface IDocument extends IBaseObject {
 	/*public String getPropertyStringValue(String name)
 			throws RepositoryDocumentException;
 */
-	public void getPropertyStringValue(String name, LinkedList set)
+	public void getPropertyStringValue(String name, List set)
 	throws RepositoryDocumentException;
 
-	public void getPropertyGuidValue(String name, LinkedList list) throws RepositoryDocumentException;
+	public void getPropertyGuidValue(String name, List list) throws RepositoryDocumentException;
 
-	public void getPropertyLongValue(String name, LinkedList list) throws RepositoryDocumentException;
+	public void getPropertyLongValue(String name, List list) throws RepositoryDocumentException;
 
-	public void getPropertyDoubleValue(String name, LinkedList list)
+	public void getPropertyDoubleValue(String name, List list)
 			throws RepositoryDocumentException;
 
-	public void getPropertyDateValue(String name, LinkedList list) throws RepositoryDocumentException;
+	public void getPropertyDateValue(String name, List list) throws RepositoryDocumentException;
 
-	public void getPropertyBooleanValue(String name, LinkedList list)
+	public void getPropertyBooleanValue(String name, List list)
 			throws RepositoryDocumentException;
 
-	public void getPropertyBinaryValue(String name, LinkedList list)
+	public void getPropertyBinaryValue(String name, List list)
 			throws RepositoryDocumentException;
 
 }

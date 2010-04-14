@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,7 +41,7 @@ public class FileDocumentProperty implements Property {
 		this.name = name;
 	}
 
-	public FileDocumentProperty(String name, LinkedList value) {
+	public FileDocumentProperty(String name, List value) {
 		this.name = name;
 		this.iter = value.iterator();
 	}
