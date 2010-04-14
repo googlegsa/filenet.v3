@@ -1,12 +1,12 @@
 /*
  * Copyright 2009 Google Inc.
- 
+
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
 	Unless required by applicable law or agreed to in writing, software
 	distributed under the License is distributed on an "AS IS" BASIS,
 	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -57,12 +57,12 @@ public class FileSession implements Session {
 			String refPathToWcmApiConfig, String refDisplayUrl, boolean refIsPublic,
 			String refAdditionalWhereClause, HashSet refIncludedMeta,
 			HashSet refExcludedMeta) throws RepositoryException {
-		
+
 		setFileObjectFactory(iObjectFactory);
 
 		logger.info("Getting session for user "+userName);
 		fileSession = fileObjectFactory.getSession("gsa-file-connector", null, userName, userPassword);
-		
+
 		logger.info("WCMApiConfig.properties path is set to: "+refPathToWcmApiConfig);
 		this.pathToWcmApiConfig = refPathToWcmApiConfig;
 		try {
@@ -82,12 +82,11 @@ public class FileSession implements Session {
 		} catch (FileNotFoundException e) {
 			logger.log(Level.SEVERE,"WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ");
 			throw new RepositoryException("WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ",e);
-		} catch (Exception exp) {			
+		} catch (Exception exp) {
 			throw new RepositoryLoginException(exp);
 		}
 		objectStore = fileObjectFactory.getObjectStore(objectStoreName, fileSession);
-		this.displayUrl = refDisplayUrl + "?objectStoreName=" + objectStoreName
-				+ "&objectType=document&versionStatus=1&vsId=";
+		this.displayUrl = getDisplayURL(refDisplayUrl, objectStoreName);
 
 		this.isPublic = refIsPublic;
 		fileSession.verify();
@@ -97,6 +96,16 @@ public class FileSession implements Session {
 		this.excludedMeta = refExcludedMeta;
 	}
 
+	private String getDisplayURL(String displayUrl, String objectStoreName){
+		if(displayUrl.endsWith("/getContent/")){
+			displayUrl = displayUrl.substring(0, displayUrl.length() - 1);
+		}
+		if(displayUrl.contains("/getContent") && displayUrl.endsWith("/getContent")){
+			return displayUrl + "?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
+		}else{
+			return displayUrl + "/getContent?objectStoreName=" + objectStoreName + "&objectType=document&versionStatus=1&vsId=";
+		}
+	}
 	private void setFileObjectFactory(String objectFactory)
 			throws RepositoryException {
 
@@ -149,6 +158,6 @@ public class FileSession implements Session {
 	public ISearch getSearch() {
 		ISearch search = fileObjectFactory.getSearch(fileSession);
 		return search;
-	}	
+	}
 
 }
