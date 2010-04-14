@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import com.google.enterprise.connector.spi.Value;
 //import com.google.enterprise.connector.spiimpl.DateValue;
@@ -41,12 +42,21 @@ public class FileDateValue extends ValueImpl {
 		return this.calendarValue;
 	}
 
+	private static final TimeZone TIME_ZONE_GMT = TimeZone.getTimeZone("GMT+0");
+	private static final Calendar CALENDAR = Calendar.getInstance();
+	private static final Calendar GMT_CALENDAR =Calendar.getInstance(TIME_ZONE_GMT);
+
 	private static final SimpleDateFormat ISO8601_DATE_FORMAT_MILLIS = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss.SSS");
+			"yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 	private static final SimpleDateFormat ISO8601_DATE_FORMAT_SECS = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss");
+			"yyyy-MM-dd'T'HH:mm:ssZ");
 
+	//Set the date formatter to GMT+0 calendar, so that dates used for checkpoint are always in GMT+0 i.e. UTC
+	static{
+		ISO8601_DATE_FORMAT_MILLIS.setCalendar(GMT_CALENDAR);
+		ISO8601_DATE_FORMAT_SECS.setCalendar(GMT_CALENDAR);
+	}
 	private static synchronized Date iso8601ToDate(String s)
 			throws ParseException {
 		Date d = null;
