@@ -199,9 +199,11 @@ public class FnDocument implements IDocument {
 	}
 
 	/**
-	 * Fetches the String type metadata from FileNet.
+	 * Fetches the String type metadata from FileNet. Responsible for distinguishing between single-valued and
+	 * multi-valued metadata. If the value fetched from FileNet is of instance type List then it is multi-valued
+	 * else it is single-valued.
 	 */
-	public void getPropertyStringValue(String name, List list) throws RepositoryDocumentException{
+	public void getPropertyStringValue(String propertyName, List valuesList) throws RepositoryDocumentException{
 		Object value = null;
 		try {
 			Properties props = doc.getProperties();
@@ -209,25 +211,28 @@ public class FnDocument implements IDocument {
 			for (Property prop : property) {
 				String propName = prop.getPropertyName();
 
-				if (propName.equalsIgnoreCase(name)) {
+				if (propName.equalsIgnoreCase(propertyName)) {
 					value = prop.getObjectValue();
 					if(value!=null){
+						//To distinguish between multi-valued and single-valued metadata.
+						//If value is instance of List then metadata is multi-valued else
+						//metadata is single-valued.
 						if(value instanceof List){
 							for (Object object : (List)value) {
-								list.add(new StringValue(object.toString()));
+								valuesList.add(new StringValue(object.toString()));
 							}
 						}else{
-							list.add(new StringValue(prop.getStringValue()));
+							valuesList.add(new StringValue(prop.getStringValue()));
 						}
 					}
 					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "Encountered ClassCastException while fetching values for property ["+ name +"] Skipping the current value [" + (String)value +"]",e);
+			logger.log(Level.SEVERE, "Encountered ClassCastException while fetching values for property ["+ propertyName +"] Skipping the current value [" + (String)value +"]",e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
-					+ name + " of the file " + this.doc.get_Id() + " "
+					+ propertyName + " of the file " + this.doc.get_Id() + " "
 					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
@@ -235,9 +240,11 @@ public class FnDocument implements IDocument {
 	}
 
 	/**
-	 * Fetches the GUID type metadata from FileNet.
+	 * Fetches the GUID type metadata from FileNet. Responsible for distinguishing between single-valued and
+	 * multi-valued metadata. If the value fetched from FileNet is of instance type List then it is multi-valued
+	 * else it is single-valued.
 	 */
-	public void getPropertyGuidValue(String name, List list) throws RepositoryDocumentException {
+	public void getPropertyGuidValue(String propertyName, List valuesList) throws RepositoryDocumentException {
 		try {
 			String id = null;
 			Properties props = doc.getProperties();
@@ -246,9 +253,12 @@ public class FnDocument implements IDocument {
 			for (Property prop : property) {
 				String propName = prop.getPropertyName();
 
-				if (propName.equalsIgnoreCase(name)) {
+				if (propName.equalsIgnoreCase(propertyName)) {
 					value = prop.getObjectValue();
 					if(value!=null){
+						//To distinguish between multi-valued and single-valued metadata.
+						//If value is instance of List then metadata is multi-valued else
+						//metadata is single-valued.
 						if(value instanceof List){
 							for (Object object : (List)value) {
 								id = object.toString();
@@ -257,7 +267,7 @@ public class FnDocument implements IDocument {
 									// and "}" surrounded and ID is in between these curly braces
 									//FileNEt connector needs ID without curly braces. Thus removing
 									//the curly braces.
-									list.add(new StringValue(id.substring(1,id.length()-1)));
+									valuesList.add(new StringValue(id.substring(1,id.length()-1)));
 							}
 						}else{
 							id = prop.getIdValue().toString();
@@ -266,17 +276,17 @@ public class FnDocument implements IDocument {
 								// and "}" surrounded and ID is in between these curly braces
 								//FileNEt connector needs ID without curly braces. Thus removing
 								//the curly braces.
-								list.add(new StringValue(id.substring(1,id.length()-1)));
+								valuesList.add(new StringValue(id.substring(1,id.length()-1)));
 						}
 					}
 					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ propertyName,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
-					+ name + " of the file " + this.doc.get_Id() + " "
+					+ propertyName + " of the file " + this.doc.get_Id() + " "
 					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
@@ -284,36 +294,41 @@ public class FnDocument implements IDocument {
 	}
 
 	/**
-	 * Fetches the Integer type metadata from FileNet.
+	 * Fetches the Integer type metadata from FileNet. Responsible for distinguishing between single-valued and
+	 * multi-valued metadata. If the value fetched from FileNet is of instance type List then it is multi-valued
+	 * else it is single-valued.
 	 */
-	public void getPropertyLongValue(String name, List list) throws RepositoryDocumentException {
+	public void getPropertyLongValue(String propertyName, List valuesList) throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
 			Property[] property = props.toArray();
 			Object value;
 			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-				if (propName.equalsIgnoreCase(name)) {
+				if (propName.equalsIgnoreCase(propertyName)) {
 					value = prop.getObjectValue();
 					if(value!=null){
+						//To distinguish between multi-valued and single-valued metadata.
+						//If value is instance of List then metadata is multi-valued else
+						//metadata is single-valued.
 						if(value instanceof List){
 							for (Object object : (List)value) {
 								//FileNet only supports Integer type and connector-manager contains only LongValue
 								//Thus need to map Integer value of FileNet to LongValue.
-								list.add(new LongValue(((Integer)object).longValue()));
+								valuesList.add(new LongValue(((Integer)object).longValue()));
 							}
 						}else{
-							list.add(new LongValue(prop.getInteger32Value().longValue()));
+							valuesList.add(new LongValue(prop.getInteger32Value().longValue()));
 						}
 					}
 					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ propertyName,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
-					+ name + " of the file " + this.doc.get_Id() + " "
+					+ propertyName + " of the file " + this.doc.get_Id() + " "
 					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
@@ -321,9 +336,11 @@ public class FnDocument implements IDocument {
 	}
 
 	/**
-	 * Fetches the Double/Float type metadata from FileNet.
+	 * Fetches the Double/Float type metadata from FileNet. Responsible for distinguishing between single-valued and
+	 * multi-valued metadata. If the value fetched from FileNet is of instance type List then it is multi-valued
+	 * else it is single-valued.
 	 */
-	public void getPropertyDoubleValue(String name, List list)
+	public void getPropertyDoubleValue(String propertyName, List valuesList)
 			throws RepositoryDocumentException {
 		try {
 
@@ -332,39 +349,47 @@ public class FnDocument implements IDocument {
 			Object value;
 			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-				if (propName.equalsIgnoreCase(name)) {
+				if (propName.equalsIgnoreCase(propertyName)) {
 					value = prop.getObjectValue();
 					if(value!=null){
+						//To distinguish between multi-valued and single-valued metadata.
+						//If value is instance of List then metadata is multi-valued else
+						//metadata is single-valued.
 						if(value instanceof List){
 							for (Object object : (List)value) {
 								if(object instanceof Double)
-									list.add(new DoubleValue(((Double)object).doubleValue()));
+									valuesList.add(new DoubleValue(((Double)object).doubleValue()));
 							}
 						}else{
-							list.add(new DoubleValue(prop.getFloat64Value().doubleValue()));
+							valuesList.add(new DoubleValue(prop.getFloat64Value().doubleValue()));
 						}
 					}
 					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ propertyName,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
-					+ name + " of the file " + this.doc.get_Id() + " "
+					+ propertyName + " of the file " + this.doc.get_Id() + " "
 					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
 	}
 	public Date getPropertyDateValueDelete(String name) throws RepositoryDocumentException {
+		//Currently the dummy Date instance is returned. If required then modify it to
+		//support you requirement. It can be used in future. currently this method is
+		//used nowhere.
 		return new Date();
 	}
 
 	/**
-	 * Fetches the Date type metadata from FileNet.
+	 * Fetches the Date type metadata from FileNet. Responsible for distinguishing between single-valued and
+	 * multi-valued metadata. If the value fetched from FileNet is of instance type List then it is multi-valued
+	 * else it is single-valued.
 	 */
-	public void getPropertyDateValue(String name, List list) throws RepositoryDocumentException {
+	public void getPropertyDateValue(String propertyName, List valuesList) throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
 			Property[] property = props.toArray();
@@ -372,29 +397,32 @@ public class FnDocument implements IDocument {
 			Iterator it = props.iterator();
 			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-				if (propName.equalsIgnoreCase(name)) {
+				if (propName.equalsIgnoreCase(propertyName)) {
 					value = prop.getObjectValue();
 					if(value!=null){
+						//To distinguish between multi-valued and single-valued metadata.
+						//If value is instance of List then metadata is multi-valued else
+						//metadata is single-valued.
 						if(value instanceof List){
 							for (Object object : (List)value) {
 								Calendar c = Calendar.getInstance();
 								c.setTime((Date)object);
-								list.add(new DateValue(c));
+								valuesList.add(new DateValue(c));
 							}
 						}else{
 							Calendar c = Calendar.getInstance();
 							c.setTime(prop.getDateTimeValue());
-							list.add(new DateValue(c));
+							valuesList.add(new DateValue(c));
 						}
 					}
 					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ propertyName,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
-					+ name + " of the file " + this.doc.get_Id() + " "
+					+ propertyName + " of the file " + this.doc.get_Id() + " "
 					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
@@ -402,9 +430,11 @@ public class FnDocument implements IDocument {
 	}
 
 	/**
-	 * Fetches the Boolean type metadata from FileNet.
+	 * Fetches the Boolean type metadata from FileNet. Responsible for distinguishing between single-valued and
+	 * multi-valued metadata. If the value fetched from FileNet is of instance type List then it is multi-valued
+	 * else it is single-valued.
 	 */
-	public void getPropertyBooleanValue(String name, List list)
+	public void getPropertyBooleanValue(String propertyName, List valuesList)
 			throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
@@ -412,32 +442,40 @@ public class FnDocument implements IDocument {
 			Object value;
 			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-				if (propName.equalsIgnoreCase(name)) {
+				if (propName.equalsIgnoreCase(propertyName)) {
 					value = prop.getObjectValue();
 					if(value!=null){
+						//To distinguish between multi-valued and single-valued metadata.
+						//If value is instance of List then metadata is multi-valued else
+						//metadata is single-valued.
 						if(value instanceof List){
 							for (Object object : (List)value) {
-								list.add(BooleanValue.makeBooleanValue(((Boolean)object).booleanValue()));
+								valuesList.add(BooleanValue.makeBooleanValue(((Boolean)object).booleanValue()));
 							}
 						}else{
-							list.add(BooleanValue.makeBooleanValue((prop.getBooleanValue().booleanValue())));
+							valuesList.add(BooleanValue.makeBooleanValue((prop.getBooleanValue().booleanValue())));
 						}
 					}
 					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ propertyName,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
-					+ name + " of the file " + this.doc.get_Id() + " "
+					+ propertyName + " of the file " + this.doc.get_Id() + " "
 					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
 		}
 	}
 
-	public void getPropertyBinaryValue(String name, List list)
+	/**
+	 * Fetches the Binary type metadata from FileNet. Responsible for distinguishing between single-valued and
+	 * multi-valued metadata. If the value fetched from FileNet is of instance type List then it is multi-valued
+	 * else it is single-valued.
+	 */
+	public void getPropertyBinaryValue(String propertyName, List valuesList)
 			throws RepositoryDocumentException {
 		try {
 			Properties props = doc.getProperties();
@@ -445,23 +483,26 @@ public class FnDocument implements IDocument {
 			Object value;
 			for (Property prop : property) {
 				String propName = prop.getPropertyName();
-				if (propName.equalsIgnoreCase(name)) {
+				if (propName.equalsIgnoreCase(propertyName)) {
 					value = prop.getObjectValue();
 					if(value!=null){
+						//To distinguish between multi-valued and single-valued metadata.
+						//If value is instance of List then metadata is multi-valued else
+						//metadata is single-valued.
 						if(value instanceof List){
 							logger.log(Level.WARNING, "Binary MultiValued Metadat is currently not supported. Binary MultiValued metadata will not be fed to GSA");
 						}else{
-							list.add(new BinaryValue(prop.getBinaryValue()));
+							valuesList.add(new BinaryValue(prop.getBinaryValue()));
 						}
 					}
 					return;
 				}
 			}
 		} catch (ClassCastException e) {
-			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ name,e);
+			logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "+ propertyName,e);
 		} catch (Exception e1) {
 			logger.log(Level.SEVERE, "Error while trying to get the property "
-					+ name + " of the file " + this.doc.get_Id() + " "
+					+ propertyName + " of the file " + this.doc.get_Id() + " "
 					+ e1.getMessage(),e1);
 			RepositoryDocumentException re = new RepositoryDocumentException(e1);
 			throw re;
