@@ -14,6 +14,9 @@ public class FileDateValue extends ValueImpl {
 
 	Calendar calendarValue;
 
+	public FileDateValue() {
+
+	}
 	public FileDateValue(Calendar calendarValue) {
 		this.calendarValue = calendarValue;
 	}
@@ -70,16 +73,15 @@ public class FileDateValue extends ValueImpl {
 		return d;
 	}
 
-	public static synchronized Calendar iso8601ToCalendar(String s)
-			throws ParseException {
-		Date d = iso8601ToDate(s);
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);
-		return c;
-	}
-
 	public static synchronized String calendarToIso8601(Calendar c) {
 		Date d = c.getTime();
+		String isoString = ISO8601_DATE_FORMAT_MILLIS.format(d);
+		return isoString;
+	}
+
+	public static synchronized String calendarToIso8601(String s)
+			throws ParseException  {
+		Date d = iso8601ToDate(s);
 		String isoString = ISO8601_DATE_FORMAT_MILLIS.format(d);
 		return isoString;
 	}
