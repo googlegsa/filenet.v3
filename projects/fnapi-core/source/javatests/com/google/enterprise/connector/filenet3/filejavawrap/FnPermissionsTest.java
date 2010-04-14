@@ -22,7 +22,7 @@ public class FnPermissionsTest extends TestCase {
 	 * Test method for
 	 * 'com.google.enterprise.connector.file.filejavawrap.FnPermissions.asMask(String)'
 	 */
-	public void testAsMask() throws FileNotFoundException,
+	public void testAuthorize() throws FileNotFoundException,
 			RepositoryLoginException, RepositoryException {
 
 		IObjectFactory objectFactory = new FnObjectFactory();
