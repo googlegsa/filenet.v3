@@ -5,12 +5,18 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.enterprise.connector.spi.Value;
-//import com.google.enterprise.connector.spiimpl.DateValue;
 import com.google.enterprise.connector.spiimpl.ValueImpl;
 
 public class FileDateValue extends ValueImpl {
+
+	private static Logger logger = null;
+	{
+		logger = Logger.getLogger(FileDateValue.class.getName());
+	}
 
 	Calendar calendarValue;
 
@@ -67,7 +73,7 @@ public class FileDateValue extends ValueImpl {
 			d = ISO8601_DATE_FORMAT_MILLIS.parse(s);
 			return d;
 		} catch (ParseException e) {
-			// this is just here so we can try another format
+			logger.log(Level.WARNING, "Unable to parse date in milli-second format yyyy-MM-dd'T'HH:mm:ss.SSSZ. Trying to parse in second format yyyy-MM-dd'T'HH:mm:ssZ");
 		}
 		d = ISO8601_DATE_FORMAT_SECS.parse(s);
 		return d;
