@@ -113,10 +113,10 @@
 			<!--creation of manifest file-->
 			<manifest>
 			    <attribute name="Implementation-Title" value="Filenet Connector"/>
-  		        <attribute name="Implementation-Version" value="2.4.4_Build1"/>
+  		        <attribute name="Implementation-Version" value="2.4.6_Build1"/>
 			    <attribute name="Implementation-Vendor" value="Google Inc."/>
 			    <attribute name="Specification-Title" value="Connector Manager SPI"/>
-			    <attribute name="Specification-Version" value="2.4.4"/>
+			    <attribute name="Specification-Version" value="2.4.6"/>
 			    <attribute name="Specification-Vendor" value="Google Inc."/>
 				<attribute name="Main-Class" value="com.google.enterprise.connector.file.FileMain" />
 			</manifest>
