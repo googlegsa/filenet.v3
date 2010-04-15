@@ -10,7 +10,7 @@ See the Issues Tab on the Code Site for the current list of known issues and wor
 Web Site: http://code.google.com/p/google-enterprise-connector-file/issues/list
 
 
-Release 2.4.4, Mar 12, 2010
+Release 2.4.6, April 15, 2010
 ==========================
 
 Introduction
@@ -75,6 +75,10 @@ Issues Fixed
 - Issue 26: Search results not obtained because authentication and authrization fails.
 - Issue 28: Documents with access rights for #AUTHENTICATED-USERS are not seached by User2 with no direct access rights on those documents
 - Issue 29: Documents associated with only WorkflowDefinition and Document classes are getting crawled
+- Issue 34: FileNet connector should be able to crawl multi valued meta data.
+- Issue 35: Timestamp is not registerd correctly in the feed log file.
+- Issue 36: DateLastModified and other dates are not getting fed to GSA.
+- Issue 37: Incrmental crwal is working fine with connector manager 2.4.0 but it is not working with 2.4.4
 
 
 Known Limitations
