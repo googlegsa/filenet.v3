@@ -1,0 +1,88 @@
+Release Notes:
+===============
+
+Google Search Appliance Connector for IBM FileNet P8 4.0,4.5
+
+This document contains the release notes for Google Search Appliance Connector for IBM FileNet P8 4.0,4.5
+The following sections describe the release in detail and provide information that supplements the main documentation.
+See the Issues Tab on the Code Site for the current list of known issues and workarounds.
+
+Web Site: http://code.google.com/p/google-enterprise-connector-file/issues/list
+
+
+Release 2.4.6, April 15, 2010
+==========================
+
+Introduction
+------------------
+This is the patch release of this product. See the product website for a complete description.
+
+Version Compatibility
+-----------------------
+This version works with Connector Manager version 2.4.x.
+
+Platform Support
+------------------
+The connector can be installed and run on both 32-bit & 64-bit Windows and Linux environments
+
+Certified Against
+-------------------
+32-bit:
+-------
+Microsoft Windows Server 2003
+Enterprise Edition
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 2.00 GB of RAM
+
+Red Hat Linux 5 (32-bit)
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 2.00 GB of RAM
+
+64-bit:
+--------
+Microsoft Windows Server 2003
+Enterprise x64 Edition
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 2.00 GB of RAM
+
+SUSE Linux Enterprise Server 11 (x86_64)
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 2.00 GB of RAM
+
+Features
+--------------
+1. The connector crawls all documents which are supported by IBM FileNet server 4.0
+2. The connector always runs in an incremental mode and keeps feeding the updated documents to the Google Search Appliance (GSA).
+3. The auditing feature ensures that documents are deleted from the GSA index when they are deleted from the repository.
+4. The connector handles serve-time authentication and authorization
+
+Steps to deploy patch
+---------------------
+1. Stop the connector service (If Running)
+2. Navigate to the folder CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib. Delete connector-file4.jar.
+3. Replace the existing connector-file4.jar with the jar from patch.
+4. Start the connector service.
+
+Issues Fixed
+------------
+- Issue 12: Connector does not show any error/warning for Invalid Folder specified in "Where"clause on connector configuration page.
+- Issue 15: The ObjectStore field is not displayed in RED in case of error.
+- Issue 16: Rename packages to have the name filenet instead of file.
+- Issue 20: Few Metadata (Document Title/ Name etc) which should be crawled by default are not getting crawled.
+- Issue 21: On search result page, when we click on the hyperlink to open the Document, it gives error as the formed URL is not correct.
+- Issue 22: Connector does not show any error message on GSA connector configuration page when Workplace url is not correct.
+- Issue 23: Connector Configuration not saved when Content Engine url has repeated slashes and also there is exception in the log.
+- Issue 26: Search results not obtained because authentication and authrization fails.
+- Issue 28: Documents with access rights for #AUTHENTICATED-USERS are not seached by User2 with no direct access rights on those documents
+- Issue 29: Documents associated with only WorkflowDefinition and Document classes are getting crawled
+- Issue 34: FileNet connector should be able to crawl multi valued meta data.
+- Issue 35: Timestamp is not registerd correctly in the feed log file.
+- Issue 36: DateLastModified and other dates are not getting fed to GSA.
+- Issue 37: Incrmental crwal is working fine with connector manager 2.4.0 but it is not working with 2.4.4
+
+
+Known Limitations
+-------------------
+- Issue 11: Documents which are checked in as only minor version and don't have any major version at all, will not be crawled.
+- Issue 14: Few words are displayed in English on Connctor Configuration page in GSA when we change the language on IE & Mozilla browsers.
+- Issue 30: FileNet4.0,4.5: Save configuration with Additional Where clause throws exception in logs and stops crawling
