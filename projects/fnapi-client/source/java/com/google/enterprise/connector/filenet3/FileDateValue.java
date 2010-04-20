@@ -5,26 +5,23 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.enterprise.connector.spi.Value;
-//import com.google.enterprise.connector.spiimpl.DateValue;
 import com.google.enterprise.connector.spiimpl.ValueImpl;
 
 public class FileDateValue extends ValueImpl {
 
 	Calendar calendarValue;
 
-	
-	private static Logger logger = Logger.getLogger(FileDocumentList.class
-			.getName());
+	private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
 
-	
 	public FileDateValue(Calendar calendarValue) {
-	
+
 		this.calendarValue = calendarValue;
 	}
-	
+
 	public String toFeedXml() {
 		return toString();
 	}
@@ -34,7 +31,7 @@ public class FileDateValue extends ValueImpl {
 	}
 
 	public String toIso8601() {
-		logger.info("toIso8601 calendarValue : "+calendarValue);
+		logger.info("toIso8601 calendarValue : " + calendarValue);
 		return FileDateValue.calendarToIso8601(calendarValue);
 	}
 
@@ -50,39 +47,53 @@ public class FileDateValue extends ValueImpl {
 		return this.calendarValue;
 	}
 
+	private static final TimeZone TIME_ZONE_GMT = TimeZone.getTimeZone("GMT+0");
+	private static final Calendar GMT_CALENDAR = Calendar.getInstance(TIME_ZONE_GMT);
+
 	private static final SimpleDateFormat ISO8601_DATE_FORMAT_MILLIS = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss.SSS");
+			"yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
 	private static final SimpleDateFormat ISO8601_DATE_FORMAT_SECS = new SimpleDateFormat(
-			"yyyy-MM-dd'T'HH:mm:ss");
+			"yyyy-MM-dd'T'HH:mm:ssZ");
+
+	// Set the date formatter to GMT+0 calendar, so that dates used for
+	// checkpoint are always in GMT+0 i.e. UTC
+	static {
+		ISO8601_DATE_FORMAT_MILLIS.setCalendar(GMT_CALENDAR);
+		ISO8601_DATE_FORMAT_SECS.setCalendar(GMT_CALENDAR);
+	}
 
 	private static synchronized Date iso8601ToDate(String s)
 			throws ParseException {
 		Date d = null;
 		try {
-			//d = ISO8601_DATE_FORMAT_MILLIS.parse(s);
+			// d = ISO8601_DATE_FORMAT_MILLIS.parse(s);
 			d = ISO8601_DATE_FORMAT_SECS.parse(s);
 			return d;
 		} catch (ParseException e) {
-			// this is just here so we can try another format
+			logger.log(Level.WARNING, "Unable to parse date in milli-second format yyyy-MM-dd'T'HH:mm:ss.SSSZ. Trying to parse in second format yyyy-MM-dd'T'HH:mm:ssZ");
 		}
-		//d = ISO8601_DATE_FORMAT_SECS.parse(s);
 		d = ISO8601_DATE_FORMAT_MILLIS.parse(s);
 		logger.info("WARNING : Date with milliseconds");
 		return d;
 	}
 
-	public static synchronized Calendar iso8601ToCalendar(String s)
-			throws ParseException {
-		Date d = iso8601ToDate(s);
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);
-		return c;
-	}
-
 	public static synchronized String calendarToIso8601(Calendar c) {
 		Date d = c.getTime();
 		String isoString = ISO8601_DATE_FORMAT_MILLIS.format(d);
+		return isoString;
+	}
+
+	public static synchronized String calendarToIso8601(String s)
+			throws ParseException {
+		Date d = iso8601ToDate(s);
+		String isoString = ISO8601_DATE_FORMAT_MILLIS.format(d);
+		// Since the date string returned in in the form
+		// yyyy-MM-dd'T'HH:mm:ss.SSS+0000
+		// This may lead to error when actual TimeZone will be concatenated with
+		// this date.
+		// Thus removing the last substring "+0000"
+		isoString = isoString.replaceFirst("\\+0000", "");
 		return isoString;
 	}
 

@@ -1,22 +1,14 @@
 package com.google.enterprise.connector.filenet3;
 
-import java.util.HashSet;
+import junit.framework.TestCase;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.enterprise.connector.filenet3.FileConnector;
-import com.google.enterprise.connector.filenet3.FileDocument;
-import com.google.enterprise.connector.filenet3.FileDocumentList;
-import com.google.enterprise.connector.filenet3.FileSession;
-import com.google.enterprise.connector.filenet3.FileTraversalManager;
-import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
 import com.google.enterprise.connector.spi.SpiConstants;
-
-import junit.framework.TestCase;
 
 public class FileDocumentListTest extends TestCase {
 	Connector connector = null;
@@ -31,16 +23,11 @@ public class FileDocumentListTest extends TestCase {
 		connector = new FileConnector();
 		((FileConnector) connector).setUsername(FnConnection.userName);
 		((FileConnector) connector).setPassword(FnConnection.password);
-		((FileConnector) connector)
-				.setObject_store(FnConnection.objectStoreName);
-		((FileConnector) connector)
-				.setWorkplace_display_url(FnConnection.displayUrl);
-		((FileConnector) connector)
-				.setObject_factory(FnConnection.objectFactory);
-		((FileConnector) connector)
-				.setPath_to_WcmApiConfig(FnConnection.pathToWcmApiConfig);
-		((FileConnector) connector)
-				.setAdditional_where_clause(FnConnection.additionalWhereClause);
+		((FileConnector) connector).setObject_store(FnConnection.objectStoreName);
+		((FileConnector) connector).setWorkplace_display_url(FnConnection.displayUrl);
+		((FileConnector) connector).setObject_factory(FnConnection.objectFactory);
+		((FileConnector) connector).setPath_to_WcmApiConfig(FnConnection.pathToWcmApiConfig);
+		((FileConnector) connector).setAdditional_where_clause(FnConnection.additionalWhereClause);
 		((FileConnector) connector).setIs_public("false");
 		sess = (FileSession) connector.login();
 		qtm = (FileTraversalManager) sess.getTraversalManager();
@@ -69,7 +56,7 @@ public class FileDocumentListTest extends TestCase {
 	 */
 	public void testCheckpoint() throws RepositoryException {
 
-		FileDocumentList set = (FileDocumentList) qtm.startTraversal();
+		FileDocumentList set = (FileDocumentList) qtm.resumeTraversal(FnConnection.checkpoint);
 		int counter = 0;
 		com.google.enterprise.connector.spi.Document doc = null;
 		doc = set.nextDocument();
@@ -83,22 +70,18 @@ public class FileDocumentListTest extends TestCase {
 	public void testFetchAndVerifyValueForCheckpoint()
 			throws RepositoryException {
 
-		
 		/*
-		public FileDocument(String docId, String timeStamp, IObjectStore objectStore,
-				boolean isPublic, String displayUrl, HashSet included_meta,
-				HashSet excluded_meta, SpiConstants.ActionType action) 
-		*/
-		
-		
-		
-		FileDocument pm = new FileDocument(FnConnection.docId,FnConnection.date,
-				((FileSession) sess).getObjectStore(), false,
-				FnConnection.displayUrl, FnConnection.included_meta,
+		 * public FileDocument(String docId, String timeStamp, IObjectStore
+		 * objectStore, boolean isPublic, String displayUrl, HashSet
+		 * included_meta, HashSet excluded_meta, SpiConstants.ActionType action)
+		 */
+
+		FileDocument pm = new FileDocument(FnConnection.docId,
+				FnConnection.date, ((FileSession) sess).getObjectStore(),
+				false, FnConnection.displayUrl, FnConnection.included_meta,
 				FnConnection.excluded_meta, SpiConstants.ActionType.ADD);
 		fdl = (FileDocumentList) qtm.startTraversal();
-		String result = fdl.fetchAndVerifyValueForCheckpoint(pm,
-				SpiConstants.PROPNAME_DOCID).nextValue().toString();
+		String result = fdl.fetchAndVerifyValueForCheckpoint(pm, SpiConstants.PROPNAME_DOCID).nextValue().toString();
 		assertEquals(FnConnection.docId, result);
 	}
 
@@ -133,8 +116,7 @@ public class FileDocumentListTest extends TestCase {
 							+ FnConnection.checkpoint);
 		}
 
-		modifDate = qtm.extractNativeDateFromCheckpoint(jo,
-				FnConnection.checkpoint);
+		modifDate = qtm.extractNativeDateFromCheckpoint(jo, FnConnection.checkpoint);
 		assertNotNull(modifDate);
 		assertEquals(FnConnection.dateForResume, modifDate);
 
