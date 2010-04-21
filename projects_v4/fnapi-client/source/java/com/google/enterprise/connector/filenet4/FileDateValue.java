@@ -82,22 +82,39 @@ public class FileDateValue extends ValueImpl {
         return d;
     }
 
-    public static synchronized String calendarToIso8601(Calendar c) {
-        Date d = c.getTime();
-        String isoString = ISO8601_DATE_FORMAT_MILLIS.format(d);
-        // Since the date string returned in in the form
-        // yyyy-MM-dd'T'HH:mm:ss.SSS+0000
-        // This may lead to error when actual TimeZone will be concatenated with
-        // this date.
-        // Thus removing the last substring "+0000"
-        isoString = isoString.replaceFirst("\\+0000", "");
-        return isoString;
+    /**
+     * Converts the date in Calendar to string date in UTC timezone and in the
+     * format yyyy-MM-dd'T'HH:mm:ss.SSS
+     *
+     * @param calendar Calendar whose date need to be converted
+     * @return String date in UTC timezone in format yyyy-MM-dd'T'HH:mm:ss.SSS
+     */
+    public static synchronized String calendarToIso8601(Calendar calendar) {
+        return toISO8601DateFormat(calendar.getTime());
     }
 
+    /**
+     * Parses and formats the string in UTC timezone and in the format
+     * yyyy-MM-dd'T'HH:mm:ss.SSS
+     *
+     * @param s String date to be formatted
+     * @return and in the format yyyy-MM-dd'T'HH:mm:ss.SSS
+     * @throws ParseException
+     */
     public static synchronized String calendarToIso8601(String s)
             throws ParseException {
-        Date d = iso8601ToDate(s);
-        String isoString = ISO8601_DATE_FORMAT_MILLIS.format(d);
+        return toISO8601DateFormat(iso8601ToDate(s));
+    }
+
+    /**
+     * Converts the date into string in UTC timezone and returns the string date
+     * in the format yyyy-MM-dd'T'HH:mm:ss.SSS
+     *
+     * @param date Date to be formatted
+     * @return String date in UTC timezone in format yyyy-MM-dd'T'HH:mm:ss.SSS
+     */
+    private static String toISO8601DateFormat(Date date) {
+        String isoString = ISO8601_DATE_FORMAT_MILLIS.format(date);
         // Since the date string returned in in the form
         // yyyy-MM-dd'T'HH:mm:ss.SSS+0000
         // This may lead to error when actual TimeZone will be concatenated with
