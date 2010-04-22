@@ -1,14 +1,14 @@
 package com.google.enterprise.connector.filenet3;
 
-import junit.framework.TestCase;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
 import com.google.enterprise.connector.spi.SpiConstants;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import junit.framework.TestCase;
 
 public class FileDocumentListTest extends TestCase {
 	Connector connector = null;
