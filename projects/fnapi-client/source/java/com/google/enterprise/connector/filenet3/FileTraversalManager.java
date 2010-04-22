@@ -1,3 +1,16 @@
+// Copyright (C) 2007-2010 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.google.enterprise.connector.filenet3;
 
 import com.google.enterprise.connector.filenet3.filewrap.IObjectFactory;
@@ -20,6 +33,7 @@ import com.filenet.wcm.api.VersionableObject;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -63,11 +77,12 @@ public class FileTraversalManager implements TraversalManager {
 			+ " ";
 	private final static String VERSION_STATUS_IN_PROCESS = VersionableObject.VERSION_STATUS_IN_PROCESS
 			+ " ";
+	private String db_timezone;
 
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession, boolean b,
 			String displayUrl, String additionalWhereClause,
-			HashSet included_meta, HashSet excluded_meta)
+			HashSet included_meta, HashSet excluded_meta, String db_timezone)
 			throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
@@ -79,6 +94,7 @@ public class FileTraversalManager implements TraversalManager {
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
+		this.db_timezone = db_timezone;
 	}
 
 	public DocumentList startTraversal() throws RepositoryException {
@@ -135,20 +151,13 @@ public class FileTraversalManager implements TraversalManager {
 		query.append(objectStoresQuery);
 		query.append("<querystatement>SELECT Id,DateLastModified FROM ");
 		query.append(tableName);
-		/*
-		 * query.append(" WHERE ( VersionStatus=");
-		 * query.append(VERSION_STATUS_RELEASED); query.append(OR_OPERATOR);
-		 * query.append("VersionStatus=");
-		 * query.append(VERSION_STATUS_IN_PROCESS);
-		 * query.append(") and ContentSize IS NOT NULL ");
-		 */
 		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
 		if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
 			query.append(additionalWhereClause);
 		}
 		if (checkpoint != null) {
-			query.append(getCheckpointClause(checkpoint));
+			query.append(getCheckpointClause(checkpoint, "uuid", "lastModified"));
 		}
 		query.append(ORDER_BY);
 		query.append("</querystatement>");
@@ -172,7 +181,7 @@ public class FileTraversalManager implements TraversalManager {
 			query.append("<querystatement>SELECT Id,DateLastModified,VersionSeriesId  FROM ");
 			query.append(tableNameEventToDelete);
 			query.append(eventAllias);
-			query.append(getCheckpointClauseToDelete(checkpoint));
+			query.append(getCheckpointClause(checkpoint, "uuidToDelete", "lastRemoveDate"));
 			query.append(AND_OPERATOR);
 			query.append(isClassSQLFunction(eventAllias, EVENT_DELETE));
 			query.append(orderByToDelete);
@@ -185,16 +194,13 @@ public class FileTraversalManager implements TraversalManager {
 			query.append("</request>");
 		} else {
 			// Get the date of today, corresponding to the date of first push
-
-			TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-			// /Calendar cal =
-			// Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 			Calendar cal = Calendar.getInstance();
 			logger.log(Level.FINEST, "BuildQueryToDelete cal : " + cal);
 
 			Date d = cal.getTime();
-			java.text.SimpleDateFormat dateStandard = new java.text.SimpleDateFormat(
+			SimpleDateFormat dateStandard = new SimpleDateFormat(
 					"yyyy-MM-dd'T'HH:mm:ss.SSS");
+			dateStandard.setTimeZone(TimeZone.getTimeZone("UTC"));
 			dateFirstPush = dateStandard.format(d);
 			logger.log(Level.FINEST, "buildQueryToDelete dateFirstPush : "
 					+ dateFirstPush);
@@ -223,8 +229,8 @@ public class FileTraversalManager implements TraversalManager {
 		return query.toString();
 	}
 
-	private String getCheckpointClause(String checkPoint)
-			throws RepositoryException {
+	private String getCheckpointClause(String checkPoint, String uuidParam,
+			String dateParam) throws RepositoryException {
 
 		logger.info(checkPoint);
 
@@ -238,78 +244,11 @@ public class FileTraversalManager implements TraversalManager {
 			throw new IllegalArgumentException(
 					"CheckPoint string does not parse as JSON: " + checkPoint);
 		}
-		String uuid = extractDocidFromCheckpoint(jo, checkPoint);
-		String c = extractNativeDateFromCheckpoint(jo, checkPoint);
-		String queryString = makeCheckpointQueryString(uuid, c);
+		String uuid = extractDocidFromCheckpoint(jo, checkPoint, uuidParam);
+		String c = extractNativeDateFromCheckpoint(jo, checkPoint, dateParam);
+		String queryString = makeCheckpointQueryString(uuid, c, uuidParam);
 		return queryString;
 
-	}
-
-	private String getCheckpointClauseToDelete(String checkPoint)
-			throws RepositoryException {
-
-		logger.log(Level.INFO, "Checkpoint is: " + checkPoint);
-
-		JSONObject jo = null;
-
-		try {
-			jo = new JSONObject(checkPoint);
-		} catch (JSONException e) {
-			logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
-					+ checkPoint);
-			throw new IllegalArgumentException(
-					"CheckPoint string does not parse as JSON: " + checkPoint);
-		}
-		String uuid = extractDocidFromCheckpointToDelete(jo, checkPoint);
-		String c = extractNativeDateFromCheckpointToDelete(jo, checkPoint);
-		String queryString = makeCheckpointQueryStringToDelete(uuid, c);
-		return queryString;
-
-	}
-
-	protected String extractDocidFromCheckpointToDelete(JSONObject jo,
-			String checkPoint) {
-		String uuid = null;
-		try {
-			uuid = jo.getString("uuidToDelete");
-		} catch (JSONException e) {
-			logger.log(Level.WARNING, "Could not get uuid from checkPoint string: "
-					+ checkPoint);
-			throw new IllegalArgumentException(
-					"Could not get uuid from checkPoint string: " + checkPoint);
-		}
-		return uuid;
-	}
-
-	protected String extractNativeDateFromCheckpointToDelete(JSONObject jo,
-			String checkPoint) {
-		String dateString = null;
-		// Date d=null;
-		try {
-			dateString = jo.getString("lastRemoveDate");
-		} catch (JSONException e) {
-			logger.log(Level.WARNING, "Could not get last modified date from checkPoint string: "
-					+ checkPoint);
-			throw new IllegalArgumentException(
-					"Could not get last modified date from checkPoint string: "
-							+ checkPoint);
-		}
-
-		return dateString;
-	}
-
-	protected String makeCheckpointQueryStringToDelete(String uuid, String c)
-			throws RepositoryException {
-		String statement = "";
-		Object[] arguments = { c, uuid };
-		if (uuid.equals("")) {
-			statement = MessageFormat.format(whereClauseToDeleteOnlyDate, arguments);
-		} else {
-			statement = MessageFormat.format(whereClauseToDelete, arguments);
-		}
-		logger.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
-		logger.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
-		return statement;
 	}
 
 	public void setBatchHint(int batchHint) throws RepositoryException {
@@ -317,24 +256,26 @@ public class FileTraversalManager implements TraversalManager {
 
 	}
 
-	protected String extractDocidFromCheckpoint(JSONObject jo, String checkPoint) {
+	protected String extractDocidFromCheckpoint(JSONObject jo,
+			String checkPoint, String param) {
 		String uuid = null;
 		try {
-			uuid = jo.getString("uuid");
+			uuid = jo.getString(param);
 		} catch (JSONException e) {
 			logger.log(Level.WARNING, "Could not get uuid from checkPoint string: "
-					+ checkPoint);
+					+ checkPoint, e);
 			throw new IllegalArgumentException(
-					"Could not get uuid from checkPoint string: " + checkPoint);
+					"Could not get uuid from checkPoint string: " + checkPoint,
+					e);
 		}
 		return uuid;
 	}
 
 	protected String extractNativeDateFromCheckpoint(JSONObject jo,
-			String checkPoint) {
+			String checkPoint, String param) {
 		String dateString = null;
 		try {
-			dateString = jo.getString("lastModified");
+			dateString = jo.getString(param);
 		} catch (JSONException e) {
 			logger.log(Level.WARNING, "Could not get last modified date from checkPoint string: "
 					+ checkPoint);
@@ -342,15 +283,32 @@ public class FileTraversalManager implements TraversalManager {
 					"Could not get last modified date from checkPoint string: "
 							+ checkPoint);
 		}
-		return dateString;
+		String timeZoneOffset = null;
+		if (this.db_timezone == null || this.db_timezone.equalsIgnoreCase("")) {
+			timeZoneOffset = FileUtil.getTimeZone(Calendar.getInstance());
+		} else {
+			timeZoneOffset = FileUtil.getTimeZone(this.db_timezone);
+		}
+
+		return dateString + timeZoneOffset;
 	}
 
-	protected String makeCheckpointQueryString(String uuid, String c)
-			throws RepositoryException {
+	protected String makeCheckpointQueryString(String uuid, String c,
+			String uuidParam) throws RepositoryException {
 
+		String statement = null;
 		Object[] arguments = { c, uuid };
-		String statement = MessageFormat.format(whereClause, arguments);
-		logger.log(Level.INFO, "MakeCheckpointQueryString ID: " + uuid);
+		if (uuidParam.equalsIgnoreCase("uuid")) {
+			statement = MessageFormat.format(whereClause, arguments);
+		} else if (uuidParam.equalsIgnoreCase("uuidToDelete")) {
+			if (uuid.equals("")) {
+				statement = MessageFormat.format(whereClauseToDeleteOnlyDate, arguments);
+			} else {
+				statement = MessageFormat.format(whereClauseToDelete, arguments);
+			}
+		}
+		logger.log(Level.FINE, "MakeCheckpointQueryString date: [" + c + "]");
+		logger.log(Level.FINE, "MakeCheckpointQueryString ID: [" + uuid + "]");
 		return statement;
 	}
 

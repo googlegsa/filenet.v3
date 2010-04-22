@@ -1,3 +1,16 @@
+// Copyright (C) 2007-2010 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 package com.google.enterprise.connector.filenet3;
 
 import com.google.enterprise.connector.spi.Connector;
@@ -31,11 +44,21 @@ public class FileConnector implements Connector {
 	private HashSet included_meta;
 
 	private HashSet excluded_meta;
+	private String db_timezone;
 
 	private static Logger logger = null;
 
 	static {
 		logger = Logger.getLogger(FileConnectorType.class.getName());
+	}
+
+	public String getDb_timezone() {
+		return db_timezone;
+	}
+
+	public void setDb_timezone(String dbTimezone) {
+		db_timezone = dbTimezone;
+		logger.config("Set Database Server's TimeZone to " + this.db_timezone);
 	}
 
 	public Session login() throws RepositoryException {
@@ -47,7 +70,7 @@ public class FileConnector implements Connector {
 			sess = new FileSession(object_factory, username, password,
 					object_store, path_to_WcmApiConfig, workplace_display_url,
 					is_public.equals("on"), additional_where_clause,
-					included_meta, excluded_meta);
+					included_meta, excluded_meta, db_timezone);
 			logger.info("FileNet Seesion creation succeeded");
 		}
 		return sess;

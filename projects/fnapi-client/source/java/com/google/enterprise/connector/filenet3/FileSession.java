@@ -47,6 +47,7 @@ public class FileSession implements Session {
 	private String additionalWhereClause;
 	private HashSet includedMeta;
 	private HashSet excludedMeta;
+	private String db_timezone;
 	private static Logger logger;
 	static {
 		logger = Logger.getLogger(FileSession.class.getName());
@@ -56,7 +57,7 @@ public class FileSession implements Session {
 			String userPassword, String objectStoreName,
 			String refPathToWcmApiConfig, String refDisplayUrl,
 			boolean refIsPublic, String refAdditionalWhereClause,
-			HashSet refIncludedMeta, HashSet refExcludedMeta)
+			HashSet refIncludedMeta, HashSet refExcludedMeta, String db_timezone)
 			throws RepositoryException {
 
 		setFileObjectFactory(iObjectFactory);
@@ -99,6 +100,7 @@ public class FileSession implements Session {
 		this.additionalWhereClause = refAdditionalWhereClause;
 		this.includedMeta = refIncludedMeta;
 		this.excludedMeta = refExcludedMeta;
+		this.db_timezone = db_timezone;
 	}
 
 	private String getDisplayURL(String displayUrl, String objectStoreName) {
@@ -144,7 +146,7 @@ public class FileSession implements Session {
 		FileTraversalManager fileQTM = new FileTraversalManager(
 				fileObjectFactory, objectStore, fileSession, this.isPublic,
 				this.displayUrl, this.additionalWhereClause, this.includedMeta,
-				this.excludedMeta);
+				this.excludedMeta, this.db_timezone);
 		return fileQTM;
 	}
 
