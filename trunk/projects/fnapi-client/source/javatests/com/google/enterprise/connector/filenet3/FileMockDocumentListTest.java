@@ -1,15 +1,5 @@
 package com.google.enterprise.connector.filenet3;
 
-import java.util.Calendar;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.google.enterprise.connector.filenet3.FileConnector;
-import com.google.enterprise.connector.filenet3.FileDocument;
-import com.google.enterprise.connector.filenet3.FileDocumentList;
-import com.google.enterprise.connector.filenet3.FileSession;
-import com.google.enterprise.connector.filenet3.FileTraversalManager;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
@@ -17,6 +7,11 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spiimpl.DateValue;
 import com.google.enterprise.connector.spiimpl.StringValue;
 import com.google.enterprise.connector.spiimpl.ValueImpl;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Calendar;
 
 import junit.framework.TestCase;
 
@@ -32,16 +27,12 @@ public class FileMockDocumentListTest extends TestCase {
 		connector = new FileConnector();
 		((FileConnector) connector).setUsername(FnMockConnection.userName);
 		((FileConnector) connector).setPassword(FnMockConnection.password);
-		((FileConnector) connector)
-				.setObject_store(FnMockConnection.objectStoreName);
+		((FileConnector) connector).setObject_store(FnMockConnection.objectStoreName);
 		// ((FileConnector)
 		// connector).setCredential_tag(FnMockConnection.credTag);
-		((FileConnector) connector)
-				.setWorkplace_display_url(FnMockConnection.displayUrl);
-		((FileConnector) connector)
-				.setObject_factory(FnMockConnection.objectFactory);
-		((FileConnector) connector)
-				.setPath_to_WcmApiConfig(FnMockConnection.pathToWcmApiConfig);
+		((FileConnector) connector).setWorkplace_display_url(FnMockConnection.displayUrl);
+		((FileConnector) connector).setObject_factory(FnMockConnection.objectFactory);
+		((FileConnector) connector).setPath_to_WcmApiConfig(FnMockConnection.pathToWcmApiConfig);
 		((FileConnector) connector).setIs_public("false");
 		sess = (FileSession) connector.login();
 		qtm = (FileTraversalManager) sess.getTraversalManager();
@@ -56,8 +47,7 @@ public class FileMockDocumentListTest extends TestCase {
 		String statement = "";
 
 		try {
-			statement = qtm.makeCheckpointQueryString(uuid,
-					"1970-01-01 01:00:00.020");
+			statement = qtm.makeCheckpointQueryString(uuid, "1970-01-01 01:00:00.020");
 		} catch (RepositoryException re) {
 			re.printStackTrace();
 		}
@@ -75,12 +65,12 @@ public class FileMockDocumentListTest extends TestCase {
 			throws IllegalArgumentException, RepositoryException {
 		FileDocument propertyMap = new FileDocument("doc2",
 				((FileSession) sess).getObjectStore(), false, "",
-				FnMockConnection.included_meta, FnMockConnection.excluded_meta, SpiConstants.ActionType.ADD);
+				FnMockConnection.included_meta, FnMockConnection.excluded_meta,
+				SpiConstants.ActionType.ADD);
 		Calendar calDate = null;
 
 		FileDocumentList fdl = (FileDocumentList) qtm.startTraversal();
-		DateValue value = (DateValue) fdl.fetchAndVerifyValueForCheckpoint(
-				propertyMap, SpiConstants.PROPNAME_LASTMODIFIED).nextValue();
+		DateValue value = (DateValue) fdl.fetchAndVerifyValueForCheckpoint(propertyMap, SpiConstants.PROPNAME_LASTMODIFIED).nextValue();
 		// Value value = qtm.fetchAndVerifyValueForCheckpoint(propertyMap,
 		// SpiConstants.PROPNAME_LASTMODIFIED);
 		calDate = Calendar.getInstance();
@@ -90,9 +80,7 @@ public class FileMockDocumentListTest extends TestCase {
 		// assertEquals(calDate.getTime().toString(),value.getDate().getTime().toString());
 		assertEquals("1970-01-01T00:00:00.020Z", value.toIso8601());
 
-		StringValue value2 = (StringValue) fdl
-				.fetchAndVerifyValueForCheckpoint(propertyMap,
-						SpiConstants.PROPNAME_DOCID).nextValue();
+		StringValue value2 = (StringValue) fdl.fetchAndVerifyValueForCheckpoint(propertyMap, SpiConstants.PROPNAME_DOCID).nextValue();
 		assertTrue(value2 instanceof StringValue);
 		assertEquals("doc2", value2.toString());
 
@@ -152,8 +140,7 @@ public class FileMockDocumentListTest extends TestCase {
 		String statement = "";
 
 		try {
-			statement = qtm.makeCheckpointQueryString(uuid,
-					"1970-01-01 01:00:00.020");
+			statement = qtm.makeCheckpointQueryString(uuid, "1970-01-01 01:00:00.020");
 		} catch (RepositoryException re) {
 			re.printStackTrace();
 		}

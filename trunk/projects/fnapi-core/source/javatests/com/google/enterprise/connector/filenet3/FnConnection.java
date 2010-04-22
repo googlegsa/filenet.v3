@@ -8,12 +8,11 @@ public class FnConnection {
 
 	public static String password = "Admin1234";
 
-	public static String objectStoreName = "FNOStore";//"GSA_Filenet";
+	public static String objectStoreName = "FNOStore";// "GSA_Filenet";
 
 	public static String appId = "file-connector";
 
 	public static String credTag = "Clear";
-
 
 	public static String displayUrl = "http://gdc02.persistent.co.in:8080/Workplace/";
 	public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
