@@ -1,9 +1,5 @@
 package com.google.enterprise.connector.filenet3;
 
-import com.google.enterprise.connector.filenet3.FileConnector;
-import com.google.enterprise.connector.filenet3.FileDocument;
-import com.google.enterprise.connector.filenet3.FileSession;
-import com.google.enterprise.connector.filenet3.FileTraversalManager;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -24,18 +20,13 @@ public class FileMockTraversalManagerTest extends TestCase {
 		connector = new FileConnector();
 		((FileConnector) connector).setUsername(FnMockConnection.userName);
 		((FileConnector) connector).setPassword(FnMockConnection.password);
-		((FileConnector) connector)
-				.setObject_store(FnMockConnection.objectStoreName);
+		((FileConnector) connector).setObject_store(FnMockConnection.objectStoreName);
 		// ((FileConnector)
 		// connector).setCredential_tag(FnMockConnection.credTag);
-		((FileConnector) connector)
-				.setWorkplace_display_url(FnMockConnection.displayUrl);
-		((FileConnector) connector)
-				.setObject_factory(FnMockConnection.objectFactory);
-		((FileConnector) connector)
-				.setPath_to_WcmApiConfig(FnMockConnection.pathToWcmApiConfig);
-		((FileConnector) connector)
-				.setAdditional_where_clause(FnMockConnection.additionalWhereClause);
+		((FileConnector) connector).setWorkplace_display_url(FnMockConnection.displayUrl);
+		((FileConnector) connector).setObject_factory(FnMockConnection.objectFactory);
+		((FileConnector) connector).setPath_to_WcmApiConfig(FnMockConnection.pathToWcmApiConfig);
+		((FileConnector) connector).setAdditional_where_clause(FnMockConnection.additionalWhereClause);
 		sess = (FileSession) connector.login();
 		qtm = (FileTraversalManager) sess.getTraversalManager();
 	}
@@ -91,11 +82,9 @@ public class FileMockTraversalManagerTest extends TestCase {
 		String[] tabTimeStamp = { "1970-01-01T00:00:00.000Z" };
 		int i = 0;
 		if ((map = (FileDocument) resultSet.nextDocument()) != null) {
-			docId = map.findProperty(SpiConstants.PROPNAME_DOCID).nextValue()
-					.toString();
+			docId = map.findProperty(SpiConstants.PROPNAME_DOCID).nextValue().toString();
 			assertEquals(tabDocIds[i], docId);
-			modifyDate = map.findProperty(SpiConstants.PROPNAME_LASTMODIFIED)
-					.nextValue().toString();
+			modifyDate = map.findProperty(SpiConstants.PROPNAME_LASTMODIFIED).nextValue().toString();
 			assertEquals(tabTimeStamp[i], modifyDate);
 			i++;
 		}

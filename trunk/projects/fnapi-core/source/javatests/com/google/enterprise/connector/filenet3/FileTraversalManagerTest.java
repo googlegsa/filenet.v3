@@ -1,11 +1,6 @@
 package com.google.enterprise.connector.filenet3;
 
-import com.google.enterprise.connector.filenet3.FileConnector;
-import com.google.enterprise.connector.filenet3.FileDocumentList;
-import com.google.enterprise.connector.filenet3.FileSession;
-import com.google.enterprise.connector.filenet3.FileTraversalManager;
 import com.google.enterprise.connector.spi.Connector;
-
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Session;
@@ -25,16 +20,11 @@ public class FileTraversalManagerTest extends TestCase {
 		connector = new FileConnector();
 		((FileConnector) connector).setUsername(FnConnection.userName);
 		((FileConnector) connector).setPassword(FnConnection.password);
-		((FileConnector) connector)
-				.setObject_store(FnConnection.objectStoreName);
-		((FileConnector) connector)
-				.setWorkplace_display_url(FnConnection.displayUrl);
-		((FileConnector) connector)
-				.setObject_factory(FnConnection.objectFactory);
-		((FileConnector) connector)
-				.setPath_to_WcmApiConfig(FnConnection.pathToWcmApiConfig);
-		((FileConnector) connector)
-				.setAdditional_where_clause(FnConnection.additionalWhereClause);
+		((FileConnector) connector).setObject_store(FnConnection.objectStoreName);
+		((FileConnector) connector).setWorkplace_display_url(FnConnection.displayUrl);
+		((FileConnector) connector).setObject_factory(FnConnection.objectFactory);
+		((FileConnector) connector).setPath_to_WcmApiConfig(FnConnection.pathToWcmApiConfig);
+		((FileConnector) connector).setAdditional_where_clause(FnConnection.additionalWhereClause);
 		((FileConnector) connector).setIs_public("false");
 		sess = (FileSession) connector.login();
 		qtm = (FileTraversalManager) sess.getTraversalManager();
