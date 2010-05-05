@@ -57,19 +57,19 @@ public class FilenetPublicfeed extends SeleneseTestCase
 	@Test(dependsOnMethods="testconfigureconnector")
 	public void testIsConnectorRunning()
 	{
-		assertEquals(Tasks.IsConnectorPresent(FilenetTasks.obj.connectorexists()), true);
+		assertTrue(Tasks.IsConnectorPresent(FilenetTasks.obj.connectorexists()));
 	}
 	
 	@Test(dependsOnMethods="testIsConnectorRunning")
 	public void testConfigurationSaved()
 	{
-		assertEquals(FileUtils.CheckConfigSaved(FilenetTasks.property.connectorname(),"baseline\\fpautomationPublic.properties"), true);
+		assertTrue(FileUtils.CheckConfigSaved(FilenetTasks.property.connectorname(),"baseline\\FnConnectorPublic.properties"));
 	}
 	
 	@Test(dependsOnMethods="testConfigurationSaved")
 	public void testFeedfile()
 	{
-		assertEquals(FileUtils.CheckFeedFile("baseline\\fpautomationFeedFilePublic.log"), true);
+		assertTrue(FileUtils.CheckFeedFile("baseline\\FnConnectorFeedFilePublic.log",60));
 	}
 	
 	@Test(dependsOnMethods="testFeedfile")
