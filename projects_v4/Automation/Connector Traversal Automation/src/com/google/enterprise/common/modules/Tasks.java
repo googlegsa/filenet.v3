@@ -241,9 +241,8 @@ public class Tasks extends SeleneseTestCase
 	
 	public static void sleep(int time)
 	{
-		for(int sec=0; sec <= time; sec++)
-			try {
-				Thread.sleep(1000);
+		try {
+				Thread.sleep(1000 * time);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
