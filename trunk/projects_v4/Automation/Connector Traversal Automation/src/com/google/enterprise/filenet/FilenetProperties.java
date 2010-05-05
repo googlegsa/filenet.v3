@@ -97,4 +97,17 @@ public class FilenetProperties
 		return temp;
 	}
 	
+	public String startservicebat()
+	{
+		loadproperties(FileNetProperties);
+		temp = p.getProperty("startconnectorservice");
+		return temp;
+	}
+	
+	public String stopservicebat()
+	{
+		loadproperties(FileNetProperties);
+		temp = p.getProperty("stopconnectorservice");
+		return temp;
+	}
 }
