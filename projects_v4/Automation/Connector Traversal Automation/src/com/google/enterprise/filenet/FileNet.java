@@ -23,6 +23,7 @@ public class FileNet extends SeleneseTestCase
 	@BeforeClass
 	public void setup()
 	{
+		Tasks.startConnectorService(FilenetTasks.property.startservicebat());
 		Tasks.getSession();
 		Tasks.LoginToGSA();
 		Tasks.gotoConnectorAdministration();
