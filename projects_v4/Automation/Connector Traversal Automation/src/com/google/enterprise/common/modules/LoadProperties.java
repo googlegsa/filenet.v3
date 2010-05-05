@@ -20,7 +20,7 @@ public class LoadProperties {
 		
 	Properties p = new Properties();
 	String GSAProperties = "common\\GSA.properties";
-	String SeleniumProperties = "common\\selenium.properties";
+	String SeleniumProperties = "common\\Selenium.properties";
 	String ErrorMessages = "common\\GSAErrors.properties";
 	String temp = "";
 	FileInputStream input;
