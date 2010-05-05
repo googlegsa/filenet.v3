@@ -177,13 +177,13 @@ public class FileNet extends SeleneseTestCase
 	@Test(dependsOnMethods="testIsConnectorRunning")
 	public void testConfigurationSaved()
 	{
-		assertTrue(FileUtils.CheckConfigSaved(FilenetTasks.property.connectorname(),"baseline\\fpautomation.properties"));
+		assertTrue(FileUtils.CheckConfigSaved(FilenetTasks.property.connectorname(),"baseline\\FnConnector.properties"));
 	}
 	
 	@Test(dependsOnMethods="testConfigurationSaved")
 	public void testFeedfile()
 	{
-		assertTrue(FileUtils.CheckFeedFile("baseline\\fpautomationFeedFile.log"));
+		assertTrue(FileUtils.CheckFeedFile("baseline\\FnConnectorFeedFile.log",60));
 	}
 	
 	@Test(dependsOnMethods="testFeedfile")
