@@ -94,7 +94,7 @@ public class FileUtils
 		boolean Flag = true;
 		try
 		{
-			Thread.sleep(WaitTime);
+			Thread.sleep(WaitTime*1000);
 			File Expectedfile = new File(FeedFile);
 			File Actualfile = new File(property.connectorfeedfile());
 			FileInputStream ExpectedFileInputStream = null;
