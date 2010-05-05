@@ -42,27 +42,27 @@ public class FileUtils
 			Actual.load(new FileInputStream(new File(FilenetTasks.property.connectorpath()+ ConnectorName+".properties")));
 			Expected.load(new FileInputStream(new File(ConfigFile)));
 			
-			Collection<Object> A= Actual.values();
-			Collection<Object> E= Expected.values();
-			Object AKeys[] = Actual.keySet().toArray();
-			Object EKeys[] = Expected.keySet().toArray();
+			Collection<Object> ActualValues= Actual.values();
+			Collection<Object> ExpectedValues= Expected.values();
+			Object ActualKeys[] = Actual.keySet().toArray();
+			Object ExpectedKeys[] = Expected.keySet().toArray();
 			
-			Object AValues[]= A.toArray();
-			Object EValues[]= E.toArray();
+			Object AValues[]= ActualValues.toArray();
+			Object EValues[]= ExpectedValues.toArray();
 			
-			if(AKeys.length == EKeys.length)
+			if(ActualKeys.length == ExpectedKeys.length)
 			{
-				for (int i = 0;i< AKeys.length;i++)
+				for (int i = 0;i< ActualKeys.length;i++)
 				{
-					if(!AKeys[i].toString().contentEquals(EKeys[i].toString()))
+					if(!ActualKeys[i].toString().contentEquals(ExpectedKeys[i].toString()))
 					{
-						System.out.println("Actual = " +AKeys[i]+ "Expected = " +EKeys[i]);
+						System.out.println("Actual = " +ActualKeys[i]+ "Expected = " +ExpectedKeys[i]);
 						Flag = false;
 					}
 					
 					if(!AValues[i].toString().contentEquals(EValues[i].toString()))
 					{
-						if(!AKeys[i].toString().contentEquals("Password"))
+						if(!ActualKeys[i].toString().contentEquals("Password"))
 						{
 							System.out.println("Actual = " +AValues[i]+ "Expected = " +EValues[i]);
 							Flag = false;
@@ -86,32 +86,33 @@ public class FileUtils
 	/**
 	 * CheckFeedFile Function checks feed logs against the baseline(expected)
 	 * feed log file
+	 * WaitTime should be equal to the time taken by connector to generate a feed file
 	 * */
-	public static boolean CheckFeedFile(String FeedFile)
+	public static boolean CheckFeedFile(String FeedFile, int WaitTime)
 	{
 		System.out.println("Checking Feed file...");
 		boolean Flag = true;
 		try
 		{
-			Thread.sleep(60000);
+			Thread.sleep(WaitTime);
 			File Expectedfile = new File(FeedFile);
 			File Actualfile = new File(property.connectorfeedfile());
-			FileInputStream Efis = null;
-			BufferedReader EBrd = null;
-		    InputStreamReader EIsr = null;
-		    FileInputStream Afis = null;
-			BufferedReader ABrd = null;
-		    InputStreamReader AIsr = null;
+			FileInputStream ExpectedFileInputStream = null;
+			BufferedReader ExpectedBufferedReader = null;
+		    InputStreamReader ExpectedInputStreamReader = null;
+		    FileInputStream ActualFileInputStream = null;
+			BufferedReader ActualBufferedReader = null;
+		    InputStreamReader ActualInputStreamReader = null;
 		    
-		    Efis = new FileInputStream(Expectedfile);
-			EIsr = new InputStreamReader(Efis);
-			EBrd = new BufferedReader(EIsr);
-			String Expected =EBrd.readLine();
+		    ExpectedFileInputStream = new FileInputStream(Expectedfile);
+			ExpectedInputStreamReader = new InputStreamReader(ExpectedFileInputStream);
+			ExpectedBufferedReader = new BufferedReader(ExpectedInputStreamReader);
+			String Expected =ExpectedBufferedReader.readLine();
 			
-			Afis = new FileInputStream(Actualfile);
-			AIsr = new InputStreamReader(Afis);
-			ABrd = new BufferedReader(AIsr);
-			String Actual =ABrd.readLine();
+			ActualFileInputStream = new FileInputStream(Actualfile);
+			ActualInputStreamReader = new InputStreamReader(ActualFileInputStream);
+			ActualBufferedReader = new BufferedReader(ActualInputStreamReader);
+			String Actual =ActualBufferedReader.readLine();
 			
 			System.out.println("Expected = " + Expected );
 			System.out.println("Actual = " + Actual);
@@ -136,9 +137,9 @@ public class FileUtils
 					}
 					
 				}
-				Expected =EBrd.readLine();
+				Expected =ExpectedBufferedReader.readLine();
 //				System.out.println("Expected = " + Expected);
-				Actual =ABrd.readLine();
+				Actual =ActualBufferedReader.readLine();
 //				System.out.println("Actual = " + Actual);
 				if((Expected == null && Actual != null)||(Expected != null && Actual == null))
 				{
@@ -150,8 +151,8 @@ public class FileUtils
 				
 			}
 			
-			Efis.close();
-			Afis.close();
+			ExpectedFileInputStream.close();
+			ActualFileInputStream.close();
 		}
 		catch( Exception e)
 		{
