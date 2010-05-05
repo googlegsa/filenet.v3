@@ -228,6 +228,17 @@ public class Tasks extends SeleneseTestCase
 		}
 	}
 		
+	public static void startConnectorService(String batchfilepath) {
+		Runtime load = Runtime.getRuntime();
+		String command = "cmd /C start " + batchfilepath + " ";
+		try {
+			load.exec(command);
+			System.out.println("Starting Connector Service...");
+			sleep(30);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	public static void waitfor(String element) 
 	{
 		for (int second = 0;; second++) 
