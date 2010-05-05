@@ -51,7 +51,7 @@ public class FileNet extends SeleneseTestCase
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		
 		Tasks.waitfor(Tasks.obj.gsaerrormessage());
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.blankconnectornameerror()));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.blankconnectornameerror()));
 		Tasks.selenium.type(Tasks.obj.txtconnectorname(),FilenetTasks.property.connectorname());
 		
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
@@ -65,8 +65,8 @@ public class FileNet extends SeleneseTestCase
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		Tasks.waitfor(Tasks.obj.gsaerrormessage());
 		
-//		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.blankusernameerror()));
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankusername")));
+//		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.blankusernameerror()));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankusername")));
 		Tasks.selenium.type(FilenetTasks.obj.txtconnectorusername(),FilenetTasks.property.connectorusername());
 	}
 	
@@ -75,7 +75,7 @@ public class FileNet extends SeleneseTestCase
 	{
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		Tasks.sleep(5);
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankpassword")));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankpassword")));
 		
 		Tasks.selenium.type(FilenetTasks.obj.txtconnectorpassword(),FilenetTasks.property.connectorpassword());
 	}
@@ -85,7 +85,7 @@ public class FileNet extends SeleneseTestCase
 	{
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		Tasks.sleep(5);
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankobjectstore")));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankobjectstore")));
 		
 		Tasks.selenium.type(FilenetTasks.obj.txtobjectstore(),FilenetTasks.property.objectstore());
 	}
@@ -95,7 +95,7 @@ public class FileNet extends SeleneseTestCase
 	{
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		Tasks.sleep(5);
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankcontentengineurl")));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankcontentengineurl")));
 		
 		Tasks.selenium.type(FilenetTasks.obj.txtcontentengineurl(),FilenetTasks.property.contentenginurl());
 	}
@@ -104,7 +104,7 @@ public class FileNet extends SeleneseTestCase
 	public void testblankWorkPlaceURL()
 	{
 //		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
-//		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.blankworkplaceurlerror()));
+//		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.blankworkplaceurlerror()));
 		Tasks.selenium.type(FilenetTasks.obj.txtworkplaceurl(),FilenetTasks.property.workplaceurl());
 
 //		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
@@ -117,7 +117,7 @@ public class FileNet extends SeleneseTestCase
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		Tasks.sleep(15);
 		
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "invalidcredentials")));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "invalidcredentials")));
 		Tasks.selenium.type(FilenetTasks.obj.txtconnectorusername(), FilenetTasks.property.connectorusername());
 	}
 	
@@ -128,7 +128,7 @@ public class FileNet extends SeleneseTestCase
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		Tasks.sleep(15);
 		
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "invalidcredentials")));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "invalidcredentials")));
 		Tasks.selenium.type(FilenetTasks.obj.txtconnectorpassword(), FilenetTasks.property.connectorpassword());
 	}
 	
@@ -139,7 +139,7 @@ public class FileNet extends SeleneseTestCase
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		Tasks.sleep(15);
 		
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "invalidobjectstore")));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "invalidobjectstore")));
 		Tasks.selenium.type(FilenetTasks.obj.txtobjectstore(),FilenetTasks.property.objectstore());
 	}
 	
@@ -150,7 +150,7 @@ public class FileNet extends SeleneseTestCase
 		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
 		Tasks.sleep(15);
 		
-		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "invalidcontentengineurl")));
+		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "invalidcontentengineurl")));
 		Tasks.selenium.type(FilenetTasks.obj.txtcontentengineurl(),FilenetTasks.property.contentenginurl());
 	}
 	
@@ -159,7 +159,7 @@ public class FileNet extends SeleneseTestCase
 	{
 //		Tasks.selenium.type(Tasks.obj.txtworkplaceurl(),Tasks.property.workplaceurl()+123);
 //		Tasks.selenium.click(Tasks.obj.saveconfigurationbtn());
-//		assertEquals(true, Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankpassword")));
+//		assertTrue(Tasks.GetGSAErrorMsg().contentEquals(Tasks.property.geterrormessage("common\\FileNetErrors.properties", "blankpassword")));
 		
 		Tasks.selenium.type(FilenetTasks.obj.txtworkplaceurl(),FilenetTasks.property.workplaceurl());
 		Tasks.setTraversalRate("52");
@@ -171,19 +171,19 @@ public class FileNet extends SeleneseTestCase
 	public void testIsConnectorRunning()
 	{
 		Tasks.waitfor(FilenetTasks.obj.connectorexists());
-		assertEquals(Tasks.IsConnectorPresent(FilenetTasks.obj.connectorexists()), true);
+		assertTrue(Tasks.IsConnectorPresent(FilenetTasks.obj.connectorexists()));
 	}
 	
 	@Test(dependsOnMethods="testIsConnectorRunning")
 	public void testConfigurationSaved()
 	{
-		assertEquals(FileUtils.CheckConfigSaved(FilenetTasks.property.connectorname(),"baseline\\fpautomation.properties"), true);
+		assertTrue(FileUtils.CheckConfigSaved(FilenetTasks.property.connectorname(),"baseline\\fpautomation.properties"));
 	}
 	
 	@Test(dependsOnMethods="testConfigurationSaved")
 	public void testFeedfile()
 	{
-		assertEquals(FileUtils.CheckFeedFile("baseline\\fpautomationFeedFile.log"), true);
+		assertTrue(FileUtils.CheckFeedFile("baseline\\fpautomationFeedFile.log"));
 	}
 	
 	@Test(dependsOnMethods="testFeedfile")
@@ -198,6 +198,6 @@ public class FileNet extends SeleneseTestCase
 	public void testDeleteConnectorInstance()
 	{
 		FilenetTasks.DeleteConnectorInstance();
-		assertEquals(Tasks.IsConnectorPresent(FilenetTasks.property.connectorname()), false);
+		assertFalse(Tasks.IsConnectorPresent(FilenetTasks.property.connectorname()));
 	}
 }
