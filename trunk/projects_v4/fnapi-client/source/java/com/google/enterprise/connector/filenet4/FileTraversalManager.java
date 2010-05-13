@@ -169,7 +169,6 @@ public class FileTraversalManager implements TraversalManager {
 		query.append(PropertyNames.DATE_LAST_MODIFIED);
 		query.append(" FROM ");
 		query.append(tableName);
-		query.append(" AS d");
 		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
 		if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
@@ -218,10 +217,6 @@ public class FileTraversalManager implements TraversalManager {
 			query.append(" (" + PropertyNames.DATE_CREATED + ">"
 					+ dateFirstPush + ")");
 
-			if (additionalWhereClause != null
-					&& !additionalWhereClause.equals("")) {
-				query.append(additionalWhereClause);
-			}
 			query.append(orderByToDelete);
 		}
 		return query.toString();
