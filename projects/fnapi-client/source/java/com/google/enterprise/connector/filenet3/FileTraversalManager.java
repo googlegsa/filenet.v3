@@ -77,12 +77,11 @@ public class FileTraversalManager implements TraversalManager {
 			+ " ";
 	private final static String VERSION_STATUS_IN_PROCESS = VersionableObject.VERSION_STATUS_IN_PROCESS
 			+ " ";
-	private String db_timezone;
 
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession, boolean b,
 			String displayUrl, String additionalWhereClause,
-			HashSet included_meta, HashSet excluded_meta, String db_timezone)
+			HashSet included_meta, HashSet excluded_meta)
 			throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
@@ -94,7 +93,6 @@ public class FileTraversalManager implements TraversalManager {
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
-		this.db_timezone = db_timezone;
 	}
 
 	public DocumentList startTraversal() throws RepositoryException {
@@ -283,14 +281,8 @@ public class FileTraversalManager implements TraversalManager {
 					"Could not get last modified date from checkPoint string: "
 							+ checkPoint);
 		}
-		String timeZoneOffset = null;
-		if (this.db_timezone == null || this.db_timezone.equalsIgnoreCase("")) {
-			timeZoneOffset = FileUtil.getTimeZone(Calendar.getInstance());
-		} else {
-			timeZoneOffset = FileUtil.getTimeZone(this.db_timezone);
-		}
 
-		return dateString + timeZoneOffset;
+		return dateString;
 	}
 
 	protected String makeCheckpointQueryString(String uuid, String c,
