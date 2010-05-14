@@ -44,21 +44,11 @@ public class FileConnector implements Connector {
 	private HashSet included_meta;
 
 	private HashSet excluded_meta;
-	private String db_timezone;
 
 	private static Logger logger = null;
 
 	static {
 		logger = Logger.getLogger(FileConnectorType.class.getName());
-	}
-
-	public String getDb_timezone() {
-		return db_timezone;
-	}
-
-	public void setDb_timezone(String dbTimezone) {
-		db_timezone = dbTimezone;
-		logger.config("Set Database Server's TimeZone to " + this.db_timezone);
 	}
 
 	public Session login() throws RepositoryException {
@@ -70,7 +60,7 @@ public class FileConnector implements Connector {
 			sess = new FileSession(object_factory, username, password,
 					object_store, path_to_WcmApiConfig, workplace_display_url,
 					is_public.equals("on"), additional_where_clause,
-					included_meta, excluded_meta, db_timezone);
+					included_meta, excluded_meta);
 			logger.info("FileNet Seesion creation succeeded");
 		}
 		return sess;
