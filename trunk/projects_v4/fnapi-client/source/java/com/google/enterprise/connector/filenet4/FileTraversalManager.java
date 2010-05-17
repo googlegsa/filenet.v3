@@ -182,6 +182,17 @@ public class FileTraversalManager implements TraversalManager {
 		return query.toString();
 	}
 
+	/**
+	 * Builds the query to send delete feeds to GSA. This query does not include
+	 * the "Additional Where Clause"(AWC) because the schema of Event Table and
+	 * the Classes included in AWC are different. Due to the exclusion of AWC in
+	 * query, there are chances that, connector may send Delete Feed to GSA for
+	 * documents which were never indexed to GSA
+	 * 
+	 * @param checkpoint
+	 * @return
+	 * @throws RepositoryException
+	 */
 	private String buildQueryToDelete(String checkpoint)
 			throws RepositoryException {
 
