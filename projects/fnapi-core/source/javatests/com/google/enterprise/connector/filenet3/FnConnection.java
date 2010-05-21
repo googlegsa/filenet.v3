@@ -35,6 +35,7 @@ public class FnConnection {
 	public static String PARAM_DATE_LASTMODIFIED = "lastModified";
 	public static String PARAM_DATE_LASTREMOVE = "lastRemoveDate";
 
+	public static String checkpointDate = "2010-05-18T12:42:38";
 	public static String pathToWcmApiConfig = "WcmApiConfig.properties";
 
 	public static String completePathToWcmApiConfig = "C:\\WcmApiConfig.properties";

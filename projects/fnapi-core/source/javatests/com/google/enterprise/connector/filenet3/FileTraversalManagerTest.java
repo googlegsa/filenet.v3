@@ -21,6 +21,16 @@ import com.google.enterprise.connector.spi.SpiConstants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+
+import com.filenet.wcm.api.ObjectFactory;
+import com.filenet.wcm.api.Search;
+
+import java.io.StringReader;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import junit.framework.TestCase;
 
@@ -166,6 +176,70 @@ public class FileTraversalManagerTest extends TestCase {
 
 		assertNotNull(statement);
 		assertEquals(FnConnection.DM_CHECKPOINT_QUERY_STRING, statement);
+	}
+
+	/**
+	 * Compares the LastModified Date stored in Database of a given document
+	 * with the LastModified Date stored in Checkpoint. If both the dates are
+	 * equal then it proves that date stored in Checkpoint is correct and is
+	 * stored in UTC timezone.
+	 */
+	public void testCompareDBTimeWithCheckPointTime() {
+		String dbDate = getDBDate(FnConnection.objectStoreName, FnConnection.userName, FnConnection.password, FnConnection.docId3);
+		assertEquals(FnConnection.checkpointDate, dbDate);
+	}
+
+	/**
+	 * Retrieves the LastModified Date of a particular Document, stored in
+	 * database.
+	 * 
+	 * @param objectStoreName - Name of the ObjectStore where the document is
+	 *            stored.
+	 * @param userName - Username to get session to retrieve the document
+	 * @param password - Password of the corresponding user
+	 * @param docId - Dcoument ID of the taarget document
+	 * @return - Returns the exact LastModified Date of the document, which is
+	 *         stored in Database.
+	 */
+	private String getDBDate(String objectStoreName, String userName,
+			String password, String docId) {
+		com.filenet.wcm.api.Session sess = ObjectFactory.getSession("com.google.enterprise.connector.filenet3.FileTraversalManagerTest", com.filenet.wcm.api.Session.DEFAULT, userName, password);
+		StringBuffer query = new StringBuffer(
+				"<?xml version=\"1.0\" ?><request>");
+		query.append("<objectstores mergeoption=\"none\"><objectstore id=\"");
+		query.append(objectStoreName);
+		query.append("\"/></objectstores>");
+		query.append("<querystatement>SELECT Id,DateLastModified FROM Document Where Id=");
+		query.append(docId);
+		query.append("</querystatement>");
+		query.append("<options maxrecords='100' objectasid=\"false\"/></request>");
+
+		Search search = ObjectFactory.getSearch(sess);
+		Document document = stringToDom(search.executeXML(query.toString()));
+
+		if (document != null) {
+			return document.getElementsByTagName("z:row").item(0).getAttributes().item(0).getNodeValue();
+		} else {
+			return null;
+		}
+
+	}
+
+	/**
+	 * To get the Document out of the XML source passed as a string.
+	 * 
+	 * @param xmlSource - XML source to get the Document out of it.
+	 * @return - Document object for the XML source.
+	 */
+	private Document stringToDom(String xmlSource) {
+		DocumentBuilder builder = null;
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			builder = factory.newDocumentBuilder();
+			return builder.parse(new InputSource(new StringReader(xmlSource)));
+		} catch (Exception e) {
+			return null;
+		}
 	}
 
 }
