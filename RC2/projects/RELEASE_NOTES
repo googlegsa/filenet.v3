@@ -59,7 +59,7 @@ Features
 Steps to deploy patch
 ---------------------
 1. Stop the connector service (If Running).
-2. Navigate to the folder CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib. Delete connector-file.jar.
+2. Navigate to the folder CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib.
 3. Replace the existing connector-file.jar with the jar from patch.
 4. Start the connector service.
 
