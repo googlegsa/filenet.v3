@@ -119,3 +119,28 @@ Enable the Auditing for delete event on FileNet server for target Object Store t
   #    Click "Add" button
 
 All the documents deleted after Auditing is enabled, will be sent for Delete Feed to GSA
+
+||*6. Unable to configure the connector instance for FileNet Version 4.5.1 and above:*||
+
+*Problem Description:*
+
+I am trying to configure FileNet conenctor for FileNet Server whose version is 4.5.1 or above, but I am getting following exception in the log
+
+`com.filenet.api.exception.EngineRuntimeException: TRANSPORT_WSI_SERIALIZATION_ERROR: Error serializing a web services instance of GetObjectsRequest.`
+
+*Root Cause:*
+
+For FileNet Server with version 4.5.1 and above following three extra jars are required as dependency jar files:
+  #    stax-api.jar
+  #    xlxpScanner.jar
+  #    xlxpScannerUtils.jar
+These jars should be present in the classpath. Due to unavailability of these jars in classpath, the above mentioned exception is generated.
+
+
+*Resolution/Quick Workaround:*
+
+  #    Stop the connector service.
+  #    Copy those jars from FileNet Server and paste them under the following directory:
+       `CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib`
+  #    Restart the connector service.
+   
