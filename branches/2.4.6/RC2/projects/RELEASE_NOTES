@@ -23,7 +23,7 @@ This version works with Connector Manager version 2.6.x.
 
 Platform Support
 ------------------
-The connector can be installed and run on both 32-bit & 64-bit Windows and Linux environments
+The connector can be installed on x86/x64 Windows (2003/2008) and Linux environments.
 
 Certified Against
 -------------------
