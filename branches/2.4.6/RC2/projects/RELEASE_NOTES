@@ -19,6 +19,7 @@ This is the patch release of this product. See the product website for a complet
 
 Version Compatibility
 -----------------------
+Upgrading earlier versions, lower than 2.0.x, with this version will not work.
 This version works with Connector Manager version 2.6.x.
 
 Platform Support
@@ -52,18 +53,15 @@ Processor: Intel(R) Xeon(R) CPU    E5620 @ 2.40 GHz 2.39 GHz
 Memory (RAM): 4.00 GB
 System Type: 64-bit Operating System
 
+Microsoft Windows Server 2008 R2
+Enterprise x64 Edition
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 4.00 GB of RAM
+
 Microsoft Windows Server 2003
 Enterprise x64 Edition
 Intel(R) Xeon(R) CPU
 E5504 @ 2.00GHz, 2.00 GB of RAM
-
-
-Features
---------------
-1. The connector crawls all documents which are supported by IBM FileNet server 3.5.
-2. The connector always runs in an incremental mode and keeps feeding the updated documents to the Google Search Appliance (GSA).
-3. The auditing feature ensures that documents are deleted from the GSA index when they are deleted from the repository.
-4. The connector handles serve-time authentication and authorization.
 
 Steps to deploy patch
 ---------------------
