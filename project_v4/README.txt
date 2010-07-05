@@ -1,28 +1,36 @@
-This readme file presents how to configure the development environment for the Filenet connector.
+Welcome to the Google Search Appliance Connector for IBM FileNet P8 Systems 4.0,4.5
 
-REQUIRED FILES to compile and run the tests
-•	Jace.jar (in <Filenet CE root folder>/CE_API/lib)
-•	log4j-1.2.8.jar (in <Filenet CE root folder>/CE_API/lib)
-•	commons-httpclient-3.0.1.jar (in file_third_party/lib folder of the project)
-•	commons-codec-1.3.jar (in file_third_party/lib folder of the project)
-•	json.jar (in third_party/lib folder of the project)
-•	junit.jar (in third_party/lib folder of the project)
-•	spring.jar (in third_party/lib folder of the project)
-•	commons-logging.jar (in third_party/lib folder of the project)
-•	connector-spi.jar (to copy in third_party/lib folder of the project)
-•	connector.jar (to copy in third_party/lib folder of the project
-•	connector-tests.jar (to copy in third_party/lib folder of the project
+Google Search Appliance Connector framework enables Google search
+appliances to search and serve documents stored in non-Web
+repositories, such as enterprise content management systems.
+An enterprise content management (ECM) system provides a central
+repository for large numbers of documents.
 
+The Google Search Appliance Connector for IBM FileNet P8 Systems 4.0,4.5 enables the appliance to
+traverse documents from ObjectStore.
+
+The Google Search Appliance Connector for IBM FileNet P8 Systems 4.0,4.5 communicates with the FileNet
+Content Engine Server using the Content Engine Java APIs and feed it to the search appliance.
 
 
-CONFIGURATION
-Open Eclipse and create a java project from the existing source "connector-file"
-Add to the classpath of the project all the jars that are in third_party\lib and file_third_party\lib
-Also, add to the classpath 3 Class folders linked to the folder 
-•	google_enterprise_connector_file/config
+Documentation Links
+
+    * Developer Introduction to the Google Search Appliance Connector Framework
+      http://code.google.com/apis/searchappliance/documentation/connectors/200/connector_dev/cdg_about.html
+
+    * Google Search Appliance Connector for IBM FileNet P8 Systems 4.0,4.5
+      http://code.google.com/p/google-enterprise-connector-file/
 
 
-JUNIT TESTS
-To run the unit tests, open the classes 
-•	com.google.enterprise.connector.file.TestConnection in the folder fnapi-core/source/javatests
-to add your environment configuration.
+Licensing
+
+      This product includes software developed by Apache Software Foundation (http://www.apache.org/).
+      A copy of the licensing terms is available in a file called COPYING.
+
+
+Source code for 3rd party libraries
+
+      FileNet connector uses various 3rd party open source libraries. The versions of these libraries
+      are embedded in the names of the files. If you have trouble locating the source code of
+      any of the libraries used by FileNet connector, you can file an issue on the FileNet connector
+      project site.
