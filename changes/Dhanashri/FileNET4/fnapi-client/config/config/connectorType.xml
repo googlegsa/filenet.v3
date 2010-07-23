@@ -11,8 +11,7 @@
 				<value>content_engine_url</value>
 				<value>workplace_display_url</value>
 				<value>object_factory</value>
-				<value>additional_where_clause</value>
-				<value>is_public</value>
+				<value>additional_where_clause</value>				
 			</list>
 		</property>
 	</bean>

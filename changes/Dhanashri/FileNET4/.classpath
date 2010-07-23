@@ -4,10 +4,9 @@
 	<classpathentry kind="src" path="fnapi-core/source/javatest"/>
 	<classpathentry kind="src" path="fnapi-core/source/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.5.0_16"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jre6"/>
 	<classpathentry kind="lib" path="third_party/lib/connector-logging.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/connector-spi.jar"/>
-	<classpathentry kind="lib" path="third_party/lib/connector-tests.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/connector-util.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/connector.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/json.jar"/>

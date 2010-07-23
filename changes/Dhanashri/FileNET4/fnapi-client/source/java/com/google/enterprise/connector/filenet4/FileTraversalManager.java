@@ -16,6 +16,25 @@
  */
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.ISearch;
+import com.google.enterprise.connector.filenet4.filewrap.ISession;
+import com.google.enterprise.connector.spi.DocumentList;
+import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
+import com.google.enterprise.connector.spi.TraversalManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.filenet.api.constants.GuidConstants;
+import com.filenet.api.constants.PropertyNames;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.DateFormat;
@@ -30,24 +49,6 @@ import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import com.filenet.api.constants.GuidConstants;
-import com.filenet.api.constants.PropertyNames;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.ISearch;
-import com.google.enterprise.connector.filenet4.filewrap.ISession;
-import com.google.enterprise.connector.spi.DocumentList;
-import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
-import com.google.enterprise.connector.spi.TraversalManager;
 
 /**
  * Responsible for: 1. Construction of FileNet SQL queries for adding and
@@ -80,19 +81,19 @@ public class FileTraversalManager implements TraversalManager {
 			+ PropertyNames.DATE_CREATED + ">{0})";
 	private String additionalWhereClause;
 	private String displayUrl;
-	private boolean isPublic;
+	// private boolean isPublic;
 	private HashSet included_meta;
 	private HashSet excluded_meta;
 	private String db_timezone;
 
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
-			IObjectStore objectStore, boolean b, String displayUrl,
+			IObjectStore objectStore, String displayUrl,
 			String additionalWhereClause, HashSet included_meta,
 			HashSet excluded_meta, String db_timezone)
 			throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
-		this.isPublic = b;
+		// this.isPublic = b;
 		this.displayUrl = displayUrl;
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
@@ -100,16 +101,41 @@ public class FileTraversalManager implements TraversalManager {
 		this.db_timezone = db_timezone;
 	}
 
+	/*
+	 * Dhanashri : with is public
+	 * 
+	 * public FileTraversalManager(IObjectFactory fileObjectFactory,
+	 * IObjectStore objectStore, boolean b, String displayUrl, String
+	 * additionalWhereClause, HashSet included_meta, HashSet excluded_meta,
+	 * String db_timezone) throws RepositoryException { this.fileObjectFactory =
+	 * fileObjectFactory; this.objectStore = objectStore; this.isPublic = b;
+	 * this.displayUrl = displayUrl; this.additionalWhereClause =
+	 * additionalWhereClause; this.included_meta = included_meta;
+	 * this.excluded_meta = excluded_meta; this.db_timezone = db_timezone; }
+	 */
+
+	/*
+	 * Dhanashri : with is public public FileTraversalManager(IObjectFactory
+	 * fileObjectFactory, IObjectStore objectStore, ISession fileSession,
+	 * boolean b, String displayUrl, String additionalWhereClause, HashSet
+	 * included_meta, HashSet excluded_meta, String db_timezone) throws
+	 * RepositoryException { this.fileObjectFactory = fileObjectFactory;
+	 * this.objectStore = objectStore; this.fileSession = fileSession; Object[]
+	 * args = { objectStore.getName() }; this.isPublic = b; this.displayUrl =
+	 * displayUrl; this.additionalWhereClause = additionalWhereClause;
+	 * this.included_meta = included_meta; this.excluded_meta = excluded_meta;
+	 * this.db_timezone = db_timezone; }
+	 */
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
-			IObjectStore objectStore, ISession fileSession, boolean b,
-			String displayUrl, String additionalWhereClause,
-			HashSet included_meta, HashSet excluded_meta, String db_timezone)
+			IObjectStore objectStore, ISession fileSession, String displayUrl,
+			String additionalWhereClause, HashSet included_meta,
+			HashSet excluded_meta, String db_timezone)
 			throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
 		this.fileSession = fileSession;
 		Object[] args = { objectStore.getName() };
-		this.isPublic = b;
+		// this.isPublic = b;
 		this.displayUrl = displayUrl;
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
@@ -151,9 +177,14 @@ public class FileTraversalManager implements TraversalManager {
 
 		if ((objectSet.getSize() > 0) || (objectSetToDelete.getSize() > 0)) {
 			resultSet = new FileDocumentList(objectSet, objectSetToDelete,
-					objectStore, this.isPublic, this.displayUrl,
-					this.included_meta, this.excluded_meta, dateFirstPush,
-					checkPoint);
+					objectStore, this.displayUrl, this.included_meta,
+					this.excluded_meta, dateFirstPush, checkPoint);
+			/*
+			 * Dhanashri : with is public resultSet = new
+			 * FileDocumentList(objectSet, objectSetToDelete, objectStore,
+			 * this.isPublic, this.displayUrl, this.included_meta,
+			 * this.excluded_meta, dateFirstPush, checkPoint);
+			 */
 		}
 		return resultSet;
 	}
