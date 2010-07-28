@@ -108,9 +108,6 @@ public class FileConnector implements Connector {
 				+ this.workplace_display_url);
 	}
 
-	public void setIs_public(String isPublic) {
-	}
-
 	public String getAdditional_where_clause() {
 		return additional_where_clause;
 	}

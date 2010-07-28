@@ -62,7 +62,6 @@ public class FileDocument implements Document {
 		this.docId = docId;
 		this.timeStamp = timeStamp;
 		this.objectStore = objectStore;
-		// this.isPublic = isPublic;
 		this.displayUrl = displayUrl;
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
