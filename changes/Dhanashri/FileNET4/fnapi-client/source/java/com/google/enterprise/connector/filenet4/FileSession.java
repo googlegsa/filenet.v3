@@ -37,7 +37,6 @@ public class FileSession implements Session {
     private IObjectStore objectStore;
     private IConnection connection;
     private String displayUrl;
-    // private boolean isPublic;
     private String additionalWhereClause;
     private HashSet included_meta;
     private HashSet excluded_meta;
