@@ -81,6 +81,7 @@ public class FileTraversalManager implements TraversalManager {
 			+ PropertyNames.DATE_CREATED + ">{0})";
 	private String additionalWhereClause;
 	private String displayUrl;
+	// private boolean isPublic;
 	private HashSet included_meta;
 	private HashSet excluded_meta;
 	private String db_timezone;
@@ -92,6 +93,7 @@ public class FileTraversalManager implements TraversalManager {
 			throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
+		// this.isPublic = b;
 		this.displayUrl = displayUrl;
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
@@ -99,6 +101,31 @@ public class FileTraversalManager implements TraversalManager {
 		this.db_timezone = db_timezone;
 	}
 
+	/*
+	 * Dhanashri : with is public
+	 * 
+	 * public FileTraversalManager(IObjectFactory fileObjectFactory,
+	 * IObjectStore objectStore, boolean b, String displayUrl, String
+	 * additionalWhereClause, HashSet included_meta, HashSet excluded_meta,
+	 * String db_timezone) throws RepositoryException { this.fileObjectFactory =
+	 * fileObjectFactory; this.objectStore = objectStore; this.isPublic = b;
+	 * this.displayUrl = displayUrl; this.additionalWhereClause =
+	 * additionalWhereClause; this.included_meta = included_meta;
+	 * this.excluded_meta = excluded_meta; this.db_timezone = db_timezone; }
+	 */
+
+	/*
+	 * Dhanashri : with is public public FileTraversalManager(IObjectFactory
+	 * fileObjectFactory, IObjectStore objectStore, ISession fileSession,
+	 * boolean b, String displayUrl, String additionalWhereClause, HashSet
+	 * included_meta, HashSet excluded_meta, String db_timezone) throws
+	 * RepositoryException { this.fileObjectFactory = fileObjectFactory;
+	 * this.objectStore = objectStore; this.fileSession = fileSession; Object[]
+	 * args = { objectStore.getName() }; this.isPublic = b; this.displayUrl =
+	 * displayUrl; this.additionalWhereClause = additionalWhereClause;
+	 * this.included_meta = included_meta; this.excluded_meta = excluded_meta;
+	 * this.db_timezone = db_timezone; }
+	 */
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession, String displayUrl,
 			String additionalWhereClause, HashSet included_meta,
@@ -108,6 +135,7 @@ public class FileTraversalManager implements TraversalManager {
 		this.objectStore = objectStore;
 		this.fileSession = fileSession;
 		Object[] args = { objectStore.getName() };
+		// this.isPublic = b;
 		this.displayUrl = displayUrl;
 		this.additionalWhereClause = additionalWhereClause;
 		this.included_meta = included_meta;
@@ -151,6 +179,12 @@ public class FileTraversalManager implements TraversalManager {
 			resultSet = new FileDocumentList(objectSet, objectSetToDelete,
 					objectStore, this.displayUrl, this.included_meta,
 					this.excluded_meta, dateFirstPush, checkPoint);
+			/*
+			 * Dhanashri : with is public resultSet = new
+			 * FileDocumentList(objectSet, objectSetToDelete, objectStore,
+			 * this.isPublic, this.displayUrl, this.included_meta,
+			 * this.excluded_meta, dateFirstPush, checkPoint);
+			 */
 		}
 		return resultSet;
 	}
