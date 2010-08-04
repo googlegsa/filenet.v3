@@ -20,6 +20,7 @@ import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
+import com.google.enterprise.connector.spiimpl.BooleanValue;
 import com.google.enterprise.connector.spiimpl.DateValue;
 import com.google.enterprise.connector.spiimpl.StringValue;
 
@@ -108,9 +109,11 @@ public class FileDocument implements Document {
                 logger.log(Level.FINEST, "Getting property: " + name);
                 list.add(new StringValue(this.displayUrl + vsDocId));
                 return new FileDocumentProperty(name, list);
-            }
-
-            else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
+            }else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
+                logger.log(Level.FINEST, "Getting property: "+name);
+                list.add(BooleanValue.makeBooleanValue(false));
+                return new FileDocumentProperty(name, list);
+            }else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
                 logger.log(Level.FINEST, "Getting property: " + name);
                 this.document.getPropertyDateValue("DateLastModified", list);
                 return new FileDocumentProperty(name, list);

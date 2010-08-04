@@ -116,16 +116,7 @@ public class FileConnectorType implements ConnectorType {
         }
         this.keys = keys;
         this.keySet = new HashSet(keys);
-
-        /*
-         * for (int i = 0; i < keys.size(); i++) { if
-         * (keys.get(i).equals("is_public")) { logger.info("is public -------- "
-         * + keys.get(i)); }
-         *
-         * else { this.keys.add(keys.get(i)); this.keySet.add(keys.get(i)); } }
-         */
-
-    }
+     }
 
     /**
      * Set the keys that are required for configuration. One of the overloadings
@@ -197,7 +188,6 @@ public class FileConnectorType implements ConnectorType {
             if (!key.equals(FNCLASS)
                     && !key.equals(AUTHENTICATIONTYPE)
                     && !key.equals(WHERECLAUSE) // && !key.equals(FILEURI)
-                    && !key.equals("is_public")
                     && (val == null || val.length() == 0)) {
 
                 return key;
@@ -431,8 +421,7 @@ public class FileConnectorType implements ConnectorType {
             }
 
             if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
-            /* && !key.equals(WHERECLAUSE) */&& !key.equals(FILEPATH)
-                    && !key.equals("is_public")) {
+            /* && !key.equals(WHERECLAUSE) */&& !key.equals(FILEPATH)) {
                 if (validate.equals(key)) {
                     appendStartRow(buf, key, validate);
                 } else {
@@ -543,10 +532,8 @@ public class FileConnectorType implements ConnectorType {
             // XML-encode the special characters (< > " etc.)
             // Check the basic requirement mentioned in ConnectorType as part of
             // CM-Issue 186
-            // is public :
-            if (!(attrName.equals("is_public"))) {
                 XmlUtils.xmlAppendAttrValue(attrValue, buf);
-            }
+
         } catch (IOException e) {
             String msg = new StringBuffer(
                     "Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();

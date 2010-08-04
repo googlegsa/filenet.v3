@@ -20,6 +20,7 @@ public class FileConnector implements Connector {
     private String object_store;
     private String workplace_display_url;
     private String content_engine_url;
+    private String is_public = "false";
     private String additional_where_clause;
     private HashSet included_meta;
     private HashSet excluded_meta;
@@ -45,12 +46,9 @@ public class FileConnector implements Connector {
         if (conf != null) {
             logger.info("setting sytem property java.security.auth.login.config to "
                     + conf.getPath());
-            // System.setProperty("java.security.auth.login.config",
-            // conf.getPath());
+
         } else {
             logger.warning("Unable to find URL of file jaas.conf");
-            // System.setProperty("java.security.auth.login.config",
-            // "F:\\Program Files\\GoogleConnectors\\FileNET2\\Tomcat\\webapps\\connector-manager\\WEB-INF\\classes\\jaas.conf");
         }
 
         HostnameVerifier aa = new FileHNV();
@@ -108,7 +106,13 @@ public class FileConnector implements Connector {
                 + this.workplace_display_url);
     }
 
+    public String getIs_public() {
+        return is_public;
+    }
+
     public void setIs_public(String isPublic) {
+        this.is_public = isPublic;
+        logger.config("Set IsPublic to " + this.is_public);
     }
 
     public String getAdditional_where_clause() {
