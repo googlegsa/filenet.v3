@@ -119,7 +119,7 @@ public class FileMockTraversalManagerTest extends TestCase {
     public void testFetchAndVerifyValueForCheckpoint()
             throws IllegalArgumentException, RepositoryException {
         FileDocument propertyMap = new FileDocument("doc2",
-                ((FileSession) sess).getObjectStore(), false, "",
+                ((FileSession) sess).getObjectStore(), "",
                 FnMockConnection.included_meta, FnMockConnection.excluded_meta,
                 SpiConstants.ActionType.ADD);
         Calendar calDate = null;

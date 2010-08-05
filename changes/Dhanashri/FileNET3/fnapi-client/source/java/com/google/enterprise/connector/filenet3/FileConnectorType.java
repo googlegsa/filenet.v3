@@ -81,12 +81,7 @@ public class FileConnectorType implements ConnectorType {
     private static final String FILEPATH = "path_to_WcmApiConfig";
     private static final String AUTHENTICATIONTYPE = "authentication_type";
     private static final String WHERECLAUSE = "additional_where_clause";
-    private static final String ISPUBLIC = "is_public";
-    private static final String CHECKBOX = "checkbox";
-    private static final String CHECKED = "checked='checked'";
     private static final String LOCALE_FILE = "FileConnectorResources";
-    //    private static final String CONNECTOR_INSTANCE_XML = "config/connectorInstance.xml";
-    //    private static final String FILE_CONNECTOR_INSTANCE = "FileConnectorInstance";
     private static final int BUFFER_SIZE = 2048;
     private static Logger logger = null;
     private List keys = null;
@@ -178,7 +173,6 @@ public class FileConnectorType implements ConnectorType {
             String val = (String) configData.get(key);
             if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
                     && !key.equals(WHERECLAUSE) && !key.equals(FILEPATH)
-                    && !key.equals(ISPUBLIC)
                     && (val == null || val.length() == 0)) {
                 return key;
             }
@@ -315,19 +309,8 @@ public class FileConnectorType implements ConnectorType {
             if (configMap != null) {
                 value = (String) configMap.get(key);
             }
-            if (key.equals(ISPUBLIC)) {
-                appendCheckBox(buf, key, resource.getString(key), value);
-                appendStartHiddenRow(buf);
-                buf.append(OPEN_ELEMENT);
-                buf.append(INPUT);
-                appendAttribute(buf, TYPE, HIDDEN);
-                appendAttribute(buf, VALUE, "false");
-                appendAttribute(buf, NAME, key);
-                buf.append(CLOSE_ELEMENT);
-                appendEndRow(buf);
-                value = "";
-            } else {
-                if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
+
+            if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
                         /*&& !key.equals(WHERECLAUSE)*/ && !key.equals(FILEPATH)) {
                     if(validate.equals(key)){
                         logger.log(Level.FINEST, "key: "+key);
@@ -357,7 +340,6 @@ public class FileConnectorType implements ConnectorType {
                 buf.append(CLOSE_ELEMENT);
                 appendEndRow(buf);
                 value = "";
-            }
         }
 
         if (configMap != null) {
@@ -466,23 +448,6 @@ public class FileConnectorType implements ConnectorType {
         if (attrName == TYPE && attrValue == TEXT) {
             buf.append(" size=\"50\"");
         }
-    }
-
-    private void appendCheckBox(StringBuffer buf, String key, String label,    String value) {
-        buf.append(TR_START);
-        buf.append(TD_START_COLSPAN);
-        buf.append(OPEN_ELEMENT);
-        buf.append(INPUT);
-        buf.append(" " + TYPE + "=\"" +CHECKBOX+'"');
-        buf.append(" " + NAME + "=\"" + key + "\" ");
-        if (value != null && value.equals("on")) {
-            buf.append(CHECKED);
-        }
-        buf.append(CLOSE_ELEMENT);
-        buf.append(label + TD_END);
-
-        buf.append(TR_END);
-
     }
 
     private boolean isRequired(final String configKey){

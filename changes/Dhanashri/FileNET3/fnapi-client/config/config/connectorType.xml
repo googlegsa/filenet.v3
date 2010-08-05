@@ -13,7 +13,6 @@
                 <value>object_factory</value>
                 <value>authentication_type</value>
                 <value>additional_where_clause</value>
-                <value>is_public</value>
             </list>
         </property>
     </bean>

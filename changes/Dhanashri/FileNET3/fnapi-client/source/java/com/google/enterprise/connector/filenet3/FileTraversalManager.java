@@ -66,7 +66,6 @@ public class FileTraversalManager implements TraversalManager {
     private String displayUrl;
     private String additionalWhereClause;
     private int batchint;
-    private boolean isPublic;
     private HashSet included_meta;
     private HashSet excluded_meta;
     private final static String eventAllias = " e";
@@ -79,16 +78,14 @@ public class FileTraversalManager implements TraversalManager {
             + " ";
 
     public FileTraversalManager(IObjectFactory fileObjectFactory,
-            IObjectStore objectStore, ISession fileSession, boolean b,
-            String displayUrl, String additionalWhereClause,
-            HashSet included_meta, HashSet excluded_meta)
-            throws RepositoryException {
+            IObjectStore objectStore, ISession fileSession, String displayUrl,
+            String additionalWhereClause, HashSet included_meta,
+            HashSet excluded_meta) throws RepositoryException {
         this.fileObjectFactory = fileObjectFactory;
         this.objectStore = objectStore;
         this.fileSession = fileSession;
         Object[] args = { objectStore.getName() };
         objectStoresQuery = MessageFormat.format(objectStoresQuery, args);
-        this.isPublic = b;
         this.displayUrl = displayUrl;
         this.additionalWhereClause = additionalWhereClause;
         this.included_meta = included_meta;
@@ -135,9 +132,8 @@ public class FileTraversalManager implements TraversalManager {
         if ((resultDoc.getElementsByTagName("z:row").getLength() > 0)
                 || (resultDocToDelete.getElementsByTagName("z:row").getLength() > 0)) {
             resultSet = new FileDocumentList(resultDoc, resultDocToDelete,
-                    objectStore, this.isPublic, this.displayUrl,
-                    this.included_meta, this.excluded_meta, dateFirstPush,
-                    checkPoint);
+                    objectStore, this.displayUrl, this.included_meta,
+                    this.excluded_meta, dateFirstPush, checkPoint);
         }
         return resultSet;
     }

@@ -48,7 +48,7 @@ public class FileMockDocumentTest extends TestCase {
      */
     public void testFindProperty() throws RepositoryException {
         FileDocument filePm = new FileDocument(FnMockConnection.FN_ID1,
-                ((FileSession) sess).getObjectStore(), false,
+                ((FileSession) sess).getObjectStore(),
                 FnMockConnection.displayUrl, FnMockConnection.included_meta,
                 FnMockConnection.excluded_meta,SpiConstants.ActionType.ADD);
         Property property = filePm.findProperty("google:docid");
@@ -69,7 +69,7 @@ public class FileMockDocumentTest extends TestCase {
      */
     public void testGetPropertyNames() throws RepositoryException {
         FileDocument filePm = new FileDocument(FnMockConnection.FN_ID1,
-                ((FileSession) sess).getObjectStore(), false,
+                ((FileSession) sess).getObjectStore(),
                 FnMockConnection.displayUrl, FnMockConnection.included_meta,
                 FnMockConnection.excluded_meta,SpiConstants.ActionType.ADD);
 
