@@ -26,70 +26,70 @@ import java.util.Iterator;
 
 public class FileDocumentTest extends FileNetTestCase {
 
-	FileSession fs;
-	IObjectStore ios;
-	IConnection conn;
-	UserContext uc;
-	IObjectFactory iof;
+    FileSession fs;
+    IObjectStore ios;
+    IConnection conn;
+    UserContext uc;
+    IObjectFactory iof;
 
-	protected void setUp() throws Exception {
+    protected void setUp() throws Exception {
 
-		FileConnector connec = new FileConnector();
-		connec.setUsername(TestConnection.adminUsername);
-		connec.setPassword(TestConnection.adminPassword);
-		connec.setObject_store(TestConnection.objectStore);
-		connec.setWorkplace_display_url(TestConnection.displayURL);
-		connec.setObject_factory(TestConnection.objectFactory);
-		connec.setContent_engine_url(TestConnection.uri);
+        FileConnector connec = new FileConnector();
+        connec.setUsername(TestConnection.adminUsername);
+        connec.setPassword(TestConnection.adminPassword);
+        connec.setObject_store(TestConnection.objectStore);
+        connec.setWorkplace_display_url(TestConnection.displayURL);
+        connec.setObject_factory(TestConnection.objectFactory);
+        connec.setContent_engine_url(TestConnection.uri);
 
-		fs = (FileSession) connec.login();
+        fs = (FileSession) connec.login();
 
-		iof = (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
-		IConnection conn = iof.getConnection(TestConnection.uri);
-		// Domain domain = Factory.Domain.getInstance(conn.getConnection(),
-		// "P8.V4");
-		ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.username, TestConnection.password);
+        iof = (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
+        IConnection conn = iof.getConnection(TestConnection.uri);
+        // Domain domain = Factory.Domain.getInstance(conn.getConnection(),
+        // "P8.V4");
+        ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.username, TestConnection.password);
 
-	}
+    }
 
-	/*
-	 * Test method for
-	 * 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
-	 */
-	public void testFindProperty() throws RepositoryException {
+    /*
+     * Test method for
+     * 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
+     */
+    public void testFindProperty() throws RepositoryException {
 
-		FileDocument fd = new FileDocument(TestConnection.docId1, null, ios,
-				TestConnection.displayURL, TestConnection.included_meta,
-				TestConnection.excluded_meta, ActionType.ADD);
+        FileDocument fd = new FileDocument(TestConnection.docId1, null, ios,
+                TestConnection.displayURL, TestConnection.included_meta,
+                TestConnection.excluded_meta, ActionType.ADD);
 
-		Property prop = fd.findProperty("Id");
+        Property prop = fd.findProperty("Id");
 
-		assertTrue(prop instanceof FileDocumentProperty);
-		assertEquals(TestConnection.docId1, prop.nextValue().toString());
+        assertTrue(prop instanceof FileDocumentProperty);
+        assertEquals(TestConnection.docId1, prop.nextValue().toString());
 
-	}
+    }
 
-	/*
-	 * Test method for
-	 * 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
-	 */
-	public void testGetPropertyNames() throws RepositoryException {
+    /*
+     * Test method for
+     * 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
+     */
+    public void testGetPropertyNames() throws RepositoryException {
 
-		FileDocument fd = new FileDocument(TestConnection.docId2, null, ios,
-				TestConnection.displayURL, TestConnection.included_meta,
-				TestConnection.excluded_meta, ActionType.ADD);
-		// Set set = fdpm.getPropertyNames();
+        FileDocument fd = new FileDocument(TestConnection.docId2, null, ios,
+                TestConnection.displayURL, TestConnection.included_meta,
+                TestConnection.excluded_meta, ActionType.ADD);
+        // Set set = fdpm.getPropertyNames();
 
-		Iterator properties = fd.getPropertyNames().iterator();
+        Iterator properties = fd.getPropertyNames().iterator();
 
-		int counter = 0;
-		while (properties.hasNext()) {
-			properties.next();
-			counter++;
-		}
+        int counter = 0;
+        while (properties.hasNext()) {
+            properties.next();
+            counter++;
+        }
 
-		assertEquals(19, counter);
+        assertEquals(19, counter);
 
-	}
+    }
 
 }
