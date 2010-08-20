@@ -59,7 +59,7 @@ public class FileDocumentTest extends FileNetTestCase {
     public void testFindProperty() throws RepositoryException {
 
         FileDocument fd = new FileDocument(TestConnection.docId1, null, ios,
-                TestConnection.displayURL, TestConnection.included_meta,
+                false, TestConnection.displayURL, TestConnection.included_meta,
                 TestConnection.excluded_meta, ActionType.ADD);
 
         Property prop = fd.findProperty("Id");
@@ -76,7 +76,7 @@ public class FileDocumentTest extends FileNetTestCase {
     public void testGetPropertyNames() throws RepositoryException {
 
         FileDocument fd = new FileDocument(TestConnection.docId2, null, ios,
-                TestConnection.displayURL, TestConnection.included_meta,
+                false, TestConnection.displayURL, TestConnection.included_meta,
                 TestConnection.excluded_meta, ActionType.ADD);
         // Set set = fdpm.getPropertyNames();
 

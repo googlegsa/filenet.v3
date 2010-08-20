@@ -37,6 +37,7 @@ public class FileSession implements Session {
     private IObjectStore objectStore;
     private IConnection connection;
     private String displayUrl;
+    private boolean isPublic;
     private String additionalWhereClause;
     private HashSet included_meta;
     private HashSet excluded_meta;
@@ -48,8 +49,9 @@ public class FileSession implements Session {
 
     public FileSession(String iObjectFactory, String userName,
             String userPassword, String objectStoreName, String displayUrl,
-            String contentEngineUri, String additionalWhereClause,
-            HashSet included_meta, HashSet excluded_meta, String db_timezone)
+            String contentEngineUri, boolean isPublic,
+            String additionalWhereClause, HashSet included_meta,
+            HashSet excluded_meta, String db_timezone)
             throws RepositoryException, RepositoryLoginException {
 
         setFileObjectFactory(iObjectFactory);
@@ -65,6 +67,7 @@ public class FileSession implements Session {
         logger.info("objectStore ok user:" + userName);
 
         this.displayUrl = getDisplayURL(displayUrl, objectStoreName);
+        this.isPublic = isPublic;
         this.additionalWhereClause = additionalWhereClause;
         this.included_meta = included_meta;
         this.excluded_meta = excluded_meta;
@@ -112,12 +115,10 @@ public class FileSession implements Session {
 
     public TraversalManager getTraversalManager() throws RepositoryException {
         // logger.info("getTraversalManager");
-
         FileTraversalManager fileQTM = new FileTraversalManager(
-                fileObjectFactory, objectStore, this.displayUrl,
+                fileObjectFactory, objectStore, this.isPublic, this.displayUrl,
                 this.additionalWhereClause, this.included_meta,
                 this.excluded_meta, this.db_timezone);
-
         return fileQTM;
     }
 

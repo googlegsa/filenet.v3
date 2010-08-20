@@ -35,6 +35,7 @@ public class FileDocumentList implements DocumentList {
     private String lastCheckPoint;
     private String dateFirstPush;
     private String docIdToDelete = "";
+    private boolean isPublic;
     private HashSet included_meta;
     private HashSet excluded_meta;
     private int index = -1;
@@ -43,11 +44,13 @@ public class FileDocumentList implements DocumentList {
     private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
 
     public FileDocumentList(IObjectSet objectSet, IObjectSet objectSetToDelete,
-            IObjectStore objectStore, String displayUrl, HashSet included_meta,
-            HashSet excluded_meta, String dateFirstPush, String checkPoint) {
+            IObjectStore objectStore, boolean isPublic, String displayUrl,
+            HashSet included_meta, HashSet excluded_meta, String dateFirstPush,
+            String checkPoint) {
         this.objectSet = objectSet;
         this.objectSetToDelete = objectSetToDelete;
         this.objectStore = objectStore;
+        this.isPublic = isPublic;
         this.displayUrl = displayUrl;
         this.included_meta = included_meta;
         this.excluded_meta = excluded_meta;
@@ -89,8 +92,9 @@ public class FileDocumentList implements DocumentList {
                 Date dateLastModified = doc.getModifyDate(SpiConstants.ActionType.ADD);
 
                 fileDocument = new FileDocument(docId, dateLastModified,
-                        this.objectStore, this.displayUrl, this.included_meta,
-                        this.excluded_meta, SpiConstants.ActionType.ADD);
+                        this.objectStore, this.isPublic, this.displayUrl,
+                        this.included_meta, this.excluded_meta,
+                        SpiConstants.ActionType.ADD);
                 index++;
                 return fileDocument;
             }
@@ -111,7 +115,7 @@ public class FileDocumentList implements DocumentList {
                     commonVersionId = "{" + commonVersionId + "}";
                     fileDocumentToDelete = new FileDocument(docId,
                             commonVersionId, dateLastModified,
-                            this.objectStore, this.displayUrl,
+                            this.objectStore, this.isPublic, this.displayUrl,
                             this.included_meta, this.excluded_meta,
                             SpiConstants.ActionType.DELETE);
                     index++;

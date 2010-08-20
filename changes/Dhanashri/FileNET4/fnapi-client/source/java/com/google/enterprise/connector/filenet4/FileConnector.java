@@ -20,7 +20,7 @@ public class FileConnector implements Connector {
     private String object_store;
     private String workplace_display_url;
     private String content_engine_url;
-       private String is_public = "false";
+    private String is_public = "false";
     private String additional_where_clause;
     private HashSet included_meta;
     private HashSet excluded_meta;
@@ -61,8 +61,8 @@ public class FileConnector implements Connector {
 
             sess = new FileSession(object_factory, username, password,
                     object_store, workplace_display_url, content_engine_url,
-                    additional_where_clause, included_meta, excluded_meta,
-                    db_timezone);
+                    is_public.equals("on"), additional_where_clause,
+                    included_meta, excluded_meta, db_timezone);
         }
         return sess;
 
@@ -111,7 +111,7 @@ public class FileConnector implements Connector {
 
     public void setIs_public(String isPublic) {
         this.is_public = isPublic;
-        logger.config("Set IsPublic to "+this.is_public);
+        logger.config("Set IsPublic to " + this.is_public);
     }
 
     public String getAdditional_where_clause() {

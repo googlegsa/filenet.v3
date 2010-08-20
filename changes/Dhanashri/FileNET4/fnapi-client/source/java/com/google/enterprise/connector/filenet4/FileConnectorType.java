@@ -89,8 +89,6 @@ public class FileConnectorType implements ConnectorType {
     private static final String FILEPATH = "path_to_WcmApiConfig";
     private static final String AUTHENTICATIONTYPE = "authentication_type";
     private static final String WHERECLAUSE = "additional_where_clause";
-    private static final String CHECKBOX = "checkbox";
-    private static final String CHECKED = "checked='checked'";
     private static final String LOCALE_FILE = "FileConnectorResources";
     private static Logger logger = null;
     private List keys = null;
@@ -177,7 +175,7 @@ public class FileConnectorType implements ConnectorType {
     /**
      * Loops on keys and return a key name only if it finds one with a null or
      * blank value, unless key.equals(FNCLASS) or key.equals(AUTHENTICATIONTYPE)
-     * or key.equals(WHERECLAUSE) or key.equals(FILEURI) or key.equals(ISPUBLIC)
+     * or key.equals(WHERECLAUSE) or key.equals(FILEURI)
      */
     private String validateConfigMap(Map configData) {
         for (Iterator i = keys.iterator(); i.hasNext();) {
@@ -185,8 +183,7 @@ public class FileConnectorType implements ConnectorType {
             String val = (String) configData.get(key);
             // TODO remove unrelevant FILEURI
 
-            if (!key.equals(FNCLASS)
-                    && !key.equals(AUTHENTICATIONTYPE)
+            if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
                     && !key.equals(WHERECLAUSE) // && !key.equals(FILEURI)
                     && (val == null || val.length() == 0)) {
 
@@ -450,7 +447,7 @@ public class FileConnectorType implements ConnectorType {
             buf.append(CLOSE_ELEMENT);
             appendEndRow(buf);
             value = "";
-            // }
+
         }
         if (configMap != null) {
             Iterator i = new TreeSet(configMap.keySet()).iterator();
@@ -532,7 +529,8 @@ public class FileConnectorType implements ConnectorType {
             // XML-encode the special characters (< > " etc.)
             // Check the basic requirement mentioned in ConnectorType as part of
             // CM-Issue 186
-                XmlUtils.xmlAppendAttrValue(attrValue, buf);
+            XmlUtils.xmlAppendAttrValue(attrValue, buf);
+
         } catch (IOException e) {
             String msg = new StringBuffer(
                     "Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();

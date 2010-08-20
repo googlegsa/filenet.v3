@@ -9,7 +9,6 @@
         <property name="workplace_display_url" value="${workplace_display_url}" />
         <property name="object_factory" value="com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory" />
         <property name="additional_where_clause" value="${additional_where_clause}" />
-        <property name="is_public" value="${is_public}" />
         <property name="db_timezone" value=""/>
         <property name="included_meta">
             <set>
