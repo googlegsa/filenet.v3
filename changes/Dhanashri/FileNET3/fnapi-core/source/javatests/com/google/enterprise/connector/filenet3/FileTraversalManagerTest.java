@@ -118,7 +118,7 @@ public class FileTraversalManagerTest extends TestCase {
 
         FileDocument pm = new FileDocument(FnConnection.docId,
                 FnConnection.date, ((FileSession) sess).getObjectStore(),
-                FnConnection.displayUrl, FnConnection.included_meta,
+                false, FnConnection.displayUrl, FnConnection.included_meta,
                 FnConnection.excluded_meta, SpiConstants.ActionType.ADD);
         fdl = (FileDocumentList) qtm.startTraversal();
         String result = fdl.fetchAndVerifyValueForCheckpoint(pm, SpiConstants.PROPNAME_DOCID).nextValue().toString();

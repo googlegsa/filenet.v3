@@ -10,7 +10,6 @@
         <property name="object_factory" value="com.google.enterprise.connector.filenet3.filejavawrap.FnObjectFactory" />
         <property name="authentication_type" value="api" />
         <property name="additional_where_clause" value="${additional_where_clause}" />
-        <property name="is_public" value="${is_public}" />
         <property name="included_meta">
             <set>
                 <value>ClassificationStatus</value>

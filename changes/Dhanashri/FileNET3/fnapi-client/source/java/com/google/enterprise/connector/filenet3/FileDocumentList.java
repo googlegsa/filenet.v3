@@ -41,6 +41,7 @@ public class FileDocumentList implements DocumentList {
     private String lastCheckPoint;
     private String dateFirstPush;
     private String docIdToDelete = "";
+    private boolean isPublic;
     private HashSet includedMeta;
     private HashSet excludedMeta;
     private int index = -1;
@@ -49,7 +50,7 @@ public class FileDocumentList implements DocumentList {
     private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
 
     public FileDocumentList(Document document, Document documentToDelete,
-            IObjectStore refObjectStore,
+            IObjectStore refObjectStore, boolean refIsPublic,
             String refDisplayUrl, HashSet refIncludedMeta,
             HashSet refExcludedMeta, String refDateFirstPush,
             String refCheckPoint) {
@@ -69,6 +70,7 @@ public class FileDocumentList implements DocumentList {
         logger.log(Level.FINE, "List of results to delete : "
                 + resultDocToDelete.getChildNodes());
 
+        this.isPublic = refIsPublic;
         this.includedMeta = refIncludedMeta;
         this.excludedMeta = refExcludedMeta;
         this.lastCheckPoint = refCheckPoint;
@@ -102,7 +104,7 @@ public class FileDocumentList implements DocumentList {
                         fileDocument = new FileDocument(
                                 (String) nodeMap.item(j).getNodeValue(),
                                 dateLastModified, this.objectStore,
-                                this.displayUrl,
+                                this.isPublic, this.displayUrl,
                                 this.includedMeta, this.excludedMeta,
                                 SpiConstants.ActionType.ADD);
 
@@ -141,7 +143,7 @@ public class FileDocumentList implements DocumentList {
                             fileDocumentToDelete = new FileDocument(
                                     docIdToDelete, commonVersionId,
                                     dateLastModified, this.objectStore,
-                                    this.displayUrl,
+                                    this.isPublic, this.displayUrl,
                                     this.includedMeta, this.excludedMeta,
                                     SpiConstants.ActionType.DELETE);
                             index++;

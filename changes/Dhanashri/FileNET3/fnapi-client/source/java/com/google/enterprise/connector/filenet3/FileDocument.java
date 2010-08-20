@@ -30,6 +30,7 @@ public class FileDocument implements Document {
 
     private IObjectStore objectStore;
     private IDocument document = null;
+    private boolean isPublic = false;
     private String displayUrl;
     private String docId;
     private String versionId;
@@ -46,10 +47,11 @@ public class FileDocument implements Document {
     private final static int ONE_SECOND = 1000;
 
     public FileDocument(String docId, IObjectStore objectStore,
-            String displayUrl, HashSet included_meta,
+            boolean isPublic, String displayUrl, HashSet included_meta,
             HashSet excluded_meta, SpiConstants.ActionType action) {
         this.docId = docId;
         this.objectStore = objectStore;
+        this.isPublic = isPublic;
         this.displayUrl = displayUrl;
         this.included_meta = included_meta;
         this.excluded_meta = excluded_meta;
@@ -57,11 +59,12 @@ public class FileDocument implements Document {
     }
 
     public FileDocument(String docId, String timeStamp, IObjectStore objectStore,
-            String displayUrl, HashSet included_meta,
+            boolean isPublic, String displayUrl, HashSet included_meta,
             HashSet excluded_meta, SpiConstants.ActionType action) {
         this.docId = docId;
         this.objectStore = objectStore;
         this.timeStamp = timeStamp;
+        this.isPublic = isPublic;
         this.displayUrl = displayUrl;
         this.included_meta = included_meta;
         this.excluded_meta = excluded_meta;
@@ -69,12 +72,13 @@ public class FileDocument implements Document {
     }
 
     public FileDocument(String docId, String commonVersionId, String timeStamp, IObjectStore objectStore,
-            String displayUrl, HashSet included_meta,
+            boolean isPublic, String displayUrl, HashSet included_meta,
             HashSet excluded_meta, SpiConstants.ActionType action) {
         this.docId = docId;
         this.versionId = commonVersionId;
         this.timeStamp = timeStamp;
         this.objectStore = objectStore;
+        this.isPublic = isPublic;
         this.displayUrl = displayUrl;
         this.included_meta = included_meta;
         this.excluded_meta = excluded_meta;
@@ -128,7 +132,7 @@ public class FileDocument implements Document {
                 return new FileDocumentProperty(name, set);
             } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
                 logger.log(Level.INFO, "Getting property: "+name);
-                set.add(BooleanValue.makeBooleanValue(false));
+                set.add(BooleanValue.makeBooleanValue(this.isPublic ? true : false));
                 return new FileDocumentProperty(name, set);
             } else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
                 logger.log(Level.INFO, "Getting property: "+name);

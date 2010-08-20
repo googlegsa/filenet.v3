@@ -38,7 +38,7 @@ public class FileDocumentTest extends TestCase {
     public void testFindProperty() throws RepositoryException {
 
         FileDocument fdpm = new FileDocument(FnConnection.docId2, objectStore,
-                FnConnection.displayUrl, FnConnection.included_meta,
+                false, FnConnection.displayUrl, FnConnection.included_meta,
                 FnConnection.excluded_meta,SpiConstants.ActionType.ADD);
 
         Property property = fdpm.findProperty("google:docid");
@@ -54,7 +54,7 @@ public class FileDocumentTest extends TestCase {
      */
     public void testGetProperties() throws RepositoryException {
         FileDocument fdpm = new FileDocument(FnConnection.docId2, objectStore,
-                FnConnection.displayUrl, FnConnection.included_meta,
+                false, FnConnection.displayUrl, FnConnection.included_meta,
                 FnConnection.excluded_meta,SpiConstants.ActionType.ADD);
         // Set set = fdpm.getPropertyNames();
 
