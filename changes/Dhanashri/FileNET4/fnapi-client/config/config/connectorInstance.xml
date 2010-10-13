@@ -8,6 +8,7 @@
              For e.g. GMT+05:30 -->
     <!--
         <property name="db_timezone" value=""/>
+        <property name="is_public" value="false"/>
         <property name="included_meta">
             <set>
                 <value>ClassificationStatus</value>
