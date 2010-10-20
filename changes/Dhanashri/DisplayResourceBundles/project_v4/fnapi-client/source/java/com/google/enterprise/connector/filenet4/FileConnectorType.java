@@ -252,7 +252,7 @@ public class FileConnectorType implements ConnectorType {
                         search.execute(query.toString());
                     }
                 }catch(Exception e){
-                    logger.log(Level.SEVERE, e.getLocalizedMessage(),e);
+                    logger.log(Level.SEVERE, e.getLocalizedMessage());
                     this.validation = WHERECLAUSE;
                     form = makeConfigForm(configData, this.validation);
                     return new ConfigureResponse(resource.getString("additional_where_clause_invalid"), form);
@@ -262,17 +262,17 @@ public class FileConnectorType implements ConnectorType {
                 String bundleMessage;
                 try{
                     if(errorKey.equalsIgnoreCase("E_NULL_OR_INVALID_PARAM_VALUE")){
-                        bundleMessage = resource.getString("content_engine_url_invalid") +" "+ e.getLocalizedMessage();
+                        bundleMessage = resource.getString("content_engine_url_invalid");
                         logger.log(Level.SEVERE,bundleMessage,e);
                     }else{
                         //                        bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
                         bundleMessage = e.getLocalizedMessage();
-                        logger.log(Level.SEVERE,bundleMessage,e);
+                        logger.log(Level.SEVERE,bundleMessage);
                     }
                 }catch(MissingResourceException mre){
                     //                    bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
-                    bundleMessage = e.getLocalizedMessage();
-                    logger.log(Level.SEVERE,bundleMessage,mre);
+                    bundleMessage = mre.getLocalizedMessage();
+                    logger.log(Level.SEVERE,bundleMessage);
                 }
                 form = makeConfigForm(configData, validation);
                 return new ConfigureResponse( bundleMessage, form);
@@ -283,9 +283,9 @@ public class FileConnectorType implements ConnectorType {
                         EngineRuntimeException ere = (EngineRuntimeException)e.getCause();
                         String errorKey = ere.getExceptionCode().getKey();
                         if(errorKey.equalsIgnoreCase("E_OBJECT_NOT_FOUND")){
-                            bundleMessage = resource.getString("object_store_invalid")+" "+ere.getLocalizedMessage();
+                            bundleMessage = resource.getString("object_store_invalid");
                         }else if(errorKey.equalsIgnoreCase("E_NOT_AUTHENTICATED")){
-                            bundleMessage = resource.getString("invalid_credentials_error")+" "+ere.getLocalizedMessage();
+                            bundleMessage = resource.getString("invalid_credentials_error");
                         }else if(errorKey.equalsIgnoreCase("E_UNEXPECTED_EXCEPTION")){
                             String errorMsg = ere.getCause().getClass().getName();
                             if(ere.getCause() instanceof NoClassDefFoundError){
@@ -319,14 +319,14 @@ public class FileConnectorType implements ConnectorType {
                         }else if(errorKey.equalsIgnoreCase("TRANSPORT_WSI_LOOKUP_FAILURE")){
                             bundleMessage = resource.getString("wsdl_api_jar_error");
                         }else{
-                            bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
+                            bundleMessage = resource.getString("required_field_error");
                         }
                     }else{
                         bundleMessage = e.getLocalizedMessage();
                     }
                     logger.log(Level.SEVERE,bundleMessage,e);
                 } catch (MissingResourceException mre) {
-                    bundleMessage = resource.getString("required_field_error") +" "+ e.getLocalizedMessage();
+                    bundleMessage = resource.getString("required_field_error");
                     //logger.severe(bundleMessage);
                     logger.log(Level.SEVERE,bundleMessage,mre);
                 }catch(NullPointerException npe){
