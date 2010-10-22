@@ -144,5 +144,5 @@ These jars should be present in the classpath. Due to unavailability of these ja
        `CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib`
   #    Restart the connector service.
 
-Authentication And Authorization :
+=Diagnosing the Connector Logs=
    
