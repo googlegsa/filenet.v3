@@ -143,4 +143,6 @@ These jars should be present in the classpath. Due to unavailability of these ja
   #    Copy those jars from FileNet Server and paste them under the following directory:
        `CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib`
   #    Restart the connector service.
+
+Authentication And Authorization :
    
