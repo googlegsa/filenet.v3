@@ -145,31 +145,3 @@ These jars should be present in the classpath. Due to unavailability of these ja
   #    Restart the connector service.
 
 ===Diagnosing the Connector Logs===
-
-This section details some of the important log messages that are written into the connector’s log: 
-
-essage 	Description 	Logging Level 
-startTraversal / resumeTraversal 	A new / incremental crawl has begun. 	INFO 
-Getting the initial list of MySites 	Connector is discovering the personal site / My Sites 	INFO 
-Web Web_URL is getting traversed for documents 	Web with the URL Web_URL is getting traversed for documents. 	INFO 
-discovered new listState: List_URL 	Connector has just discovered the new SharePoint list and traversed the documents in it. 	INFO 
-revisiting old listState: List_URL 	Connector is checking for the list for any changes / updates. 	INFO 
-found # items to crawl in List_URL 	Connector has discovered # no. of documents from to be sent to GSA. 	INFO 
-found: # Items in List/Library List_URL for feed action=ADD 	Connector has discovered # no. of documents for ADD feeds. 	INFO 
-Processing the renamed/restored folder IDdocId, relativeURLrelativeURL 	Connector is fetching the child documents under a folder which have been restored or renamed. 	INFO 
-document urlurl has been re-written to [Aliased_Url ] in respect to the aliasing. 	Document URL has been re-written as per the Site Alias Mapping specified during the connector configuration. 	INFO 
-Document URL sending to CM : DocURL 	Connector has sent the document DocURL to the connector Manager from where it will be sent to GSA. 	INFO 
-Traversal returned #count documents 
-Number of documents returned after the current traversal cycle. 	INFO 
-checkpoint received 	Connector has just received a check pointing request from the Connector Manager / GSA. 	INFO 
-checkpoint processed; saving GlobalState to disk 	Connector has saved the traversal status to the state file. 	INFO 
-401: Unauthorized: Indicates invalid credentials 	Connector can not call the SharePoint web service with the specified user credentials. Check the correctness of the credential and the user rights. 	WARNING 
-Call to the GSSiteDiscovery web service failed with the following exception: 	Connector can not discover the sites outside the current site collection because GSSitediscovery has failed. 	WARNING 
-Unable to match the metadata_name1 ,metadata_name2 against one of the Included/excluded metadata. 	Some problem occurred while matching the metadata against the included / excluded list of metadata. 	WARNING 
-One of the metadata under included/excluded is invalid as GNU Regexp. metadata_name1 ,metadata_name2 	All the metadata entries under included / excluded metadata should be valid as per the GNU Regexp rules. 	WARNING 
-Unable to match the metadata metadata_name against one of the Included/excluded metadata. 	Some problem occurred while matching the metadata against the included / excluded list of metadata. 	WARNING 
-Getting child sites for web [ siteCollectionURL ] 	Sub sites are being discovered for a given site collection 	INFO 
-global state has been updated with newly intermediate webs 	Connector has discovered new sites to be crawled and have been added to the connector's state information 	INFO 
-Total MyLinks returned: <# of MySite URLs>	The total # of MySites discovered by the connector from the MySite base URL provided with the connector configuration 	INFO 
-
-   
