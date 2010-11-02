@@ -15,9 +15,13 @@ You are installing a patch release that is not packaged with an installer.
 
 = Pre-requisites: =
 • Apache Tomcat 6. You can download it from it from http://tomcat.apache.org/download-  60.cgi.
+
 • JRE1.5 or above. Refer to http://java.sun.com/javase/downloads/index_jdk5.jsp for downloads.
+
 • Make sure that Jace.jar is present.
+
 • Make sure that jaas.conf is present.
+
 • Make sure that  these files are available in your FileNet Workplace installation in the “WSI” directory or folder:
 
   Files under “lib” folder
