@@ -40,8 +40,8 @@ You are installing a patch release that is not packaged with an installer.
 
 = Steps to Install: =
 To install the connector manually, follow the instructions given below:
-1. On the Tomcat host, shut down Tomcat if it is running. 
-2. Go to $CATALINA_HOME\bin directory. 
+#1. On the Tomcat host, shut down Tomcat if it is running. 
+#2. Go to $CATALINA_HOME\bin directory. 
    a. For Windows Users, 
 	Edit the following files:
         • setclasspath.bat
