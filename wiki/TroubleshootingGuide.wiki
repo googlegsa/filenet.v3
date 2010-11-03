@@ -188,5 +188,4 @@ This section details some of the important log messages that are written into th
 ||  Connector dependency file builtin_serialization.jar is corrupted or its classpath has been reset ||  builtin serialization jar_error || SEVERE ||
 ||  Connector dependency file jaxrpc.jar is corrupted or its classpath has been reset ||  jaxrpc_jar_error || SEVERE ||
 ||  Connector dependency file saaj.jar is corrupted or its classpath has been reset ||  saaj_jar_error || SEVERE ||
-Connector dependency file wsdl_api.jar is corrupted or its classpath has been reset ||  wsdl_api_jar_error || SEVERE ||
-
+|| Connector dependency file wsdl_api.jar is corrupted or its classpath has been reset ||  wsdl_api_jar_error || SEVERE ||
