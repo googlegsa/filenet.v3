@@ -193,8 +193,6 @@ This section details some of the important log messages that are written into th
 || Resuming traversal...|| Resuming traversal...|| FINER ||
 || Number of new documents discovered << number >> || Number of new documents discovered|| INFO ||
 || checkpoint {"uuidToDelete""<<Doc id to delete>>","lastRemoveDate""<<Last removal date>>","lastModified""<<Last modified date>>","uuid""<<Doc id to add>>"}|| Checkpoint || INFO ||
-
-
 || * AuthN *  ||
 || *Log Message* || *Description* || *Level* ||
 || Unable to GET connection or user is not authenticated || Connection failed due to unauthenticated user || INFO ||
