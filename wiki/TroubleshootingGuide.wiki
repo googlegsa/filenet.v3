@@ -164,3 +164,29 @@ This section details some of the important log messages that are written into th
 || No configuration information is available || Resource bundle file is empty || SEVERE ||
 || Unable to establish connection with FileNet server || Fail to connect to FileNET server || SEVERE ||
 || Connection to Content Engine URL Failed || Connection to Content Engine URL failed || INFO ||
+
+
+|| * Connector configuration *  ||
+|| *Log Message* || *Description* || *Level* ||
+|| Invalid credentials. Please enter correct credentials || Invalid credentials  || SEVERE ||
+|| Either the Jaas.conf file is missing or corrupted. Please provide a valid Jaas.conf file.
+|| Invalid Jaas.conf file path || SEVERE ||
+|| Unable to connect remote server || Unable to connect remote server || SEVERE  ||
+|| Unable to validate Workplace URL. Could not connect to the Workplace. Either remote server is down or URL is not in proper format || Invalid  Workplace URL || SEVERE ||
+|| Unable to validate Content Engine URL. Could not connect to the Content Engine. Either Content Engine server is down or URL is not in proper format || Invalid Content Engine URL || SEVERE ||
+|| Required field not specified || Required field not specified || SEVERE ||
+|| Unsupported protocol. Please use http protocol || Used unsupported protocol || SEVERE ||
+|| Username cannot be blank. Please enter valid username || Blank username || SEVERE ||
+|| Password cannot be blank. Please enter valid password || Blank Password || SEVERE ||
+|| Object Store cannot be blank. Please enter a valid Object Store name || Blank object_store name || SEVERE ||
+|| Workplace URL cannot be blank. Please enter a valid Workplace URL || Blank Workplace display URL || SEVERE ||
+|| Content Engine URL cannot be blank. Please enter a valid Content Engine URL || Blank content engine URL || SEVERE ||
+|| Object Store is invalid. Please enter a valid Object Store name || Invalid object_store || SEVERE ||
+|| Where Clause is syntactically incorrect || Invalid additional where clause || SEVERE ||
+|| Connector dependency file activation.jar is corrupted or its classpath has been reset || activation jar error || SEVERE ||
+|| Connector dependency file jetty.jar is corrupted or its classpath has been reset || jetty jar error || SEVERE ||
+||  Connector dependency file builtin_serialization.jar is corrupted or its classpath has been reset ||  builtin serialization jar_error || SEVERE ||
+||  Connector dependency file jaxrpc.jar is corrupted or its classpath has been reset ||  jaxrpc_jar_error || SEVERE ||
+||  Connector dependency file saaj.jar is corrupted or its classpath has been reset ||  saaj_jar_error || SEVERE ||
+Connector dependency file wsdl_api.jar is corrupted or its classpath has been reset ||  wsdl_api_jar_error || SEVERE ||
+
