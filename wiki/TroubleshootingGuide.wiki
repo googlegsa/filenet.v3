@@ -208,8 +208,6 @@ This section details some of the important log messages that are written into th
 || Authentication Failed for user << user name >> || Authentication failed due to invalid credentials || INFO ||
 || Trying to authenticate with Short Name << short name >> || Authentication with short name || INFO ||
 || User << username >> is authenticated, Authentication Succeeded for user << name >> || Authentication succeeded for user || INFO ||
-
-
 || * AuthZ  *  ||
 || *Log Message* || *Description* || *Level* ||
 || Got null docids for authZ .. returning null || Empty collection of Document ID’s for authorization  || SEVERE ||
