@@ -216,12 +216,12 @@ This section details some of the important log messages that are written into th
 || Authorizing docids for user << User name >> || Started Authorizing document lists || INFO ||
 || Getting version series for document DocID %<ID>%|| Getting version series for document || INFO ||
 || Unable to Decode: Encoding is not supported for the document with ID: << docid >>
-UnsupportedEncodingException || WARNING ||
+|| UnsupportedEncodingException || WARNING ||
 || Error : document Version Series Id <docid> may no longer exist. Message: << exception message >>  || RepositoryException || WARNING ||
 || Authorizing DocID %<ID>%  for user << Username >>  ||  Started Authorizing single document  || INFO||
 || Authorizing user << username >>||  Started Authorizing single document  || INFO||
 || Authorizing user << username  >> || Authorizing user for permissions || INFO||
-|| Access Mask is [ << access mask >> ] || Checking permissions access mask || INFO||
-|| Grantee Name is [ << user name >>] is of type USER || Getting grantee name and type over permissions || INFO||
-|| Grantee Name [ << Grantee name >> ] does not match with search user [ << user name >> ]. Authorization will continue with the next Grantee Name || Grantee name doesn’t match with Search user name || INFO||
-|| Authorization for user [ << username >>] is Successful || Authorization successful  || INFO||
+|| Access Mask is  << access mask >>  || Checking permissions access mask || INFO||
+|| Grantee Name is  << user name >> is of type USER || Getting grantee name and type over permissions || INFO||
+|| Grantee Name  << Grantee name >>  does not match with search user  << user name >> . Authorization will continue with the next Grantee Name || Grantee name doesn’t match with Search user name || INFO||
+|| Authorization for user  << username >> is Successful || Authorization successful  || INFO||
