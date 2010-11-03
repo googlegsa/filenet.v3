@@ -15,15 +15,17 @@ You are installing a patch release that is not packaged with an installer.
 
 = Pre-requisites: =
 • Apache Tomcat 6. You can download it from it from http://tomcat.apache.org/download-  60.cgi
+
 • JRE1.5 or above. Refer to http://java.sun.com/javase/downloads/index_jdk5.jsp for downloads
-• Make sure that these files are available in your <FILENET_HOME>\Workplace\WEB-INF\lib server’s directory or folder:
+
+• Make sure that these files are available in your < FILENET_HOME >\Workplace\WEB-INF\lib server’s directory or folder:
    • javaapi.jar
    • activation.jar
    • mailapi.jar
    • p8cjares.jar
    • log4j.1.2.x.jar
    • soap.jar 
-• Make sure that “WcmApiConfig.properties” file is present under <FILENET_HOME>\Workplace\WEB-INF on server machine.
+• Make sure that “WcmApiConfig.properties” file is present under < FILENET_HOME >\Workplace\WEB-INF on server machine.
 
 = Steps to Install: =
 To install the connector manually, follow the instructions given below:
