@@ -207,6 +207,4 @@ This section details some of the important log messages that are written into th
 || Unable to GET connection or user is not authenticated || Connection failed due to unauthenticated user || INFO ||
 || Authentication Failed for user << user name >> || Authentication failed due to invalid credentials || INFO ||
 || Trying to authenticate with Short Name << short name >> || Authentication with short name || INFO ||
-|| User <username> is authenticated, Authentication Succeeded for user <name> || Authentication succeeded for user || INFO ||
-
-
+|| User << username >> is authenticated, Authentication Succeeded for user << name >> || Authentication succeeded for user || INFO ||
