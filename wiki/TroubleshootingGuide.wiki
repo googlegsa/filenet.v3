@@ -169,8 +169,7 @@ This section details some of the important log messages that are written into th
 || * Connector configuration *  ||
 || *Log Message* || *Description* || *Level* ||
 || Invalid credentials. Please enter correct credentials || Invalid credentials  || SEVERE ||
-|| Either the Jaas.conf file is missing or corrupted. Please provide a valid Jaas.conf file.
-|| Invalid Jaas.conf file path || SEVERE ||
+|| Either the Jaas.conf file is missing or corrupted. Please provide a valid Jaas.conf file.|| Invalid Jaas.conf file path || SEVERE ||
 || Unable to connect remote server || Unable to connect remote server || SEVERE  ||
 || Unable to validate Workplace URL. Could not connect to the Workplace. Either remote server is down or URL is not in proper format || Invalid  Workplace URL || SEVERE ||
 || Unable to validate Content Engine URL. Could not connect to the Content Engine. Either Content Engine server is down or URL is not in proper format || Invalid Content Engine URL || SEVERE ||
