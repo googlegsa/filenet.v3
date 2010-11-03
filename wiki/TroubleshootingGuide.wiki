@@ -214,11 +214,11 @@ This section details some of the important log messages that are written into th
 || *Log Message* || *Description* || *Level* ||
 || Got null docids for authZ .. returning null || Empty collection of Document ID’s for authorization  || SEVERE ||
 || Authorizing docids for user << User name >> || Started Authorizing document lists || INFO ||
-|| Getting version series for document DocID %<ID>%|| Getting version series for document || INFO ||
+|| Getting version series for document DocID %< ID >%|| Getting version series for document || INFO ||
 || Unable to Decode: Encoding is not supported for the document with ID: << docid >>
 || UnsupportedEncodingException || WARNING ||
-|| Error : document Version Series Id <docid> may no longer exist. Message: << exception message >>  || RepositoryException || WARNING ||
-|| Authorizing DocID %<ID>%  for user << Username >>  ||  Started Authorizing single document  || INFO||
+|| Error : document Version Series Id < docid > may no longer exist. Message: << exception message >>  || RepositoryException || WARNING ||
+|| Authorizing DocID %<  ID>%  for user << Username >>  ||  Started Authorizing single document  || INFO||
 || Authorizing user << username >>||  Started Authorizing single document  || INFO||
 || Authorizing user << username  >> || Authorizing user for permissions || INFO||
 || Access Mask is  << access mask >>  || Checking permissions access mask || INFO||
