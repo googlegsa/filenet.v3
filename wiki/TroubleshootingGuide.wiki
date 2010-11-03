@@ -153,9 +153,6 @@ This section details some of the important log messages that are written into th
 || Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory || Unable to instantiate the class|| WARNING ||
 || Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory || IllegalAccessException || WARNING ||
 || The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found || ClassNotFoundException || WARNING ||
-
-
-
 || * Login * ||
 || *Log Message* || *Description* || *Level* ||
 || Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory || Setting system property  || INFO ||
@@ -164,8 +161,6 @@ This section details some of the important log messages that are written into th
 || No configuration information is available || Resource bundle file is empty || SEVERE ||
 || Unable to establish connection with FileNet server || Fail to connect to FileNET server || SEVERE ||
 || Connection to Content Engine URL Failed || Connection to Content Engine URL failed || INFO ||
-
-
 || * Connector configuration *  ||
 || *Log Message* || *Description* || *Level* ||
 || Invalid credentials. Please enter correct credentials || Invalid credentials  || SEVERE ||
@@ -188,8 +183,6 @@ This section details some of the important log messages that are written into th
 ||  Connector dependency file jaxrpc.jar is corrupted or its classpath has been reset ||  jaxrpc_jar_error || SEVERE ||
 ||  Connector dependency file saaj.jar is corrupted or its classpath has been reset ||  saaj_jar_error || SEVERE ||
 || Connector dependency file wsdl_api.jar is corrupted or its classpath has been reset ||  wsdl_api_jar_error || SEVERE ||
-
-
 || * Traversal *  ||
 || *Log Message* || *Description* || *Level* ||
 || Query to Add document SELECT TOP 200 Id,DateLastModified FROM Document AS d WHERE VersionStatus=1 and ContentSize IS NOT NULL  AND ((DateLastModified=<<Date Lat Modified>> AND (‘<<Document ID>>’<id)) OR (DateLastModified>=<<Date Lat Modified>>)) ORDER BY DateLastModified,Id || FileNet query to add documents  || INFO ||
