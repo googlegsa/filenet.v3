@@ -148,7 +148,7 @@ These jars should be present in the classpath. Due to unavailability of these ja
 
 This section details some of the important log messages that are written into the connector’s log: 
 
-||*Initialize Connector instance*||
+|| *Initialize Connector instance* ||
 || *Log Message* || *Description* || *Level* ||
 || Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory || Unable to instantiate the class|| WARNING ||
 || Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory || IllegalAccessException || WARNING ||
