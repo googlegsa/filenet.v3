@@ -1,6 +1,6 @@
 #summary Manual Installation Steps for FileNet Connector 3.5.2
 
-= Introduction =
+=== Introduction ===
 
 This document walks you through the steps to manually install a connector. The instructions mentioned here are applicable to connector version 2.x and above
 
@@ -10,10 +10,7 @@ You have built and installed a customized connector manager or a customized vers
 You want to deploy the connector on an existing Tomcat installation
 You are installing a patch release that is not packaged with an installer.
 
-
-= Details =
-
-= Pre-requisites: =
+=== Pre-requisites: ===
 • Apache Tomcat 6. You can download it from it from http://tomcat.apache.org/download-  60.cgi
 
 • JRE1.5 or above. Refer to http://java.sun.com/javase/downloads/index_jdk5.jsp for downloads
@@ -27,7 +24,7 @@ You are installing a patch release that is not packaged with an installer.
    • soap.jar 
 • Make sure that “WcmApiConfig.properties” file is present under < FILENET_HOME >\Workplace\WEB-INF on server machine.
 
-= Steps to Install: =
+=== Steps to Install: ===
 To install the connector manually, follow the instructions given below:
 1. On the Tomcat host, shut down Tomcat if it is running. 
 2. Go to $CATALINA_HOME\bin directory. 
