@@ -156,7 +156,7 @@ This section details some of the important log messages that are written into th
 || 1940 || -2 || 40 ||
 
 
-|| *Year* ||
+|| *Year*            ||
 || 1900 || -10 || 25 ||
 || 1910 || -15 || 30 ||
 || 1920 || -10 || 32 ||
