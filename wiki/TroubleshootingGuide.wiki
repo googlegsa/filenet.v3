@@ -160,7 +160,7 @@ This section details some of the important log messages that are written into th
 || *Log Message* || *Description* || *Level* ||
 || Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory || Setting system property  || INFO ||
 || Unable to find URL of file jaas.conf || Jaas.conf not found at giver location || WARNING ||
-|| Unable to find the resource bundle file for language [ language ] || Unable to find the resource bundle file for locale language in resource bundle || SEVERE ||
+|| Unable to find the resource bundle file for language << language >> || Unable to find the resource bundle file for locale language in resource bundle || SEVERE ||
 || No configuration information is available || Resource bundle file is empty || SEVERE ||
 || Unable to establish connection with FileNet server || Fail to connect to FileNET server || SEVERE ||
 || Connection to Content Engine URL Failed || Connection to Content Engine URL failed || INFO ||
