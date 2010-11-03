@@ -188,3 +188,17 @@ This section details some of the important log messages that are written into th
 ||  Connector dependency file jaxrpc.jar is corrupted or its classpath has been reset ||  jaxrpc_jar_error || SEVERE ||
 ||  Connector dependency file saaj.jar is corrupted or its classpath has been reset ||  saaj_jar_error || SEVERE ||
 || Connector dependency file wsdl_api.jar is corrupted or its classpath has been reset ||  wsdl_api_jar_error || SEVERE ||
+
+
+|| * Traversal *  ||
+|| *Log Message* || *Description* || *Level* ||
+|| Query to Add document SELECT TOP 200 Id,DateLastModified FROM Document AS d WHERE VersionStatus=1 and ContentSize IS NOT NULL  AND ((DateLastModified=<<Date Lat Modified>> AND (‘<<Document ID>>’<id)) OR (DateLastModified>=<<Date Lat Modified>>)) ORDER BY DateLastModified,Id || FileNet query to add documents  || INFO ||
+|| Query to get deleted documents SELECT TOP 200 Id,DateCreated,VersionSeriesId FROM {<< version series ID >>} WHERE (DateCreated> <<Date created >>) ORDER BY DateCreated,Id  || FileNet query to delete documents   || INFO ||
+|| Number of documents sent to GSA <<number>>|| Number of documents sent to GSA at the end of the traversal  || INFO ||
+|| Number of documents whose index will be deleted from GSA <<number>>|| Number of documents whose index will be deleted from GSA || INFO ||
+|| Result set is NULL, no documents returned for traversal || End of last traversal  || INFO ||
+|| Resuming traversal...|| Resuming traversal...|| FINER ||
+|| Number of new documents discovered <<number>> || Number of new documents discovered|| INFO ||
+|| checkpoint {"uuidToDelete""<<Doc id to delete>>","lastRemoveDate""<<Last removal date>>","lastModified""<<Last modified date>>","uuid""<<Doc id to add>>"}
+|| Checkpoint || INFO ||
+
