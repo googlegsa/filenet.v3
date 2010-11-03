@@ -145,3 +145,12 @@ These jars should be present in the classpath. Due to unavailability of these ja
   #    Restart the connector service.
 
 ===Diagnosing the Connector Logs===
+
+This section details some of the important log messages that are written into the connector’s log: 
+
+|| *Year* || *Temperature (low)* || *Temperature (high)* ||
+|| 1900 || -10 || 25 ||
+|| 1910 || -15 || 30 ||
+|| 1920 || -10 || 32 ||
+|| 1930 || _N/A_ || _N/A_ ||
+|| 1940 || -2 || 40 ||
