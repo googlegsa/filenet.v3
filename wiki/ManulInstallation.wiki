@@ -115,7 +115,7 @@ Also you can check for http://localhost:8080/connector-manager/testConnectivity 
 
    o Change it to the following:
      {{{
-      set JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=java.util.logging.LogManager -Djava.util.logging.config.file=”%CATALINA_BASE%\webapps\connector-manager\WEB-INF\classes\logging.properties" -Dwasp.location="<WSI_DIRECTORY_PATH>"
+      set JAVA_OPTS=%JAVA_OPTS% -Djava.util.logging.manager=java.util.logging.LogManager -Djava.util.logging.config.file=”%CATALINA_BASE%\webapps\connector-manager\WEB-INF\classes\logging.properties" 
      }}}
 
 For Linux use $CATALINA_BASE
