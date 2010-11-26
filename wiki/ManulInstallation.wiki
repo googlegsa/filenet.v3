@@ -120,15 +120,17 @@ Also you can check for http://localhost:8080/connector-manager/testConnectivity 
 
 For Linux use $CATALINA_BASE
 
-9. In the $CATALINA_HOME/webapps/connector-manager/WEB-INF folder, create a directory or folder called classes. 
+9. Copy all the 9 jars (i.e. activation.jar, builtin_serialization.jar, javaapi.jar, jaxrpc.jar, jetty.jar, log4j.1.2.15.jar, saaj.jar, wasp.jar, wsdl_api.jar) from wsi\lib mentioned from the pre-requisite section to CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib 
 
-10. Copy the logging.properties file from the /Config folder to the /classes folder. 
+10. In the $CATALINA_HOME/webapps/connector-manager/WEB-INF folder, create a directory or folder called classes. 
 
-11. Copy the jaas.conf file to the /classes folder.
+11. Copy the logging.properties file from the /Config folder to the /classes folder. 
 
-12. Open the logging.properties file in a text editor. Set the value of java.util.logging.FileHandler.pattern equal to the absolute path of the log file.
+12. Copy the jaas.conf file to the /classes folder.
+
+13. Open the logging.properties file in a text editor. Set the value of java.util.logging.FileHandler.pattern equal to the absolute path of the log file.
 		java.util.logging.FileHandler.pattern=<value of $CATALINA_HOME>/logs/google-connectors%g.log
 
-13. Start the Tomcat server. 
+14. Start the Tomcat server. 
 
-14. To confirm whether the Tomcat server has started correctly and the connector is installed, navigate to the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors directory, and verify that the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors/Filenet_P8_3.5.2 directory exists. 
+15. To confirm whether the Tomcat server has started correctly and the connector is installed, navigate to the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors directory, and verify that the $CATALINA_HOME/webapps/connector-manager/WEB-INF/connectors/Filenet_P8 directory exists. 
