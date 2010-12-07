@@ -2,7 +2,7 @@
 
 == Introduction ==
 
-This document walks you through the steps to manually install a connector. The instructions mentioned here are applicable to connector version 2.x and above
+This document walks you through the steps to manually install a Google Enterprise FileNet Connector 4.0. The instructions mentioned here are applicable to connector version 2.x and above
 
 Google strongly recommends that you use the installer for installing the connector. Though, you may want to do it manually if,
 
