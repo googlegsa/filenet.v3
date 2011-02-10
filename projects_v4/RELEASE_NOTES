@@ -1,9 +1,9 @@
 Release Notes:
 ===============
 
-Google Search Appliance Connector for IBM FileNet P8 4.0,4.5
+Google Search Appliance Connector for IBM FileNet P8 4.0,4.5,4.5.1
 
-This document contains the release notes for Google Search Appliance Connector for IBM FileNet P8 4.0,4.5
+This document contains the release notes for Google Search Appliance Connector for IBM FileNet P8 4.0,4.5,4.5.1
 The following sections describe the release in detail and provide information that supplements the main documentation.
 See the Issues Tab on the Code Site for the current list of known issues and workarounds.
 
@@ -51,7 +51,7 @@ E5504 @ 2.00GHz, 2.00 GB of RAM
 
 Features
 --------------
-1. The connector crawls all documents which are supported by IBM FileNet server 4.0.
+1. The connector crawls all documents which are supported by IBM FileNet server 4.0,4.5,4.5.1.
 2. The connector always runs in an incremental mode and keeps feeding the updated documents to the Google Search Appliance (GSA).
 3. The auditing feature ensures that documents are deleted from the GSA index when they are deleted from the repository.
 4. The connector handles serve-time authentication and authorization.
@@ -85,4 +85,4 @@ Known Limitations
 -------------------
 - Issue 11: Documents which are checked in as only minor version and don't have any major version at all, will not be crawled.
 - Issue 14: Few words are displayed in English on Connctor Configuration page in GSA when we change the language on IE & Mozilla browsers.
-- Issue 30: FileNet4.0,4.5: Save configuration with Additional Where clause throws exception in logs and stops crawling.
+- Issue 30: FileNet4.0,4.5,4.5.1: Save configuration with Additional Where clause throws exception in logs and stops crawling.
