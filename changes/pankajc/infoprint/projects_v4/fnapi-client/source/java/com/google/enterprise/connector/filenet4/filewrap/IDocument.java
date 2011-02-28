@@ -30,37 +30,37 @@ import com.google.enterprise.connector.spi.RepositoryException;
  */
 public interface IDocument extends IBaseObject {
 
-	public void fetch(Set includedMeta)throws RepositoryDocumentException;
+    public void fetch(Set includedMeta)throws RepositoryDocumentException;
 
-	public IPermissions getPermissions() throws RepositoryException;
+    public IPermissions getPermissions() throws RepositoryException;
 
-	public InputStream getContent() throws RepositoryDocumentException;
+    public InputStream getContent() throws RepositoryDocumentException;
 
-	public IVersionSeries getVersionSeries() throws RepositoryDocumentException;;
+    public IVersionSeries getVersionSeries() throws RepositoryDocumentException;;
 
-	public Set getPropertyName() throws RepositoryDocumentException;
+    public Set getPropertyName() throws RepositoryDocumentException;
 
-	public String getPropertyType(String name) throws RepositoryDocumentException;
+    public String getPropertyType(String name) throws RepositoryDocumentException;
 
-	/*public String getPropertyStringValue(String name)
-			throws RepositoryDocumentException;
+    /*public String getPropertyStringValue(String name)
+            throws RepositoryDocumentException;
 */
-	public void getPropertyStringValue(String name, List set)
-	throws RepositoryDocumentException;
+    public void getPropertyStringValue(String name, List set)
+    throws RepositoryDocumentException;
 
-	public void getPropertyGuidValue(String name, List list) throws RepositoryDocumentException;
+    public void getPropertyGuidValue(String name, List list) throws RepositoryDocumentException;
 
-	public void getPropertyLongValue(String name, List list) throws RepositoryDocumentException;
+    public void getPropertyLongValue(String name, List list) throws RepositoryDocumentException;
 
-	public void getPropertyDoubleValue(String name, List list)
-			throws RepositoryDocumentException;
+    public void getPropertyDoubleValue(String name, List list)
+            throws RepositoryDocumentException;
 
-	public void getPropertyDateValue(String name, List list) throws RepositoryDocumentException;
+    public void getPropertyDateValue(String name, List list) throws RepositoryDocumentException;
 
-	public void getPropertyBooleanValue(String name, List list)
-			throws RepositoryDocumentException;
+    public void getPropertyBooleanValue(String name, List list)
+            throws RepositoryDocumentException;
 
-	public void getPropertyBinaryValue(String name, List list)
-			throws RepositoryDocumentException;
+    public void getPropertyBinaryValue(String name, List list)
+            throws RepositoryDocumentException;
 
 }
