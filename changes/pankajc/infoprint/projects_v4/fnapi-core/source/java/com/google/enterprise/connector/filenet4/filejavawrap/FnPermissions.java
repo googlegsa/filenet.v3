@@ -45,7 +45,6 @@ public class FnPermissions implements IPermissions {
 	private int ACCESS_LEVEL = AccessLevel.VIEW_AS_INT;
 	private String ACTIVE_DIRECTORY_SYMBOL = "@";
 	private int ACCESS_OBJECT_LEVEL = AccessRight.USE_MARKING_AS_INT;
-	// public int ACCESS_MASK_LEVEL = AccessRight.VIEW_CONTENT_AS_INT;
 	private Logger logger = null;
 
 	public FnPermissions(PermissionList perms) {
@@ -145,13 +144,23 @@ public class FnPermissions implements IPermissions {
 		return false;
 	}
 
+	/**
+	 * To check, a given user has at least USE right or above, over all the
+	 * marking permission of the target document.
+	 * 
+	 * @param Username which needs to be authorized.
+	 * @return True or False, depending on the success or failure of check for
+	 *         USE right.
+	 * @see com.google.enterprise.connector.filenet4.filewrap.IPermissions#authorizeMarking(java.lang.String)
+	 */
+
 	public boolean authorizeMarking(String username) {
 
 		String granteeName;
 		Iterator iter = perms.iterator();
 
-		logger.log(Level.FINE, "Authorizing user:[" + username
-				+ "] For USE right for marking set");
+		logger.log(Level.FINE, "Checking user : [" + username
+				+ "] For USE right over the Document");
 
 		while (iter.hasNext()) {
 			AccessPermission perm = (AccessPermission) iter.next();
@@ -163,15 +172,17 @@ public class FnPermissions implements IPermissions {
 
 				if (accessType.equals(AccessType.ALLOW)) {
 					if ((accessMask & ACCESS_OBJECT_LEVEL) == ACCESS_OBJECT_LEVEL) {
-
 						logger.log(Level.FINE, " User: [" + username
-								+ "] has USE right ");
+								+ "] has USE right over the document ");
 						return true;
+					} else {
+						logger.log(Level.FINE, " User: [" + username
+								+ "] does not have USE right over the document");
 					}
+				} else {
+					logger.log(Level.FINE, " User: [" + username
+							+ "] does not have USE right over the document");
 				}
-				logger.log(Level.FINE, " User: [" + username
-						+ "] does not have USE right over the document");
-				return false;
 			}
 		}
 		logger.log(Level.FINE, " User: [" + username
@@ -179,24 +190,41 @@ public class FnPermissions implements IPermissions {
 		return false;
 	}
 
+	/**
+	 * To check, a given user is in the list of Grantee of the given permission
+	 * object.
+	 * 
+	 * @param Object of the AccessPermission, Search user name.
+	 * @return True or False, depending on the success or failure of check for
+	 *         grantee name check.
+	 * @see com.google.enterprise.connector.filenet4.filewrap.IPermissions#checkGranteeName(AccessPermission,java.lang.String)
+	 */
+
 	private boolean checkGranteeName(AccessPermission perm, String username) {
 
 		String granteeName = perm.get_GranteeName();
 		boolean found = false;
 
+		logger.log(Level.FINE, "Matching the Grantee Name [" + granteeName
+				+ "] with search USER : [" + username + "]");
+
+		// check the type of the Grantee (USER or GROUP) for the given
+		// permission
+
 		if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
 			logger.log(Level.FINE, "Grantee Name is [" + granteeName
 					+ "] is of type USER");
+
 			if (granteeName.equalsIgnoreCase(username)
 					|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
-				logger.log(Level.FINE, "Authorization for user: [" + username
-						+ "] is Successful");
+				logger.log(Level.FINE, "Grantee Name [" + granteeName
+						+ "] matches with search USER [" + username + "]");
 
 				return true;
-
 			} else if (getShortName(granteeName).equalsIgnoreCase(username)) {
-				logger.log(Level.FINE, "Authorization for user: [" + username
-						+ "] is Successful");
+				logger.log(Level.FINE, "Grantee Name ["
+						+ getShortName(granteeName)
+						+ "] matches with search USER [" + username + "]");
 
 				return true;
 			} else {
@@ -204,16 +232,15 @@ public class FnPermissions implements IPermissions {
 						+ granteeName
 						+ "] does not match with search user ["
 						+ username
-						+ "]. Authorization will continue with the next Grantee Name");
+						+ "]. Checking will continue with the next Grantee Name");
 			}
 		} else if (perm.get_GranteeType() == SecurityPrincipalType.GROUP) { // GROUP
 			logger.log(Level.FINE, "Grantee Name [" + granteeName
 					+ "] is of type GROUP");
 			if (granteeName.equalsIgnoreCase("#AUTHENTICATED-USERS")) {
 
-				logger.log(Level.FINE, "Authorization for user: [" + username
-						+ "] is Successful");
-
+				logger.log(Level.FINE, "Grantee Name [" + granteeName
+						+ "] contains search USER [" + username + "]");
 				return true;
 
 			} else {
@@ -223,9 +250,8 @@ public class FnPermissions implements IPermissions {
 					group = com.filenet.api.core.Factory.Group.fetchInstance(conn, perm.get_GranteeName(), null);
 					found = searchUserInGroup(username, group);
 					if (found) {
-						logger.log(Level.FINE, "Authorization for user: ["
-								+ username + "] is Successful");
-
+						logger.log(Level.FINE, "Grantee Name [" + granteeName
+								+ "] contains search USER [" + username + "]");
 						return true;
 					}
 				} catch (Exception e) {
@@ -236,6 +262,14 @@ public class FnPermissions implements IPermissions {
 		}
 		return false;
 	}
+
+	/**
+	 * To return short name of the Search user name provided as a parameter.
+	 * 
+	 * @param Search user name.
+	 * @return short name of the Search user name provided as a parameter.
+	 * @see com.google.enterprise.connector.filenet4.filewrap.IPermissions#getShortName(java.lang.String)
+	 */
 
 	private String getShortName(String longName) {
 		StringTokenizer strtok = new StringTokenizer(longName, ",");
@@ -279,13 +313,12 @@ public class FnPermissions implements IPermissions {
 		Iterator itUser = us.iterator();
 		while (itUser.hasNext()) {
 			user = (User) itUser.next();
-			logger.log(Level.FINER, "Authorization for USER ["
-					+ user.get_Name() + "] of GROUP [" + group.get_Name() + "]");
+			logger.log(Level.FINER, "Searching the USER [" + username
+					+ "] in GROUP [" + group.get_Name() + "]");
 			if (user.get_Name().equalsIgnoreCase(username)
 					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
-				logger.log(Level.INFO, "Authorization for USER ["
-						+ user.get_Name() + "] of GROUP [" + group.get_Name()
-						+ "] is successful");
+				logger.log(Level.FINE, "Search USER [" + username
+						+ "] found in GROUP [" + group.get_Name() + "]");
 				return true;
 			}
 		}

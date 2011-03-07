@@ -182,6 +182,7 @@ public class FileConnectorType implements ConnectorType {
 	 * Loops on keys and return a key name only if it finds one with a null or
 	 * blank value, unless key.equals(FNCLASS) or key.equals(AUTHENTICATIONTYPE)
 	 * or key.equals(WHERECLAUSE) or key.equals(FILEURI) or key.equals(ISPUBLIC)
+	 * or key.equals(CHECKMARKING)
 	 */
 	private String validateConfigMap(Map configData) {
 		for (Iterator i = keys.iterator(); i.hasNext();) {
@@ -591,7 +592,6 @@ public class FileConnectorType implements ConnectorType {
 	private void appendMarkingCheckBox(StringBuffer buf, String key,
 			String label, String value) {
 		buf.append(TR_START);
-		// buf.append(TD_START);
 		buf.append(TD_START_COLSPAN);
 		buf.append(OPEN_ELEMENT);
 		buf.append(INPUT);

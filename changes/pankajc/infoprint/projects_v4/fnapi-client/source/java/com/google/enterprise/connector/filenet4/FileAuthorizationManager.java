@@ -44,6 +44,20 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		this.checkMarkings = checkMarkings;
 	}
 
+	/***
+	 * To authorize a given username against the grantee-names, present in all
+	 * the Access Control Entries for all the permission of the target document.
+	 * 
+	 * @param (java.util.Collection<String> List of Document IDs to authorize,
+	 *        com.google.enterprise.connector.spi.AuthenticationIdentity
+	 *        Search_user_identity)
+	 * @return Collection of AuthorizationResponse objects(True or
+	 *         False,DocumentID), depending on the success or failure of
+	 *         authorization.
+	 * @see com.google.enterprise.connector.spi.AuthorizationManager#authorizeDocids(java.util.Collection,
+	 *      com.google.enterprise.connector.spi.AuthenticationIdentity)
+	 */
+
 	public Collection authorizeDocids(Collection docids,
 			AuthenticationIdentity identity) throws RepositoryException {
 
@@ -59,22 +73,20 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
 		logger.info("Authorizing docids for user: " + identity.getUsername());
 
-		// authenticate superuser
-		// conn.getUserContext().authenticate(objectStore.getSUserLogin(),objectStore.getSUserPassword());
-		// check availability of marking set on docyument class
+		// check for the marking sets applied over the document class
 
 		try {
-			DocumentClassDefinition dcd = Factory.DocumentClassDefinition.fetchInstance(this.objectStore.getObjectStore(), GuidConstants.Class_Document, null);
-			PropertyDefinitionList pdslist = dcd.get_PropertyDefinitions();
-			Iterator<PropertyDefinition> pdsiter = pdslist.iterator();
+			DocumentClassDefinition documentClassDefinition = Factory.DocumentClassDefinition.fetchInstance(this.objectStore.getObjectStore(), GuidConstants.Class_Document, null);
+			PropertyDefinitionList propertyDefinitionList = documentClassDefinition.get_PropertyDefinitions();
+			Iterator<PropertyDefinition> propertyDefinitionIterator = propertyDefinitionList.iterator();
 			boolean hasMarkings = false;
 
-			while (pdsiter.hasNext()) {
-				PropertyDefinition pd = pdsiter.next();
+			while (propertyDefinitionIterator.hasNext()) {
+				PropertyDefinition propertyDefinition = propertyDefinitionIterator.next();
 
-				if (pd instanceof PropertyDefinitionString) {
-					MarkingSet msl = ((PropertyDefinitionString) pd).get_MarkingSet();
-					if (msl != null) {
+				if (propertyDefinition instanceof PropertyDefinitionString) {
+					MarkingSet markingSet = ((PropertyDefinitionString) propertyDefinition).get_MarkingSet();
+					if (markingSet != null) {
 						logger.log(Level.INFO, "Document class has properties associated with Markings set");
 						hasMarkings = true;
 						break;
@@ -88,7 +100,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 					logger.log(Level.INFO, "Connector is not configured to perform marking set's check for authorization");
 				}
 			} else {
-				logger.log(Level.INFO, "Document class does not have properties associated with Markings set hence; Not perform marking set's check for authorization");
+				logger.log(Level.INFO, "Document class does not have properties associated with Markings set hence; Marking set's check is  not required for authorization");
 				this.checkMarkings = false;
 			}
 		} catch (Exception ecp) {
@@ -127,31 +139,27 @@ public class FileAuthorizationManager implements AuthorizationManager {
 								+ " for user: " + identity.getUsername()
 								+ " for Marking sets ");
 
-						// check whether document has marking set or not //
+						// check whether current document has property values
+						// set for properties associated with marking sets or
+						// not //
 						if (versionSeries.getReleasedVersion().getActiveMarkings() != null) {
 							logger.log(Level.INFO, "Document has properties associated with Markings set");
 
-							authorizationResponse = new AuthorizationResponse(
-									versionSeries.getReleasedVersion().getActiveMarkings().authorize(identity.getUsername()),
-									docId);
-							/*
-							 * if
-							 * (versionSeries.getReleasedVersion().getActiveMarkings
-							 * ().authorize(identity.getUsername())) {
-							 * logger.log(Level.INFO, "User " +
-							 * identity.getUsername() +
-							 * " is authorized for document Id " + docId);
-							 * authorizationResponse = new
-							 * AuthorizationResponse(
-							 * versionSeries.getReleasedVersion
-							 * ().getActiveMarkings
-							 * ().authorize(identity.getUsername()), docId); }
-							 * else { logger.log(Level.INFO, "User " +
-							 * identity.getUsername() +
-							 * " is NOT authorized for document Id " + docId);
-							 * authorizationResponse = new
-							 * AuthorizationResponse( false, docId); }
-							 */
+							if (versionSeries.getReleasedVersion().getActiveMarkings().authorize(identity.getUsername())) {
+								logger.log(Level.INFO, "As per the Marking Sets User "
+										+ identity.getUsername()
+										+ " is authorized for document Id "
+										+ docId);
+								authorizationResponse = new AuthorizationResponse(
+										true, docId);
+							} else {
+								logger.log(Level.INFO, "As per the Marking Sets User "
+										+ identity.getUsername()
+										+ " is NOT authorized for document Id "
+										+ docId);
+								authorizationResponse = new AuthorizationResponse(
+										false, docId);
+							}
 
 						} else {
 							logger.log(Level.INFO, "Document does not have properties associated with Marking Sets "
