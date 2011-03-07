@@ -13,6 +13,7 @@
                 <value>object_factory</value>
                 <value>additional_where_clause</value>
                 <value>is_public</value>
+                <value>check_marking</value>
             </list>
         </property>
     </bean>
