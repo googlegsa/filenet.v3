@@ -16,6 +16,25 @@
  */
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.ISearch;
+import com.google.enterprise.connector.filenet4.filewrap.ISession;
+import com.google.enterprise.connector.spi.DocumentList;
+import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
+import com.google.enterprise.connector.spi.TraversalManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.filenet.api.constants.GuidConstants;
+import com.filenet.api.constants.PropertyNames;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.DateFormat;
@@ -31,334 +50,459 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import com.filenet.api.constants.GuidConstants;
-import com.filenet.api.constants.PropertyNames;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.ISearch;
-import com.google.enterprise.connector.filenet4.filewrap.ISession;
-import com.google.enterprise.connector.spi.DocumentList;
-import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
-import com.google.enterprise.connector.spi.TraversalManager;
-
 /**
  * Responsible for: 1. Construction of FileNet SQL queries for adding and
  * deleting index of documents to GSA. 2. Execution of the SQL query constructed
  * in step 1. 3. Retrieve the results of step 2 and wrap it in DocumentList
- *
+ * 
  * @author pankaj_chouhan
  */
 public class FileTraversalManager implements TraversalManager {
 
-    private static Logger logger;
-    private static String dateFirstPush;
-    static {
-        logger = Logger.getLogger(FileTraversalManager.class.getName());
-    }
-    private IObjectFactory fileObjectFactory;
-    private IObjectStore objectStore;
-    private int batchint;
-    private ISession fileSession;
-    private String tableName = "Document";
-    private String order_by = " ORDER BY DateLastModified,Id";
-    private String whereClause = " AND ((DateLastModified={0} AND (''{1}''<id)) OR (DateLastModified>{0}))";
-    private String orderByToDelete = " ORDER BY " + PropertyNames.DATE_CREATED
-            + "," + PropertyNames.ID;
-    private String whereClauseToDelete = " WHERE (("
-            + PropertyNames.DATE_CREATED + "={0} AND (''{1}''<"
-            + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_CREATED
-            + ">{0}))";
-    private String whereClauseToDeleteOnlyDate = " WHERE ("
-            + PropertyNames.DATE_CREATED + ">{0})";
-    private String additionalWhereClause;
-    private String displayUrl;
-    private boolean isPublic;
-    private HashSet included_meta;
-    private HashSet excluded_meta;
-    private String db_timezone;
+	private static Logger logger;
+	private static String dateFirstPush;
+	static {
+		logger = Logger.getLogger(FileTraversalManager.class.getName());
+	}
+	private IObjectFactory fileObjectFactory;
+	private IObjectStore objectStore;
+	private int batchint;
+	private ISession fileSession;
+	private String tableName = "Document d";
+	private String order_by = " ORDER BY DateLastModified,Id";
+	private String whereClause = " AND ((DateLastModified={0} OR (DateLastModified>{0})))";
+	private String whereClauseOnlyDate = " AND ((DateLastModified>={0}))";
+	private String orderByToDelete = " ORDER BY " + PropertyNames.DATE_CREATED
+			+ "," + PropertyNames.ID;
 
-    public FileTraversalManager(IObjectFactory fileObjectFactory,
-            IObjectStore objectStore, boolean b, String displayUrl,
-            String additionalWhereClause, HashSet included_meta,
-            HashSet excluded_meta, String db_timezone)
-            throws RepositoryException {
-        this.fileObjectFactory = fileObjectFactory;
-        this.objectStore = objectStore;
-        this.isPublic = b;
-        this.displayUrl = displayUrl;
-        this.additionalWhereClause = additionalWhereClause;
-        this.included_meta = included_meta;
-        this.excluded_meta = excluded_meta;
-        this.db_timezone = db_timezone;
-    }
+	private String whereClauseToDelete = " WHERE (("
+			+ PropertyNames.DATE_CREATED + "={0} OR ("
+			+ PropertyNames.DATE_CREATED + ">{0})))";
 
-    public FileTraversalManager(IObjectFactory fileObjectFactory,
-            IObjectStore objectStore, ISession fileSession, boolean b,
-            String displayUrl, String additionalWhereClause,
-            HashSet included_meta, HashSet excluded_meta, String db_timezone)
-            throws RepositoryException {
-        this.fileObjectFactory = fileObjectFactory;
-        this.objectStore = objectStore;
-        this.fileSession = fileSession;
-        Object[] args = { objectStore.getName() };
-        this.isPublic = b;
-        this.displayUrl = displayUrl;
-        this.additionalWhereClause = additionalWhereClause;
-        this.included_meta = included_meta;
-        this.excluded_meta = excluded_meta;
-        this.db_timezone = db_timezone;
-    }
+	private String whereClauseToDeleteOnlyDate = " WHERE ("
+			+ PropertyNames.DATE_CREATED + ">{0})";
 
-    public DocumentList startTraversal() throws RepositoryException {
-        return resumeTraversal(null);
-    }
+	private String whereClauseToDeleteDocs = " AND (("
+			+ PropertyNames.DATE_LAST_MODIFIED + "={0} OR ("
+			+ PropertyNames.DATE_LAST_MODIFIED + ">{0})))";
 
-    public DocumentList resumeTraversal(String checkPoint)
-            throws RepositoryException {
-        logger.info((checkPoint == null) ? "Starting traversal..."
-                : "Resuming traversal...");
-        DocumentList resultSet = null;
-        objectStore.refreshSUserContext();
+	private String whereClauseToDeleteDocsOnlyDate = " AND ("
+			+ PropertyNames.DATE_LAST_MODIFIED + ">{0})";
 
-        // to add
-        String query = buildQueryString(checkPoint);
+	private String additionalWhereClause;
+	private String deleteadditionalWhereClause;
+	private String displayUrl;
+	private boolean isPublic;
+	private HashSet included_meta;
+	private HashSet excluded_meta;
+	private String db_timezone;
 
-        ISearch search = fileObjectFactory.getSearch(objectStore);
-        logger.log(Level.INFO, "Query to Add document: " + query);
-        IObjectSet objectSet = search.execute(query);
+	public FileTraversalManager(IObjectFactory fileObjectFactory,
+			IObjectStore objectStore, boolean b, String displayUrl,
+			String additionalWhereClause, String deleteadditionalWhereClause,
+			HashSet included_meta, HashSet excluded_meta, String db_timezone)
+			throws RepositoryException {
+		this.fileObjectFactory = fileObjectFactory;
+		this.objectStore = objectStore;
+		this.isPublic = b;
+		this.displayUrl = displayUrl;
+		this.additionalWhereClause = additionalWhereClause;
+		this.deleteadditionalWhereClause = deleteadditionalWhereClause;
+		this.included_meta = included_meta;
+		this.excluded_meta = excluded_meta;
+		this.db_timezone = db_timezone;
+	}
 
-        // to delete
-        String queryStringToDelete = buildQueryToDelete(checkPoint);
+	public FileTraversalManager(IObjectFactory fileObjectFactory,
+			IObjectStore objectStore, ISession fileSession, boolean b,
+			String displayUrl, String additionalWhereClause,
+			String deleteadditionalWhereClause, HashSet included_meta,
+			HashSet excluded_meta, String db_timezone)
+			throws RepositoryException {
+		this.fileObjectFactory = fileObjectFactory;
+		this.objectStore = objectStore;
+		this.fileSession = fileSession;
+		Object[] args = { objectStore.getName() };
+		this.isPublic = b;
+		this.displayUrl = displayUrl;
+		this.additionalWhereClause = additionalWhereClause;
+		this.deleteadditionalWhereClause = deleteadditionalWhereClause;
+		this.included_meta = included_meta;
+		this.excluded_meta = excluded_meta;
+		this.db_timezone = db_timezone;
+	}
 
-        ISearch searchToDelete = fileObjectFactory.getSearch(objectStore);
-        logger.log(Level.INFO, "Query to get deleted documents: "
-                + queryStringToDelete);
-        IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
+	public FileTraversalManager() {
 
-        logger.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
-        logger.log(Level.INFO, "Number of documents sent to GSA: "
-                + objectSet.getSize());
-        logger.log(Level.INFO, "Number of documents whose index will be deleted from GSA: "
-                + objectSetToDelete.getSize());
+	}
 
-        if ((objectSet.getSize() > 0) || (objectSetToDelete.getSize() > 0)) {
-            resultSet = new FileDocumentList(objectSet, objectSetToDelete,
-                    objectStore, this.isPublic, this.displayUrl,
-                    this.included_meta, this.excluded_meta, dateFirstPush,
-                    checkPoint);
-        }
-        return resultSet;
-    }
+	public DocumentList startTraversal() throws RepositoryException {
+		return resumeTraversal(null);
+	}
 
-    private String buildQueryString(String checkpoint)
-            throws RepositoryException {
-        StringBuffer query = new StringBuffer("SELECT ");
-        if (batchint > 0) {
-            query.append("TOP " + batchint + " ");
-        }
-        query.append(PropertyNames.ID);
-        query.append(",");
-        query.append(PropertyNames.DATE_LAST_MODIFIED);
-        query.append(" FROM ");
-        query.append(tableName);
-        query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
+	public DocumentList resumeTraversal(String checkPoint)
+			throws RepositoryException {
+		logger.info((checkPoint == null) ? "Starting traversal..."
+				: "Resuming traversal...");
+		DocumentList resultSet = null;
+		objectStore.refreshSUserContext();
+		setdateFirstPush();
+		// to add
+		String query = buildQueryString(checkPoint);
 
-        if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
-            query.append(additionalWhereClause);
-        }
-        if (checkpoint != null) {
-            query.append(getCheckpointClause(checkpoint));
-        }
-        query.append(order_by);
+		ISearch search = fileObjectFactory.getSearch(objectStore);
+		logger.log(Level.INFO, "Query to Add document: " + query);
+		IObjectSet objectSet = search.execute(query);
 
-        return query.toString();
-    }
+		// to delete for deleted documents
+		String queryStringToDelete = buildQueryToDelete(checkPoint);
+		ISearch searchToDelete = fileObjectFactory.getSearch(objectStore);
+		logger.log(Level.INFO, "Query to get deleted documents: "
+				+ queryStringToDelete);
+		IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
 
-    /**
-     * Builds the query to send delete feeds to GSA. This query does not include
-     * the "Additional Where Clause"(AWC) because the schema of Event Table and
-     * the Classes included in AWC are different. Due to the exclusion of AWC in
-     * query, there are chances that, connector may send Delete Feed to GSA for
-     * documents which were never indexed to GSA
-     *
-     * @param checkpoint
-     * @return
-     * @throws RepositoryException
-     */
-    private String buildQueryToDelete(String checkpoint)
-            throws RepositoryException {
+		// to delete for additional delete clause
 
-        logger.fine("Build query to get the documents removed : ");
-        StringBuffer query = new StringBuffer("SELECT ");
-        if (batchint > 0) {
-            query.append("TOP " + batchint + " ");
-        }
-        // GuidConstants.Class_DeletionEvent = Only deleted objects in event
-        // table
-        query.append(PropertyNames.ID + "," + PropertyNames.DATE_CREATED + ","
-                + PropertyNames.VERSION_SERIES_ID + " FROM "
-                + GuidConstants.Class_DeletionEvent);
-        if (checkpoint != null) {
-            logger.fine("Checkpoint is not null");
-            query.append(getCheckpointClauseToDelete(checkpoint));
+		if ((deleteadditionalWhereClause != null)
+				&& !(deleteadditionalWhereClause.equals(""))) {
+			String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(checkPoint);
 
-            if (additionalWhereClause != null
-                    && !additionalWhereClause.equals("")) {
-                query.append(additionalWhereClause);
-            }
-            query.append(orderByToDelete);
-        } else {
-            // Get the date of today, corresponding to the date of first push
-            logger.fine("Checkpoint is null");
-            Calendar cal = Calendar.getInstance();
-            DateFormat dateStandard = new SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss.SSS");
-            dateStandard.setTimeZone(TimeZone.getTimeZone("UTC"));
-            dateFirstPush = dateStandard.format(cal.getTime());
+			ISearch searchToDeleteDocs = fileObjectFactory.getSearch(objectStore);
+			logger.log(Level.INFO, "Query to get documents matching to the Delete where clause: "
+					+ queryStringToDeleteDocs);
+			IObjectSet objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
+			logger.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents matching to the Delete where clause): "
+					+ objectSetToDeleteDocs.getSize());
 
-            query.append(" WHERE ");
-            query.append(" (" + PropertyNames.DATE_CREATED + ">"
-                    + dateFirstPush + ")");
+			if ((objectSet.getSize() > 0)
+					|| (objectSetToDeleteDocs.getSize() > 0)
+					|| (objectSetToDelete.getSize() > 0)) {
+				resultSet = new FileDocumentList(objectSet,
+						objectSetToDeleteDocs, objectSetToDelete, objectStore,
+						this.isPublic, this.displayUrl, this.included_meta,
+						this.excluded_meta, dateFirstPush, checkPoint);
 
-            query.append(orderByToDelete);
-        }
-        return query.toString();
-    }
+			}
+		} else {
+			if ((objectSet.getSize() > 0) || (objectSetToDelete.getSize() > 0)) {
+				resultSet = new FileDocumentList(objectSet, objectSetToDelete,
+						objectStore, this.isPublic, this.displayUrl,
+						this.included_meta, this.excluded_meta, dateFirstPush,
+						checkPoint);
+			}
+			logger.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
+			logger.log(Level.INFO, "Number of documents sent to GSA: "
+					+ objectSet.getSize());
+			logger.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents deleted form Repository): "
+					+ objectSetToDelete.getSize());
+		}
+		return resultSet;
+	}
 
-    private String getCheckpointClause(String checkPoint)
-            throws RepositoryException {
+	private String buildQueryString(String checkpoint)
+			throws RepositoryException {
+		StringBuffer query = new StringBuffer("SELECT ");
+		if (batchint > 0) {
+			query.append("TOP " + batchint + " ");
+		}
+		query.append(PropertyNames.ID);
+		query.append(",");
+		query.append(PropertyNames.DATE_LAST_MODIFIED);
+		query.append(" FROM ");
+		query.append(tableName);
+		// modified by Manoj
+		// query.append(" INNER JOIN ContentSearch cs ON d.This = cs.QueriedObject");
+		// End modified by Manoj
+		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
-        JSONObject jo = null;
-        try {
-            jo = new JSONObject(checkPoint);
-        } catch (JSONException e) {
-            logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
-                    + checkPoint);
-            throw new IllegalArgumentException(
-                    "CheckPoint string does not parse as JSON: " + checkPoint);
-        }
-        String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuid");
-        String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastModified");
-        String queryString = makeCheckpointQueryString(uuid, c);
-        return queryString;
-    }
+		if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
+			if ((additionalWhereClause.toUpperCase()).startsWith("SELECT")) {
+				query = new StringBuffer(additionalWhereClause);
+				logger.fine("Using Custom Query[" + additionalWhereClause
+						+ "], will add Checkpoint in next step.");
+			} else {
+				query.append(additionalWhereClause);
+			}
+		}
+		// End modified by Manoj
+		if (checkpoint != null) {
+			query.append(getCheckpointClause(checkpoint));
+		}
+		query.append(order_by);
 
-    private String getCheckpointClauseToDelete(String checkPoint)
-            throws RepositoryException {
+		return query.toString();
+	}
 
-        JSONObject jo = null;
+	public void setAdditionalWhereClause(String additionalWhereClaue) {
+		this.additionalWhereClause = additionalWhereClaue;
+	}
 
-        try {
-            jo = new JSONObject(checkPoint);
-        } catch (JSONException e) {
-            logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
-                    + checkPoint);
-            throw new IllegalArgumentException(
-                    "CheckPoint string does not parse as JSON: " + checkPoint);
-        }
-        String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuidToDelete");
-        String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastRemoveDate");
-        String queryString = makeCheckpointQueryStringToDelete(uuid, c);
-        return queryString;
+	/**
+	 * Builds the query to send delete feeds to GSA based on the Additional
+	 * Delete clause set as Connector Configuration.
+	 * 
+	 * @param checkpoint
+	 * @return Query String
+	 * @throws RepositoryException
+	 */
 
-    }
+	private String buildQueryStringToDeleteDocs(String checkpoint)
+			throws RepositoryException {
+		StringBuffer query = new StringBuffer("SELECT ");
+		if (batchint > 0) {
+			query.append("TOP " + batchint + " ");
+		}
+		query.append(PropertyNames.ID);
+		query.append(",");
+		query.append(PropertyNames.DATE_LAST_MODIFIED);
+		query.append(" FROM ");
+		query.append(tableName);
+		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
-    protected String makeCheckpointQueryStringToDelete(String uuid, String c)
-            throws RepositoryException {
-        String statement = "";
-        Object[] arguments = { c, uuid };
-        if (uuid.equals("")) {
-            statement = MessageFormat.format(whereClauseToDeleteOnlyDate, arguments);
-        } else {
-            statement = MessageFormat.format(whereClauseToDelete, arguments);
-        }
-        logger.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
-        logger.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
-        return statement;
-    }
+		if (deleteadditionalWhereClause != null
+				&& !deleteadditionalWhereClause.equals("")) {
+			if ((deleteadditionalWhereClause.toUpperCase()).startsWith("SELECT")) {
+				query = new StringBuffer(deleteadditionalWhereClause);
+				logger.fine("Using Custom Query[" + deleteadditionalWhereClause
+						+ "], will add Checkpoint in next step.");
+			} else {
+				query.append(deleteadditionalWhereClause);
+			}
+		}
+		if (checkpoint != null) {
+			query.append(getCheckpointClauseToDeleteDocs(checkpoint));
+		}
+		query.append(order_by);
+		return query.toString();
+	}
 
-    public void setBatchHint(int batchHint) throws RepositoryException {
-        this.batchint = batchHint;
+	/**
+	 * Builds the query to send delete feeds to GSA. This query does not include
+	 * the "Additional Where Clause"(AWC) because the schema of Event Table and
+	 * the Classes included in AWC are different. Due to the exclusion of AWC in
+	 * query, there are chances that, connector may send Delete Feed to GSA for
+	 * documents which were never indexed to GSA
+	 * 
+	 * @param checkpoint
+	 * @return
+	 * @throws RepositoryException
+	 */
+	private String buildQueryToDelete(String checkpoint)
+			throws RepositoryException {
 
-    }
+		logger.fine("Build query to get the documents removed : ");
+		StringBuffer query = new StringBuffer("SELECT ");
+		if (batchint > 0) {
+			query.append("TOP " + batchint + " ");
+		}
+		// GuidConstants.Class_DeletionEvent = Only deleted objects in event
+		// table
+		query.append(PropertyNames.ID + "," + PropertyNames.DATE_CREATED + ","
+				+ PropertyNames.VERSION_SERIES_ID + " FROM "
+				+ GuidConstants.Class_DeletionEvent);
+		if (checkpoint != null) {
+			logger.fine("Checkpoint is not null");
+			query.append(getCheckpointClauseToDelete(checkpoint));
+		}
+		query.append(orderByToDelete);
 
-    protected String extractDocidFromCheckpoint(JSONObject jo,
-            String checkPoint, String param) {
-        String uuid = null;
-        try {
-            uuid = jo.getString(param);
-        } catch (JSONException e) {
-            logger.log(Level.WARNING, "Could not get uuid from checkPoint string: "
-                    + checkPoint);
-            throw new IllegalArgumentException(
-                    "Could not get uuid from checkPoint string: " + checkPoint);
-        }
-        return uuid;
-    }
+		return query.toString();
+	}
 
-    protected String extractNativeDateFromCheckpoint(JSONObject jo,
-            String checkPoint, String param) {
-        String dateString = null;
-        try {
-            dateString = jo.getString(param);
-            // dateString = "2008-09-05T09:40:04.073";
-        } catch (JSONException e) {
-            logger.log(Level.WARNING, "Could not get last modified/removed date from checkPoint string: "
-                    + checkPoint, e);
-            throw new IllegalArgumentException(
-                    "Could not get last modified/removed date from checkPoint string: "
-                            + checkPoint, e);
-        }
+	/**
+	 * Sets Date and Time of First Push.
+	 */
 
-        String timeZoneOffset = null;
-        if (this.db_timezone == null || this.db_timezone.equalsIgnoreCase("")) {
-            timeZoneOffset = FileUtil.getTimeZone(Calendar.getInstance());
-        } else {
-            timeZoneOffset = FileUtil.getTimeZone(this.db_timezone);
-        }
+	private void setdateFirstPush() {
+		logger.fine("Checkpoint is null");
+		Calendar cal = Calendar.getInstance();
+		DateFormat dateStandard = new SimpleDateFormat(
+				"yyyy-MM-dd'T'HH:mm:ss.SSS");
+		dateStandard.setTimeZone(TimeZone.getTimeZone("UTC"));
+		dateFirstPush = dateStandard.format(cal.getTime());
+	}
 
-        return dateString + timeZoneOffset;
-    }
+	private String getCheckpointClause(String checkPoint)
+			throws RepositoryException {
 
-    protected String makeCheckpointQueryString(String uuid, String c)
-            throws RepositoryException {
+		JSONObject jo = null;
+		try {
+			jo = new JSONObject(checkPoint);
+		} catch (JSONException e) {
+			logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
+					+ checkPoint);
+			throw new IllegalArgumentException(
+					"CheckPoint string does not parse as JSON: " + checkPoint);
+		}
+		String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuid");
+		String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastModified");
+		String queryString = makeCheckpointQueryString(uuid, c);
+		return queryString;
+	}
 
-        Object[] arguments = { c, uuid };
-        String statement = MessageFormat.format(whereClause, arguments);
-        logger.log(Level.INFO, "MakeCheckpointQueryString ID: " + uuid);
-        return statement;
-    }
+	/**
+	 * Returns Query String to send Delete Feed to GSA by adding Where clause
+	 * condition for checkPoint values,
+	 * 
+	 * @param checkpoint
+	 * @return Query String
+	 * @throws JSONException
+	 */
 
-    private Document stringToDom(String xmlSource) throws RepositoryException {
-        DocumentBuilder builder = null;
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            builder = factory.newDocumentBuilder();
-            return builder.parse(new InputSource(new StringReader(xmlSource)));
-        } catch (ParserConfigurationException de) {
-            logger.log(Level.WARNING, "Unable to configure parser for parsing XML string");
-            RepositoryException re = new RepositoryLoginException(
-                    "Unable to configure parser for parsing XML string", de);
-            throw re;
-        } catch (SAXException de) {
-            logger.log(Level.WARNING, "Unable to parse XML string");
-            RepositoryException re = new RepositoryLoginException(
-                    "Unable to parse XML string", de);
-            throw re;
-        } catch (IOException de) {
-            logger.log(Level.WARNING, "XML source string to be parsed not found.");
-            RepositoryException re = new RepositoryLoginException(
-                    "XML source string to be parsed not found.", de);
-            throw re;
-        }
+	private String getCheckpointClauseToDeleteDocs(String checkPoint)
+			throws RepositoryException {
 
-    }
+		JSONObject jo = null;
+		try {
+			jo = new JSONObject(checkPoint);
+		} catch (JSONException e) {
+			logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
+					+ checkPoint);
+			throw new IllegalArgumentException(
+					"CheckPoint string does not parse as JSON: " + checkPoint);
+		}
+		String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuidToDeleteDocs");
+		String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastModifiedDate");
+		String queryString = makeCheckpointQueryStringToDeleteDocs(uuid, c);
+		return queryString;
+	}
+
+	private String getCheckpointClauseToDelete(String checkPoint)
+			throws RepositoryException {
+
+		JSONObject jo = null;
+
+		try {
+			jo = new JSONObject(checkPoint);
+		} catch (JSONException e) {
+			logger.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
+					+ checkPoint);
+			throw new IllegalArgumentException(
+					"CheckPoint string does not parse as JSON: " + checkPoint);
+		}
+		String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuidToDelete");
+		String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastRemoveDate");
+		String queryString = makeCheckpointQueryStringToDelete(uuid, c);
+		return queryString;
+
+	}
+
+	/**
+	 * Returns Query String to send Delete Feed to GSA by adding Where clause
+	 * condition for checkPoint values,
+	 * 
+	 * @param checkpoint values (String ID, String Date)
+	 * @return Query String
+	 */
+
+	protected String makeCheckpointQueryStringToDelete(String uuid, String c)
+			throws RepositoryException {
+		String statement = "";
+		Object[] arguments = { c, uuid };
+		if (uuid.equals("")) {
+			statement = MessageFormat.format(whereClauseToDeleteOnlyDate, arguments);
+		} else {
+			statement = MessageFormat.format(whereClauseToDelete, arguments);
+		}
+		logger.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
+		logger.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
+		return statement;
+	}
+
+	protected String makeCheckpointQueryStringToDeleteDocs(String uuid, String c)
+			throws RepositoryException {
+		String statement = "";
+		Object[] arguments = { c, uuid };
+
+		if (uuid.equals("")) {
+			statement = MessageFormat.format(whereClauseToDeleteDocsOnlyDate, arguments);
+		} else {
+			statement = MessageFormat.format(whereClauseToDeleteDocs, arguments);
+		}
+		logger.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
+		logger.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
+
+		return statement;
+	}
+
+	public void setBatchHint(int batchHint) throws RepositoryException {
+		this.batchint = batchHint;
+	}
+
+	protected String extractDocidFromCheckpoint(JSONObject jo,
+			String checkPoint, String param) {
+		String uuid = null;
+		try {
+			uuid = jo.getString(param);
+		} catch (JSONException e) {
+			logger.log(Level.WARNING, "Could not get uuid from checkPoint string: "
+					+ checkPoint);
+			throw new IllegalArgumentException(
+					"Could not get uuid from checkPoint string: " + checkPoint);
+		}
+		return uuid;
+	}
+
+	protected String extractNativeDateFromCheckpoint(JSONObject jo,
+			String checkPoint, String param) {
+		String dateString = null;
+		try {
+			dateString = jo.getString(param);
+			// dateString = "2008-09-05T09:40:04.073";
+		} catch (JSONException e) {
+			logger.log(Level.WARNING, "Could not get last modified/removed date from checkPoint string: "
+					+ checkPoint, e);
+			throw new IllegalArgumentException(
+					"Could not get last modified/removed date from checkPoint string: "
+							+ checkPoint, e);
+		}
+
+		String timeZoneOffset = null;
+		if (this.db_timezone == null || this.db_timezone.equalsIgnoreCase("")) {
+			timeZoneOffset = FileUtil.getTimeZone(Calendar.getInstance());
+		} else {
+			timeZoneOffset = FileUtil.getTimeZone(this.db_timezone);
+		}
+
+		return dateString + timeZoneOffset;
+	}
+
+	protected String makeCheckpointQueryString(String uuid, String c)
+			throws RepositoryException {
+		String statement;
+		Object[] arguments = { c, uuid };
+		if (uuid.equals("")) {
+			statement = MessageFormat.format(whereClauseOnlyDate, arguments);
+		} else {
+			statement = MessageFormat.format(whereClause, arguments);
+		}
+		logger.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
+		logger.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
+		return statement;
+	}
+
+	private Document stringToDom(String xmlSource) throws RepositoryException {
+		DocumentBuilder builder = null;
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			builder = factory.newDocumentBuilder();
+			return builder.parse(new InputSource(new StringReader(xmlSource)));
+		} catch (ParserConfigurationException de) {
+			logger.log(Level.WARNING, "Unable to configure parser for parsing XML string");
+			RepositoryException re = new RepositoryLoginException(
+					"Unable to configure parser for parsing XML string", de);
+			throw re;
+		} catch (SAXException de) {
+			logger.log(Level.WARNING, "Unable to parse XML string");
+			RepositoryException re = new RepositoryLoginException(
+					"Unable to parse XML string", de);
+			throw re;
+		} catch (IOException de) {
+			logger.log(Level.WARNING, "XML source string to be parsed not found.");
+			RepositoryException re = new RepositoryLoginException(
+					"XML source string to be parsed not found.", de);
+			throw re;
+		}
+
+	}
 }

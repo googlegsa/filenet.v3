@@ -12,6 +12,7 @@
                 <value>workplace_display_url</value>
                 <value>object_factory</value>
                 <value>additional_where_clause</value>
+                <value>delete_additional_where_clause</value>
                 <value>is_public</value>
             </list>
         </property>
