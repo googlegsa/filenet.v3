@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-	<bean id="Filenet_P8"
-		class="com.google.enterprise.connector.filenet4.FileConnectorType">
-		<property name="configKeys">
-			<list>
-				<value>username</value>
-				<value>Password</value>
-				<value>object_store</value>
-				<value>content_engine_url</value>
-				<value>workplace_display_url</value>
-				<value>object_factory</value>
-				<value>additional_where_clause</value>
-				<value>is_public</value>
-			</list>
-		</property>
-	</bean>
+    <bean id="Filenet_P8"
+        class="com.google.enterprise.connector.filenet4.FileConnectorType">
+        <property name="configKeys">
+            <list>
+                <value>username</value>
+                <value>Password</value>
+                <value>object_store</value>
+                <value>content_engine_url</value>
+                <value>workplace_display_url</value>
+                <value>object_factory</value>
+                <value>additional_where_clause</value>
+                <value>is_public</value>
+            </list>
+        </property>
+    </bean>
 </beans>

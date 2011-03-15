@@ -15,61 +15,61 @@ import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 public class FnVersionSeries implements IVersionSeries {
 
-	private VersionSeries versionSeries;
+    private VersionSeries versionSeries;
 
-	private static Logger logger = null;
-	{
-		logger = Logger.getLogger(FnVersionSeries.class.getName());
-	}
+    private static Logger logger = null;
+    {
+        logger = Logger.getLogger(FnVersionSeries.class.getName());
+    }
 
-	public FnVersionSeries(VersionSeries versionSeries) {
-		this.versionSeries = versionSeries;
-	}
+    public FnVersionSeries(VersionSeries versionSeries) {
+        this.versionSeries = versionSeries;
+    }
 
-	public String getId(ActionType action) {
-		logger.info("getId, FnVersionSeries");
-		return versionSeries.get_Id().toString();
+    public String getId(ActionType action) {
+        logger.info("getId, FnVersionSeries");
+        return versionSeries.get_Id().toString();
 
-	}
+    }
 
-	public Date getModifyDate(ActionType action) throws RepositoryDocumentException {
-		Date ModifyDate = new Date();
-		return ModifyDate;
-	}
+    public Date getModifyDate(ActionType action) throws RepositoryDocumentException {
+        Date ModifyDate = new Date();
+        return ModifyDate;
+    }
 
-	public String getClassNameEvent() throws RepositoryDocumentException {
-		return this.versionSeries.getClassName();
-	}
+    public String getClassNameEvent() throws RepositoryDocumentException {
+        return this.versionSeries.getClassName();
+    }
 
-	public Date getPropertyDateValueDelete(String name) throws RepositoryDocumentException {
-		return new Date();
-	}
+    public Date getPropertyDateValueDelete(String name) throws RepositoryDocumentException {
+        return new Date();
+    }
 
-	public String getVersionSeriesId() throws RepositoryDocumentException {
-		Id id;
-		String strId;
-		try {
-			id = ((com.filenet.apiimpl.core.DeletionEventImpl) versionSeries).get_VersionSeriesId();
-		}catch (Exception e){
-			logger.log(Level.WARNING, "Unable to get the VersionSeriesId");
-			throw new RepositoryDocumentException(e);
-		}
-//		logger.info("versionId : ID : "+id);
-		strId=id.toString();
-//		logger.info("versionId : tostring : "+strId);
-		strId = strId.substring(1,strId.length()-1);
-//		logger.info("versionId : cut start/end : "+strId);
-		return strId;
-	}
+    public String getVersionSeriesId() throws RepositoryDocumentException {
+        Id id;
+        String strId;
+        try {
+            id = ((com.filenet.apiimpl.core.DeletionEventImpl) versionSeries).get_VersionSeriesId();
+        }catch (Exception e){
+            logger.log(Level.WARNING, "Unable to get the VersionSeriesId");
+            throw new RepositoryDocumentException(e);
+        }
+//        logger.info("versionId : ID : "+id);
+        strId=id.toString();
+//        logger.info("versionId : tostring : "+strId);
+        strId = strId.substring(1,strId.length()-1);
+//        logger.info("versionId : cut start/end : "+strId);
+        return strId;
+    }
 
-	public IDocument getCurrentVersion() throws RepositoryException {
-		return new FnDocument((Document) this.versionSeries
-				.get_CurrentVersion());
-	}
+    public IDocument getCurrentVersion() throws RepositoryException {
+        return new FnDocument((Document) this.versionSeries
+                .get_CurrentVersion());
+    }
 
-	public IDocument getReleasedVersion() throws RepositoryException {
-		return new FnDocument((Document) this.versionSeries
-				.get_ReleasedVersion());
-	}
+    public IDocument getReleasedVersion() throws RepositoryException {
+        return new FnDocument((Document) this.versionSeries
+                .get_ReleasedVersion());
+    }
 
 }
