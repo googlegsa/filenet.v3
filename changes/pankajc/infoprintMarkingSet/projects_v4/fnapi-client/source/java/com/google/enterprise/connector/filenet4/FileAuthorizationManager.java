@@ -106,7 +106,8 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		} catch (Exception ecp) {
 			logger.log(Level.SEVERE, ecp.getStackTrace().toString());
 		}
-
+		// Iterate through the DocId list and Authorize result to
+		// AuthorizationResponse list
 		for (int i = 0; i < docidList.size(); i++) {
 			String docId = (String) docidList.get(i);
 			try {
@@ -127,6 +128,8 @@ public class FileAuthorizationManager implements AuthorizationManager {
 			if (versionSeries != null) {
 				logger.config("Authorizing DocID: " + docId + " for user: "
 						+ identity.getUsername());
+				// Check whether USER is authorized to view document contents or
+				// not.
 				if (versionSeries.getReleasedVersion().getPermissions().authorize(identity.getUsername())) {
 					logger.log(Level.INFO, "As per the ACLS User "
 							+ identity.getUsername()
@@ -144,6 +147,10 @@ public class FileAuthorizationManager implements AuthorizationManager {
 						// not //
 						if (versionSeries.getReleasedVersion().getActiveMarkings() != null) {
 							logger.log(Level.INFO, "Document has properties associated with Markings set");
+
+							// check whether USER is authorized to view the
+							// document as per the Marking set security applied
+							// over it.
 
 							if (versionSeries.getReleasedVersion().getActiveMarkings().authorize(identity.getUsername())) {
 								logger.log(Level.INFO, "As per the Marking Sets User "

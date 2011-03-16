@@ -164,6 +164,10 @@ public class FnPermissions implements IPermissions {
 
 		while (iter.hasNext()) {
 			AccessPermission perm = (AccessPermission) iter.next();
+
+			// Check whether the GranteeName and search user name is same or
+			// not. If not then Go for next AccessPermission.
+
 			if (checkGranteeName(perm, username)) {
 				AccessType accessType = perm.get_AccessType();
 				logger.log(Level.FINEST, "Access Type is:[" + accessType + "]");
@@ -171,6 +175,9 @@ public class FnPermissions implements IPermissions {
 				logger.log(Level.FINEST, "Access Mask is:[" + accessMask + "]");
 
 				if (accessType.equals(AccessType.ALLOW)) {
+
+					// Check whether the search user has USE Right over the
+					// document
 					if ((accessMask & ACCESS_OBJECT_LEVEL) == ACCESS_OBJECT_LEVEL) {
 						logger.log(Level.FINE, " User: [" + username
 								+ "] has USE right over the document ");
@@ -215,13 +222,23 @@ public class FnPermissions implements IPermissions {
 			logger.log(Level.FINE, "Grantee Name is [" + granteeName
 					+ "] is of type USER");
 
+			// Match the Full Grantee name and Search user name.
+
 			if (granteeName.equalsIgnoreCase(username)
 					|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
 				logger.log(Level.FINE, "Grantee Name [" + granteeName
 						+ "] matches with search USER [" + username + "]");
 
 				return true;
-			} else if (getShortName(granteeName).equalsIgnoreCase(username)) {
+			} else if (getShortName(granteeName).equalsIgnoreCase(username)) {// Match
+				// the
+				// Short
+				// Grantee
+				// name
+				// and
+				// Search
+				// user
+				// name.
 				logger.log(Level.FINE, "Grantee Name ["
 						+ getShortName(granteeName)
 						+ "] matches with search USER [" + username + "]");
@@ -237,6 +254,10 @@ public class FnPermissions implements IPermissions {
 		} else if (perm.get_GranteeType() == SecurityPrincipalType.GROUP) { // GROUP
 			logger.log(Level.FINE, "Grantee Name [" + granteeName
 					+ "] is of type GROUP");
+
+			// Check whether the search user is Member of #AUTHENTICATED-USERS
+			// Group. If not then Search Username in the Group.
+
 			if (granteeName.equalsIgnoreCase("#AUTHENTICATED-USERS")) {
 
 				logger.log(Level.FINE, "Grantee Name [" + granteeName
