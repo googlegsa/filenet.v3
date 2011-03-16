@@ -165,8 +165,8 @@ public class FnPermissions implements IPermissions {
 		while (iter.hasNext()) {
 			AccessPermission perm = (AccessPermission) iter.next();
 
-			// Check whether the GranteeName and search user name is same or
-			// not. If not then Go for next AccessPermission.
+			// Check whether the Grantee Name and search username is same or
+			// not. If not then check the next AccessPermission.
 
 			if (checkGranteeName(perm, username)) {
 				AccessType accessType = perm.get_AccessType();
@@ -177,7 +177,7 @@ public class FnPermissions implements IPermissions {
 				if (accessType.equals(AccessType.ALLOW)) {
 
 					// Check whether the search user has USE Right over the
-					// document
+					// document or not.
 					if ((accessMask & ACCESS_OBJECT_LEVEL) == ACCESS_OBJECT_LEVEL) {
 						logger.log(Level.FINE, " User: [" + username
 								+ "] has USE right over the document ");
@@ -222,7 +222,7 @@ public class FnPermissions implements IPermissions {
 			logger.log(Level.FINE, "Grantee Name is [" + granteeName
 					+ "] is of type USER");
 
-			// Match the Full Grantee name and Search user name.
+			// Match the full Grantee Name and search user name.
 
 			if (granteeName.equalsIgnoreCase(username)
 					|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
@@ -234,11 +234,10 @@ public class FnPermissions implements IPermissions {
 				// the
 				// Short
 				// Grantee
-				// name
+				// Name
 				// and
-				// Search
-				// user
-				// name.
+				// search
+				// username.
 				logger.log(Level.FINE, "Grantee Name ["
 						+ getShortName(granteeName)
 						+ "] matches with search USER [" + username + "]");
@@ -255,8 +254,8 @@ public class FnPermissions implements IPermissions {
 			logger.log(Level.FINE, "Grantee Name [" + granteeName
 					+ "] is of type GROUP");
 
-			// Check whether the search user is Member of #AUTHENTICATED-USERS
-			// Group. If not then Search Username in the Group.
+			// Check whether the search user is member of #AUTHENTICATED-USERS
+			// Group. If not then search username in the group.
 
 			if (granteeName.equalsIgnoreCase("#AUTHENTICATED-USERS")) {
 

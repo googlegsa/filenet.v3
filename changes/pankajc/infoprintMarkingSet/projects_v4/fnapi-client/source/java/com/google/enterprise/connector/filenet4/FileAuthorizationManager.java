@@ -106,7 +106,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		} catch (Exception ecp) {
 			logger.log(Level.SEVERE, ecp.getStackTrace().toString());
 		}
-		// Iterate through the DocId list and Authorize result to
+		// Iterate through the DocId list and authorize the search user. Add the authorization result to
 		// AuthorizationResponse list
 		for (int i = 0; i < docidList.size(); i++) {
 			String docId = (String) docidList.get(i);
@@ -128,7 +128,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 			if (versionSeries != null) {
 				logger.config("Authorizing DocID: " + docId + " for user: "
 						+ identity.getUsername());
-				// Check whether USER is authorized to view document contents or
+				// Check whether the search user is authorized to view document contents or
 				// not.
 				if (versionSeries.getReleasedVersion().getPermissions().authorize(identity.getUsername())) {
 					logger.log(Level.INFO, "As per the ACLS User "

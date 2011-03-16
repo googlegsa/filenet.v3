@@ -61,8 +61,8 @@ public class FnActiveMarking implements IActiveMarking {
 		hasAccess = ((new FnPermissions(
 				this.marking.get_Marking().get_Permissions())).authorizeMarking(username));
 
-		// Check whether the user has USER rights over the document or not.
-		// If user does not have USE rights then ConstraintMasck check is
+		// Check whether the user has USE rights over the document or not.
+		// If user does not have USE rights then ConstraintMask check is
 		// required.
 
 		if (hasAccess) {
@@ -94,7 +94,7 @@ public class FnActiveMarking implements IActiveMarking {
 
 	private boolean checkConstraintMask() {
 
-		// Check whether the user has View Contents or More rights over the
+		// Check whether the user has atleast 'View Content' right over the
 		// document or not.
 		if (!(((this.marking.get_Marking().get_ConstraintMask()) & ACCESS_MASK_LEVEL) == ACCESS_MASK_LEVEL)) {
 			LOGGER.log(Level.INFO, "Authorization is Successful for Constraint mask with marking value : "
