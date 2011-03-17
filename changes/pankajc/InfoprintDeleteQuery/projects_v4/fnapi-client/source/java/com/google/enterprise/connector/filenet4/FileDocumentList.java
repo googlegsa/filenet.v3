@@ -1,8 +1,25 @@
+/*
+ * Copyright 2009 Google Inc.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+ */
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -111,8 +128,15 @@ public class FileDocumentList implements DocumentList {
 
 	}
 
-	public com.google.enterprise.connector.spi.Document nextDocument()
-			throws RepositoryDocumentException {
+	/***
+	 * The nextDocument method gets the next document from the document list
+	 * that the connector acquires from the FileNet repository.
+	 * 
+	 * @param
+	 * @return com.google.enterprise.connector.spi.Document
+	 */
+
+	public Document nextDocument() throws RepositoryDocumentException {
 		logger.entering("FileDocumentList", "nextDocument()");
 
 		int dataLen = this.objectSet.getSize();
@@ -222,6 +246,18 @@ public class FileDocumentList implements DocumentList {
 		index++;
 		return null;
 	}
+
+	/***
+	 * Checkpoint method indicates the current position within the document
+	 * list, that is where to start a resumeTraversal method. The checkpoint
+	 * method returns information that allows the resumeTraversal method to
+	 * resume on the document that would have been returned by the next call to
+	 * the nextDocument method.
+	 * 
+	 * @param
+	 * @return String checkPoint - information that allows the resumeTraversal
+	 *         method to resume on the document
+	 */
 
 	public String checkpoint() throws RepositoryException {
 		logger.log(Level.FINE, "Creation of the Checkpoint");
