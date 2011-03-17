@@ -39,17 +39,17 @@ public class FileSession implements Session {
 	private String displayUrl;
 	private boolean isPublic;
 	private String additionalWhereClause;
-	private String additionalDeleteWhereClause;
-	private HashSet includedMeta;
-	private HashSet excludedMeta;
-	private String dbTimezone;
-	private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());;
+	private String deleteadditionalWhereClause;
+	private HashSet included_meta;
+	private HashSet excluded_meta;
+	private String db_timezone;
+	private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());
 
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String objectStoreName, String displayUrl,
 			String contentEngineUri, boolean isPublic,
-			String additionalWhereClause, String additionalDeleteWhereClause,
-			HashSet includedMeta, HashSet excludedMeta, String dbTimezone)
+			String additionalWhereClause, String deleteadditionalWhereClause,
+			HashSet included_meta, HashSet excluded_meta, String db_timezone)
 			throws RepositoryException, RepositoryLoginException {
 
 		setFileObjectFactory(iObjectFactory);
@@ -67,10 +67,10 @@ public class FileSession implements Session {
 		this.displayUrl = getDisplayURL(displayUrl, objectStoreName);
 		this.isPublic = isPublic;
 		this.additionalWhereClause = additionalWhereClause;
-		this.additionalDeleteWhereClause = additionalDeleteWhereClause;
-		this.includedMeta = includedMeta;
-		this.excludedMeta = excludedMeta;
-		this.dbTimezone = dbTimezone;
+		this.deleteadditionalWhereClause = deleteadditionalWhereClause;
+		this.included_meta = included_meta;
+		this.excluded_meta = excluded_meta;
+		this.db_timezone = db_timezone;
 	}
 
 	private String getDisplayURL(String displayUrl, String objectStoreName) {
@@ -116,8 +116,8 @@ public class FileSession implements Session {
 		// logger.info("getTraversalManager");
 		FileTraversalManager fileQTM = new FileTraversalManager(
 				fileObjectFactory, objectStore, this.isPublic, this.displayUrl,
-				this.additionalWhereClause, this.additionalDeleteWhereClause,
-				this.includedMeta, this.excludedMeta, this.dbTimezone);
+				this.additionalWhereClause, this.deleteadditionalWhereClause,
+				this.included_meta, this.excluded_meta, this.db_timezone);
 		return fileQTM;
 	}
 

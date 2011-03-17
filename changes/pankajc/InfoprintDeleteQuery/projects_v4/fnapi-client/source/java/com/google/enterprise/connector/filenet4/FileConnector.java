@@ -1,4 +1,5 @@
-/* Copyright 2009 Google Inc.
+/*
+ * Copyright 2009 Google Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -29,36 +30,27 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class FileConnector implements Connector {
 
-	private String objectFactory;
+	private String object_factory;
 	private String username;
 	private String password;
-	private String objectStore;
-	private String workplaceDisplayUrl;
-	private String contentEngineUrl;
-	private String isPublic = "false";
-	private String additionalWhereClause;
-	private String additionalDeleteWhereClause;
-	private HashSet includedMeta;
-	private HashSet excludedMeta;
-	private String dbTimezone;
+	private String object_store;
+	private String workplace_display_url;
+	private String content_engine_url;
+	private String is_public = "false";
+	private String additional_where_clause;
+	private String delete_additional_where_clause;
+	private HashSet included_meta;
+	private HashSet excluded_meta;
+	private String db_timezone;
 	private static Logger LOGGER = Logger.getLogger(FileConnector.class.getName());
 
-	public String getDbTimezone() {
-		return dbTimezone;
+	public String getDb_timezone() {
+		return db_timezone;
 	}
 
-	public String getAdditionalDeleteWhereClause() {
-		return additionalDeleteWhereClause;
-	}
-
-	public void setAdditionalDeleteWhereClause(
-			String additionalDeleteWhereClause) {
-		this.additionalDeleteWhereClause = additionalDeleteWhereClause;
-	}
-
-	public void setDbTimezone(String dbTimezone) {
-		dbTimezone = dbTimezone;
-		LOGGER.config("Set Database Server's TimeZone to " + this.dbTimezone);
+	public void setDb_timezone(String dbTimezone) {
+		db_timezone = dbTimezone;
+		LOGGER.config("Set Database Server's TimeZone to " + this.db_timezone);
 	}
 
 	/**
@@ -89,15 +81,15 @@ public class FileConnector implements Connector {
 		HttpsURLConnection.setDefaultHostnameVerifier(aa);
 
 		Session sess = null;
-		if (!(objectFactory == null || username == null || password == null
-				|| objectStore == null || workplaceDisplayUrl == null || contentEngineUrl == null)) {
+		if (!(object_factory == null || username == null || password == null
+				|| object_store == null || workplace_display_url == null || content_engine_url == null)) {
 
 			LOGGER.info("Creating fileSession object...");
-			sess = new FileSession(objectFactory, username, password,
-					objectStore, workplaceDisplayUrl, contentEngineUrl,
-					isPublic.equals("on"), additionalWhereClause,
-					additionalDeleteWhereClause, includedMeta, excludedMeta,
-					dbTimezone);
+			sess = new FileSession(object_factory, username, password,
+					object_store, workplace_display_url, content_engine_url,
+					is_public.equals("on"), additional_where_clause,
+					delete_additional_where_clause, included_meta,
+					excluded_meta, db_timezone);
 		}
 		return sess;
 
@@ -112,78 +104,89 @@ public class FileConnector implements Connector {
 		LOGGER.config("Set Password");
 	}
 
-	public String getObjectFactory() {
-		return objectFactory;
+	public String getObject_factory() {
+		return object_factory;
 	}
 
-	public void setObjectFactory(String objectFactory) {
-		this.objectFactory = objectFactory;
-		LOGGER.config("Set Object Factory to " + this.objectFactory);
+	public void setObject_factory(String objectFactory) {
+		this.object_factory = objectFactory;
+		LOGGER.config("Set Object Factory to " + this.object_factory);
 	}
 
-	public String getObjectStore() {
-		return objectStore;
+	public String getObject_store() {
+		return object_store;
 	}
 
-	public void setObjectStore(String objectStoreName) {
-		this.objectStore = objectStoreName;
-		LOGGER.config("Set Object Store to " + this.objectStore);
+	public void setObject_store(String objectStoreName) {
+		this.object_store = objectStoreName;
+		LOGGER.config("Set Object Store to " + this.object_store);
 	}
 
-	public String getWorkplaceDisplayUrl() {
-		return workplaceDisplayUrl;
+	public String getWorkplace_display_url() {
+		return workplace_display_url;
 	}
 
-	public void setWorkplaceDisplayUrl(String displayUrl) {
-		this.workplaceDisplayUrl = displayUrl;
+	public void setWorkplace_display_url(String displayUrl) {
+		this.workplace_display_url = displayUrl;
 		LOGGER.config("Set Workplace Display URL to "
-				+ this.workplaceDisplayUrl);
+				+ this.workplace_display_url);
 	}
 
-	public String getIsPublic() {
-		return isPublic;
+	public String getIs_public() {
+		return is_public;
 	}
 
-	public void setIsPublic(String isPublic) {
-		this.isPublic = isPublic;
-		LOGGER.config("Set IsPublic to " + this.isPublic);
+	public void setIs_public(String isPublic) {
+		this.is_public = isPublic;
+		LOGGER.config("Set IsPublic to " + this.is_public);
 	}
 
-	public String getAdditionalWhereClause() {
-		return additionalWhereClause;
+	public String getAdditional_where_clause() {
+		return additional_where_clause;
 	}
 
-	public void setAdditionalWhereClause(String additionalWhereClause) {
-		this.additionalWhereClause = additionalWhereClause;
+	public void setAdditional_where_clause(String additionalWhereClause) {
+		this.additional_where_clause = additionalWhereClause;
 		LOGGER.config("Set Additional Where Clause to "
-				+ this.additionalWhereClause);
+				+ this.additional_where_clause);
 	}
 
-	public HashSet getExcludedMeta() {
-		return excludedMeta;
+	public String getDelete_additional_where_clause() {
+		return delete_additional_where_clause;
 	}
 
-	public void setExcludedMeta(HashSet excludedMeta) {
-		this.excludedMeta = excludedMeta;
-		LOGGER.config("Setting excludedMeta to " + excludedMeta);
+	public void setDelete_additional_where_clause(
+			String deleteadditionalWhereClause) {
+		this.delete_additional_where_clause = deleteadditionalWhereClause;
+		LOGGER.config("Set Additional Where Clause for DELETE to "
+				+ this.delete_additional_where_clause);
 	}
 
-	public HashSet getIncludedMeta() {
-		return includedMeta;
+	public HashSet getExcluded_meta() {
+		return excluded_meta;
 	}
 
-	public void setIncludedMeta(HashSet includedMeta) {
-		this.includedMeta = includedMeta;
-		LOGGER.config("Setting includedMeta to " + includedMeta);
+	public void setExcluded_meta(HashSet excluded_meta) {
+		this.excluded_meta = excluded_meta;
+		LOGGER.config("Setting excluded_meta to " + excluded_meta);
 	}
 
-	public String getContentEngineUrl() {
-		return contentEngineUrl;
+	public HashSet getIncluded_meta() {
+		return included_meta;
 	}
 
-	public void setContentEngineUrl(String contentEngineUrl) {
-		this.contentEngineUrl = contentEngineUrl;
-		LOGGER.config("Set Content Engine URL to " + this.contentEngineUrl);
+	public void setIncluded_meta(HashSet included_meta) {
+		this.included_meta = included_meta;
+		LOGGER.config("Setting included_meta to " + included_meta);
+	}
+
+	public String getContent_engine_url() {
+		return content_engine_url;
+	}
+
+	public void setContent_engine_url(String content_engine_url) {
+		this.content_engine_url = content_engine_url;
+		LOGGER.config("Set Content Engine URL to " + this.content_engine_url);
 	}
 
 	public String getUsername() {
