@@ -93,6 +93,7 @@ public class FnPermissions implements IPermissions {
 						Group group = null;
 						try{
 							group = com.filenet.api.core.Factory.Group.fetchInstance(conn,perm.get_GranteeName(),null);
+							logger.log(Level.INFO, "Looking up user[" + username + "] in Group:[" + group + "] ");
 							found = searchUserInGroup(username,group);
 							if (found){
 								logger.log(Level.INFO, "Authorization for user: [" + username + "] is Successful");
@@ -127,8 +128,9 @@ public class FnPermissions implements IPermissions {
 		Iterator itUser = us.iterator();
 		while (itUser.hasNext()){
 			user = (User) itUser.next();
-			logger.log(Level.FINER, "Authorization for USER [" + user.get_Name() + "] of GROUP ["+group.get_Name()+"]");
+			logger.log(Level.FINER, "Authorization for USER [" + user.get_Name() + "][" + user.get_Email() + "] of GROUP ["+group.get_Name()+"]");
 			if (user.get_Name().equalsIgnoreCase(username)
+					|| user.get_Email().equalsIgnoreCase(username)
 					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
 				logger.log(Level.INFO, "Authorization for USER [" + user.get_Name() + "] of GROUP ["+group.get_Name()+"] is successful");
 				return true;
