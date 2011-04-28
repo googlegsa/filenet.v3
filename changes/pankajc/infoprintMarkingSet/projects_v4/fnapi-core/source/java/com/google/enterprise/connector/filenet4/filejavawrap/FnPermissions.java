@@ -333,9 +333,12 @@ public class FnPermissions implements IPermissions {
 		Iterator itUser = us.iterator();
 		while (itUser.hasNext()) {
 			user = (User) itUser.next();
-			logger.log(Level.FINER, "Searching the USER [" + username
-					+ "] in GROUP [" + group.get_Name() + "]");
+			logger.log(Level.FINER, "Searching the USER [" + user.get_Name()
+					+ "][" + user.get_Email() + "] in GROUP ["
+					+ group.get_Name() + "]");
+
 			if (user.get_Name().equalsIgnoreCase(username)
+					|| user.get_Email().equalsIgnoreCase(username)
 					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
 				logger.log(Level.FINE, "Search USER [" + username
 						+ "] found in GROUP [" + group.get_Name() + "]");

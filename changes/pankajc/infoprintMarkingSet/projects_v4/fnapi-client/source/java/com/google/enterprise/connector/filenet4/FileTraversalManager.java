@@ -16,6 +16,25 @@
  */
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.ISearch;
+import com.google.enterprise.connector.filenet4.filewrap.ISession;
+import com.google.enterprise.connector.spi.DocumentList;
+import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
+import com.google.enterprise.connector.spi.TraversalManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.filenet.api.constants.GuidConstants;
+import com.filenet.api.constants.PropertyNames;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.DateFormat;
@@ -31,29 +50,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import com.filenet.api.constants.GuidConstants;
-import com.filenet.api.constants.PropertyNames;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.ISearch;
-import com.google.enterprise.connector.filenet4.filewrap.ISession;
-import com.google.enterprise.connector.spi.DocumentList;
-import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
-import com.google.enterprise.connector.spi.TraversalManager;
-
 /**
  * Responsible for: 1. Construction of FileNet SQL queries for adding and
  * deleting index of documents to GSA. 2. Execution of the SQL query constructed
  * in step 1. 3. Retrieve the results of step 2 and wrap it in DocumentList
- * 
+ *
  * @author pankaj_chouhan
  */
 public class FileTraversalManager implements TraversalManager {
@@ -67,15 +68,14 @@ public class FileTraversalManager implements TraversalManager {
 	private IObjectStore objectStore;
 	private int batchint;
 	private ISession fileSession;
-	private String tableName = "Document";
+	private String tableName = "Document d";
 	private String order_by = " ORDER BY DateLastModified,Id";
-	private String whereClause = " AND ((DateLastModified={0} AND (''{1}''<id)) OR (DateLastModified>{0}))";
+	private String whereClause = " AND ((DateLastModified={0} OR (DateLastModified>{0})))";
 	private String orderByToDelete = " ORDER BY " + PropertyNames.DATE_CREATED
 			+ "," + PropertyNames.ID;
 	private String whereClauseToDelete = " WHERE (("
-			+ PropertyNames.DATE_CREATED + "={0} AND (''{1}''<"
-			+ PropertyNames.ID + ")) OR (" + PropertyNames.DATE_CREATED
-			+ ">{0}))";
+			+ PropertyNames.DATE_CREATED + "={0} OR ("
+			+ PropertyNames.DATE_CREATED + ">{0})))";
 	private String whereClauseToDeleteOnlyDate = " WHERE ("
 			+ PropertyNames.DATE_CREATED + ">{0})";
 	private String additionalWhereClause;
@@ -115,6 +115,10 @@ public class FileTraversalManager implements TraversalManager {
 		this.included_meta = included_meta;
 		this.excluded_meta = excluded_meta;
 		this.db_timezone = db_timezone;
+	}
+
+	public FileTraversalManager() {
+
 	}
 
 	public DocumentList startTraversal() throws RepositoryException {
@@ -158,7 +162,7 @@ public class FileTraversalManager implements TraversalManager {
 		return resultSet;
 	}
 
-	private String buildQueryString(String checkpoint)
+	public String buildQueryString(String checkpoint)
 			throws RepositoryException {
 		StringBuffer query = new StringBuffer("SELECT ");
 		if (batchint > 0) {
@@ -169,11 +173,21 @@ public class FileTraversalManager implements TraversalManager {
 		query.append(PropertyNames.DATE_LAST_MODIFIED);
 		query.append(" FROM ");
 		query.append(tableName);
+		//modified by Manoj
+		//query.append(" INNER JOIN ContentSearch cs ON d.This = cs.QueriedObject");
+		//End modified by Manoj
 		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
+		//Modified by Manoj
 		if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
-			query.append(additionalWhereClause);
+			if( (additionalWhereClause.toUpperCase()).startsWith("SELECT")) {
+				query = new StringBuffer(additionalWhereClause);
+				logger.fine("Using Custom Query[" + additionalWhereClause + "], will add Checkpoint in next step.");
+			}else {
+				query.append(additionalWhereClause);
+			}
 		}
+		//End modified by Manoj
 		if (checkpoint != null) {
 			query.append(getCheckpointClause(checkpoint));
 		}
@@ -182,13 +196,17 @@ public class FileTraversalManager implements TraversalManager {
 		return query.toString();
 	}
 
+	public void setAdditionalWhereClause(String additionalWhereClaue) {
+		this.additionalWhereClause = additionalWhereClaue;
+	}
+
 	/**
 	 * Builds the query to send delete feeds to GSA. This query does not include
 	 * the "Additional Where Clause"(AWC) because the schema of Event Table and
 	 * the Classes included in AWC are different. Due to the exclusion of AWC in
 	 * query, there are chances that, connector may send Delete Feed to GSA for
 	 * documents which were never indexed to GSA
-	 * 
+	 *
 	 * @param checkpoint
 	 * @return
 	 * @throws RepositoryException
@@ -211,7 +229,7 @@ public class FileTraversalManager implements TraversalManager {
 			query.append(getCheckpointClauseToDelete(checkpoint));
 
 			if (additionalWhereClause != null
-					&& !additionalWhereClause.equals("")) {
+					&& !additionalWhereClause.equals("") && !(additionalWhereClause.toUpperCase()).startsWith("SELECT")) {
 				query.append(additionalWhereClause);
 			}
 			query.append(orderByToDelete);
