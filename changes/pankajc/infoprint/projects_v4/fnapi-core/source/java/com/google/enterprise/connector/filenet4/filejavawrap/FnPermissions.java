@@ -15,23 +15,6 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 
-import com.filenet.api.collection.GroupSet;
-import com.filenet.api.collection.PermissionList;
-import com.filenet.api.collection.UserSet;
-import com.filenet.api.constants.AccessLevel;
-import com.filenet.api.constants.AccessRight;
-import com.filenet.api.constants.AccessType;
-import com.filenet.api.constants.SecurityPrincipalType;
-import com.filenet.api.core.Connection;
-import com.filenet.api.security.AccessPermission;
-import com.filenet.api.security.Group;
-import com.filenet.api.security.User;
-
-import java.util.Iterator;
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Wrapper class over the FileNet API class Permissions. This class is
  * responsible to authorize a target user against all the Access Control Entries
@@ -313,9 +296,12 @@ public class FnPermissions implements IPermissions {
 		Iterator itUser = us.iterator();
 		while (itUser.hasNext()) {
 			user = (User) itUser.next();
-			logger.log(Level.FINER, "Searching the USER [" + username
-					+ "] in GROUP [" + group.get_Name() + "]");
+			logger.log(Level.FINER, "Searching the USER [" + user.get_Name()
+					+ "][" + user.get_Email() + "] in GROUP ["
+					+ group.get_Name() + "]");
+
 			if (user.get_Name().equalsIgnoreCase(username)
+					|| user.get_Email().equalsIgnoreCase(username)
 					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
 				logger.log(Level.FINE, "Search USER [" + username
 						+ "] found in GROUP [" + group.get_Name() + "]");
