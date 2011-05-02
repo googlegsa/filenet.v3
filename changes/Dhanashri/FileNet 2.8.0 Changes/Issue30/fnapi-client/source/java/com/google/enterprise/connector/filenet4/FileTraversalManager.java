@@ -16,6 +16,25 @@
  */
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.ISearch;
+import com.google.enterprise.connector.filenet4.filewrap.ISession;
+import com.google.enterprise.connector.spi.DocumentList;
+import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
+import com.google.enterprise.connector.spi.TraversalManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.filenet.api.constants.GuidConstants;
+import com.filenet.api.constants.PropertyNames;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.DateFormat;
@@ -30,24 +49,6 @@ import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import com.filenet.api.constants.GuidConstants;
-import com.filenet.api.constants.PropertyNames;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.ISearch;
-import com.google.enterprise.connector.filenet4.filewrap.ISession;
-import com.google.enterprise.connector.spi.DocumentList;
-import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
-import com.google.enterprise.connector.spi.TraversalManager;
 
 /**
  * Responsible for: 1. Construction of FileNet SQL queries for adding and
@@ -214,6 +215,7 @@ public class FileTraversalManager implements TraversalManager {
 					&& !additionalWhereClause.equals("")) {
 				query.append(additionalWhereClause);
 			}
+
 			query.append(orderByToDelete);
 		} else {
 			// Get the date of today, corresponding to the date of first push
