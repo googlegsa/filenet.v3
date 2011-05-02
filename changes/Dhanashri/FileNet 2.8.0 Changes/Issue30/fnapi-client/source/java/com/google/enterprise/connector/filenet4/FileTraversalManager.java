@@ -211,11 +211,6 @@ public class FileTraversalManager implements TraversalManager {
 			logger.fine("Checkpoint is not null");
 			query.append(getCheckpointClauseToDelete(checkpoint));
 
-			if (additionalWhereClause != null
-					&& !additionalWhereClause.equals("")) {
-				query.append(additionalWhereClause);
-			}
-
 			query.append(orderByToDelete);
 		} else {
 			// Get the date of today, corresponding to the date of first push
