@@ -1,5 +1,6 @@
 package com.google.enterprise.connector.filenet3.filejavawrap;
 
+import com.google.enterprise.connector.filenet3.FileUtil;
 import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
 
 import com.filenet.wcm.api.BaseObject;
@@ -54,8 +55,11 @@ public class FnPermissions implements IPermissions {
 				if (perm.getGranteeType() == BaseObject.TYPE_USER) {
 					logger.log(Level.INFO, "Grantee Name is [" + granteeName
 							+ "] is of type USER");
+					// compare username with complete granteeName or shortName
+					// of the grantee
 					if (granteeName.equalsIgnoreCase(username)
-							|| granteeName.split("@")[0].equalsIgnoreCase(username)) {
+							|| granteeName.split("@")[0].equalsIgnoreCase(username)
+							|| FileUtil.getShortName(granteeName).equalsIgnoreCase(username)) {
 						logger.log(Level.INFO, "Authorization for user: ["
 								+ username + "] is Successful");
 						return true;
@@ -85,7 +89,7 @@ public class FnPermissions implements IPermissions {
 								+ username + "] is Successful");
 						return true;
 					} else {
-						Groups groups = en.getUserRealm().findGroups(perm.getGranteeName().split("@")[0], Realm.PRINCIPAL_SEARCH_TYPE_EXACT, Realm.PRINCIPAL_SEARCH_ATTR_DISPLAY_NAME, Realm.PRINCIPAL_SEARCH_SORT_NONE, 0);
+						Groups groups = en.getUserRealm().findGroups(perm.getGranteeName().split("@")[0], Realm.PRINCIPAL_SEARCH_TYPE_NONE, Realm.PRINCIPAL_SEARCH_ATTR_NONE, Realm.PRINCIPAL_SEARCH_SORT_NONE, 0);
 
 						Group group = null;
 						Iterator it = groups.iterator();
@@ -130,8 +134,11 @@ public class FnPermissions implements IPermissions {
 			user = (User) itUser.next();
 			logger.log(Level.FINER, "Authorization for USER [" + user.getName()
 					+ "] of GROUP [" + group.getName() + "]");
+			// compare username with complete username or the shortName of the
+			// group member
 			if (user.getName().equalsIgnoreCase(username)
-					|| user.getName().split("@")[0].equalsIgnoreCase(username)) {
+					|| user.getName().split("@")[0].equalsIgnoreCase(username)
+					|| FileUtil.getShortName(user.getName()).equalsIgnoreCase(username)) {
 				logger.log(Level.INFO, "Authorization for USER ["
 						+ user.getName() + "] of GROUP [" + group.getName()
 						+ "] is successful");
