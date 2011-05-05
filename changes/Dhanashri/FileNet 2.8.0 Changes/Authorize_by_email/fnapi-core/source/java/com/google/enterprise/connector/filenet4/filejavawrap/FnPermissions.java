@@ -13,6 +13,7 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
+import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 
 import com.filenet.api.collection.GroupSet;
@@ -75,8 +76,11 @@ public class FnPermissions implements IPermissions {
 				if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
 					logger.log(Level.INFO, "Grantee Name is [" + granteeName
 							+ "] is of type USER");
+					// compare username with complete granteeName or shortName
+					// of the grantee
 					if (granteeName.equalsIgnoreCase(username)
-							|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
+							|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
+							|| FileUtil.getShortName(granteeName).equalsIgnoreCase(username)) {
 						logger.log(Level.INFO, "Authorization for user: ["
 								+ username + "] is Successful");
 						return true;
@@ -157,7 +161,9 @@ public class FnPermissions implements IPermissions {
 			logger.log(Level.FINER, "Authorization for USER ["
 					+ user.get_Name() + "] of GROUP [" + group.get_Name() + "]");
 			if (user.get_Name().equalsIgnoreCase(username)
-					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)) {
+					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
+					|| FileUtil.getShortName(user.get_Name()).equalsIgnoreCase(username)
+					|| user.get_ShortName().equalsIgnoreCase(username)) {
 				logger.log(Level.INFO, "Authorization for USER ["
 						+ user.get_Name() + "] of GROUP [" + group.get_Name()
 						+ "] is successful");
