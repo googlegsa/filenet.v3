@@ -25,13 +25,18 @@ public class FnPermissions implements IPermissions {
 
 	public static int LEVEL_VIEW = Permission.LEVEL_VIEW;
 
-	private static Logger logger = null;
-	static {
-		logger = Logger.getLogger(FnPermissions.class.getName());
-	}
+	private static Logger LOGGER = Logger.getLogger(FnPermissions.class.getName());
+
+	private static final String AUTHENTICATED_USERS = "#AUTHENTICATED-USERS";
+
+	private static final String ACTIVE_DIRECTORY_SYMBOL = "@";
+
+	private static final int PRINCIPAL_SEARCH_TYPE_NONE = Realm.PRINCIPAL_SEARCH_TYPE_NONE;
+	private static final int PRINCIPAL_SEARCH_ATTR_NONE = Realm.PRINCIPAL_SEARCH_ATTR_NONE;
+	private static final int PRINCIPAL_SEARCH_SORT_NONE = Realm.PRINCIPAL_SEARCH_SORT_NONE;
 
 	public FnPermissions(EntireNetwork refEn, Permissions refPerms) {
-		logger.finest("FnPermissions:" + refPerms.toString());
+		LOGGER.finest("FnPermissions:" + refPerms.toString());
 		this.en = refEn;
 		this.perms = refPerms;
 	}
@@ -41,11 +46,11 @@ public class FnPermissions implements IPermissions {
 		boolean accessLevelFailure = true;
 		Iterator iter = perms.iterator();
 		String granteeName;
-		logger.log(Level.FINE, "Authorizing user:[" + username + "]");
+		LOGGER.log(Level.FINE, "Authorizing user:[" + username + "]");
 		while (iter.hasNext()) {
 			Permission perm = (Permission) iter.next();
 			Integer accessMask = perm.getAccess();
-			logger.log(Level.FINEST, "Access Mask is:[" + accessMask + "]");
+			LOGGER.log(Level.FINEST, "Access Mask is:[" + accessMask + "]");
 
 			// Compare to make sure that the access level, to user for a
 			// document, is atleast view or above.
@@ -53,27 +58,27 @@ public class FnPermissions implements IPermissions {
 				accessLevelFailure = false;
 				granteeName = perm.getGranteeName();
 				if (perm.getGranteeType() == BaseObject.TYPE_USER) {
-					logger.log(Level.INFO, "Grantee Name is [" + granteeName
+					LOGGER.log(Level.INFO, "Grantee Name is [" + granteeName
 							+ "] is of type USER");
 					// compare username with complete granteeName or shortName
 					// of the grantee
 					if (granteeName.equalsIgnoreCase(username)
-							|| granteeName.split("@")[0].equalsIgnoreCase(username)
+							|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
 							|| FileUtil.getShortName(granteeName).equalsIgnoreCase(username)) {
-						logger.log(Level.INFO, "Authorization for user: ["
+						LOGGER.log(Level.INFO, "Authorization for user: ["
 								+ username + "] is Successful");
 						return true;
 					} else {
-						logger.log(Level.FINER, "Grantee Name ["
+						LOGGER.log(Level.FINER, "Grantee Name ["
 								+ granteeName
 								+ "] does not match with search user ["
 								+ username
 								+ "]. Authorization will continue with the next Grantee Name");
 					}
 				} else if (perm.getGranteeType() == BaseObject.TYPE_GROUP) { // GROUP
-					logger.log(Level.INFO, "Grantee Name [" + granteeName
+					LOGGER.log(Level.INFO, "Grantee Name [" + granteeName
 							+ "] is of type GROUP");
-					if (perm.getGranteeName().equalsIgnoreCase("#AUTHENTICATED-USERS")) {
+					if (perm.getGranteeName().equalsIgnoreCase(AUTHENTICATED_USERS)) {
 						// #AUTHENTICATED-USERS is a logical group in FileNet P8
 						// Systems, which gets automatically
 						// created at the time of FileNet installation. This
@@ -85,11 +90,11 @@ public class FnPermissions implements IPermissions {
 						// reason to authenticate a user for a document, if that
 						// document contains #AUTHENTICATED-USERS
 						// group in its ACL or ACE.
-						logger.log(Level.INFO, "Authorization for user: ["
+						LOGGER.log(Level.INFO, "Authorization for user: ["
 								+ username + "] is Successful");
 						return true;
 					} else {
-						Groups groups = en.getUserRealm().findGroups(perm.getGranteeName().split("@")[0], Realm.PRINCIPAL_SEARCH_TYPE_NONE, Realm.PRINCIPAL_SEARCH_ATTR_NONE, Realm.PRINCIPAL_SEARCH_SORT_NONE, 0);
+						Groups groups = en.getUserRealm().findGroups(perm.getGranteeName().split(ACTIVE_DIRECTORY_SYMBOL)[0], PRINCIPAL_SEARCH_TYPE_NONE, PRINCIPAL_SEARCH_ATTR_NONE, PRINCIPAL_SEARCH_SORT_NONE, 0);
 
 						Group group = null;
 						Iterator it = groups.iterator();
@@ -99,7 +104,7 @@ public class FnPermissions implements IPermissions {
 						if (group != null) {
 							found = searchUserInGroup(username, group);
 							if (found) {
-								logger.log(Level.INFO, "Authorization for user: ["
+								LOGGER.log(Level.INFO, "Authorization for user: ["
 										+ username + "] is Successful");
 								return true;
 							}
@@ -111,11 +116,11 @@ public class FnPermissions implements IPermissions {
 		if (accessLevelFailure) {
 			// If the document have no view content or more Access Security
 			// Level to any user
-			logger.log(Level.WARNING, "Authorization for user: ["
+			LOGGER.log(Level.WARNING, "Authorization for user: ["
 					+ username
 					+ "] FAILED due to insufficient Access Security Levels. Minimum expected Access Security Level is \"View Content\"");
 		} else {
-			logger.log(Level.WARNING, "Authorization for user: ["
+			LOGGER.log(Level.WARNING, "Authorization for user: ["
 					+ username
 					+ "] FAILED. Probable reason: ["
 					+ username
@@ -132,14 +137,14 @@ public class FnPermissions implements IPermissions {
 		Iterator itUser = us.iterator();
 		while (itUser.hasNext()) {
 			user = (User) itUser.next();
-			logger.log(Level.FINER, "Authorization for USER [" + user.getName()
+			LOGGER.log(Level.FINER, "Authorization for USER [" + user.getName()
 					+ "] of GROUP [" + group.getName() + "]");
 			// compare username with complete username or the shortName of the
 			// group member
 			if (user.getName().equalsIgnoreCase(username)
-					|| user.getName().split("@")[0].equalsIgnoreCase(username)
+					|| user.getName().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
 					|| FileUtil.getShortName(user.getName()).equalsIgnoreCase(username)) {
-				logger.log(Level.INFO, "Authorization for USER ["
+				LOGGER.log(Level.INFO, "Authorization for USER ["
 						+ user.getName() + "] of GROUP [" + group.getName()
 						+ "] is successful");
 				return true;
