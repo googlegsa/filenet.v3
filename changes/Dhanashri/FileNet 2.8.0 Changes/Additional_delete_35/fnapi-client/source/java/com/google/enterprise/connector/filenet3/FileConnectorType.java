@@ -1,20 +1,27 @@
 /*
  * Copyright 2009 Google Inc.
 
-	Licensed under the Apache License, Version 2.0 (the "License");
-	you may not use this file except in compliance with the License.
-	You may obtain a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
 
      http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing, software
-	distributed under the License is distributed on an "AS IS" BASIS,
-	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	See the License for the specific language governing permissions and
-	limitations under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
 
  */
 package com.google.enterprise.connector.filenet3;
+
+import com.google.enterprise.connector.filenet3.filewrap.ISearch;
+import com.google.enterprise.connector.spi.ConfigureResponse;
+import com.google.enterprise.connector.spi.ConnectorFactory;
+import com.google.enterprise.connector.spi.ConnectorType;
+import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.XmlUtils;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -34,17 +41,12 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.enterprise.connector.filenet3.filewrap.ISearch;
-import com.google.enterprise.connector.spi.ConfigureResponse;
-import com.google.enterprise.connector.spi.ConnectorFactory;
-import com.google.enterprise.connector.spi.ConnectorType;
-import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.XmlUtils;
-
 /**
- * Represents FileNetConnectortype. Contains methods for creating and validating FileNet user form.
+ * Represents FileNetConnectortype. Contains methods for creating and validating
+ * FileNet user form.
+ * 
  * @author amit_kagrawal
- * */
+ */
 public class FileConnectorType implements ConnectorType {
 
 	private static final String HIDDEN = "hidden";
@@ -85,8 +87,10 @@ public class FileConnectorType implements ConnectorType {
 	private static final String CHECKBOX = "checkbox";
 	private static final String CHECKED = "checked='checked'";
 	private static final String LOCALE_FILE = "FileConnectorResources";
-	//	private static final String CONNECTOR_INSTANCE_XML = "config/connectorInstance.xml";
-	//	private static final String FILE_CONNECTOR_INSTANCE = "FileConnectorInstance";
+	// private static final String CONNECTOR_INSTANCE_XML =
+	// "config/connectorInstance.xml";
+	// private static final String FILE_CONNECTOR_INSTANCE =
+	// "FileConnectorInstance";
 	private static final int BUFFER_SIZE = 2048;
 	private static Logger logger = null;
 	private List keys = null;
@@ -104,8 +108,7 @@ public class FileConnectorType implements ConnectorType {
 	 * of this method must be called exactly once before the SPI methods are
 	 * used.
 	 * 
-	 * @param keys
-	 *            A list of String keys
+	 * @param keys A list of String keys
 	 */
 	public void setConfigKeys(List keys) {
 		if (this.keys != null) {
@@ -120,8 +123,7 @@ public class FileConnectorType implements ConnectorType {
 	 * of this method must be called exactly once before the SPI methods are
 	 * used.
 	 * 
-	 * @param keys
-	 *            An array of String keys
+	 * @param keys An array of String keys
 	 */
 	public void setConfigKeys(String[] keys) {
 		setConfigKeys(Arrays.asList(keys));
@@ -131,8 +133,8 @@ public class FileConnectorType implements ConnectorType {
 	 * Sets the form to be used by this configurer. This is optional. If this
 	 * method is used, it must be called before the SPI methods are used.
 	 * 
-	 * @param formSnippet
-	 *            A String snippet of html - see the Configurer interface
+	 * @param formSnippet A String snippet of html - see the Configurer
+	 *            interface
 	 */
 	public void setInitialConfigForm(String formSnippet) {
 		if (this.initialConfigForm != null) {
@@ -144,8 +146,7 @@ public class FileConnectorType implements ConnectorType {
 	public ConfigureResponse getConfigForm(Locale language) {
 
 		try {
-			resource = ResourceBundle.getBundle(LOCALE_FILE,
-					language);
+			resource = ResourceBundle.getBundle(LOCALE_FILE, language);
 		} catch (MissingResourceException e) {
 			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
@@ -155,20 +156,19 @@ public class FileConnectorType implements ConnectorType {
 		if (keys == null) {
 			throw new IllegalStateException();
 		}
-		this.initialConfigForm = makeConfigForm(null,this.validation);
+		this.initialConfigForm = makeConfigForm(null, this.validation);
 		return new ConfigureResponse("", initialConfigForm);
 	}
 
 	public ConfigureResponse getPopulatedConfigForm(Map configMap,
 			Locale language) {
 		try {
-			resource = ResourceBundle.getBundle(LOCALE_FILE,
-					language);
+			resource = ResourceBundle.getBundle(LOCALE_FILE, language);
 		} catch (MissingResourceException e) {
 			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
 		ConfigureResponse response = new ConfigureResponse("",
-				makeConfigForm(configMap,this.validation));
+				makeConfigForm(configMap, this.validation));
 		return response;
 	}
 
@@ -186,12 +186,12 @@ public class FileConnectorType implements ConnectorType {
 		return "";
 	}
 
-	public ConfigureResponse validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory) {
+	public ConfigureResponse validateConfig(Map configData, Locale language,
+			ConnectorFactory connectorFactory) {
 
 		logger.log(Level.FINEST, "Entering into function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
 		try {
-			resource = ResourceBundle.getBundle(LOCALE_FILE,
-					language);
+			resource = ResourceBundle.getBundle(LOCALE_FILE, language);
 		} catch (MissingResourceException e) {
 			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
@@ -204,96 +204,109 @@ public class FileConnectorType implements ConnectorType {
 
 			FileConnector conn = null;
 			try {
-				logger.log(Level.CONFIG, "Start Test Connection to the object store ..."+ (String) configData.get(OBJECT_STORE));
+				logger.log(Level.CONFIG, "Start Test Connection to the object store ..."
+						+ (String) configData.get(OBJECT_STORE));
 
 				logger.info("Attempting to create FileNet connector instance for verification");
-				conn =(FileConnector) connectorFactory.makeConnector(configData);
+				conn = (FileConnector) connectorFactory.makeConnector(configData);
 
-				if(null!=conn){
+				if (null != conn) {
 					logger.info("Able to create FileNet connector instance. Trying to login with provided credentials.");
 					session = (FileSession) conn.login();
 				}
-			}catch(RepositoryException e){
+			} catch (RepositoryException e) {
 				form = makeConfigForm(configData, this.validation);
 				logger.log(Level.SEVERE, e.getLocalizedMessage());
 
-				return new ConfigureResponse(resource.getString("invalid_credentials_error"), form);
+				return new ConfigureResponse(
+						resource.getString("invalid_credentials_error"), form);
 			}
 			logger.info("Login succeeded. Trying to retrieve the traversal manager.");
 
-			try{
-				if(session != null){
-					session.getTraversalManager();// test on the objectStore name
+			try {
+				if (session != null) {
+					session.getTraversalManager();// test on the objectStore
+													// name
 				}
-			}catch(RepositoryException e){
-				this.validation=OBJECT_STORE;
+			} catch (RepositoryException e) {
+				this.validation = OBJECT_STORE;
 
 				form = makeConfigForm(configData, this.validation);
 				logger.log(Level.SEVERE, e.getLocalizedMessage());
 
-				return new ConfigureResponse(resource.getString("object_store_invalid"), form);
+				return new ConfigureResponse(
+						resource.getString("object_store_invalid"), form);
 			}
-			logger.log(Level.INFO, "Connecttion to Object Store "+ (String) configData.get(OBJECT_STORE)+ " is Successful");
+			logger.log(Level.INFO, "Connecttion to Object Store "
+					+ (String) configData.get(OBJECT_STORE) + " is Successful");
 
-
-			if(null!=conn){
+			if (null != conn) {
 				logger.info("Got traversal manager");
-				StringBuffer query = new StringBuffer("<?xml version=\"1.0\" ?><request>");
+				StringBuffer query = new StringBuffer(
+						"<?xml version=\"1.0\" ?><request>");
 				query.append("<objectstores mergeoption=\"none\"><objectstore id=\"");
-				query.append((String)configData.get(OBJECT_STORE));
+				query.append((String) configData.get(OBJECT_STORE));
 				query.append("\"/></objectstores>");
 				query.append("<querystatement>SELECT Id FROM Document WHERE VersionStatus=1 ");
-				query.append((String)configData.get(WHERECLAUSE));
+				query.append((String) configData.get(WHERECLAUSE));
 				query.append("</querystatement><options maxrecords='100' objectasid=\"false\"/></request>");
 
-				try{
-					if(session != null){
+				try {
+					if (session != null) {
 						ISearch search = session.getSearch();
-						search.executeXml(query.toString(),session.getObjectStore());
+						search.executeXml(query.toString(), session.getObjectStore());
 					}
-				}catch(Exception e){
+				} catch (Exception e) {
 					this.validation = WHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
-					return new ConfigureResponse(resource.getString("additional_where_clause_invalid"), form);
+					return new ConfigureResponse(
+							resource.getString("additional_where_clause_invalid"),
+							form);
 				}
-			}else{
+			} else {
 				logger.severe("Unable to create a FileNet connector instance");
 			}
 
-			try{	
-				logger.log(Level.CONFIG, "Start Test Connection to Workplace server ..."+ (String) configData.get(WORKPLACE_URL));
+			try {
+				logger.log(Level.CONFIG, "Start Test Connection to Workplace server ..."
+						+ (String) configData.get(WORKPLACE_URL));
 				configData.put(WORKPLACE_URL, getFQDNHostNameURL((String) configData.get(WORKPLACE_URL)));
 				testWorkplaceUrl((String) configData.get(WORKPLACE_URL));
 			} catch (RepositoryException e) {
 				form = makeConfigForm(configData, this.validation);
 				logger.log(Level.SEVERE, e.getLocalizedMessage());
 
-				return new ConfigureResponse(resource.getString("workplace_url_error") ,form);
+				return new ConfigureResponse(
+						resource.getString("workplace_url_error"), form);
 			}
 			return null;
 		}
 
 		form = makeConfigForm(configData, this.validation);
-		String errorMsg =resource.getString(validation + "_error"); //added here
+		String errorMsg = resource.getString(validation + "_error"); // added
+																		// here
 		logger.log(Level.FINEST, "Exiting from function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
-		return new ConfigureResponse(errorMsg,form);
+		return new ConfigureResponse(errorMsg, form);
 	}
 
 	private void testWorkplaceUrl(String workplaceServerUrl)
-	throws RepositoryException {
+			throws RepositoryException {
 
-		//Added by Pankaj on 04/05/2009 to remove the dependency of Httpclient.jar file
+		// Added by Pankaj on 04/05/2009 to remove the dependency of
+		// Httpclient.jar file
 		try {
 			new FileUrlValidator().validate(workplaceServerUrl);
 			logger.log(Level.INFO, "Connecttion to Workplace server is Successful");
 		} catch (FileUrlValidatorException e) {
-			this.validation=WORKPLACE_URL;
+			this.validation = WORKPLACE_URL;
 			logger.log(Level.SEVERE, resource.getString("workplace_url_error"));
-			throw new RepositoryException(resource.getString("workplace_url_error"));
+			throw new RepositoryException(
+					resource.getString("workplace_url_error"));
 		} catch (Throwable t) {
-			this.validation=WORKPLACE_URL;
+			this.validation = WORKPLACE_URL;
 			logger.log(Level.SEVERE, resource.getString("workplace_url_error"));
-			throw new RepositoryException(resource.getString("workplace_url_error"));
+			throw new RepositoryException(
+					resource.getString("workplace_url_error"));
 		}
 
 	}
@@ -307,7 +320,7 @@ public class FileConnectorType implements ConnectorType {
 	 */
 	private String makeConfigForm(Map configMap, String validate) {
 		logger.log(Level.FINEST, "Entering into function makeConfigForm(Map configMap, String validate)");
-		logger.log(Level.FINEST, "validate: "+validate);
+		logger.log(Level.FINEST, "validate: " + validate);
 		StringBuffer buf = new StringBuffer(BUFFER_SIZE);
 		String value = "";
 		for (Iterator i = keys.iterator(); i.hasNext();) {
@@ -328,11 +341,11 @@ public class FileConnectorType implements ConnectorType {
 				value = "";
 			} else {
 				if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
-						/*&& !key.equals(WHERECLAUSE)*/ && !key.equals(FILEPATH)) {
-					if(validate.equals(key)){
-						logger.log(Level.FINEST, "key: "+key);
+				/* && !key.equals(WHERECLAUSE) */&& !key.equals(FILEPATH)) {
+					if (validate.equals(key)) {
+						logger.log(Level.FINEST, "key: " + key);
 						appendStartRow(buf, key, validate);
-					}else{
+					} else {
 						appendStartRow(buf, key, "");
 					}
 
@@ -346,7 +359,7 @@ public class FileConnectorType implements ConnectorType {
 					appendAttribute(buf, TYPE, PASSWORD);
 				} else if (key.equals(FNCLASS)
 						|| key.equals(AUTHENTICATIONTYPE)
-						/*|| key.equals(WHERECLAUSE)*/ || key.equals(FILEPATH)) {
+						/* || key.equals(WHERECLAUSE) */|| key.equals(FILEPATH)) {
 					appendAttribute(buf, TYPE, HIDDEN);
 				} else {
 					appendAttribute(buf, TYPE, TEXT);
@@ -364,12 +377,16 @@ public class FileConnectorType implements ConnectorType {
 			appendStartHiddenRow(buf);
 			Iterator i = new TreeSet(configMap.keySet()).iterator();
 
-			//added: NULL checks
-			if(null!=i){
+			// added: NULL checks
+			if (null != i) {
 				while (i.hasNext()) {
 					String key = (String) i.next();
 					if (!keySet.contains(key)) {
-						String val = (String) configMap.get(key);// add another hidden field to preserve this data
+						String val = (String) configMap.get(key);// add another
+																	// hidden
+																	// field to
+																	// preserve
+																	// this data
 						buf.append("<input type=\"hidden\" value=\"");
 						buf.append(val);
 						buf.append("\" name=\"");
@@ -380,7 +397,8 @@ public class FileConnectorType implements ConnectorType {
 			}
 			appendEndRow(buf);
 		}
-		logger.log(Level.FINEST, "Exiting from function makeConfigForm(Map configMap, String validate)" + buf.toString());
+		logger.log(Level.FINEST, "Exiting from function makeConfigForm(Map configMap, String validate)"
+				+ buf.toString());
 		return buf.toString();
 	}
 
@@ -394,13 +412,13 @@ public class FileConnectorType implements ConnectorType {
 		buf.append(TR_START);
 		buf.append(TD_START_LABEL);
 		buf.append(TD_WHITE_SPACE);
-		if(isRequired(key)){
+		if (isRequired(key)) {
 
 			buf.append(TD_END_START_LABEL);
 			buf.append(DIV_START_LABEL);
 			buf.append(TD_FLOAT_LEFT);
 			buf.append(TD_DELIMITER);
-			if(!validate.equals("")){
+			if (!validate.equals("")) {
 				buf.append(TD_FONT_COLOR);
 				buf.append(TD_DELIMITER);
 			}
@@ -414,19 +432,18 @@ public class FileConnectorType implements ConnectorType {
 			buf.append(TD_DELIMITER);
 			buf.append(TD_FONT_WEIGHT);
 			buf.append(TD_DELIMITER);
-			buf.append(TD_FONT_COLOR);			
+			buf.append(TD_FONT_COLOR);
 			buf.append(TD_END_START_LABEL);
 			buf.append(ASTERISK);
 			buf.append(DIV_END);
 			buf.append(TD_END);
-		}
-		else{
+		} else {
 			buf.append(TD_END_START_LABEL);
-			if(key.equals(WHERECLAUSE)){
+			if (key.equals(WHERECLAUSE)) {
 				buf.append(DIV_START_LABEL);
 				buf.append(TD_FLOAT_LEFT);
 				buf.append(TD_DELIMITER);
-				if(!validate.equals("")){
+				if (!validate.equals("")) {
 					buf.append(TD_FONT_COLOR);
 					buf.append(TD_DELIMITER);
 					buf.append(TD_FONT_WEIGHT);
@@ -435,7 +452,7 @@ public class FileConnectorType implements ConnectorType {
 				buf.append(resource.getString(key));
 				buf.append(DIV_END);
 				buf.append(TD_END);
-			}else{
+			} else {
 				buf.append(resource.getString(key));
 				buf.append(TD_END);
 			}
@@ -448,7 +465,8 @@ public class FileConnectorType implements ConnectorType {
 		buf.append(TR_END);
 	}
 
-	private void appendAttribute(StringBuffer buf, String attrName, String attrValue) {
+	private void appendAttribute(StringBuffer buf, String attrName,
+			String attrValue) {
 		buf.append(" ");
 		buf.append(attrName);
 		buf.append("=\"");
@@ -468,12 +486,13 @@ public class FileConnectorType implements ConnectorType {
 		}
 	}
 
-	private void appendCheckBox(StringBuffer buf, String key, String label,	String value) {
+	private void appendCheckBox(StringBuffer buf, String key, String label,
+			String value) {
 		buf.append(TR_START);
 		buf.append(TD_START_COLSPAN);
 		buf.append(OPEN_ELEMENT);
 		buf.append(INPUT);
-		buf.append(" " + TYPE + "=\"" +CHECKBOX+'"');
+		buf.append(" " + TYPE + "=\"" + CHECKBOX + '"');
 		buf.append(" " + NAME + "=\"" + key + "\" ");
 		if (value != null && value.equals("on")) {
 			buf.append(CHECKED);
@@ -485,15 +504,16 @@ public class FileConnectorType implements ConnectorType {
 
 	}
 
-	private boolean isRequired(final String configKey){
+	private boolean isRequired(final String configKey) {
 		final boolean bValue = false;
-		if(configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL) || configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME)){
+		if (configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL)
+				|| configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME)) {
 			return true;
-		}		
+		}
 		return bValue;
 	}
 
-	private String getFQDNHostNameURL(String strUrl){
+	private String getFQDNHostNameURL(String strUrl) {
 
 		InetAddress ia = null;
 		URL url = null;
@@ -501,16 +521,14 @@ public class FileConnectorType implements ConnectorType {
 			url = new URL(strUrl);
 			ia = InetAddress.getByName(url.getHost());
 		} catch (final UnknownHostException e) {
-			logger.log(Level.WARNING,"Exception occurred while converting to FQDN.",e);
+			logger.log(Level.WARNING, "Exception occurred while converting to FQDN.", e);
 		} catch (MalformedURLException e) {
-			logger.log(Level.WARNING,"URL is not in a correct format.",e);
+			logger.log(Level.WARNING, "URL is not in a correct format.", e);
 		}
-		if(ia != null && url != null){
+		if (ia != null && url != null) {
 			return strUrl = strUrl.replaceAll(url.getHost(), ia.getCanonicalHostName());
 		}
 
 		return strUrl;
 	}
-
-
 }

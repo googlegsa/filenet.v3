@@ -175,5 +175,4 @@ public class FileSession implements Session {
 		ISearch search = fileObjectFactory.getSearch(fileSession);
 		return search;
 	}
-
 }

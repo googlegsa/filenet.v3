@@ -1,10 +1,11 @@
 package com.google.enterprise.connector.filenet3;
 
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
+import com.google.enterprise.connector.spi.DocumentList;
+import com.google.enterprise.connector.spi.Property;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
+import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SpiConstants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,12 +15,11 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.google.enterprise.connector.filenet3.filewrap.IObjectStore;
-import com.google.enterprise.connector.spi.DocumentList;
-import com.google.enterprise.connector.spi.Property;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.SpiConstants;
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileDocumentList implements DocumentList {
 
@@ -267,5 +267,4 @@ public class FileDocumentList implements DocumentList {
 		}
 		return property;
 	}
-
 }

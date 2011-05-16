@@ -209,11 +209,11 @@ public class FileTraversalManager implements TraversalManager {
 			query.append(tableNameEventToDelete);
 			query.append(eventAllias);
 			query.append(" WHERE ");
-			// //////////////////////////////////////////////////////////////////////
+			// ///////////////////////////////////////////////////////////////////////
 			query.append(" (DateLastModified >" + dateFirstPush + ")");
 			query.append(AND_OPERATOR);
 			query.append(isClassSQLFunction(eventAllias, EVENT_DELETE));
-			// //////////////////////////////////////////////////////////////////////
+			// ///////////////////////////////////////////////////////////////////////
 
 			query.append(orderByToDelete);
 			query.append("</querystatement>");

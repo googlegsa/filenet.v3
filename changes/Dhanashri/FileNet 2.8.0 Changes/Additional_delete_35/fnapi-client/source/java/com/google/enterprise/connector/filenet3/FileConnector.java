@@ -169,5 +169,4 @@ public class FileConnector implements Connector {
 		this.included_meta = included_meta;
 		logger.log(Level.CONFIG, "Set included_meta to " + included_meta);
 	}
-
 }

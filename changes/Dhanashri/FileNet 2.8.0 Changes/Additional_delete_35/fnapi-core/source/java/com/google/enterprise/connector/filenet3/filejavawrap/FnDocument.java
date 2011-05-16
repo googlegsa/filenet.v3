@@ -1,10 +1,10 @@
 package com.google.enterprise.connector.filenet3.filejavawrap;
 
-import java.io.InputStream;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.google.enterprise.connector.filenet3.filewrap.IDocument;
+import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet3.filewrap.IProperties;
+import com.google.enterprise.connector.filenet3.filewrap.IVersionSeries;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import com.filenet.wcm.api.BaseRuntimeException;
 import com.filenet.wcm.api.Document;
@@ -18,11 +18,12 @@ import com.filenet.wcm.api.PropertyNotFoundException;
 import com.filenet.wcm.api.Session;
 import com.filenet.wcm.api.Value;
 import com.filenet.wcm.api.Values;
-import com.google.enterprise.connector.filenet3.filewrap.IDocument;
-import com.google.enterprise.connector.filenet3.filewrap.IPermissions;
-import com.google.enterprise.connector.filenet3.filewrap.IProperties;
-import com.google.enterprise.connector.filenet3.filewrap.IVersionSeries;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
+
+import java.io.InputStream;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FnDocument implements IDocument {
 
@@ -37,14 +38,14 @@ public class FnDocument implements IDocument {
 		this.doc = refDoc;
 	}
 
-	public InputStream getContent() throws RepositoryDocumentException{
+	public InputStream getContent() throws RepositoryDocumentException {
 		logger.log(Level.FINE, "Entering into getContent()");
 		try {
 			return doc.getContent();
 		} catch (InsufficientPermissionException e) {
 			logger.log(Level.WARNING, "User does not have sufficient permission to retrive the content of document for "
 					+ this.doc.getId() + " " + e.getLocalizedMessage());
-//			throw new RepositoryDocumentException();
+			// throw new RepositoryDocumentException();
 			return null;
 		} catch (BaseRuntimeException e) {
 			logger.log(Level.WARNING, "Unable to retrieve the content of file for "
@@ -58,15 +59,17 @@ public class FnDocument implements IDocument {
 	}
 
 	public String getPropertyStringValue(String name)
-	throws RepositoryDocumentException {
+			throws RepositoryDocumentException {
 		String[] valuesName = { name };
 		try {
 			Properties props = doc.getProperties(valuesName);
 			Iterator it = props.iterator();
 			while (it.hasNext()) {
 				Property prop = (Property) it.next();
-				//Value of 7 i.e. TYPE_OBJECT; object data type; also returned if the value is a Values  
-				//collection (that is, if the property in question is a multi-valued property).
+				// Value of 7 i.e. TYPE_OBJECT; object data type; also returned
+				// if the value is a Values
+				// collection (that is, if the property in question is a
+				// multi-valued property).
 				if (prop.getType() == 7) {
 
 					Values values = prop.getValuesValue();
@@ -95,43 +98,50 @@ public class FnDocument implements IDocument {
 			} else if (name.equals(Property.PERMISSIONS)) {
 
 				return "security";
-			} else if(name.equals(Property.TITLE)){
+			} else if (name.equals(Property.TITLE)) {
 				return doc.getFilename();
-			}else {
-				String errorMsg = " Error while trying to get the property " + name
-				+ " of the file " + this.doc.getId() + " "
-				+ e1.getLocalizedMessage();
+			} else {
+				String errorMsg = " Error while trying to get the property "
+						+ name + " of the file " + this.doc.getId() + " "
+						+ e1.getLocalizedMessage();
 				logger.log(Level.SEVERE, errorMsg);
-				RepositoryDocumentException re = new RepositoryDocumentException(errorMsg, e1);
+				RepositoryDocumentException re = new RepositoryDocumentException(
+						errorMsg, e1);
 				throw re;
 			}
 
 		} catch (ClassCastException e) {
-			logger.log(Level.FINE, "ClassCastException found but still continuing for property " + name);
+			logger.log(Level.FINE, "ClassCastException found but still continuing for property "
+					+ name);
 		} catch (Exception e) {
-			logger.log(Level.FINE, "Exception found but still continuing for property " + name);
+			logger.log(Level.FINE, "Exception found but still continuing for property "
+					+ name);
 		}
 		return "";
 
 	}
 
-	public IPermissions getPermissions(Session session) throws RepositoryDocumentException {
+	public IPermissions getPermissions(Session session)
+			throws RepositoryDocumentException {
 		try {
 			EntireNetwork en = ObjectFactory.getEntireNetwork(session);
 			Permissions perms = this.doc.getPermissions();
 			return new FnPermissions(en, perms);
 		} catch (NullPointerException e) {
 			logger.log(Level.WARNING, "Document is null");
-			RepositoryDocumentException re = new RepositoryDocumentException("Document is null", e);
+			RepositoryDocumentException re = new RepositoryDocumentException(
+					"Document is null", e);
 			throw re;
 		} catch (Exception e) {
-			logger.log(Level.WARNING, "Unable to retrieve permissions for document "+this.doc.getFilename());
+			logger.log(Level.WARNING, "Unable to retrieve permissions for document "
+					+ this.doc.getFilename());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
-	public long getPropertyLongValue(String name) throws RepositoryDocumentException {
+	public long getPropertyLongValue(String name)
+			throws RepositoryDocumentException {
 
 		try {
 			return this.doc.getPropertyIntValue(name);
@@ -145,67 +155,68 @@ public class FnDocument implements IDocument {
 	}
 
 	public double getPropertyDoubleValue(String name)
-	throws RepositoryDocumentException {
+			throws RepositoryDocumentException {
 		try {
 			return this.doc.getPropertyDoubleValue(name);
 		} catch (NullPointerException e) {
 			logger.log(Level.WARNING, "Document is null");
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
-		}catch (PropertyNotFoundException e) {
+		} catch (PropertyNotFoundException e) {
 			logger.log(Level.WARNING, "error while trying to get the property "
-					+ name + " of the file " + this.doc.getFilename()+ " with docId " + this.doc.getId() + " "
-					+ e.getMessage());
+					+ name + " of the file " + this.doc.getFilename()
+					+ " with docId " + this.doc.getId() + " " + e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
-	public Date getPropertyDateValue(String name) throws RepositoryDocumentException {
+	public Date getPropertyDateValue(String name)
+			throws RepositoryDocumentException {
 		try {
 			return this.doc.getPropertyDateValue(name);
 		} catch (NullPointerException e) {
 			logger.log(Level.WARNING, "Document is null");
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
-		}catch (PropertyNotFoundException e) {
+		} catch (PropertyNotFoundException e) {
 			logger.log(Level.WARNING, "error while trying to get the property "
-					+ name + " of the file " + this.doc.getFilename()+ " with docId " + this.doc.getId() + " "
-					+ e.getMessage());
+					+ name + " of the file " + this.doc.getFilename()
+					+ " with docId " + this.doc.getId() + " " + e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
 	public boolean getPropertyBooleanValue(String name)
-	throws RepositoryDocumentException {
+			throws RepositoryDocumentException {
 		try {
 			return this.doc.getPropertyBooleanValue(name);
 		} catch (NullPointerException e) {
 			logger.log(Level.WARNING, "Document is null");
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
-		}catch (PropertyNotFoundException e) {
+		} catch (PropertyNotFoundException e) {
 			logger.log(Level.WARNING, "error while trying to get the property "
-					+ name + " of the file " + this.doc.getFilename()+ " with docId " + this.doc.getId() + " "
-					+ e.getMessage());
+					+ name + " of the file " + this.doc.getFilename()
+					+ " with docId " + this.doc.getId() + " " + e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
 
 	public byte[] getPropertyBinaryValue(String name)
-	throws RepositoryDocumentException {
+			throws RepositoryDocumentException {
 		try {
 			return this.doc.getPropertyBinaryValue(name);
 		} catch (NullPointerException e) {
 			logger.log(Level.WARNING, "Document is null");
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
-		}catch (PropertyNotFoundException e) {
+		} catch (PropertyNotFoundException e) {
 			logger.log(Level.WARNING, "error while trying to get the property "
-					+ name + " of the file " + this.doc.getFilename()+ " with docId " + this.doc.getId() + " "
-					+ e.getMessage());
+					+ name + " of the file " + this.doc.getFilename()
+					+ " with docId " + this.doc.getId() + " " + e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
@@ -218,10 +229,11 @@ public class FnDocument implements IDocument {
 			logger.log(Level.WARNING, "Document is null");
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
-		}catch (PropertyNotFoundException e) {
-			logger.log(Level.WARNING, "error while trying to get the properties of the file " 
-					+ this.doc.getFilename()+ " with docId " + this.doc.getId() + " "
-					+ e.getMessage());
+		} catch (PropertyNotFoundException e) {
+			logger.log(Level.WARNING, "error while trying to get the properties of the file "
+					+ this.doc.getFilename()
+					+ " with docId "
+					+ this.doc.getId() + " " + e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
@@ -234,7 +246,7 @@ public class FnDocument implements IDocument {
 			logger.log(Level.WARNING, "Document is null");
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Error while trying to get the properties of the file "
 					+ this.doc.getId() + " " + e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
@@ -249,7 +261,7 @@ public class FnDocument implements IDocument {
 			logger.log(Level.WARNING, "Document is null");
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
-		}catch (Exception e) {
+		} catch (Exception e) {
 			logger.log(Level.SEVERE, "Error while trying to get the properties of the file "
 					+ this.doc.getId() + " " + e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
@@ -257,7 +269,8 @@ public class FnDocument implements IDocument {
 		}
 	}
 
-	public String getPropertyValue(String name) throws PropertyNotFoundException {
+	public String getPropertyValue(String name)
+			throws PropertyNotFoundException {
 
 		String[] names = { name };
 		Properties props = this.doc.getProperties(names);
@@ -271,7 +284,8 @@ public class FnDocument implements IDocument {
 		return fnprop.getValueType();
 	}
 
-	public IProperties getProperties(String[] names) throws RepositoryDocumentException {
+	public IProperties getProperties(String[] names)
+			throws RepositoryDocumentException {
 
 		try {
 			return new FnProperties(this.doc.getProperties(names));
@@ -279,13 +293,13 @@ public class FnDocument implements IDocument {
 			logger.log(Level.WARNING, "Document is null");
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
-		}catch (PropertyNotFoundException e) {
-			logger.log(Level.WARNING, "Error while trying to get the properties of the file " 
-					+ this.doc.getFilename()+ " with docId " + this.doc.getId() + " "
-					+ e.getMessage());
+		} catch (PropertyNotFoundException e) {
+			logger.log(Level.WARNING, "Error while trying to get the properties of the file "
+					+ this.doc.getFilename()
+					+ " with docId "
+					+ this.doc.getId() + " " + e.getMessage());
 			RepositoryDocumentException re = new RepositoryDocumentException(e);
 			throw re;
 		}
 	}
-
 }
