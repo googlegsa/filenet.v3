@@ -41,6 +41,8 @@ public class FileConnector implements Connector {
 
 	private String additional_where_clause;
 
+	private String additional_delete_where_clause;
+
 	private HashSet included_meta;
 
 	private HashSet excluded_meta;
@@ -51,6 +53,15 @@ public class FileConnector implements Connector {
 		logger = Logger.getLogger(FileConnectorType.class.getName());
 	}
 
+	/**
+	 * login method is to create a new instance of a connector by instantiating
+	 * the Connector interface. It starts access to managers for authentication,
+	 * authorization, and traversal and returns a Session object that passes
+	 * data and objects between the connector manager and a connector.
+	 * 
+	 * @param Username which needs to be authorized.
+	 * @return com.google.enterprise.connector.spi.Session;
+	 */
 	public Session login() throws RepositoryException {
 		Session sess = null;
 		if (!(object_factory == null || username == null || password == null
@@ -60,7 +71,8 @@ public class FileConnector implements Connector {
 			sess = new FileSession(object_factory, username, password,
 					object_store, path_to_WcmApiConfig, workplace_display_url,
 					is_public.equals("on"), additional_where_clause,
-					included_meta, excluded_meta);
+					additional_delete_where_clause, included_meta,
+					excluded_meta);
 			logger.info("FileNet Seesion creation succeeded");
 		}
 		return sess;
@@ -140,6 +152,15 @@ public class FileConnector implements Connector {
 		this.additional_where_clause = additionalWhereClause;
 		logger.log(Level.CONFIG, "Set additional_where_clause to "
 				+ additional_where_clause);
+	}
+
+	public String getAdditional_delete_where_clause() {
+		return additional_delete_where_clause;
+	}
+
+	public void setAdditional_delete_where_clause(
+			String additionalDeleteWhereClause) {
+		additional_delete_where_clause = additionalDeleteWhereClause;
 	}
 
 	public String getAuthentication_type() {

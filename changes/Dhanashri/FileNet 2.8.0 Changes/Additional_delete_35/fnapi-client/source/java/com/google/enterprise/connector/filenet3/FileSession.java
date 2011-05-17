@@ -45,26 +45,24 @@ public class FileSession implements Session {
 	private String displayUrl;
 	private boolean isPublic;
 	private String additionalWhereClause;
+	private String additionalDeleteWhereClause;
 	private HashSet includedMeta;
 	private HashSet excludedMeta;
-	private static Logger logger;
-	static {
-		logger = Logger.getLogger(FileSession.class.getName());
-	}
+	private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());;
 
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String objectStoreName,
 			String refPathToWcmApiConfig, String refDisplayUrl,
 			boolean refIsPublic, String refAdditionalWhereClause,
-			HashSet refIncludedMeta, HashSet refExcludedMeta)
-			throws RepositoryException {
+			String refAdditionalDeleteWhereClause, HashSet refIncludedMeta,
+			HashSet refExcludedMeta) throws RepositoryException {
 
 		setFileObjectFactory(iObjectFactory);
 
-		logger.info("Getting session for user " + userName);
+		LOGGER.info("Getting session for user " + userName);
 		fileSession = fileObjectFactory.getSession("gsa-file-connector", null, userName, userPassword);
 
-		logger.info("WCMApiConfig.properties path is set to: "
+		LOGGER.info("WCMApiConfig.properties path is set to: "
 				+ refPathToWcmApiConfig);
 		this.pathToWcmApiConfig = refPathToWcmApiConfig;
 		try {
@@ -72,18 +70,18 @@ public class FileSession implements Session {
 			URL is = this.getClass().getClassLoader().getResource(this.pathToWcmApiConfig);
 
 			if (is == null) {
-				logger.log(Level.SEVERE, "WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ");
+				LOGGER.log(Level.SEVERE, "WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ");
 			} else {
 				String sFile = URLDecoder.decode(is.getFile(), "UTF-8");
 				FileInputStream fis = new FileInputStream(sFile);
 				fileSession.setConfiguration(fis);
 			}
 		} catch (UnsupportedEncodingException e) {
-			logger.log(Level.WARNING, "Cannot Decode. Encoding format not supported.");
+			LOGGER.log(Level.WARNING, "Cannot Decode. Encoding format not supported.");
 			throw new RepositoryException(
 					"Cannot Decode. Encoding format not supported.", e);
 		} catch (FileNotFoundException e) {
-			logger.log(Level.SEVERE, "WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ");
+			LOGGER.log(Level.SEVERE, "WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ");
 			throw new RepositoryException(
 					"WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ",
 					e);
@@ -97,6 +95,7 @@ public class FileSession implements Session {
 		fileSession.verify();
 
 		this.additionalWhereClause = refAdditionalWhereClause;
+		this.additionalDeleteWhereClause = refAdditionalDeleteWhereClause;
 		this.includedMeta = refIncludedMeta;
 		this.excludedMeta = refExcludedMeta;
 	}
@@ -122,17 +121,17 @@ public class FileSession implements Session {
 		try {
 			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
 		} catch (InstantiationException e) {
-			logger.log(Level.WARNING, "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
+			LOGGER.log(Level.WARNING, "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
 			throw new RepositoryException(
 					"Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
 					e);
 		} catch (IllegalAccessException e) {
-			logger.log(Level.WARNING, "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
+			LOGGER.log(Level.WARNING, "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
 			throw new RepositoryException(
 					"Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
 					e);
 		} catch (ClassNotFoundException e) {
-			logger.log(Level.WARNING, "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found");
+			LOGGER.log(Level.WARNING, "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found");
 			throw new RepositoryException(
 					"The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",
 					e);
@@ -143,7 +142,8 @@ public class FileSession implements Session {
 	public TraversalManager getTraversalManager() throws RepositoryException {
 		FileTraversalManager fileQTM = new FileTraversalManager(
 				fileObjectFactory, objectStore, fileSession, this.isPublic,
-				this.displayUrl, this.additionalWhereClause, this.includedMeta,
+				this.displayUrl, this.additionalWhereClause,
+				this.additionalDeleteWhereClause, this.includedMeta,
 				this.excludedMeta);
 		return fileQTM;
 	}
