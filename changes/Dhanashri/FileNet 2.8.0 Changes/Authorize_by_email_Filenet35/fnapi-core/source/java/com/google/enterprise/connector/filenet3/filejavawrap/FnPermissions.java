@@ -17,6 +17,13 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Wrapper class over the FileNet API class Permissions. This class is
+ * responsible to authorize a target user against all the Access Control Entries
+ * of a target document.
+ * 
+ * @author pankaj_chouhan
+ */
 public class FnPermissions implements IPermissions {
 
 	EntireNetwork en;
@@ -41,6 +48,14 @@ public class FnPermissions implements IPermissions {
 		this.perms = refPerms;
 	}
 
+	/**
+	 * To authorize a given username against the grantee-names, present in all
+	 * the Access Control Entries for all the permission of the target document.
+	 * 
+	 * @param Username which needs to be authorized.
+	 * @return True or False, depending on the success or failure of
+	 *         authorization.
+	 */
 	public boolean authorize(String username) {
 		boolean found;
 		boolean accessLevelFailure = true;
@@ -129,6 +144,11 @@ public class FnPermissions implements IPermissions {
 		return false;
 	}
 
+	/**
+	 * It is a recursive function which will search a target user in the
+	 * provided group. If the group contains some other group then it
+	 * recursively searches the target user in those groups as well.
+	 */
 	private boolean searchUserInGroup(String username, Group group) {
 		User user;
 		Group subGroup;
