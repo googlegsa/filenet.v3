@@ -37,6 +37,7 @@ public class FileConnector implements Connector {
 	private String workplace_display_url;
 	private String content_engine_url;
 	private String is_public = "false";
+	private String useIDForChangeDetection = "false";
 	private String additional_where_clause;
 	private String delete_additional_where_clause;
 	private HashSet included_meta;
@@ -87,9 +88,10 @@ public class FileConnector implements Connector {
 			LOGGER.info("Creating fileSession object...");
 			sess = new FileSession(object_factory, username, password,
 					object_store, workplace_display_url, content_engine_url,
-					is_public.equals("on"), additional_where_clause,
-					delete_additional_where_clause, included_meta,
-					excluded_meta, db_timezone);
+					is_public.equals("on"),
+					useIDForChangeDetection.equals("true"),
+					additional_where_clause, delete_additional_where_clause,
+					included_meta, excluded_meta, db_timezone);
 		}
 		return sess;
 
@@ -196,6 +198,14 @@ public class FileConnector implements Connector {
 	public void setUsername(String username) {
 		this.username = username;
 		LOGGER.config("Set UserName to " + this.username);
+	}
+
+	public String getUseIDForChangeDetection() {
+		return useIDForChangeDetection;
+	}
+
+	public void setUseIDForChangeDetection(String useIDForChangeDetection) {
+		this.useIDForChangeDetection = useIDForChangeDetection;
 	}
 
 }

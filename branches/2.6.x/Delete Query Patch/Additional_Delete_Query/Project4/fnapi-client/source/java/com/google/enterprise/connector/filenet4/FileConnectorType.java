@@ -58,8 +58,10 @@ public class FileConnectorType implements ConnectorType {
 	private static final String VALUE = "value";
 	private static final String NAME = "name";
 	private static final String TEXT = "text";
+	private static final String TEXTAREA = "textarea";
 	private static final String TYPE = "type";
 	private static final String INPUT = "input";
+	private static final String CLOSE_TAG = ">";
 	private static final String CLOSE_ELEMENT = "/>";
 	private static final String OPEN_ELEMENT = "<";
 	private static final String PASSWORD = "password";
@@ -284,10 +286,19 @@ public class FileConnectorType implements ConnectorType {
 				StringBuffer query = new StringBuffer();
 
 				if (((String) configData.get(WHERECLAUSE)).toUpperCase().startsWith("SELECT")) {
-					query = new StringBuffer(
-							(String) configData.get(WHERECLAUSE));
-					LOGGER.fine("Using Custom Query["
-							+ (String) configData.get(WHERECLAUSE) + "]");
+					if (((String) configData.get(WHERECLAUSE)).toUpperCase().startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
+
+						query = new StringBuffer(
+								(String) configData.get(WHERECLAUSE));
+						LOGGER.fine("Using Custom Query["
+								+ (String) configData.get(WHERECLAUSE) + "]");
+					} else {
+						this.validation = WHERECLAUSE;
+						form = makeConfigForm(configData, this.validation);
+						return new ConfigureResponse(
+								resource.getString("additional_where_clause_invalid"),
+								form);
+					}
 				} else {
 					query.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 					query.append((String) configData.get(WHERECLAUSE));
@@ -310,10 +321,19 @@ public class FileConnectorType implements ConnectorType {
 				StringBuffer deleteuery = new StringBuffer();
 
 				if (((String) configData.get(DELETEWHERECLAUSE)).toUpperCase().startsWith("SELECT")) {
-					deleteuery = new StringBuffer(
-							(String) configData.get(DELETEWHERECLAUSE));
-					LOGGER.fine("Using Custom Query["
-							+ (String) configData.get(DELETEWHERECLAUSE) + "]");
+					if (((String) configData.get(DELETEWHERECLAUSE)).toUpperCase().startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
+						deleteuery = new StringBuffer(
+								(String) configData.get(DELETEWHERECLAUSE));
+						LOGGER.fine("Using Custom Query["
+								+ (String) configData.get(DELETEWHERECLAUSE)
+								+ "]");
+					} else {
+						this.validation = DELETEWHERECLAUSE;
+						form = makeConfigForm(configData, this.validation);
+						return new ConfigureResponse(
+								resource.getString("delete_additional_where_clause_invalid"),
+								form);
+					}
 				} else {
 					deleteuery.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 					deleteuery.append((String) configData.get(DELETEWHERECLAUSE));
@@ -442,6 +462,12 @@ public class FileConnectorType implements ConnectorType {
 				form);
 	}
 
+	/**
+	 * This method validates WorkPlace URL used to configure connector.
+	 * 
+	 * @param workplaceServerUrl
+	 * @throws RepositoryException
+	 */
 	private void testWorkplaceUrl(String workplaceServerUrl)
 			throws RepositoryException {
 		// Added by Pankaj on 04/05/2009 to remove the dependency of
@@ -500,22 +526,38 @@ public class FileConnectorType implements ConnectorType {
 				}
 
 				buf.append(OPEN_ELEMENT);
-				buf.append(INPUT);
-				if (key.equalsIgnoreCase(PASSWORD_KEY)) {
-					appendAttribute(buf, TYPE, PASSWORD);
-				} else if (key.equals(FNCLASS)
-						|| key.equals(AUTHENTICATIONTYPE)
-				// || key.equals(WHERECLAUSE)
-				// || key.equals(FILEURI)
-				) {
-					appendAttribute(buf, TYPE, HIDDEN);
-				} else {
-					appendAttribute(buf, TYPE, TEXT);
-				}
 
-				appendAttribute(buf, NAME, key);
-				appendAttribute(buf, VALUE, value);
-				buf.append(CLOSE_ELEMENT);
+				if (key.equals(WHERECLAUSE) || key.equals(DELETEWHERECLAUSE)) {
+					buf.append(TEXTAREA);
+					appendAttribute(buf, TYPE, TEXTAREA);
+					// buf.append(" ");
+					appendAttribute(buf, NAME, key);
+					appendAttribute(buf, VALUE, value);
+					buf.append(CLOSE_TAG);
+					buf.append(value);
+					buf.append(OPEN_ELEMENT);
+					buf.append("/" + TEXTAREA);
+					buf.append(CLOSE_TAG);
+
+				} else {
+
+					buf.append(INPUT);
+					if (key.equalsIgnoreCase(PASSWORD_KEY)) {
+						appendAttribute(buf, TYPE, PASSWORD);
+					} else if (key.equals(FNCLASS)
+							|| key.equals(AUTHENTICATIONTYPE)
+					// || key.equals(WHERECLAUSE)
+					// || key.equals(FILEURI)
+					) {
+						appendAttribute(buf, TYPE, HIDDEN);
+					} else {
+						appendAttribute(buf, TYPE, TEXT);
+					}
+
+					appendAttribute(buf, NAME, key);
+					appendAttribute(buf, VALUE, value);
+					buf.append(CLOSE_ELEMENT);
+				}
 				appendEndRow(buf);
 				value = "";
 			}
@@ -535,9 +577,18 @@ public class FileConnectorType implements ConnectorType {
 				}
 			}
 		}
+
+		LOGGER.log(Level.FINEST, "Exiting from function makeConfigForm(Map configMap, String validate)"
+				+ buf.toString());
 		return buf.toString();
 	}
 
+	/**
+	 * To append table row start (TR_START) and table column start (TD_START)
+	 * tags to the configuration form for the hidden form elements.
+	 * 
+	 * @param buf
+	 */
 	private void appendStartHiddenRow(StringBuffer buf) {
 		// buf.append(TR_START);
 		buf.append(TR_START_HIDDEN);
@@ -545,6 +596,13 @@ public class FileConnectorType implements ConnectorType {
 
 	}
 
+	/**
+	 * To creates a new table row in the configuration form.
+	 * 
+	 * @param buf
+	 * @param key
+	 * @param validate
+	 */
 	private void appendStartRow(StringBuffer buf, String key, String validate) {
 		buf.append(TR_START);
 		// buf.append(TD_START);
@@ -583,34 +641,75 @@ public class FileConnectorType implements ConnectorType {
 		buf.append(TD_START);
 	}
 
+	/**
+	 * To append close element (CLOSE_ELEMENT), table column end (TD_END), and
+	 * table row end (TR_END) tags to the current table row.
+	 * 
+	 * @param buf
+	 */
 	private void appendEndRow(StringBuffer buf) {
 		// buf.append(CLOSE_ELEMENT);
 		buf.append(TD_END);
 		buf.append(TR_END);
 	}
 
+	/**
+	 * To append an attribute to the connector configuration form.
+	 * 
+	 * @param buf
+	 * @param attrName
+	 * @param attrValue
+	 */
 	private void appendAttribute(StringBuffer buf, String attrName,
 			String attrValue) {
+		/****
+		 * buf.append(" "); buf.append(attrName); buf.append("=\""); //
+		 * buf.append(attrValue); try { // XML-encode the special characters (<
+		 * > " etc.) // Check the basic requirement mentioned in ConnectorType
+		 * as part of // CM-Issue 186 XmlUtils.xmlAppendAttrValue(attrValue,
+		 * buf); } catch (IOException e) { String msg = new StringBuffer(
+		 * "Exceptions while constructing the config form for attribute : "
+		 * ).append
+		 * (attrName).append(" with value : ").append(attrValue).toString();
+		 * LOGGER.log(Level.WARNING, msg, e); } buf.append("\""); if (attrName
+		 * == TYPE && attrValue == TEXT) { buf.append(" size=\"50\""); }
+		 *****/
+
 		buf.append(" ");
-		buf.append(attrName);
-		buf.append("=\"");
-		// buf.append(attrValue);
-		try {
-			// XML-encode the special characters (< > " etc.)
-			// Check the basic requirement mentioned in ConnectorType as part of
-			// CM-Issue 186
-			XmlUtils.xmlAppendAttrValue(attrValue, buf);
-		} catch (IOException e) {
-			String msg = new StringBuffer(
-					"Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
-			LOGGER.log(Level.WARNING, msg, e);
+
+		if (attrName == TYPE && attrValue == TEXTAREA) {
+			buf.append(" cols=\"50\"");
+			buf.append(" rows=\"5\"");
+		} else {
+			buf.append(attrName);
+			buf.append("=\"");
+			try {
+				// XML-encode the special characters (< > " etc.)
+				// Check the basic requirement mentioned in ConnectorType as
+				// part of
+				// CM-Issue 186
+				XmlUtils.xmlAppendAttrValue(attrValue, buf);
+			} catch (IOException e) {
+				String msg = new StringBuffer(
+						"Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
+				LOGGER.log(Level.WARNING, msg, e);
+			}
+			buf.append("\"");
 		}
-		buf.append("\"");
 		if (attrName == TYPE && attrValue == TEXT) {
 			buf.append(" size=\"50\"");
 		}
+
 	}
 
+	/**
+	 * To add a check box to the form
+	 * 
+	 * @param buf
+	 * @param key
+	 * @param label
+	 * @param value
+	 */
 	private void appendCheckBox(StringBuffer buf, String key, String label,
 			String value) {
 		buf.append(TR_START);
@@ -630,6 +729,12 @@ public class FileConnectorType implements ConnectorType {
 
 	}
 
+	/**
+	 * To check all the required field are entered or not.
+	 * 
+	 * @param configKey
+	 * @return
+	 */
 	private boolean isRequired(final String configKey) {
 		final boolean bValue = false;
 		if (configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL)

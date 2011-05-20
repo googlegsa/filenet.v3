@@ -38,6 +38,7 @@ public class FileSession implements Session {
 	private IConnection connection;
 	private String displayUrl;
 	private boolean isPublic;
+	private boolean useIDForChangeDetection;
 	private String additionalWhereClause;
 	private String deleteadditionalWhereClause;
 	private HashSet included_meta;
@@ -48,8 +49,9 @@ public class FileSession implements Session {
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String objectStoreName, String displayUrl,
 			String contentEngineUri, boolean isPublic,
-			String additionalWhereClause, String deleteadditionalWhereClause,
-			HashSet included_meta, HashSet excluded_meta, String db_timezone)
+			boolean useIDForChangeDetection, String additionalWhereClause,
+			String deleteadditionalWhereClause, HashSet included_meta,
+			HashSet excluded_meta, String db_timezone)
 			throws RepositoryException, RepositoryLoginException {
 
 		setFileObjectFactory(iObjectFactory);
@@ -66,6 +68,7 @@ public class FileSession implements Session {
 
 		this.displayUrl = getDisplayURL(displayUrl, objectStoreName);
 		this.isPublic = isPublic;
+		this.useIDForChangeDetection = useIDForChangeDetection;
 		this.additionalWhereClause = additionalWhereClause;
 		this.deleteadditionalWhereClause = deleteadditionalWhereClause;
 		this.included_meta = included_meta;
@@ -115,7 +118,8 @@ public class FileSession implements Session {
 	public TraversalManager getTraversalManager() throws RepositoryException {
 		// logger.info("getTraversalManager");
 		FileTraversalManager fileQTM = new FileTraversalManager(
-				fileObjectFactory, objectStore, this.isPublic, this.displayUrl,
+				fileObjectFactory, objectStore, this.isPublic,
+				this.useIDForChangeDetection, this.displayUrl,
 				this.additionalWhereClause, this.deleteadditionalWhereClause,
 				this.included_meta, this.excluded_meta, this.db_timezone);
 		return fileQTM;
