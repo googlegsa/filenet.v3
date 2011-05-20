@@ -53,8 +53,10 @@ public class FileConnectorType implements ConnectorType {
 	private static final String VALUE = "value";
 	private static final String NAME = "name";
 	private static final String TEXT = "text";
+	private static final String TEXTAREA = "textarea";
 	private static final String TYPE = "type";
 	private static final String INPUT = "input";
+	private static final String CLOSE_TAG = ">";
 	private static final String CLOSE_ELEMENT = "/>";
 	private static final String OPEN_ELEMENT = "<";
 	private static final String PASSWORD = "password";
@@ -88,10 +90,6 @@ public class FileConnectorType implements ConnectorType {
 	private static final String CHECKBOX = "checkbox";
 	private static final String CHECKED = "checked='checked'";
 	private static final String LOCALE_FILE = "FileConnectorResources";
-	// private static final String CONNECTOR_INSTANCE_XML =
-	// "config/connectorInstance.xml";
-	// private static final String FILE_CONNECTOR_INSTANCE =
-	// "FileConnectorInstance";
 	private static final int BUFFER_SIZE = 2048;
 	private static Logger LOGGER = Logger.getLogger(FileConnectorType.class.getName());
 	private List keys = null;
@@ -140,6 +138,13 @@ public class FileConnectorType implements ConnectorType {
 		this.initialConfigForm = formSnippet;
 	}
 
+	/**
+	 * The getConfigForm method creates the configuration form and returns a
+	 * ConfigureResponse class object containing the form.
+	 * 
+	 * @see com.google.enterprise.connector.spi.ConnectorType#getConfigForm(java.
+	 *      util.Locale)
+	 */
 	public ConfigureResponse getConfigForm(Locale language) {
 
 		try {
@@ -157,6 +162,12 @@ public class FileConnectorType implements ConnectorType {
 		return new ConfigureResponse("", initialConfigForm);
 	}
 
+	/**
+	 * getPopulatedConfigForm method is called when an administrator clicks
+	 * Add/Edit for a connector in the Connector Administration > Connectors
+	 * page in the Admin Console to display populated form to allow to edit the
+	 * connector connector configuration.
+	 */
 	public ConfigureResponse getPopulatedConfigForm(Map configMap,
 			Locale language) {
 		try {
@@ -184,6 +195,11 @@ public class FileConnectorType implements ConnectorType {
 		return "";
 	}
 
+	/**
+	 * The validateConfig method ensures that the administrator fills in all
+	 * required information. This method also instantiates the connector to
+	 * ensure that the connector instance is available for access.
+	 */
 	public ConfigureResponse validateConfig(Map configData, Locale language,
 			ConnectorFactory connectorFactory) {
 
@@ -245,8 +261,23 @@ public class FileConnectorType implements ConnectorType {
 				query.append("<objectstores mergeoption=\"none\"><objectstore id=\"");
 				query.append((String) configData.get(OBJECT_STORE));
 				query.append("\"/></objectstores>");
-				query.append("<querystatement>SELECT Id FROM Document WHERE VersionStatus=1 ");
-				query.append((String) configData.get(WHERECLAUSE));
+				if (((String) configData.get(WHERECLAUSE)).toUpperCase().startsWith("SELECT")) {
+					if ((((String) configData.get(WHERECLAUSE)).toUpperCase().startsWith("SELECT ID,DATELASTMODIFIED FROM "))) {
+
+						query.append("<querystatement>"
+								+ (String) configData.get(WHERECLAUSE));
+					} else {
+						this.validation = WHERECLAUSE;
+						form = makeConfigForm(configData, this.validation);
+						return new ConfigureResponse(
+								resource.getString("additional_where_clause_invalid"),
+								form);
+					}
+				} else {
+					query.append("<querystatement>SELECT Id,DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
+					query.append((String) configData.get(WHERECLAUSE));
+				}
+
 				query.append("</querystatement><options maxrecords='100' objectasid=\"false\"/></request>");
 
 				try {
@@ -266,8 +297,23 @@ public class FileConnectorType implements ConnectorType {
 				deleteQuery.append("<objectstores mergeoption=\"none\"><objectstore id=\"");
 				deleteQuery.append((String) configData.get(OBJECT_STORE));
 				deleteQuery.append("\"/></objectstores>");
-				deleteQuery.append("<querystatement>SELECT Id FROM Document WHERE VersionStatus=1 ");
-				deleteQuery.append((String) configData.get(DELETEWHERECLAUSE));
+
+				if (((String) configData.get(DELETEWHERECLAUSE)).toUpperCase().startsWith("SELECT")) {
+					if ((((String) configData.get(DELETEWHERECLAUSE)).toUpperCase().startsWith("SELECT ID,DATELASTMODIFIED FROM "))) {
+						deleteQuery.append("<querystatement>"
+								+ (String) configData.get(DELETEWHERECLAUSE));
+					} else {
+						this.validation = DELETEWHERECLAUSE;
+						form = makeConfigForm(configData, this.validation);
+						return new ConfigureResponse(
+								resource.getString("additional_delete_where_clause_invalid"),
+								form);
+					}
+				} else {
+					deleteQuery.append("<querystatement>SELECT Id,DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
+					deleteQuery.append((String) configData.get(DELETEWHERECLAUSE));
+				}
+
 				deleteQuery.append("</querystatement><options maxrecords='100' objectasid=\"false\"/></request>");
 				try {
 					if (session != null) {
@@ -308,6 +354,12 @@ public class FileConnectorType implements ConnectorType {
 		return new ConfigureResponse(errorMsg, form);
 	}
 
+	/**
+	 * This method validates WorkPlace URL used to configure connector.
+	 * 
+	 * @param workplaceServerUrl
+	 * @throws RepositoryException
+	 */
 	private void testWorkplaceUrl(String workplaceServerUrl)
 			throws RepositoryException {
 
@@ -373,20 +425,36 @@ public class FileConnectorType implements ConnectorType {
 				}
 
 				buf.append(OPEN_ELEMENT);
-				buf.append(INPUT);
-				if (key.equalsIgnoreCase(PASSWORD_KEY)) {
-					appendAttribute(buf, TYPE, PASSWORD);
-				} else if (key.equals(FNCLASS)
-						|| key.equals(AUTHENTICATIONTYPE)
-						/* || key.equals(WHERECLAUSE) */|| key.equals(FILEPATH)) {
-					appendAttribute(buf, TYPE, HIDDEN);
+
+				if (key.equals(WHERECLAUSE) || key.equals(DELETEWHERECLAUSE)) {
+					buf.append(TEXTAREA);
+					appendAttribute(buf, TYPE, TEXTAREA);
+					// buf.append(" ");
+					appendAttribute(buf, NAME, key);
+					appendAttribute(buf, VALUE, value);
+					buf.append(CLOSE_TAG);
+					buf.append(value);
+					buf.append(OPEN_ELEMENT);
+					buf.append("/" + TEXTAREA);
+					buf.append(CLOSE_TAG);
+
 				} else {
-					appendAttribute(buf, TYPE, TEXT);
+					buf.append(INPUT);
+					if (key.equalsIgnoreCase(PASSWORD_KEY)) {
+						appendAttribute(buf, TYPE, PASSWORD);
+					} else if (key.equals(FNCLASS)
+							|| key.equals(AUTHENTICATIONTYPE)
+							/* || key.equals(WHERECLAUSE) */|| key.equals(FILEPATH)) {
+						appendAttribute(buf, TYPE, HIDDEN);
+					} else {
+						appendAttribute(buf, TYPE, TEXT);
+					}
+
+					appendAttribute(buf, NAME, key);
+					appendAttribute(buf, VALUE, value);
+					buf.append(CLOSE_ELEMENT);
 				}
 
-				appendAttribute(buf, NAME, key);
-				appendAttribute(buf, VALUE, value);
-				buf.append(CLOSE_ELEMENT);
 				appendEndRow(buf);
 				value = "";
 			}
@@ -421,12 +489,25 @@ public class FileConnectorType implements ConnectorType {
 		return buf.toString();
 	}
 
+	/**
+	 * To append table row start (TR_START) and table column start (TD_START)
+	 * tags to the configuration form for the hidden form elements.
+	 * 
+	 * @param buf
+	 */
 	private void appendStartHiddenRow(StringBuffer buf) {
 		buf.append(TR_START_HIDDEN);
 		buf.append(TD_START);
 
 	}
 
+	/**
+	 * To creates a new table row in the configuration form.
+	 * 
+	 * @param buf
+	 * @param key
+	 * @param validate
+	 */
 	private void appendStartRow(StringBuffer buf, String key, String validate) {
 		buf.append(TR_START);
 		buf.append(TD_START_LABEL);
@@ -492,32 +573,61 @@ public class FileConnectorType implements ConnectorType {
 		buf.append(TD_START);
 	}
 
+	/**
+	 * To append close element (CLOSE_ELEMENT), table column end (TD_END), and
+	 * table row end (TR_END) tags to the current table row.
+	 * 
+	 * @param buf
+	 */
 	private void appendEndRow(StringBuffer buf) {
 		buf.append(TD_END);
 		buf.append(TR_END);
 	}
 
+	/**
+	 * To append an attribute to the connector configuration form.
+	 * 
+	 * @param buf
+	 * @param attrName
+	 * @param attrValue
+	 */
 	private void appendAttribute(StringBuffer buf, String attrName,
 			String attrValue) {
 		buf.append(" ");
-		buf.append(attrName);
-		buf.append("=\"");
-		try {
-			// XML-encode the special characters (< > " etc.)
-			// Check the basic requirement mentioned in ConnectorType as part of
-			// CM-Issue 186
-			XmlUtils.xmlAppendAttrValue(attrValue, buf);
-		} catch (IOException e) {
-			String msg = new StringBuffer(
-					"Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
-			LOGGER.log(Level.WARNING, msg, e);
+
+		if (attrName == TYPE && attrValue == TEXTAREA) {
+			buf.append(" cols=\"50\"");
+			buf.append(" rows=\"5\"");
+		} else {
+			buf.append(attrName);
+			buf.append("=\"");
+			try {
+				// XML-encode the special characters (< > " etc.)
+				// Check the basic requirement mentioned in ConnectorType as
+				// part of
+				// CM-Issue 186
+				XmlUtils.xmlAppendAttrValue(attrValue, buf);
+			} catch (IOException e) {
+				String msg = new StringBuffer(
+						"Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
+				LOGGER.log(Level.WARNING, msg, e);
+			}
+			buf.append("\"");
 		}
-		buf.append("\"");
 		if (attrName == TYPE && attrValue == TEXT) {
 			buf.append(" size=\"50\"");
 		}
+
 	}
 
+	/**
+	 * To add a check box to the form
+	 * 
+	 * @param buf
+	 * @param key
+	 * @param label
+	 * @param value
+	 */
 	private void appendCheckBox(StringBuffer buf, String key, String label,
 			String value) {
 		buf.append(TR_START);
@@ -536,6 +646,12 @@ public class FileConnectorType implements ConnectorType {
 
 	}
 
+	/**
+	 * To check all the required field are entered or not.
+	 * 
+	 * @param configKey
+	 * @return
+	 */
 	private boolean isRequired(final String configKey) {
 		final boolean bValue = false;
 		if (configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL)

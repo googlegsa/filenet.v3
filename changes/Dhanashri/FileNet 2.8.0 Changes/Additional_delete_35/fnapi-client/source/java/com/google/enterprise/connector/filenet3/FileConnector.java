@@ -37,6 +37,8 @@ public class FileConnector implements Connector {
 
 	private String is_public = "false";
 
+	private String useIDForChangeDetection = "false";
+
 	private String authentication_type;
 
 	private String additional_where_clause;
@@ -51,6 +53,14 @@ public class FileConnector implements Connector {
 
 	static {
 		logger = Logger.getLogger(FileConnectorType.class.getName());
+	}
+
+	public String getUseIDForChangeDetection() {
+		return useIDForChangeDetection;
+	}
+
+	public void setUseIDForChangeDetection(String useIDForChangeDetection) {
+		this.useIDForChangeDetection = useIDForChangeDetection;
 	}
 
 	/**
@@ -70,9 +80,10 @@ public class FileConnector implements Connector {
 			logger.info("creating FileNet session");
 			sess = new FileSession(object_factory, username, password,
 					object_store, path_to_WcmApiConfig, workplace_display_url,
-					is_public.equals("on"), additional_where_clause,
-					additional_delete_where_clause, included_meta,
-					excluded_meta);
+					is_public.equals("on"),
+					useIDForChangeDetection.equals("true"),
+					additional_where_clause, additional_delete_where_clause,
+					included_meta, excluded_meta);
 			logger.info("FileNet Seesion creation succeeded");
 		}
 		return sess;

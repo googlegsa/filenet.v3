@@ -44,6 +44,7 @@ public class FileSession implements Session {
 	private String pathToWcmApiConfig;
 	private String displayUrl;
 	private boolean isPublic;
+	private boolean useIDForChangeDetection;
 	private String additionalWhereClause;
 	private String additionalDeleteWhereClause;
 	private HashSet includedMeta;
@@ -53,7 +54,8 @@ public class FileSession implements Session {
 	public FileSession(String iObjectFactory, String userName,
 			String userPassword, String objectStoreName,
 			String refPathToWcmApiConfig, String refDisplayUrl,
-			boolean refIsPublic, String refAdditionalWhereClause,
+			boolean refIsPublic, boolean useIDForChangeDetection,
+			String refAdditionalWhereClause,
 			String refAdditionalDeleteWhereClause, HashSet refIncludedMeta,
 			HashSet refExcludedMeta) throws RepositoryException {
 
@@ -92,6 +94,7 @@ public class FileSession implements Session {
 		this.displayUrl = getDisplayURL(refDisplayUrl, objectStoreName);
 
 		this.isPublic = refIsPublic;
+		this.useIDForChangeDetection = useIDForChangeDetection;
 		fileSession.verify();
 
 		this.additionalWhereClause = refAdditionalWhereClause;
@@ -142,9 +145,9 @@ public class FileSession implements Session {
 	public TraversalManager getTraversalManager() throws RepositoryException {
 		FileTraversalManager fileQTM = new FileTraversalManager(
 				fileObjectFactory, objectStore, fileSession, this.isPublic,
-				this.displayUrl, this.additionalWhereClause,
-				this.additionalDeleteWhereClause, this.includedMeta,
-				this.excludedMeta);
+				this.useIDForChangeDetection, this.displayUrl,
+				this.additionalWhereClause, this.additionalDeleteWhereClause,
+				this.includedMeta, this.excludedMeta);
 		return fileQTM;
 	}
 

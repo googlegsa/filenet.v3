@@ -55,6 +55,7 @@ public class FileTraversalManager implements TraversalManager {
 	private String objectStoresQuery = "<objectstores mergeoption=\"none\"><objectstore id=\"{0}\"/></objectstores>";
 	private String tableName = "Document";
 	private String whereClause = " AND ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&gt;{0}))";
+	private String whereClauseOnlyDate = " AND (DateLastModified&gt;{0})";
 	private String tableNameEventToDelete = "Event";
 	private String whereClauseToDelete = " WHERE ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&gt;{0}))";
 	private String whereClauseToDeleteOnlyDate = " WHERE (DateLastModified&gt;{0})";
@@ -66,6 +67,7 @@ public class FileTraversalManager implements TraversalManager {
 	private String additionalDeleteWhereClause;
 	private int batchint;
 	private boolean isPublic;
+	private boolean useIDForChangeDetection;
 	private HashSet included_meta;
 	private HashSet excluded_meta;
 	private final static String eventAllias = " e";
@@ -73,16 +75,9 @@ public class FileTraversalManager implements TraversalManager {
 	private final static String OR_OPERATOR = " OR ";
 	private final static String EVENT_DELETE = "DeletionEvent";
 
-	// private final static String VERSION_STATUS_RELEASED =
-	// VersionableObject.VERSION_STATUS_RELEASED
-	// + " ";
-	// private final static String VERSION_STATUS_IN_PROCESS =
-	// VersionableObject.VERSION_STATUS_IN_PROCESS
-	// + " ";
-
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
 			IObjectStore objectStore, ISession fileSession, boolean b,
-			String displayUrl, String additionalWhereClause,
+			boolean useID, String displayUrl, String additionalWhereClause,
 			String additionalDeleteWhereClause, HashSet included_meta,
 			HashSet excluded_meta) throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
@@ -91,6 +86,7 @@ public class FileTraversalManager implements TraversalManager {
 		Object[] args = { objectStore.getName() };
 		objectStoresQuery = MessageFormat.format(objectStoresQuery, args);
 		this.isPublic = b;
+		this.useIDForChangeDetection = useID;
 		this.displayUrl = displayUrl;
 		this.additionalWhereClause = additionalWhereClause;
 		this.additionalDeleteWhereClause = additionalDeleteWhereClause;
@@ -98,10 +94,19 @@ public class FileTraversalManager implements TraversalManager {
 		this.excluded_meta = excluded_meta;
 	}
 
+	/**
+	 * To start acquiring documents from the content management system. And to
+	 * return a list of documents to connector manager.
+	 */
 	public DocumentList startTraversal() throws RepositoryException {
 		return resumeTraversal(null);
 	}
 
+	/**
+	 * Accepts the previously remembered checkpoint to indicate where to resume
+	 * acquiring documents from the FileNet repository and to return a
+	 * DocumentList identifying documents to traverse in this batch.
+	 */
 	public DocumentList resumeTraversal(String checkPoint)
 			throws RepositoryException {
 		LOGGER.info((checkPoint == null) ? "Starting traversal..."
@@ -174,18 +179,43 @@ public class FileTraversalManager implements TraversalManager {
 		return resultSet;
 	}
 
+	/**
+	 * To construct FileNet query to fetch documents from FileNet repository
+	 * considering additional where clause specified as connector configuration
+	 * and the previously remembered checkpoint to indicate where to resume
+	 * acquiring documents from the FileNet repository
+	 * 
+	 * @param checkpoint
+	 * @return
+	 * @throws RepositoryException
+	 */
 	private String buildQueryString(String checkpoint)
 			throws RepositoryException {
 		StringBuffer query = new StringBuffer(
 				"<?xml version=\"1.0\" ?><request>");
 		query.append(objectStoresQuery);
-		query.append("<querystatement>SELECT Id,DateLastModified FROM ");
-		query.append(tableName);
-		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
 		if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
-			query.append(additionalWhereClause);
+
+			if ((additionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
+
+				query.append("<querystatement>" + additionalWhereClause);
+				// query = new StringBuffer(additionalWhereClause);
+				LOGGER.fine("Using Custom Query[" + additionalWhereClause
+						+ "], will add Checkpoint in next step.");
+			} else {
+				query.append("<querystatement>SELECT Id,DateLastModified FROM ");
+				query.append(tableName);
+				query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
+				query.append(additionalWhereClause);
+
+			}
+		} else {
+			query.append("<querystatement>SELECT Id,DateLastModified FROM ");
+			query.append(tableName);
+			query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 		}
+
 		if (checkpoint != null) {
 			query.append(getCheckpointClause(checkpoint, "uuid", "lastModified"));
 		}
@@ -200,6 +230,17 @@ public class FileTraversalManager implements TraversalManager {
 		return query.toString();
 	}
 
+	/**
+	 * To construct FileNet query to fetch documents from FileNet repository
+	 * considering additional delete where clause specified as connector
+	 * configuration and the previously remembered checkpoint to indicate where
+	 * to resume acquiring documents from the FileNet repository to send delete
+	 * feed.
+	 * 
+	 * @param checkpoint
+	 * @return
+	 * @throws RepositoryException
+	 */
 	private String buildQueryStringAsDeleteClause(String checkpoint)
 			throws RepositoryException {
 
@@ -208,13 +249,26 @@ public class FileTraversalManager implements TraversalManager {
 		StringBuffer query = new StringBuffer(
 				"<?xml version=\"1.0\" ?><request>");
 		query.append(objectStoresQuery);
-		query.append("<querystatement>SELECT Id,DateLastModified FROM ");
-		query.append(tableName);
-		query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
 		if (additionalDeleteWhereClause != null
 				&& !additionalDeleteWhereClause.equals("")) {
-			query.append(additionalDeleteWhereClause);
+
+			if ((additionalDeleteWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
+
+				query.append("<querystatement>" + additionalDeleteWhereClause);
+				// query = new StringBuffer(additionalDeleteWhereClause);
+				LOGGER.fine("Using Custom Query[" + additionalDeleteWhereClause
+						+ "], will add Checkpoint in next step.");
+			} else {
+				query.append("<querystatement>SELECT Id,DateLastModified FROM ");
+				query.append(tableName);
+				query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
+				query.append(additionalDeleteWhereClause);
+			}
+		} else {
+			query.append("<querystatement>SELECT Id,DateLastModified FROM ");
+			query.append(tableName);
+			query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 		}
 		if (checkpoint != null) {
 			query.append(getCheckpointClause(checkpoint, "uuidAsDeleteClause", "lastModifiedForDeleteDoc"));
@@ -230,6 +284,15 @@ public class FileTraversalManager implements TraversalManager {
 		return query.toString();
 	}
 
+	/**
+	 * To construct FileNet query to fetch documents deleted from FileNet
+	 * repository previously remembered checkpoint to indicate where to resume
+	 * acquiring documents from the FileNet repository to send delete feed.
+	 * 
+	 * @param checkpoint
+	 * @return
+	 * @throws RepositoryException
+	 */
 	private String buildQueryToDelete(String checkpoint)
 			throws RepositoryException {
 
@@ -289,6 +352,16 @@ public class FileTraversalManager implements TraversalManager {
 		return query.toString();
 	}
 
+	/**
+	 * To construct check point query using check point values provided as
+	 * parameters
+	 * 
+	 * @param checkPoint
+	 * @param uuidParam
+	 * @param dateParam
+	 * @return
+	 * @throws RepositoryException
+	 */
 	private String getCheckpointClause(String checkPoint, String uuidParam,
 			String dateParam) throws RepositoryException {
 
@@ -311,11 +384,22 @@ public class FileTraversalManager implements TraversalManager {
 
 	}
 
+	/**
+	 * To set BatchHint for traversal.
+	 */
 	public void setBatchHint(int batchHint) throws RepositoryException {
 		this.batchint = batchHint;
 
 	}
 
+	/**
+	 * To extract Docid From Checkpoint string
+	 * 
+	 * @param jo
+	 * @param checkPoint
+	 * @param param
+	 * @return
+	 */
 	protected String extractDocidFromCheckpoint(JSONObject jo,
 			String checkPoint, String param) {
 		String uuid = null;
@@ -331,6 +415,14 @@ public class FileTraversalManager implements TraversalManager {
 		return uuid;
 	}
 
+	/**
+	 * To extract date part From Checkpoint string
+	 * 
+	 * @param jo
+	 * @param checkPoint
+	 * @param param
+	 * @return
+	 */
 	protected String extractNativeDateFromCheckpoint(JSONObject jo,
 			String checkPoint, String param) {
 		String dateString = null;
@@ -347,21 +439,36 @@ public class FileTraversalManager implements TraversalManager {
 		return dateString;
 	}
 
+	/**
+	 * To construct check point query using check point values provided as
+	 * parameters
+	 * 
+	 * @param uuid
+	 * @param c
+	 * @param uuidParam
+	 * @return
+	 * @throws RepositoryException
+	 */
 	protected String makeCheckpointQueryString(String uuid, String c,
 			String uuidParam) throws RepositoryException {
 
 		String statement = null;
 		Object[] arguments = { c, uuid };
+
 		if (uuidParam.equalsIgnoreCase("uuid")) {
-			statement = MessageFormat.format(whereClause, arguments);
+			if (uuid.equals("") || (this.useIDForChangeDetection == (false))) {
+				statement = MessageFormat.format(whereClauseOnlyDate, arguments);
+			} else {
+				statement = MessageFormat.format(whereClause, arguments);
+			}
 		} else if (uuidParam.equalsIgnoreCase("uuidToDelete")) {
-			if (uuid.equals("")) {
+			if (uuid.equals("") || (this.useIDForChangeDetection == (false))) {
 				statement = MessageFormat.format(whereClauseToDeleteOnlyDate, arguments);
 			} else {
 				statement = MessageFormat.format(whereClauseToDelete, arguments);
 			}
 		} else if (uuidParam.equalsIgnoreCase("uuidAsDeleteClause")) {
-			if (uuid.equals("")) {
+			if (uuid.equals("") || (this.useIDForChangeDetection == (false))) {
 				statement = MessageFormat.format(whereClauseAsDeleteClauseOnlyDate, arguments);
 			} else {
 				statement = MessageFormat.format(whereClauseAsDeleteClause, arguments);
@@ -396,6 +503,13 @@ public class FileTraversalManager implements TraversalManager {
 		}
 	}
 
+	/**
+	 *To construct InClass part of the FileNet query for traversal.
+	 * 
+	 * @param refEventAllias
+	 * @param eventType
+	 * @return
+	 */
 	private String isClassSQLFunction(String refEventAllias, String eventType) {
 		return new String("IsClass(" + refEventAllias + ", " + eventType + " )");
 	}
