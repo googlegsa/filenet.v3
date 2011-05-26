@@ -91,6 +91,8 @@ public class FileConnectorType implements ConnectorType {
 	private static final String CHECKED = "checked='checked'";
 	private static final String LOCALE_FILE = "FileConnectorResources";
 	private static final int BUFFER_SIZE = 2048;
+	private static final String SELECT = "SELECT";
+	private static final String QUERYFORMAT = "SELECT ID,DATELASTMODIFIED FROM ";
 	private static Logger LOGGER = Logger.getLogger(FileConnectorType.class.getName());
 	private List keys = null;
 	private Set keySet = null;
@@ -261,11 +263,11 @@ public class FileConnectorType implements ConnectorType {
 				query.append("<objectstores mergeoption=\"none\"><objectstore id=\"");
 				query.append((String) configData.get(OBJECT_STORE));
 				query.append("\"/></objectstores>");
-				if (((String) configData.get(WHERECLAUSE)).toUpperCase().startsWith("SELECT")) {
-					if ((((String) configData.get(WHERECLAUSE)).toUpperCase().startsWith("SELECT ID,DATELASTMODIFIED FROM "))) {
+				if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
+					if ((((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT))) {
 
 						query.append("<querystatement>"
-								+ (String) configData.get(WHERECLAUSE));
+								+ ((String) configData.get(WHERECLAUSE)).trim());
 					} else {
 						this.validation = WHERECLAUSE;
 						form = makeConfigForm(configData, this.validation);
@@ -275,7 +277,7 @@ public class FileConnectorType implements ConnectorType {
 					}
 				} else {
 					query.append("<querystatement>SELECT Id,DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-					query.append((String) configData.get(WHERECLAUSE));
+					query.append(((String) configData.get(WHERECLAUSE)).trim());
 				}
 
 				query.append("</querystatement><options maxrecords='100' objectasid=\"false\"/></request>");
@@ -298,10 +300,10 @@ public class FileConnectorType implements ConnectorType {
 				deleteQuery.append((String) configData.get(OBJECT_STORE));
 				deleteQuery.append("\"/></objectstores>");
 
-				if (((String) configData.get(DELETEWHERECLAUSE)).toUpperCase().startsWith("SELECT")) {
-					if ((((String) configData.get(DELETEWHERECLAUSE)).toUpperCase().startsWith("SELECT ID,DATELASTMODIFIED FROM "))) {
+				if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
+					if ((((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT))) {
 						deleteQuery.append("<querystatement>"
-								+ (String) configData.get(DELETEWHERECLAUSE));
+								+ ((String) configData.get(DELETEWHERECLAUSE)).trim());
 					} else {
 						this.validation = DELETEWHERECLAUSE;
 						form = makeConfigForm(configData, this.validation);
@@ -311,7 +313,7 @@ public class FileConnectorType implements ConnectorType {
 					}
 				} else {
 					deleteQuery.append("<querystatement>SELECT Id,DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-					deleteQuery.append((String) configData.get(DELETEWHERECLAUSE));
+					deleteQuery.append(((String) configData.get(DELETEWHERECLAUSE)).trim());
 				}
 
 				deleteQuery.append("</querystatement><options maxrecords='100' objectasid=\"false\"/></request>");

@@ -393,7 +393,7 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * To extract Docid From Checkpoint string
+	 * To extract Docid from Checkpoint string
 	 * 
 	 * @param jo
 	 * @param checkPoint
@@ -416,7 +416,7 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * To extract date part From Checkpoint string
+	 * To extract date part from Checkpoint string
 	 * 
 	 * @param jo
 	 * @param checkPoint
