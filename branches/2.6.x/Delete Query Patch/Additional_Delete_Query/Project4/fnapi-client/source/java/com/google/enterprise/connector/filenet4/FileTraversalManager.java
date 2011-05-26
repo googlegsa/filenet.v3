@@ -339,7 +339,7 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * Returns Query String to send Feeds to GSA by adding Where clause
+	 * Returns query string to send feeds to GSA by adding where clause
 	 * condition for checkPoint values,
 	 * 
 	 * @param checkpoint
@@ -365,8 +365,8 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * Returns Query String to send Delete Feed to GSA by adding Where clause
-	 * condition for checkPoint values,
+	 * Returns query string to send delete feed to GSA by adding delete where
+	 * clause condition for checkPoint values,
 	 * 
 	 * @param checkpoint
 	 * @return Query String
@@ -392,8 +392,8 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * Returns Query String to send Delete Feed for documents matching for
-	 * checkPoint values condition,
+	 * Returns query string to send delete Feed for documents matching for
+	 * checkPoint value condition.
 	 * 
 	 * @param checkpoint
 	 * @return Query String
@@ -421,8 +421,8 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * Returns Query String to send Delete Feed to GSA by adding Where clause
-	 * condition for checkPoint values,
+	 * Returns query string to send delete feed to GSA by adding where clause
+	 * condition for checkPoint values.
 	 * 
 	 * @param checkpoint values (String ID, String Date)
 	 * @return Query String
@@ -443,8 +443,8 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * Returns Query String to send Delete Feed to GSA by adding Where clause
-	 * condition for checkPoint values,
+	 * Returns query string to send delete feed to GSA by adding where clause
+	 * condition for checkPoint values.
 	 * 
 	 * @param checkpoint values (String ID, String Date)
 	 * @return Query String
@@ -473,7 +473,7 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * To extract Docid From Checkpoint string
+	 * To extract Docid from Checkpoint string
 	 * 
 	 * @param jo
 	 * @param checkPoint
@@ -495,7 +495,7 @@ public class FileTraversalManager implements TraversalManager {
 	}
 
 	/**
-	 * To extract date part From Checkpoint string
+	 * To extract date part from Checkpoint string
 	 * 
 	 * @param jo
 	 * @param checkPoint
