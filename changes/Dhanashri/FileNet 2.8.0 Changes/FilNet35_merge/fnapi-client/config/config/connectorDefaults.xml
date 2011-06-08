@@ -10,7 +10,7 @@
         <property name="object_factory" value="com.google.enterprise.connector.filenet3.filejavawrap.FnObjectFactory" />
         <property name="authentication_type" value="api" />
         <property name="additional_where_clause" value="${additional_where_clause}" />
-        <property name="is_public" value="${is_public}" />
+        <property name="additional_delete_where_clause" value="${additional_delete_where_clause}" />
         <property name="included_meta">
             <set>
                 <value>ClassificationStatus</value>
@@ -88,7 +88,9 @@
                     <prop key="object_store"></prop>
                     <prop key="workplace_display_url"></prop>
                     <prop key="additional_where_clause"></prop>
+                    <prop key="additional_delete_where_clause"></prop>
                     <prop key="is_public"></prop>
+                    <prop key="useIDForChangeDetection"></prop>
                     <!--
                     <prop key="included_meta"></prop>
                     <prop key="excluded_meta"></prop>
