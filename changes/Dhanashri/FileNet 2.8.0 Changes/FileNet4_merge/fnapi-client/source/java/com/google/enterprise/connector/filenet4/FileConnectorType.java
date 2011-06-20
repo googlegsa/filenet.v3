@@ -98,6 +98,7 @@ public class FileConnectorType implements ConnectorType {
 	private static final String LOCALE_FILE = "FileConnectorResources";
 	private static final String SELECT = "SELECT";
 	private static final String QUERYFORMAT = "SELECT ID,DATELASTMODIFIED FROM ";
+	private static final String VERSIONQUERY = "WHERE VersionStatus=1 and ContentSize IS NOT NULL";
 	private static Logger LOGGER = Logger.getLogger(FileConnectorType.class.getName());
 	private List keys = null;
 	private Set keySet = null;
@@ -179,7 +180,7 @@ public class FileConnectorType implements ConnectorType {
 	 * @return com.google.enterprise.connector.spi.ConfigureResponse;
 	 */
 	public ConfigureResponse getPopulatedConfigForm(Map configMap,
-			Locale language) {
+	        Locale language) {
 		try {
 			resource = ResourceBundle.getBundle(LOCALE_FILE, language);
 
@@ -187,7 +188,7 @@ public class FileConnectorType implements ConnectorType {
 			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
 		ConfigureResponse response = new ConfigureResponse("",
-				makeConfigForm(configMap, this.validation));
+		        makeConfigForm(configMap, this.validation));
 		return response;
 	}
 
@@ -204,11 +205,11 @@ public class FileConnectorType implements ConnectorType {
 			// TODO remove unrelevant FILEURI
 
 			if (!key.equals(FNCLASS)
-					&& !key.equals(AUTHENTICATIONTYPE)
-					&& !key.equals(WHERECLAUSE)
-					&& !key.equals(DELETEWHERECLAUSE)// && !key.equals(FILEURI)
-					&& !key.equals(CHECKMARKING)
-					&& (val == null || val.length() == 0)) {
+			        && !key.equals(AUTHENTICATIONTYPE)
+			        && !key.equals(WHERECLAUSE)
+			        && !key.equals(DELETEWHERECLAUSE)// && !key.equals(FILEURI)
+			        && !key.equals(CHECKMARKING)
+			        && (val == null || val.length() == 0)) {
 
 				return key;
 			}
@@ -225,13 +226,13 @@ public class FileConnectorType implements ConnectorType {
 	 * @return com.google.enterprise.connector.spi.ConfigureResponse;
 	 */
 	public ConfigureResponse validateConfig(Map configData, Locale language,
-			ConnectorFactory connectorFactory) {
+	        ConnectorFactory connectorFactory) {
 		LOGGER.log(Level.FINEST, "Entering into function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
 		try {
 			resource = ResourceBundle.getBundle(LOCALE_FILE, language);
 		} catch (MissingResourceException e) {
 			LOGGER.log(Level.SEVERE, "Unable to find the resource bundle file for language "
-					+ language, e);
+			        + language, e);
 			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
 
@@ -252,7 +253,7 @@ public class FileConnectorType implements ConnectorType {
 		if (validation.equals("")) {
 			try {
 				LOGGER.info("Attempting to create FileNet4 connector instance");
-				configData.put(CONTENT_ENGINE_URL, rightTrim((String) configData.get(CONTENT_ENGINE_URL), '/'));// Removing
+				configData.put(CONTENT_ENGINE_URL, rightTrim(((String) configData.get(CONTENT_ENGINE_URL)).trim(), '/'));// Removing
 				// the
 				// extra
 				// slashes
@@ -279,30 +280,37 @@ public class FileConnectorType implements ConnectorType {
 					session.getTraversalManager();// test on the objectStore
 					// name
 					LOGGER.log(Level.INFO, "Connection to Object Store "
-							+ (String) configData.get("object_store")
-							+ " is Successful");
+					        + (String) configData.get("object_store")
+					        + " is Successful");
 				} else {
 					LOGGER.log(Level.INFO, "Connection to Content Engine URL Failed");
 				}
 
-				testWorkplaceUrl((String) configData.get("workplace_display_url"));
+				testWorkplaceUrl(((String) configData.get("workplace_display_url")).trim());
 
 				StringBuffer query = new StringBuffer();
 
 				if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
 					if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT)) {
-
-						query = new StringBuffer(
-								((String) configData.get(WHERECLAUSE)).trim());
-						LOGGER.fine("Using Custom Query["
-								+ ((String) configData.get(WHERECLAUSE)).trim()
-								+ "]");
+						if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().contains((this.VERSIONQUERY))) {
+							query = new StringBuffer(
+							        ((String) configData.get(WHERECLAUSE)).trim());
+							LOGGER.fine("Using Custom Query["
+							        + ((String) configData.get(WHERECLAUSE)).trim()
+							        + "]");
+						} else {
+							this.validation = WHERECLAUSE;
+							form = makeConfigForm(configData, this.validation);
+							return new ConfigureResponse(
+							        resource.getString("query_not_having_versionstatus_condition"),
+							        form);
+						}
 					} else {
 						this.validation = WHERECLAUSE;
 						form = makeConfigForm(configData, this.validation);
 						return new ConfigureResponse(
-								resource.getString("additional_where_clause_invalid"),
-								form);
+						        resource.getString("query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND"),
+						        form);
 					}
 				} else {
 					query.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
@@ -319,25 +327,33 @@ public class FileConnectorType implements ConnectorType {
 					this.validation = WHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
 					return new ConfigureResponse(
-							resource.getString("additional_where_clause_invalid"),
-							form);
+					        resource.getString("additional_where_clause_invalid"),
+					        form);
 				}
 
 				StringBuffer deleteuery = new StringBuffer();
 
 				if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
 					if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT)) {
-						deleteuery = new StringBuffer(
-								((String) configData.get(DELETEWHERECLAUSE)).trim());
-						LOGGER.fine("Using Custom Query["
-								+ ((String) configData.get(DELETEWHERECLAUSE)).trim()
-								+ "]");
+						if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().contains((this.VERSIONQUERY))) {
+							deleteuery = new StringBuffer(
+							        ((String) configData.get(DELETEWHERECLAUSE)).trim());
+							LOGGER.fine("Using Custom Query["
+							        + ((String) configData.get(DELETEWHERECLAUSE)).trim()
+							        + "]");
+						} else {
+							this.validation = DELETEWHERECLAUSE;
+							form = makeConfigForm(configData, this.validation);
+							return new ConfigureResponse(
+							        resource.getString("delete_query_not_having_versionstatus_condition"),
+							        form);
+						}
 					} else {
 						this.validation = DELETEWHERECLAUSE;
 						form = makeConfigForm(configData, this.validation);
 						return new ConfigureResponse(
-								resource.getString("delete_additional_where_clause_invalid"),
-								form);
+						        resource.getString("delete_query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND"),
+						        form);
 					}
 				} else {
 					deleteuery.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
@@ -354,8 +370,16 @@ public class FileConnectorType implements ConnectorType {
 					this.validation = DELETEWHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
 					return new ConfigureResponse(
-							resource.getString("delete_additional_where_clause_invalid"),
-							form);
+					        resource.getString("delete_additional_where_clause_invalid"),
+					        form);
+				}
+
+				if (WHERECLAUSE.trim().equalsIgnoreCase(DELETEWHERECLAUSE.trim())) {
+					this.validation = DELETEWHERECLAUSE;
+					form = makeConfigForm(configData, this.validation);
+					return new ConfigureResponse(
+					        resource.getString("same_additional_where_clause_and_additional_delete_clause"),
+					        form);
 				}
 
 			} catch (EngineRuntimeException e) {
@@ -406,14 +430,14 @@ public class FileConnectorType implements ConnectorType {
 								if (errorMsg.indexOf("Jetty") != -1) {
 									bundleMessage = resource.getString("jetty_jar_error");
 								} else if (ere.getCause() != null
-										&& ere.getCause().getCause() != null
-										&& ere.getCause().getCause().getCause() != null
-										&& ere.getCause().getCause().getCause() instanceof SSLHandshakeException) {
+								        && ere.getCause().getCause() != null
+								        && ere.getCause().getCause().getCause() != null
+								        && ere.getCause().getCause().getCause() instanceof SSLHandshakeException) {
 									bundleMessage = resource.getString("content_engine_url_invalid");
 								} else if (ere.getCause() != null
-										&& ere.getCause().getCause() != null
-										&& ere.getCause().getCause().getCause() != null
-										&& ere.getCause().getCause().getCause() instanceof MessageCreatingException) {
+								        && ere.getCause().getCause() != null
+								        && ere.getCause().getCause().getCause() != null
+								        && ere.getCause().getCause().getCause() instanceof MessageCreatingException) {
 									bundleMessage = resource.getString("builtin_serialization_jar_error");
 								} else {
 									bundleMessage = ere.getLocalizedMessage();
@@ -431,7 +455,7 @@ public class FileConnectorType implements ConnectorType {
 							bundleMessage = resource.getString("wsdl_api_jar_error");
 						} else {
 							bundleMessage = resource.getString("required_field_error")
-									+ " " + e.getLocalizedMessage();
+							        + " " + e.getLocalizedMessage();
 						}
 					} else {
 						bundleMessage = e.getLocalizedMessage();
@@ -439,7 +463,7 @@ public class FileConnectorType implements ConnectorType {
 					LOGGER.log(Level.SEVERE, bundleMessage, e);
 				} catch (MissingResourceException mre) {
 					bundleMessage = resource.getString("required_field_error")
-							+ " " + mre.getLocalizedMessage();
+					        + " " + mre.getLocalizedMessage();
 					// logger.severe(bundleMessage);
 					LOGGER.log(Level.SEVERE, bundleMessage, mre);
 				} catch (NullPointerException npe) {
@@ -461,7 +485,7 @@ public class FileConnectorType implements ConnectorType {
 		}
 		form = makeConfigForm(configData, validation);
 		return new ConfigureResponse(resource.getString(validation + "_error"),
-				form);
+		        form);
 	}
 
 	/**
@@ -471,7 +495,7 @@ public class FileConnectorType implements ConnectorType {
 	 * @throws RepositoryException
 	 */
 	private void testWorkplaceUrl(String workplaceServerUrl)
-			throws RepositoryException {
+	        throws RepositoryException {
 		// Added by Pankaj on 04/05/2009 to remove the dependency of
 		// Httpclient.jar file
 		try {
@@ -480,11 +504,11 @@ public class FileConnectorType implements ConnectorType {
 		} catch (FileUrlValidatorException e) {
 			LOGGER.log(Level.WARNING, resource.getString("workplace_url_error"));
 			throw new RepositoryException(
-					resource.getString("workplace_url_error"));
+			        resource.getString("workplace_url_error"));
 		} catch (Throwable t) {
 			LOGGER.log(Level.WARNING, resource.getString("workplace_url_error"));
 			throw new RepositoryException(
-					resource.getString("workplace_url_error"));
+			        resource.getString("workplace_url_error"));
 		}
 	}
 
@@ -517,7 +541,7 @@ public class FileConnectorType implements ConnectorType {
 				value = "";
 			} else {
 				if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
-				/* && !key.equals(WHERECLAUSE) */&& !key.equals(FILEPATH)) {
+				        				/* && !key.equals(WHERECLAUSE) */&& !key.equals(FILEPATH)) {
 					if (validate.equals(key)) {
 						appendStartRow(buf, key, validate);
 					} else {
@@ -550,7 +574,7 @@ public class FileConnectorType implements ConnectorType {
 					if (key.equalsIgnoreCase(PASSWORD_KEY)) {
 						appendAttribute(buf, TYPE, PASSWORD);
 					} else if (key.equals(FNCLASS)
-							|| key.equals(AUTHENTICATIONTYPE)) {
+					        || key.equals(AUTHENTICATIONTYPE)) {
 						appendAttribute(buf, TYPE, HIDDEN);
 					} else {
 						appendAttribute(buf, TYPE, TEXT);
@@ -660,7 +684,7 @@ public class FileConnectorType implements ConnectorType {
 	 * @param attrValue
 	 */
 	private void appendAttribute(StringBuffer buf, String attrName,
-			String attrValue) {
+	        String attrValue) {
 		buf.append(" ");
 		// LOGGER.log(Level.WARNING, "attrName : " + attrName + " attrName= : "
 		// + attrValue);
@@ -678,7 +702,7 @@ public class FileConnectorType implements ConnectorType {
 				XmlUtils.xmlAppendAttrValue(attrValue, buf);
 			} catch (IOException e) {
 				String msg = new StringBuffer(
-						"Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
+				        "Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
 				LOGGER.log(Level.WARNING, msg, e);
 			}
 			buf.append("\"");
@@ -698,7 +722,7 @@ public class FileConnectorType implements ConnectorType {
 	 * @param value
 	 */
 	private void appendMarkingCheckBox(StringBuffer buf, String key,
-			String label, String value) {
+	        String label, String value) {
 		buf.append(TR_START);
 		buf.append(TD_START_COLSPAN);
 		buf.append(OPEN_ELEMENT);
@@ -724,8 +748,8 @@ public class FileConnectorType implements ConnectorType {
 	private boolean isRequired(final String configKey) {
 		final boolean bValue = false;
 		if (configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL)
-				|| configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME)
-				|| configKey.equals(CONTENT_ENGINE_URL)) {
+		        || configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME)
+		        || configKey.equals(CONTENT_ENGINE_URL)) {
 			return true;
 		}
 		return bValue;
