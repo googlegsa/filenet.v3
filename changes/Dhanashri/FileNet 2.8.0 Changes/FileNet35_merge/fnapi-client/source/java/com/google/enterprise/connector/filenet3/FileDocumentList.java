@@ -72,10 +72,10 @@ public class FileDocumentList implements DocumentList {
 	private static Logger LOGGER = Logger.getLogger(FileDocumentList.class.getName());
 
 	public FileDocumentList(Document document, Document deleteDocument,
-			Document documentToDelete, IObjectStore refObjectStore,
-			boolean refIsPublic, String refDisplayUrl, HashSet refIncludedMeta,
-			HashSet refExcludedMeta, String refDateFirstPush,
-			String refCheckPoint) {
+	        Document documentToDelete, IObjectStore refObjectStore,
+	        boolean refIsPublic, String refDisplayUrl, HashSet refIncludedMeta,
+	        HashSet refExcludedMeta, String refDateFirstPush,
+	        String refCheckPoint) {
 		this.resultDoc = document;
 		this.resultDeleteDoc = deleteDocument;
 		this.resultDocToDelete = documentToDelete;
@@ -84,22 +84,22 @@ public class FileDocumentList implements DocumentList {
 		this.index = 1;
 		this.data = resultDoc.getElementsByTagName(RS_DATA).item(0).getChildNodes();
 		LOGGER.log(Level.INFO, "Number of new documents discovered: "
-				+ resultDoc.getElementsByTagName(RS_ROW).getLength());
+		        + resultDoc.getElementsByTagName(RS_ROW).getLength());
 		LOGGER.log(Level.FINE, "Child of rs_data : " + data);
 
 		if (resultDeleteDoc != null) {
 			this.deleteData = resultDeleteDoc.getElementsByTagName(RS_DATA).item(0).getChildNodes();
 			LOGGER.log(Level.INFO, "Number of documents matching with delete clause discovered: "
-					+ resultDeleteDoc.getElementsByTagName(RS_ROW).getLength());
+			        + resultDeleteDoc.getElementsByTagName(RS_ROW).getLength());
 			LOGGER.log(Level.FINE, "List of results to delete as matching with delete clause : "
-					+ deleteData);
+			        + deleteData);
 		}
 
 		this.dataToDelete = resultDocToDelete.getElementsByTagName(RS_DATA).item(0).getChildNodes();
 		LOGGER.log(Level.INFO, "Number of new documents to be removed: "
-				+ resultDocToDelete.getElementsByTagName(RS_ROW).getLength());
+		        + resultDocToDelete.getElementsByTagName(RS_ROW).getLength());
 		LOGGER.log(Level.FINE, "List of results to delete : "
-				+ resultDocToDelete.getChildNodes());
+		        + resultDocToDelete.getChildNodes());
 
 		this.isPublic = refIsPublic;
 		this.includedMeta = refIncludedMeta;
@@ -116,7 +116,7 @@ public class FileDocumentList implements DocumentList {
 	 * @return com.google.enterprise.connector.spi.Document
 	 */
 	public com.google.enterprise.connector.spi.Document nextDocument()
-			throws RepositoryDocumentException {
+	        throws RepositoryDocumentException {
 		int dataLen = data.getLength();
 		int deleteDataLen = 0;
 
@@ -126,11 +126,11 @@ public class FileDocumentList implements DocumentList {
 
 		LOGGER.entering("FileDocumentList", "nextDocument()");
 		LOGGER.log(Level.FINE, "Number of documents to be retrieved: "
-				+ data.getLength());
+		        + data.getLength());
 		LOGGER.log(Level.FINE, "Number of indexes to be deleted from appliance as matching with delete clause: "
-				+ deleteDataLen);
+		        + deleteDataLen);
 		LOGGER.log(Level.FINE, "Number of indexes to be deleted from appliance: "
-				+ dataToDelete.getLength());
+		        + dataToDelete.getLength());
 		LOGGER.log(Level.FINE, "Index of the document in list " + index);
 
 		if (index > -1 && index < dataLen) {
@@ -141,17 +141,18 @@ public class FileDocumentList implements DocumentList {
 					if (data.item(index).getNodeType() == Node.TEXT_NODE) {
 						index++;
 					}
+					LOGGER.info("ADD...");
 					try {
 						docId = (String) nodeMap.item(j).getNodeValue();
 						String dateLastModified = nodeMap.item(j - 1).getNodeValue();
 						LOGGER.info("dateLastModified " + dateLastModified);
 
 						fileDocument = new FileDocument(
-								(String) nodeMap.item(j).getNodeValue(),
-								dateLastModified, this.objectStore,
-								this.isPublic, this.displayUrl,
-								this.includedMeta, this.excludedMeta,
-								SpiConstants.ActionType.ADD);
+						        (String) nodeMap.item(j).getNodeValue(),
+						        dateLastModified, this.objectStore,
+						        this.isPublic, this.displayUrl,
+						        this.includedMeta, this.excludedMeta,
+						        SpiConstants.ActionType.ADD);
 
 						return fileDocument;
 					} catch (DOMException e) {
@@ -159,7 +160,7 @@ public class FileDocumentList implements DocumentList {
 						index++;
 						LOGGER.severe("Unable to retrieve docId for item: " + e);
 						throw new RepositoryDocumentException(
-								"Unable to retrieve docId for item", e);
+						        "Unable to retrieve docId for item", e);
 					}
 				}
 			}
@@ -170,6 +171,7 @@ public class FileDocumentList implements DocumentList {
 			for (int j = 0; j < nodeMap.getLength(); j++) {
 				if (nodeMap.item(j).getNodeName().equals(ID)) {
 					index++;
+					LOGGER.info("DEL...(Documents satisfying additional delete clause) ");
 
 					if (deleteData.item(indexDelete) != null) {
 
@@ -180,13 +182,13 @@ public class FileDocumentList implements DocumentList {
 							deleteDocId = (String) nodeMap.item(j).getNodeValue();
 							String dateLastModified = nodeMap.item(j - 1).getNodeValue();
 							LOGGER.info("dateLastModified : "
-									+ dateLastModified);
+							        + dateLastModified);
 
 							fileDeleteDocument = new FileDocument(deleteDocId,
-									dateLastModified, this.objectStore,
-									this.isPublic, this.displayUrl,
-									this.includedMeta, this.excludedMeta,
-									SpiConstants.ActionType.DELETE);
+							        dateLastModified, this.objectStore,
+							        this.isPublic, this.displayUrl,
+							        this.includedMeta, this.excludedMeta,
+							        SpiConstants.ActionType.DELETE);
 
 							String commonVersionId = fileDeleteDocument.getVsDocId();
 							fileDeleteDocument.setVersionId(commonVersionId);
@@ -197,17 +199,17 @@ public class FileDocumentList implements DocumentList {
 							// skip this document
 							index++;
 							LOGGER.severe("Unable to retrieve docId for item: "
-									+ e);
+							        + e);
 							throw new RepositoryDocumentException(
-									"Unable to retrieve docId for item", e);
+							        "Unable to retrieve docId for item", e);
 						}
 					}
 				}
 			}
 
 		} else if ((index >= (deleteDataLen + dataLen) - 1)
-				&& index < ((dataToDelete.getLength() + (deleteDataLen
-						+ dataLen - 2)))) {
+		        && index < ((dataToDelete.getLength() + (deleteDataLen
+		        + dataLen - 2)))) {
 
 			int indexDelete = index - (dataLen + deleteDataLen) + 2;
 			NamedNodeMap nodeMap = dataToDelete.item(indexDelete).getAttributes();
@@ -215,6 +217,7 @@ public class FileDocumentList implements DocumentList {
 			for (int j = 0; j < nodeMap.getLength(); j++) {
 				if (nodeMap.item(j).getNodeName().equals(ID)) {
 					index++;
+					LOGGER.info("DEL...(Documents deleted from repository)");
 
 					// if(data.item(index) != null){
 					if (dataToDelete.item(indexDelete) != null) {
@@ -229,23 +232,23 @@ public class FileDocumentList implements DocumentList {
 							String commonVersionId = nodeMap.item(j + 1).getNodeValue();
 							String dateLastModified = nodeMap.item(j - 1).getNodeValue();
 							LOGGER.info("dateLastModified : "
-									+ dateLastModified);
+							        + dateLastModified);
 
 							fileDocumentToDelete = new FileDocument(
-									docIdToDelete, commonVersionId,
-									dateLastModified, this.objectStore,
-									this.isPublic, this.displayUrl,
-									this.includedMeta, this.excludedMeta,
-									SpiConstants.ActionType.DELETE);
+							        docIdToDelete, commonVersionId,
+							        dateLastModified, this.objectStore,
+							        this.isPublic, this.displayUrl,
+							        this.includedMeta, this.excludedMeta,
+							        SpiConstants.ActionType.DELETE);
 							index++;
 							return fileDocumentToDelete;
 						} catch (DOMException e) {
 							// skip this document
 							index++;
 							LOGGER.severe("Unable to retrieve docId for item: "
-									+ e);
+							        + e);
 							throw new RepositoryDocumentException(
-									"Unable to retrieve docId for item", e);
+							        "Unable to retrieve docId for item", e);
 						}
 					}
 				}
@@ -269,10 +272,10 @@ public class FileDocumentList implements DocumentList {
 	public String checkpoint() throws RepositoryException {
 
 		if (((docId == null) && (docIdToDelete == null) && (deleteDocId == null))
-				|| ((fileDocument == null) && (fileDocumentToDelete == null) && (fileDeleteDocument == null))) {
+		        || ((fileDocument == null) && (fileDocumentToDelete == null) && (fileDeleteDocument == null))) {
 			LOGGER.log(Level.WARNING, "Cannot create checkpoint: No documents found.");
 			throw new RepositoryException(
-					"Cannot create checkpoint: No documents found.");
+			        "Cannot create checkpoint: No documents found.");
 		}
 		LOGGER.log(Level.FINE, "Creation of the Checkpoint");
 		String dateString = "";
@@ -294,7 +297,7 @@ public class FileDocumentList implements DocumentList {
 				throw new RepositoryException("Unexpected JSON problem", e1);
 			}
 			LOGGER.log(Level.FINE, "dateString of the checkpoint of added document is "
-					+ dateString);
+			        + dateString);
 		} else if (lastCheckPoint != null) {
 			JSONObject jo;
 			try {
@@ -304,7 +307,7 @@ public class FileDocumentList implements DocumentList {
 			} catch (JSONException e) {
 				LOGGER.log(Level.WARNING, "JSON exception, while getting last checkpoint.", e);
 				throw new RepositoryException(
-						"JSON exception, while getting last checkpoint.", e);
+				        "JSON exception, while getting last checkpoint.", e);
 			}
 		} else {
 			LOGGER.fine("date of the first push : " + dateFirstPush);
@@ -329,7 +332,7 @@ public class FileDocumentList implements DocumentList {
 				throw new RepositoryException("Unexpected JSON problem", e1);
 			}
 			LOGGER.log(Level.FINE, "dateString of the checkpoint of deleted document matching with delete clause is "
-					+ dateStringDocumentAsDeleteClause);
+			        + dateStringDocumentAsDeleteClause);
 		} else if (lastCheckPoint != null) {
 			LOGGER.log(Level.FINE, "Get the last modified date from the last checkpoint ");
 			JSONObject jo;
@@ -340,7 +343,7 @@ public class FileDocumentList implements DocumentList {
 			} catch (JSONException e) {
 				LOGGER.log(Level.WARNING, "JSON exception, while getting last removed date.", e);
 				throw new RepositoryException(
-						"JSON exception, while getting last removed date.", e);
+				        "JSON exception, while getting last removed date.", e);
 			}
 		} else {
 			LOGGER.log(Level.FINE, "date of the first push : " + dateFirstPush);
@@ -365,7 +368,7 @@ public class FileDocumentList implements DocumentList {
 				throw new RepositoryException("Unexpected JSON problem", e1);
 			}
 			LOGGER.log(Level.FINE, "dateString of the checkpoint of deleted document is "
-					+ dateStringDocumentToDelete);
+			        + dateStringDocumentToDelete);
 		} else if (lastCheckPoint != null) {
 			LOGGER.log(Level.FINE, "Get the last modified date from the last checkpoint ");
 			JSONObject jo;
@@ -376,7 +379,7 @@ public class FileDocumentList implements DocumentList {
 			} catch (JSONException e) {
 				LOGGER.log(Level.WARNING, "JSON exception, while getting last removed date.", e);
 				throw new RepositoryException(
-						"JSON exception, while getting last removed date.", e);
+				        "JSON exception, while getting last removed date.", e);
 			}
 		} else {
 			LOGGER.log(Level.FINE, "date of the first push : " + dateFirstPush);
@@ -402,13 +405,13 @@ public class FileDocumentList implements DocumentList {
 	}
 
 	protected Property fetchAndVerifyValueForCheckpoint(FileDocument pm,
-			String pName) throws RepositoryException {
+	        String pName) throws RepositoryException {
 		Property property = pm.findProperty(pName);
 		if (property == null) {
 			LOGGER.log(Level.WARNING, "Checkpoint must have a " + pName
-					+ " property");
+			        + " property");
 			throw new RepositoryException("Checkpoint must have a " + pName
-					+ " property");
+			        + " property");
 		}
 		return property;
 	}

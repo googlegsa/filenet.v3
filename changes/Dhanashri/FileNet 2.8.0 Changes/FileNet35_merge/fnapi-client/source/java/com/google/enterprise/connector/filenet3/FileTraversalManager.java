@@ -52,15 +52,16 @@ public class FileTraversalManager implements TraversalManager {
 	private IObjectFactory fileObjectFactory;
 	private IObjectStore objectStore;
 	private ISession fileSession;
+	// private final String ORDER_BY = " ORDER BY DateLastModified,Id";
 	private final String ORDER_BY = " ORDER BY DateLastModified,Id";
-	private String objectStoresQuery = "<objectstores mergeoption=\"none\"><objectstore id=\"{0}\"/></objectstores>";
+	private String objectStoresQuery = "<objectstores mergeoption=\"none\"><objectstore Id=\"{0}\"/></objectstores>";
 	private String tableName = "Document";
-	private String whereClause = " AND ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&gt;{0}))";
+	private String whereClause = " AND ((DateLastModified={0} AND ({1}&lt;Id)) OR (DateLastModified&gt;{0}))";
 	private String whereClauseOnlyDate = " AND (DateLastModified&gt;{0})";
 	private String tableNameEventToDelete = "Event";
-	private String whereClauseToDelete = " WHERE ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&gt;{0}))";
+	private String whereClauseToDelete = " WHERE ((DateLastModified={0} AND ({1}&lt;Id)) OR (DateLastModified&gt;{0}))";
 	private String whereClauseToDeleteOnlyDate = " WHERE (DateLastModified&gt;{0})";
-	private String whereClauseAsDeleteClause = " AND ((DateLastModified={0} AND ({1}&lt;id)) OR (DateLastModified&gt;{0}))";
+	private String whereClauseAsDeleteClause = " AND ((DateLastModified={0} AND ({1}&lt;Id)) OR (DateLastModified&gt;{0}))";
 	private String whereClauseAsDeleteClauseOnlyDate = " AND (DateLastModified&gt;{0})";
 	private String orderByToDelete = " ORDER BY DateLastModified,Id";
 	private String displayUrl;
@@ -76,15 +77,15 @@ public class FileTraversalManager implements TraversalManager {
 	private final static String OR_OPERATOR = " OR ";
 	private final static String EVENT_DELETE = "DeletionEvent";
 	private final static String VERSION_STATUS_RELEASED = VersionableObject.VERSION_STATUS_RELEASED
-			+ " ";
+	        + " ";
 	private final static String VERSION_STATUS_IN_PROCESS = VersionableObject.VERSION_STATUS_IN_PROCESS
-			+ " ";
+	        + " ";
 
 	public FileTraversalManager(IObjectFactory fileObjectFactory,
-			IObjectStore objectStore, ISession fileSession, boolean b,
-			boolean useID, String displayUrl, String additionalWhereClause,
-			String additionalDeleteWhereClause, HashSet included_meta,
-			HashSet excluded_meta) throws RepositoryException {
+	        IObjectStore objectStore, ISession fileSession, boolean b,
+	        boolean useID, String displayUrl, String additionalWhereClause,
+	        String additionalDeleteWhereClause, HashSet included_meta,
+	        HashSet excluded_meta) throws RepositoryException {
 		this.fileObjectFactory = fileObjectFactory;
 		this.objectStore = objectStore;
 		this.fileSession = fileSession;
@@ -113,9 +114,9 @@ public class FileTraversalManager implements TraversalManager {
 	 * DocumentList identifying documents to traverse in this batch.
 	 */
 	public DocumentList resumeTraversal(String checkPoint)
-			throws RepositoryException {
+	        throws RepositoryException {
 		LOGGER.info((checkPoint == null) ? "Starting traversal..."
-				: "Resuming traversal...");
+		        : "Resuming traversal...");
 		DocumentList resultSet = null;
 		String queryString = buildQueryString(checkPoint);
 		ISearch search = this.fileObjectFactory.getSearch(this.fileSession);
@@ -127,12 +128,12 @@ public class FileTraversalManager implements TraversalManager {
 		Document resultDoc = this.stringToDom(strResultDoc);
 
 		LOGGER.log(Level.FINE, "String resultDoc before stringToDom"
-				+ strResultDoc);
+		        + strResultDoc);
 		// Added: document remove all
 		String queryStringToDelete = buildQueryToDelete(checkPoint);
 		ISearch searchToDelete = this.fileObjectFactory.getSearch(this.fileSession);
 		LOGGER.log(Level.FINE, "Query to get removed documents: "
-				+ queryStringToDelete);
+		        + queryStringToDelete);
 		// logger.log(Level.INFO, "objectStore: " + this.objectStore);
 		// logger.log(Level.INFO, "searchToDelete: " + searchToDelete);
 
@@ -140,46 +141,46 @@ public class FileTraversalManager implements TraversalManager {
 		Document resultDocToDelete = this.stringToDom(searchToDelete.executeXml(queryStringToDelete, this.objectStore));
 
 		LOGGER.log(Level.FINE, "String ResultDeleteDoc before stringToDom"
-				+ strResultDocDelete);
+		        + strResultDocDelete);
 
 		Document resultDocAsDeleteClause = null;
 		if ((additionalDeleteWhereClause != null)
-				&& !(additionalDeleteWhereClause.equals(""))) {
+		        && !(additionalDeleteWhereClause.equals(""))) {
 			// Delete document matching with delete clause
 			String queryStringAsDeleteClause = buildQueryStringAsDeleteClause(checkPoint);
 			ISearch searchAsDeleteClause = this.fileObjectFactory.getSearch(this.fileSession);
 			LOGGER.log(Level.FINE, "Query to get removed documents matching with delete clause : "
-					+ queryStringAsDeleteClause);
+			        + queryStringAsDeleteClause);
 			// logger.log(Level.INFO, "objectStore: " + this.objectStore);
 			// logger.log(Level.INFO, "searchToDelete: " + searchToDelete);
 
 			String strResultDeleteDoc = searchAsDeleteClause.executeXml(queryStringAsDeleteClause, this.objectStore);
 			resultDocAsDeleteClause = this.stringToDom(searchAsDeleteClause.executeXml(queryStringAsDeleteClause, this.objectStore));
 			LOGGER.log(Level.FINE, "String ResultDeleteDoc matching with delete clause before stringToDom"
-					+ strResultDeleteDoc);
+			        + strResultDeleteDoc);
 
 		}
 
 		LOGGER.log(Level.FINE, "StringDelete before stringToDom"
-				+ search.executeXml(queryStringToDelete, objectStore));
+		        + search.executeXml(queryStringToDelete, objectStore));
 		LOGGER.log(Level.INFO, "Number of documents sent to GSA: "
-				+ resultDoc.getElementsByTagName("z:row").getLength());
+		        + resultDoc.getElementsByTagName("z:row").getLength());
 		int deleteCountAsDeleteClause = 0;
 		if (resultDocAsDeleteClause != null) {
 			deleteCountAsDeleteClause = resultDocAsDeleteClause.getElementsByTagName("z:row").getLength();
 			LOGGER.log(Level.INFO, "Number of documents matching with delete clause whose index will be deleted from GSA: "
-					+ resultDocAsDeleteClause.getElementsByTagName("z:row").getLength());
+			        + resultDocAsDeleteClause.getElementsByTagName("z:row").getLength());
 		}
 		LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA: "
-				+ resultDocToDelete.getElementsByTagName("z:row").getLength());
+		        + resultDocToDelete.getElementsByTagName("z:row").getLength());
 		// Make the document list
 		if ((resultDoc.getElementsByTagName("z:row").getLength() > 0)
-				|| (resultDocToDelete.getElementsByTagName("z:row").getLength() > 0)
-				|| (deleteCountAsDeleteClause > 0)) {
+		        || (resultDocToDelete.getElementsByTagName("z:row").getLength() > 0)
+		        || (deleteCountAsDeleteClause > 0)) {
 			resultSet = new FileDocumentList(resultDoc,
-					resultDocAsDeleteClause, resultDocToDelete, objectStore,
-					this.isPublic, this.displayUrl, this.included_meta,
-					this.excluded_meta, dateFirstPush, checkPoint);
+			        resultDocAsDeleteClause, resultDocToDelete, objectStore,
+			        this.isPublic, this.displayUrl, this.included_meta,
+			        this.excluded_meta, dateFirstPush, checkPoint);
 		}
 		return resultSet;
 	}
@@ -195,9 +196,9 @@ public class FileTraversalManager implements TraversalManager {
 	 * @throws RepositoryException
 	 */
 	private String buildQueryString(String checkpoint)
-			throws RepositoryException {
+	        throws RepositoryException {
 		StringBuffer query = new StringBuffer(
-				"<?xml version=\"1.0\" ?><request>");
+		        "<?xml version=\"1.0\" ?><request>");
 		query.append(objectStoresQuery);
 		// query.append("<querystatement>SELECT Id,DateLastModified FROM ");
 		// query.append(tableName);
@@ -213,7 +214,7 @@ public class FileTraversalManager implements TraversalManager {
 				query.append("<querystatement>" + additionalWhereClause);
 				// query = new StringBuffer(additionalWhereClause);
 				LOGGER.fine("Using Custom Query[" + additionalWhereClause
-						+ "], will add Checkpoint in next step.");
+				        + "], will add Checkpoint in next step.");
 			} else {
 				query.append("<querystatement>SELECT Id,DateLastModified FROM ");
 				query.append(tableName);
@@ -235,7 +236,7 @@ public class FileTraversalManager implements TraversalManager {
 
 		if (batchint > 0) {
 			query.append("<options maxrecords='" + batchint
-					+ "' objectasid=\"false\"/>");
+			        + "' objectasid=\"false\"/>");
 		}
 		query.append("</request>");
 		return query.toString();
@@ -253,23 +254,23 @@ public class FileTraversalManager implements TraversalManager {
 	 * @throws RepositoryException
 	 */
 	private String buildQueryStringAsDeleteClause(String checkpoint)
-			throws RepositoryException {
+	        throws RepositoryException {
 
 		LOGGER.log(Level.FINE, "Build query to get the documents matching with delete here clause : ");
 
 		StringBuffer query = new StringBuffer(
-				"<?xml version=\"1.0\" ?><request>");
+		        "<?xml version=\"1.0\" ?><request>");
 		query.append(objectStoresQuery);
 
 		if (additionalDeleteWhereClause != null
-				&& !additionalDeleteWhereClause.equals("")) {
+		        && !additionalDeleteWhereClause.equals("")) {
 
 			if ((additionalDeleteWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
 
 				query.append("<querystatement>" + additionalDeleteWhereClause);
 				// query = new StringBuffer(additionalDeleteWhereClause);
 				LOGGER.fine("Using Custom Query[" + additionalDeleteWhereClause
-						+ "], will add Checkpoint in next step.");
+				        + "], will add Checkpoint in next step.");
 			} else {
 				query.append("<querystatement>SELECT Id,DateLastModified FROM ");
 				query.append(tableName);
@@ -289,7 +290,7 @@ public class FileTraversalManager implements TraversalManager {
 
 		if (batchint > 0) {
 			query.append("<options maxrecords='" + batchint
-					+ "' objectasid=\"false\"/>");
+			        + "' objectasid=\"false\"/>");
 		}
 		query.append("</request>");
 		return query.toString();
@@ -305,7 +306,7 @@ public class FileTraversalManager implements TraversalManager {
 	 * @throws RepositoryException
 	 */
 	private String buildQueryToDelete(String checkpoint)
-			throws RepositoryException {
+	        throws RepositoryException {
 
 		LOGGER.log(Level.FINE, "Build query to get the documents removed : ");
 		StringBuffer query = null;
@@ -323,7 +324,7 @@ public class FileTraversalManager implements TraversalManager {
 
 			if (batchint > 0) {
 				query.append("<options maxrecords='" + batchint
-						+ "' objectasid=\"false\"/>");
+				        + "' objectasid=\"false\"/>");
 			}
 			query.append("</request>");
 		} else {
@@ -333,11 +334,11 @@ public class FileTraversalManager implements TraversalManager {
 
 			Date d = cal.getTime();
 			SimpleDateFormat dateStandard = new SimpleDateFormat(
-					"yyyy-MM-dd'T'HH:mm:ss.SSS");
+			        "yyyy-MM-dd'T'HH:mm:ss.SSS");
 			dateStandard.setTimeZone(TimeZone.getTimeZone("UTC"));
 			dateFirstPush = dateStandard.format(d);
 			LOGGER.log(Level.FINEST, "buildQueryToDelete dateFirstPush : "
-					+ dateFirstPush);
+			        + dateFirstPush);
 			// /
 			query = new StringBuffer("<?xml version=\"1.0\" ?><request>");
 			query.append(objectStoresQuery);
@@ -355,7 +356,7 @@ public class FileTraversalManager implements TraversalManager {
 			query.append("</querystatement>");
 			if (batchint > 0) {
 				query.append("<options maxrecords='" + batchint
-						+ "' objectasid=\"false\"/>");
+				        + "' objectasid=\"false\"/>");
 			}
 			query.append("</request>");
 		}
@@ -374,7 +375,7 @@ public class FileTraversalManager implements TraversalManager {
 	 * @throws RepositoryException
 	 */
 	private String getCheckpointClause(String checkPoint, String uuidParam,
-			String dateParam) throws RepositoryException {
+	        String dateParam) throws RepositoryException {
 
 		LOGGER.info(checkPoint);
 
@@ -384,9 +385,9 @@ public class FileTraversalManager implements TraversalManager {
 			jo = new JSONObject(checkPoint);
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
-					+ checkPoint);
+			        + checkPoint);
 			throw new IllegalArgumentException(
-					"CheckPoint string does not parse as JSON: " + checkPoint);
+			        "CheckPoint string does not parse as JSON: " + checkPoint);
 		}
 		String uuid = extractDocidFromCheckpoint(jo, checkPoint, uuidParam);
 		String c = extractNativeDateFromCheckpoint(jo, checkPoint, dateParam);
@@ -412,16 +413,16 @@ public class FileTraversalManager implements TraversalManager {
 	 * @return
 	 */
 	protected String extractDocidFromCheckpoint(JSONObject jo,
-			String checkPoint, String param) {
+	        String checkPoint, String param) {
 		String uuid = null;
 		try {
 			uuid = jo.getString(param);
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Could not get uuid from checkPoint string: "
-					+ checkPoint, e);
+			        + checkPoint, e);
 			throw new IllegalArgumentException(
-					"Could not get uuid from checkPoint string: " + checkPoint,
-					e);
+			        "Could not get uuid from checkPoint string: " + checkPoint,
+			        e);
 		}
 		return uuid;
 	}
@@ -435,16 +436,16 @@ public class FileTraversalManager implements TraversalManager {
 	 * @return
 	 */
 	protected String extractNativeDateFromCheckpoint(JSONObject jo,
-			String checkPoint, String param) {
+	        String checkPoint, String param) {
 		String dateString = null;
 		try {
 			dateString = jo.getString(param);
 		} catch (JSONException e) {
 			LOGGER.log(Level.WARNING, "Could not get last modified date from checkPoint string: "
-					+ checkPoint);
+			        + checkPoint);
 			throw new IllegalArgumentException(
-					"Could not get last modified date from checkPoint string: "
-							+ checkPoint);
+			        "Could not get last modified date from checkPoint string: "
+			        + checkPoint);
 		}
 
 		return dateString;
@@ -461,7 +462,7 @@ public class FileTraversalManager implements TraversalManager {
 	 * @throws RepositoryException
 	 */
 	protected String makeCheckpointQueryString(String uuid, String c,
-			String uuidParam) throws RepositoryException {
+	        String uuidParam) throws RepositoryException {
 
 		String statement = null;
 		Object[] arguments = { c, uuid };
@@ -499,17 +500,17 @@ public class FileTraversalManager implements TraversalManager {
 		} catch (ParserConfigurationException de) {
 			LOGGER.log(Level.WARNING, "Unable to configure parser for parsing XML string");
 			RepositoryException re = new RepositoryLoginException(
-					"Unable to configure parser for parsing XML string", de);
+			        "Unable to configure parser for parsing XML string", de);
 			throw re;
 		} catch (SAXException de) {
 			LOGGER.log(Level.WARNING, "Unable to parse XML string");
 			RepositoryException re = new RepositoryLoginException(
-					"Unable to parse XML string", de);
+			        "Unable to parse XML string", de);
 			throw re;
 		} catch (IOException de) {
 			LOGGER.log(Level.WARNING, "XML source string to be parsed not found.");
 			RepositoryException re = new RepositoryLoginException(
-					"XML source string to be parsed not found.", de);
+			        "XML source string to be parsed not found.", de);
 			throw re;
 		}
 	}

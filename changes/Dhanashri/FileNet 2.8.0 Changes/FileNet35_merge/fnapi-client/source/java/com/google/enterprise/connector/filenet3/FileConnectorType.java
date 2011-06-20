@@ -90,6 +90,7 @@ public class FileConnectorType implements ConnectorType {
 	private static final int BUFFER_SIZE = 2048;
 	private static final String SELECT = "SELECT";
 	private static final String QUERYFORMAT = "SELECT ID,DATELASTMODIFIED FROM ";
+	private static final String VERSIONQUERY = "WHERE VersionStatus=1 and ContentSize IS NOT NULL";
 
 	private static Logger LOGGER = Logger.getLogger(FileConnectorType.class.getName());
 	private List keys = null;
@@ -171,14 +172,14 @@ public class FileConnectorType implements ConnectorType {
 	 */
 
 	public ConfigureResponse getPopulatedConfigForm(Map configMap,
-			Locale language) {
+	        Locale language) {
 		try {
 			resource = ResourceBundle.getBundle(LOCALE_FILE, language);
 		} catch (MissingResourceException e) {
 			resource = ResourceBundle.getBundle(LOCALE_FILE);
 		}
 		ConfigureResponse response = new ConfigureResponse("",
-				makeConfigForm(configMap, this.validation));
+		        makeConfigForm(configMap, this.validation));
 		return response;
 	}
 
@@ -193,9 +194,9 @@ public class FileConnectorType implements ConnectorType {
 			String key = (String) i.next();
 			String val = (String) configData.get(key);
 			if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
-					&& !key.equals(WHERECLAUSE)
-					&& !key.equals(DELETEWHERECLAUSE) && !key.equals(FILEPATH)
-					&& (val == null || val.length() == 0)) {
+			        && !key.equals(WHERECLAUSE)
+			        && !key.equals(DELETEWHERECLAUSE) && !key.equals(FILEPATH)
+			        && (val == null || val.length() == 0)) {
 				return key;
 			}
 		}
@@ -208,7 +209,7 @@ public class FileConnectorType implements ConnectorType {
 	 * ensure that the connector instance is available for access.
 	 */
 	public ConfigureResponse validateConfig(Map configData, Locale language,
-			ConnectorFactory connectorFactory) {
+	        ConnectorFactory connectorFactory) {
 
 		LOGGER.log(Level.FINEST, "Entering into function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
 		try {
@@ -226,7 +227,7 @@ public class FileConnectorType implements ConnectorType {
 			FileConnector conn = null;
 			try {
 				LOGGER.log(Level.CONFIG, "Start Test Connection to the object store ..."
-						+ (String) configData.get(OBJECT_STORE));
+				        + (String) configData.get(OBJECT_STORE));
 
 				LOGGER.info("Attempting to create FileNet connector instance for verification");
 				conn = (FileConnector) connectorFactory.makeConnector(configData);
@@ -240,7 +241,7 @@ public class FileConnectorType implements ConnectorType {
 				LOGGER.log(Level.SEVERE, e.getLocalizedMessage());
 
 				return new ConfigureResponse(
-						resource.getString("invalid_credentials_error"), form);
+				        resource.getString("invalid_credentials_error"), form);
 			}
 			LOGGER.info("Login succeeded. Trying to retrieve the traversal manager.");
 
@@ -256,30 +257,37 @@ public class FileConnectorType implements ConnectorType {
 				LOGGER.log(Level.SEVERE, e.getLocalizedMessage());
 
 				return new ConfigureResponse(
-						resource.getString("object_store_invalid"), form);
+				        resource.getString("object_store_invalid"), form);
 			}
 
 			LOGGER.log(Level.INFO, "Connecttion to Object Store "
-					+ (String) configData.get(OBJECT_STORE) + " is Successful");
+			        + (String) configData.get(OBJECT_STORE) + " is Successful");
 
 			if (null != conn) {
 				LOGGER.info("Got traversal manager");
 				StringBuffer query = new StringBuffer(
-						"<?xml version=\"1.0\" ?><request>");
+				        "<?xml version=\"1.0\" ?><request>");
 				query.append("<objectstores mergeoption=\"none\"><objectstore id=\"");
-				query.append((String) configData.get(OBJECT_STORE));
+				query.append(((String) configData.get(OBJECT_STORE)).trim());
 				query.append("\"/></objectstores>");
 				if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
 					if ((((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT))) {
-
-						query.append("<querystatement>"
-								+ ((String) configData.get(WHERECLAUSE)).trim());
+						if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().contains((this.VERSIONQUERY))) {
+							query.append("<querystatement>"
+							        + ((String) configData.get(WHERECLAUSE)).trim());
+						} else {
+							this.validation = WHERECLAUSE;
+							form = makeConfigForm(configData, this.validation);
+							return new ConfigureResponse(
+							        resource.getString("query_not_having_versionstatus_condition"),
+							        form);
+						}
 					} else {
 						this.validation = WHERECLAUSE;
 						form = makeConfigForm(configData, this.validation);
 						return new ConfigureResponse(
-								resource.getString("additional_where_clause_invalid"),
-								form);
+						        resource.getString("query_not_starting_with_SELECT_Id,DateLastModified_FROM"),
+						        form);
 					}
 				} else {
 					query.append("<querystatement>SELECT Id,DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
@@ -297,25 +305,33 @@ public class FileConnectorType implements ConnectorType {
 					this.validation = WHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
 					return new ConfigureResponse(
-							resource.getString("additional_where_clause_invalid"),
-							form);
+					        resource.getString("additional_where_clause_invalid"),
+					        form);
 				}
 				StringBuffer deleteQuery = new StringBuffer(
-						"<?xml version=\"1.0\" ?><request>");
+				        "<?xml version=\"1.0\" ?><request>");
 				deleteQuery.append("<objectstores mergeoption=\"none\"><objectstore id=\"");
 				deleteQuery.append((String) configData.get(OBJECT_STORE));
 				deleteQuery.append("\"/></objectstores>");
 
 				if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
 					if ((((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT))) {
-						deleteQuery.append("<querystatement>"
-								+ ((String) configData.get(DELETEWHERECLAUSE)).trim());
+						if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().contains((this.VERSIONQUERY))) {
+							deleteQuery.append("<querystatement>"
+							        + ((String) configData.get(DELETEWHERECLAUSE)).trim());
+						} else {
+							this.validation = DELETEWHERECLAUSE;
+							form = makeConfigForm(configData, this.validation);
+							return new ConfigureResponse(
+							        resource.getString("delete_query_not_having_versionstatus_condition"),
+							        form);
+						}
 					} else {
 						this.validation = DELETEWHERECLAUSE;
 						form = makeConfigForm(configData, this.validation);
 						return new ConfigureResponse(
-								resource.getString("additional_delete_where_clause_invalid"),
-								form);
+						        resource.getString("delete_query_not_starting_with_SELECT_Id,DateLastModified_FROM"),
+						        form);
 					}
 				} else {
 					deleteQuery.append("<querystatement>SELECT Id,DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
@@ -332,24 +348,33 @@ public class FileConnectorType implements ConnectorType {
 					this.validation = DELETEWHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
 					return new ConfigureResponse(
-							resource.getString("additional_delete_where_clause_invalid"),
-							form);
+					        resource.getString("additional_delete_where_clause_invalid"),
+					        form);
 				}
+
+				if (WHERECLAUSE.trim().equalsIgnoreCase(DELETEWHERECLAUSE.trim())) {
+					this.validation = DELETEWHERECLAUSE;
+					form = makeConfigForm(configData, this.validation);
+					return new ConfigureResponse(
+					        resource.getString("same_additional_where_clause_and_additional_delete_clause"),
+					        form);
+				}
+
 			} else {
 				LOGGER.severe("Unable to create a FileNet connector instance");
 			}
 
 			try {
 				LOGGER.log(Level.CONFIG, "Start Test Connection to Workplace server ..."
-						+ (String) configData.get(WORKPLACE_URL));
-				configData.put(WORKPLACE_URL, getFQDNHostNameURL((String) configData.get(WORKPLACE_URL)));
-				testWorkplaceUrl((String) configData.get(WORKPLACE_URL));
+				        + (String) configData.get(WORKPLACE_URL));
+				configData.put(WORKPLACE_URL, getFQDNHostNameURL(((String) configData.get(WORKPLACE_URL)).trim()));
+				testWorkplaceUrl(((String) configData.get(WORKPLACE_URL)).trim());
 			} catch (RepositoryException e) {
 				form = makeConfigForm(configData, this.validation);
 				LOGGER.log(Level.SEVERE, e.getLocalizedMessage());
 
 				return new ConfigureResponse(
-						resource.getString("workplace_url_error"), form);
+				        resource.getString("workplace_url_error"), form);
 			}
 			return null;
 		}
@@ -369,7 +394,7 @@ public class FileConnectorType implements ConnectorType {
 	 */
 
 	private void testWorkplaceUrl(String workplaceServerUrl)
-			throws RepositoryException {
+	        throws RepositoryException {
 
 		// Added by Pankaj on 04/05/2009 to remove the dependency of
 		// Httpclient.jar file
@@ -380,12 +405,12 @@ public class FileConnectorType implements ConnectorType {
 			this.validation = WORKPLACE_URL;
 			LOGGER.log(Level.SEVERE, resource.getString("workplace_url_error"));
 			throw new RepositoryException(
-					resource.getString("workplace_url_error"));
+			        resource.getString("workplace_url_error"));
 		} catch (Throwable t) {
 			this.validation = WORKPLACE_URL;
 			LOGGER.log(Level.SEVERE, resource.getString("workplace_url_error"));
 			throw new RepositoryException(
-					resource.getString("workplace_url_error"));
+			        resource.getString("workplace_url_error"));
 		}
 
 	}
@@ -409,7 +434,7 @@ public class FileConnectorType implements ConnectorType {
 			}
 
 			if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
-			/* && !key.equals(WHERECLAUSE) */&& !key.equals(FILEPATH)) {
+			        			/* && !key.equals(WHERECLAUSE) */&& !key.equals(FILEPATH)) {
 				if (validate.equals(key)) {
 					LOGGER.log(Level.FINEST, "key: " + key);
 					appendStartRow(buf, key, validate);
@@ -442,8 +467,8 @@ public class FileConnectorType implements ConnectorType {
 				if (key.equalsIgnoreCase(PASSWORD_KEY)) {
 					appendAttribute(buf, TYPE, PASSWORD);
 				} else if (key.equals(FNCLASS)
-						|| key.equals(AUTHENTICATIONTYPE)
-						/* || key.equals(WHERECLAUSE) */|| key.equals(FILEPATH)) {
+				        || key.equals(AUTHENTICATIONTYPE)
+				        				/* || key.equals(WHERECLAUSE) */|| key.equals(FILEPATH)) {
 					appendAttribute(buf, TYPE, HIDDEN);
 				} else {
 					appendAttribute(buf, TYPE, TEXT);
@@ -483,7 +508,7 @@ public class FileConnectorType implements ConnectorType {
 			appendEndRow(buf);
 		}
 		LOGGER.log(Level.FINEST, "Exiting from function makeConfigForm(Map configMap, String validate)"
-				+ buf.toString());
+		        + buf.toString());
 		return buf.toString();
 	}
 
@@ -590,7 +615,7 @@ public class FileConnectorType implements ConnectorType {
 	 * @param attrValue
 	 */
 	private void appendAttribute(StringBuffer buf, String attrName,
-			String attrValue) {
+	        String attrValue) {
 		buf.append(" ");
 
 		if (attrName == TYPE && attrValue == TEXTAREA) {
@@ -607,7 +632,7 @@ public class FileConnectorType implements ConnectorType {
 				XmlUtils.xmlAppendAttrValue(attrValue, buf);
 			} catch (IOException e) {
 				String msg = new StringBuffer(
-						"Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
+				        "Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
 				LOGGER.log(Level.WARNING, msg, e);
 			}
 			buf.append("\"");
@@ -621,7 +646,7 @@ public class FileConnectorType implements ConnectorType {
 	private boolean isRequired(final String configKey) {
 		final boolean bValue = false;
 		if (configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL)
-				|| configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME)) {
+		        || configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME)) {
 			return true;
 		}
 		return bValue;
