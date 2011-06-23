@@ -52,9 +52,8 @@ public class FileTraversalManager implements TraversalManager {
 	private IObjectFactory fileObjectFactory;
 	private IObjectStore objectStore;
 	private ISession fileSession;
-	// private final String ORDER_BY = " ORDER BY DateLastModified,Id";
 	private final String ORDER_BY = " ORDER BY DateLastModified,Id";
-	private String objectStoresQuery = "<objectstores mergeoption=\"none\"><objectstore Id=\"{0}\"/></objectstores>";
+	private String objectStoresQuery = "<objectstores mergeoption=\"none\"><objectstore id=\"{0}\"/></objectstores>";
 	private String tableName = "Document";
 	private String whereClause = " AND ((DateLastModified={0} AND ({1}&lt;Id)) OR (DateLastModified&gt;{0}))";
 	private String whereClauseOnlyDate = " AND (DateLastModified&gt;{0})";
