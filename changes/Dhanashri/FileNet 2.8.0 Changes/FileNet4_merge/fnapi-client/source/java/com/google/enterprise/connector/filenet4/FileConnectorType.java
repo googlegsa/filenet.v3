@@ -292,7 +292,7 @@ public class FileConnectorType implements ConnectorType {
 
 				if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
 					if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT)) {
-						if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().contains((this.VERSIONQUERY))) {
+						if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().contains(((this.VERSIONQUERY)).toUpperCase())) {
 							query = new StringBuffer(
 							        ((String) configData.get(WHERECLAUSE)).trim());
 							LOGGER.fine("Using Custom Query["
@@ -335,7 +335,7 @@ public class FileConnectorType implements ConnectorType {
 
 				if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
 					if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT)) {
-						if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().contains((this.VERSIONQUERY))) {
+						if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().contains(((this.VERSIONQUERY)).toUpperCase())) {
 							deleteuery = new StringBuffer(
 							        ((String) configData.get(DELETEWHERECLAUSE)).trim());
 							LOGGER.fine("Using Custom Query["
@@ -374,7 +374,7 @@ public class FileConnectorType implements ConnectorType {
 					        form);
 				}
 
-				if (WHERECLAUSE.trim().equalsIgnoreCase(DELETEWHERECLAUSE.trim())) {
+				if ((((String) configData.get(WHERECLAUSE)).trim()).equalsIgnoreCase(((String) configData.get(DELETEWHERECLAUSE)).trim())) {
 					this.validation = DELETEWHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
 					return new ConfigureResponse(
