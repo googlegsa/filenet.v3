@@ -374,12 +374,15 @@ public class FileConnectorType implements ConnectorType {
 					        form);
 				}
 
-				if ((((String) configData.get(WHERECLAUSE)).trim()).equalsIgnoreCase(((String) configData.get(DELETEWHERECLAUSE)).trim())) {
-					this.validation = DELETEWHERECLAUSE;
-					form = makeConfigForm(configData, this.validation);
-					return new ConfigureResponse(
-					        resource.getString("same_additional_where_clause_and_additional_delete_clause"),
-					        form);
+				if (!((String) configData.get(WHERECLAUSE)).trim().equalsIgnoreCase("")
+				        || !((String) configData.get(DELETEWHERECLAUSE)).trim().equalsIgnoreCase("")) {
+					if ((((String) configData.get(WHERECLAUSE)).trim()).equalsIgnoreCase(((String) configData.get(DELETEWHERECLAUSE)).trim())) {
+						this.validation = DELETEWHERECLAUSE;
+						form = makeConfigForm(configData, this.validation);
+						return new ConfigureResponse(
+						        resource.getString("same_additional_where_clause_and_additional_delete_clause"),
+						        form);
+					}
 				}
 
 			} catch (EngineRuntimeException e) {
