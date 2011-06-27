@@ -85,21 +85,21 @@ public class FileDocumentList implements DocumentList {
 		this.data = resultDoc.getElementsByTagName(RS_DATA).item(0).getChildNodes();
 		LOGGER.log(Level.INFO, "Number of new documents discovered: "
 		        + resultDoc.getElementsByTagName(RS_ROW).getLength());
-		LOGGER.log(Level.FINE, "Child of rs_data : " + data);
+		LOGGER.log(Level.FINE, "Child of rs_data : " + data);		
 
 		if (resultDeleteDoc != null) {
 			this.deleteData = resultDeleteDoc.getElementsByTagName(RS_DATA).item(0).getChildNodes();
 			LOGGER.log(Level.INFO, "Number of documents matching with delete clause discovered: "
 			        + resultDeleteDoc.getElementsByTagName(RS_ROW).getLength());
 			LOGGER.log(Level.FINE, "List of results to delete as matching with delete clause : "
-			        + deleteData);
+			        + deleteData);			
 		}
 
 		this.dataToDelete = resultDocToDelete.getElementsByTagName(RS_DATA).item(0).getChildNodes();
 		LOGGER.log(Level.INFO, "Number of new documents to be removed: "
 		        + resultDocToDelete.getElementsByTagName(RS_ROW).getLength());
 		LOGGER.log(Level.FINE, "List of results to delete : "
-		        + resultDocToDelete.getChildNodes());
+		        + dataToDelete);
 
 		this.isPublic = refIsPublic;
 		this.includedMeta = refIncludedMeta;
@@ -171,7 +171,7 @@ public class FileDocumentList implements DocumentList {
 			for (int j = 0; j < nodeMap.getLength(); j++) {
 				if (nodeMap.item(j).getNodeName().equals(ID)) {
 					index++;
-					LOGGER.info("DEL...(Documents satisfying additional delete clause) ");
+					LOGGER.info("DELETE...(Documents satisfying additional delete clause) ");
 
 					if (deleteData.item(indexDelete) != null) {
 
@@ -210,19 +210,22 @@ public class FileDocumentList implements DocumentList {
 		} else if ((index >= (deleteDataLen + dataLen) - 1)
 		        && index < ((dataToDelete.getLength() + (deleteDataLen
 		        + dataLen - 2)))) {
-
-			int indexDelete = index - (dataLen + deleteDataLen) + 2;
+			int indexDelete = index;
+			if (dataLen > 0) {
+				indexDelete = indexDelete - dataLen + 1;
+			}
+			if (deleteDataLen > 0) {
+				indexDelete = indexDelete - deleteDataLen + 1;
+			}
 			NamedNodeMap nodeMap = dataToDelete.item(indexDelete).getAttributes();
 
 			for (int j = 0; j < nodeMap.getLength(); j++) {
 				if (nodeMap.item(j).getNodeName().equals(ID)) {
 					index++;
-					LOGGER.info("DEL...(Documents deleted from repository)");
+					LOGGER.info("DELETE...(Documents deleted from repository)");
 
-					// if(data.item(index) != null){
 					if (dataToDelete.item(indexDelete) != null) {
-						// if (data.item(index).getNodeType() == Node.TEXT_NODE)
-						// {
+
 						if (dataToDelete.item(indexDelete).getNodeType() == Node.TEXT_NODE) {
 							index++;
 						}
