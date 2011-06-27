@@ -254,8 +254,8 @@ public class FileConnectorType implements ConnectorType {
 				this.validation = OBJECT_STORE;
 
 				form = makeConfigForm(configData, this.validation);
+				LOGGER.log(Level.WARNING, resource.getString("object_store_invalid"));
 				LOGGER.log(Level.SEVERE, e.getLocalizedMessage());
-
 				return new ConfigureResponse(
 				        resource.getString("object_store_invalid"), form);
 			}
@@ -304,6 +304,7 @@ public class FileConnectorType implements ConnectorType {
 				} catch (Exception e) {
 					this.validation = WHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
+					LOGGER.log(Level.WARNING, resource.getString("additional_where_clause_invalid"));
 					return new ConfigureResponse(
 					        resource.getString("additional_where_clause_invalid"),
 					        form);
@@ -347,6 +348,7 @@ public class FileConnectorType implements ConnectorType {
 				} catch (Exception e) {
 					this.validation = DELETEWHERECLAUSE;
 					form = makeConfigForm(configData, this.validation);
+					LOGGER.log(Level.WARNING, resource.getString("additional_delete_where_clause_invalid"));
 					return new ConfigureResponse(
 					        resource.getString("additional_delete_where_clause_invalid"),
 					        form);
@@ -510,8 +512,7 @@ public class FileConnectorType implements ConnectorType {
 			}
 			appendEndRow(buf);
 		}
-		LOGGER.log(Level.FINEST, "Exiting from function makeConfigForm(Map configMap, String validate)"
-		        + buf.toString());
+
 		return buf.toString();
 	}
 
