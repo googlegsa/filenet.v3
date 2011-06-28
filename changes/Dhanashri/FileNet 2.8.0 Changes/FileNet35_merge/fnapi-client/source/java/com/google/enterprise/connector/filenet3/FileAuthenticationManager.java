@@ -34,8 +34,8 @@ public class FileAuthenticationManager implements AuthenticationManager {
 	 * @param authenticationIdentity: contains user credentials
 	 */
 	public AuthenticationResponse authenticate(
-			AuthenticationIdentity authenticationIdentity)
-			throws RepositoryException {
+	        AuthenticationIdentity authenticationIdentity)
+	        throws RepositoryException {
 		LOGGER.log(Level.FINEST, "Entering into authenticate(AuthenticationIdentity authenticationIdentity)");
 
 		String username = authenticationIdentity.getUsername();
@@ -57,7 +57,26 @@ public class FileAuthenticationManager implements AuthenticationManager {
 		} catch (RepositoryLoginException e) {
 			// Login failed, user not authenticated
 			LOGGER.log(Level.INFO, "Authentication failed for user " + username);
-			return new AuthenticationResponse(false, "");
+			String shortName = FileUtil.getShortName(username);
+			LOGGER.log(Level.INFO, "Trying to authenticate with Short Name: "
+			        + shortName);
+
+			sess = objectFactory.getSession("gsa-authenticate", null, shortName, password);
+			try {
+				URL is = this.getClass().getClassLoader().getResource(this.wcmConfigFilePath);
+				if (is == null) {
+					LOGGER.log(Level.SEVERE, "WCMApiConfig.properties file not found. Either path is invalid or file is corrupted. ");
+				}
+				String sFile = URLDecoder.decode(is.getFile(), "UTF-8");
+				FileInputStream fis = new FileInputStream(sFile);
+				sess.setConfiguration(fis);
+				sess.verify();
+			} catch (Exception ecp) {
+				LOGGER.log(Level.WARNING, "Authentication Failed for user "
+				        + shortName);
+				LOGGER.log(Level.FINE, "While authenticating got exception", ecp);
+				return new AuthenticationResponse(false, "");
+			}
 		}
 		LOGGER.log(Level.INFO, "Authentication succeeded for user " + username);
 		LOGGER.log(Level.FINEST, "Exiting from authenticate(AuthenticationIdentity authenticationIdentity)");
