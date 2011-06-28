@@ -99,6 +99,8 @@ public class FileConnectorType implements ConnectorType {
 	private static final String SELECT = "SELECT";
 	private static final String QUERYFORMAT = "SELECT ID,DATELASTMODIFIED FROM ";
 	private static final String VERSIONQUERY = "WHERE VersionStatus=1 and ContentSize IS NOT NULL";
+	private static final String ACCESS_DENIED_EXCEPTION = "com.filenet.api.exception.EngineRuntimeException: E_ACCESS_DENIED:";
+	private static final String RETRIEVE_SQL_SYNTAX_ERROR = "com.filenet.api.exception.EngineRuntimeException: RETRIEVE_SQL_SYNTAX_ERROR:";
 	private static Logger LOGGER = Logger.getLogger(FileConnectorType.class.getName());
 	private List keys = null;
 	private Set keySet = null;
@@ -322,13 +324,32 @@ public class FileConnectorType implements ConnectorType {
 						ISearch search = session.getSearch();
 						search.execute(query.toString());
 					}
-				} catch (Exception e) {
-					LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-					this.validation = WHERECLAUSE;
-					form = makeConfigForm(configData, this.validation);
-					return new ConfigureResponse(
-					        resource.getString("additional_where_clause_invalid"),
-					        form);
+				} catch (RepositoryException e) {
+					if (e.getCause().toString().trim().contains(ACCESS_DENIED_EXCEPTION)) {
+						LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+						this.validation = OBJECT_STORE;
+						form = makeConfigForm(configData, this.validation);
+
+						return new ConfigureResponse(
+						        resource.getString("object_store_access_error"),
+						        form);
+					} else if (e.getCause().toString().trim().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
+
+						LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+						this.validation = WHERECLAUSE;
+						form = makeConfigForm(configData, this.validation);
+
+						return new ConfigureResponse(
+						        resource.getString("additional_where_clause_invalid"),
+						        form);
+					} else {
+						LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+						this.validation = "FileNet exception";
+						form = makeConfigForm(configData, this.validation);
+
+						return new ConfigureResponse(e.getLocalizedMessage(),
+						        form);
+					}
 				}
 
 				StringBuffer deleteuery = new StringBuffer();
@@ -365,13 +386,31 @@ public class FileConnectorType implements ConnectorType {
 						ISearch search = session.getSearch();
 						search.execute(deleteuery.toString());
 					}
-				} catch (Exception e) {
-					LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-					this.validation = DELETEWHERECLAUSE;
-					form = makeConfigForm(configData, this.validation);
-					return new ConfigureResponse(
-					        resource.getString("delete_additional_where_clause_invalid"),
-					        form);
+				} catch (RepositoryException e) {
+					if (e.getCause().toString().trim().contains(ACCESS_DENIED_EXCEPTION)) {
+						LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+						this.validation = OBJECT_STORE;
+						form = makeConfigForm(configData, this.validation);
+
+						return new ConfigureResponse(
+						        resource.getString("object_store_access_error"),
+						        form);
+					} else if (e.getCause().toString().trim().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
+						LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+						this.validation = DELETEWHERECLAUSE;
+						form = makeConfigForm(configData, this.validation);
+
+						return new ConfigureResponse(
+						        resource.getString("delete_additional_where_clause_invalid"),
+						        form);
+					} else {
+						LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+						this.validation = "FileNet exception";
+						form = makeConfigForm(configData, this.validation);
+
+						return new ConfigureResponse(e.getLocalizedMessage(),
+						        form);
+					}
 				}
 
 				if (!((String) configData.get(WHERECLAUSE)).trim().equalsIgnoreCase("")
