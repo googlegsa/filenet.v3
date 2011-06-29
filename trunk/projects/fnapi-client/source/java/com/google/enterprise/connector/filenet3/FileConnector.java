@@ -37,31 +37,51 @@ public class FileConnector implements Connector {
 
 	private String is_public = "false";
 
+	private String useIDForChangeDetection = "false";
+
 	private String authentication_type;
 
 	private String additional_where_clause;
+
+	private String additional_delete_where_clause;
 
 	private HashSet included_meta;
 
 	private HashSet excluded_meta;
 
-	private static Logger logger = null;
+	private static Logger LOGGER = Logger.getLogger(FileConnectorType.class.getName());
 
-	static {
-		logger = Logger.getLogger(FileConnectorType.class.getName());
+	public String getUseIDForChangeDetection() {
+		return useIDForChangeDetection;
 	}
+
+	public void setUseIDForChangeDetection(String useIDForChangeDetection) {
+		this.useIDForChangeDetection = useIDForChangeDetection;
+	}
+
+	/**
+	 * login method is to create a new instance of a connector by instantiating
+	 * the Connector interface. It starts access to managers for authentication,
+	 * authorization, and traversal and returns a Session object that passes
+	 * data and objects between the connector manager and a connector.
+	 * 
+	 * @param Username which needs to be authorized.
+	 * @return com.google.enterprise.connector.spi.Session;
+	 */
 
 	public Session login() throws RepositoryException {
 		Session sess = null;
 		if (!(object_factory == null || username == null || password == null
 				|| object_store == null || workplace_display_url == null)) {
 
-			logger.info("creating FileNet session");
+			LOGGER.info("creating FileNet session");
 			sess = new FileSession(object_factory, username, password,
 					object_store, path_to_WcmApiConfig, workplace_display_url,
-					is_public.equals("on"), additional_where_clause,
+					is_public.equals("true"),
+					useIDForChangeDetection.equals("true"),
+					additional_where_clause, additional_delete_where_clause,
 					included_meta, excluded_meta);
-			logger.info("FileNet Seesion creation succeeded");
+			LOGGER.info("FileNet Seesion creation succeeded");
 		}
 		return sess;
 
@@ -73,7 +93,7 @@ public class FileConnector implements Connector {
 
 	public void setUsername(String refUsername) {
 		this.username = refUsername;
-		logger.log(Level.CONFIG, "Set login to " + refUsername);
+		LOGGER.log(Level.CONFIG, "Set login to " + refUsername);
 	}
 
 	public String getPassword() {
@@ -82,7 +102,7 @@ public class FileConnector implements Connector {
 
 	public void setPassword(String refPassword) {
 		this.password = refPassword;
-		logger.log(Level.CONFIG, "Set password");
+		LOGGER.log(Level.CONFIG, "Set password");
 	}
 
 	public String getObject_factory() {
@@ -91,7 +111,7 @@ public class FileConnector implements Connector {
 
 	public void setObject_factory(String objectFactory) {
 		this.object_factory = objectFactory;
-		logger.log(Level.CONFIG, "Set ObjectFactory to " + objectFactory);
+		LOGGER.log(Level.CONFIG, "Set ObjectFactory to " + objectFactory);
 	}
 
 	public String getObject_store() {
@@ -100,7 +120,7 @@ public class FileConnector implements Connector {
 
 	public void setObject_store(String objectStoreName) {
 		this.object_store = objectStoreName;
-		logger.log(Level.CONFIG, "Set Object Store to " + object_store);
+		LOGGER.log(Level.CONFIG, "Set Object Store to " + object_store);
 	}
 
 	public String getPath_to_WcmApiConfig() {
@@ -109,7 +129,7 @@ public class FileConnector implements Connector {
 
 	public void setPath_to_WcmApiConfig(String pathToWcmApiConfig) {
 		this.path_to_WcmApiConfig = pathToWcmApiConfig;
-		logger.log(Level.CONFIG, "Set path_to_WcmApiConfig to "
+		LOGGER.log(Level.CONFIG, "Set path_to_WcmApiConfig to "
 				+ path_to_WcmApiConfig);
 	}
 
@@ -119,7 +139,7 @@ public class FileConnector implements Connector {
 
 	public void setWorkplace_display_url(String displayUrl) {
 		this.workplace_display_url = displayUrl;
-		logger.log(Level.CONFIG, "Set workplace_display_url to "
+		LOGGER.log(Level.CONFIG, "Set workplace_display_url to "
 				+ workplace_display_url);
 	}
 
@@ -129,7 +149,7 @@ public class FileConnector implements Connector {
 
 	public void setIs_public(String isPublic) {
 		this.is_public = isPublic;
-		logger.log(Level.CONFIG, "Set is_public to " + is_public);
+		LOGGER.log(Level.CONFIG, "Set is_public to " + is_public);
 	}
 
 	public String getAdditional_where_clause() {
@@ -138,8 +158,17 @@ public class FileConnector implements Connector {
 
 	public void setAdditional_where_clause(String additionalWhereClause) {
 		this.additional_where_clause = additionalWhereClause;
-		logger.log(Level.CONFIG, "Set additional_where_clause to "
+		LOGGER.log(Level.CONFIG, "Set additional_where_clause to "
 				+ additional_where_clause);
+	}
+
+	public String getAdditional_delete_where_clause() {
+		return additional_delete_where_clause;
+	}
+
+	public void setAdditional_delete_where_clause(
+			String additionalDeleteWhereClause) {
+		additional_delete_where_clause = additionalDeleteWhereClause;
 	}
 
 	public String getAuthentication_type() {
@@ -148,7 +177,7 @@ public class FileConnector implements Connector {
 
 	public void setAuthentication_type(String authenticationType) {
 		this.authentication_type = authenticationType;
-		logger.log(Level.CONFIG, "Set authentication_type to "
+		LOGGER.log(Level.CONFIG, "Set authentication_type to "
 				+ authentication_type);
 	}
 
@@ -158,7 +187,7 @@ public class FileConnector implements Connector {
 
 	public void setExcluded_meta(HashSet excluded_meta) {
 		this.excluded_meta = excluded_meta;
-		logger.log(Level.CONFIG, "Set excluded_meta to " + excluded_meta);
+		LOGGER.log(Level.CONFIG, "Set excluded_meta to " + excluded_meta);
 	}
 
 	public HashSet getIncluded_meta() {
@@ -167,7 +196,7 @@ public class FileConnector implements Connector {
 
 	public void setIncluded_meta(HashSet included_meta) {
 		this.included_meta = included_meta;
-		logger.log(Level.CONFIG, "Set included_meta to " + included_meta);
+		LOGGER.log(Level.CONFIG, "Set included_meta to " + included_meta);
 	}
 
 }

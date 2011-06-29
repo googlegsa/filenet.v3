@@ -1,24 +1,21 @@
 package com.google.enterprise.connector.filenet3.filejavawrap;
 
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.filenet.wcm.api.PropertyNotFoundException;
-import com.filenet.wcm.api.VersionSeries;
 import com.google.enterprise.connector.filenet3.filewrap.IDocument;
 import com.google.enterprise.connector.filenet3.filewrap.IProperties;
 import com.google.enterprise.connector.filenet3.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
+
+import com.filenet.wcm.api.PropertyNotFoundException;
+import com.filenet.wcm.api.VersionSeries;
+
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FnVersionSeries implements IVersionSeries {
 
 	private VersionSeries versionSeries;
-	private static Logger logger = null;
-	{
-		logger = Logger.getLogger(FnDocument.class.getName());
-	}
+	private static Logger LOGGER = Logger.getLogger(FnDocument.class.getName());
 
 	public FnVersionSeries(VersionSeries refVersionSeries) {
 		this.versionSeries = refVersionSeries;
@@ -33,10 +30,10 @@ public class FnVersionSeries implements IVersionSeries {
 		try {
 			return new FnProperties(this.versionSeries.getProperties());
 		} catch (NullPointerException e) {
-			logger.log(Level.WARNING, "versionSeries is null");
+			LOGGER.log(Level.WARNING, "versionSeries is null");
 			throw new RepositoryDocumentException(e);
-		}catch (PropertyNotFoundException e) {
-			logger.log(Level.WARNING, "Error while trying to get the properties of the file "
+		} catch (PropertyNotFoundException e) {
+			LOGGER.log(Level.WARNING, "Error while trying to get the properties of the file "
 					+ e.getLocalizedMessage());
 			throw new RepositoryDocumentException(e);
 		}
@@ -54,17 +51,18 @@ public class FnVersionSeries implements IVersionSeries {
 			throws RepositoryDocumentException {
 		try {
 			return this.versionSeries.getPropertyStringValue(name);
-		}  catch (NullPointerException e) {
-			logger.log(Level.WARNING, "versionSeries is null");
+		} catch (NullPointerException e) {
+			LOGGER.log(Level.WARNING, "versionSeries is null");
 			throw new RepositoryDocumentException(e);
-		}catch (PropertyNotFoundException e) {
-			logger.log(Level.WARNING, "Error while trying to get the properties of the file "
+		} catch (PropertyNotFoundException e) {
+			LOGGER.log(Level.WARNING, "Error while trying to get the properties of the file "
 					+ e.getLocalizedMessage());
 			throw new RepositoryDocumentException(e);
 		}
 	}
 
-	public long getPropertyLongValue(String name) throws RepositoryDocumentException {
+	public long getPropertyLongValue(String name)
+			throws RepositoryDocumentException {
 		return 0;
 	}
 
@@ -73,7 +71,8 @@ public class FnVersionSeries implements IVersionSeries {
 		return 0;
 	}
 
-	public Date getPropertyDateValue(String name) throws RepositoryDocumentException {
+	public Date getPropertyDateValue(String name)
+			throws RepositoryDocumentException {
 		return null;
 	}
 
@@ -86,6 +85,5 @@ public class FnVersionSeries implements IVersionSeries {
 			throws RepositoryDocumentException {
 		return null;
 	}
-
 
 }
