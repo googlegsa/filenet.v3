@@ -14,7 +14,7 @@ public class FileDateValue extends ValueImpl {
 
 	Calendar calendarValue;
 
-	private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
+	private static Logger LOGGER = Logger.getLogger(FileDocumentList.class.getName());
 
 	public FileDateValue(Calendar calendarValue) {
 
@@ -30,7 +30,7 @@ public class FileDateValue extends ValueImpl {
 	}
 
 	public String toIso8601() {
-		logger.info("toIso8601 calendarValue : " + calendarValue);
+		LOGGER.info("toIso8601 calendarValue : " + calendarValue);
 		return FileDateValue.calendarToIso8601(calendarValue);
 	}
 
@@ -60,10 +60,10 @@ public class FileDateValue extends ValueImpl {
 			d = ISO8601_DATE_FORMAT_SECS.parse(s);
 			return d;
 		} catch (ParseException e) {
-			logger.log(Level.WARNING, "Unable to parse date in milli-second format yyyy-MM-dd'T'HH:mm:ss.SSSZ. Trying to parse in second format yyyy-MM-dd'T'HH:mm:ssZ");
+			LOGGER.log(Level.WARNING, "Unable to parse date in milli-second format yyyy-MM-dd'T'HH:mm:ss.SSSZ. Trying to parse in second format yyyy-MM-dd'T'HH:mm:ssZ");
 		}
 		d = ISO8601_DATE_FORMAT_MILLIS.parse(s);
-		logger.info("WARNING : Date with milliseconds");
+		LOGGER.info("WARNING : Date with milliseconds");
 		return d;
 	}
 
