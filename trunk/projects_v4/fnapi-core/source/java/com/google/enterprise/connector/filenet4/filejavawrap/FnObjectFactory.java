@@ -13,17 +13,6 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.security.auth.Subject;
-
-import com.filenet.api.core.Connection;
-import com.filenet.api.core.Domain;
-import com.filenet.api.core.Factory;
-import com.filenet.api.core.ObjectStore;
-import com.filenet.api.query.SearchScope;
-import com.filenet.api.util.UserContext;
 import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
@@ -32,53 +21,67 @@ import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
+import com.filenet.api.core.Connection;
+import com.filenet.api.core.Domain;
+import com.filenet.api.core.Factory;
+import com.filenet.api.core.ObjectStore;
+import com.filenet.api.query.SearchScope;
+import com.filenet.api.util.UserContext;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.security.auth.Subject;
+
 /**
- *FileNet object factory. 
+ *FileNet object factory.
  **/
 public class FnObjectFactory implements IObjectFactory {
 	private static Logger logger = null;
-	
+
 	static {
 		logger = Logger.getLogger(FnObjectFactory.class.getName());
-}
-	
+	}
+
 	public FnObjectFactory() {
 		super();
 	}
 
 	public IConnection getConnection(String contentEngineUri)
-			throws RepositoryException {
+	        throws RepositoryException {
 		return new FnConnection(contentEngineUri);
 	}
 
 	public IObjectStore getObjectStore(String objectStoreName,
-			IConnection conn, String userName, String userPassword)
-			throws RepositoryException, RepositoryLoginException {
+	        IConnection conn, String userName, String userPassword)
+	        throws RepositoryException, RepositoryLoginException {
 
 		Domain domain = null;
 		UserContext uc = null;
-		try{
+		try {
 			logger.info("getting the instance of domain from connection");
 			domain = Factory.Domain.getInstance((Connection) conn.getConnection(), null);
-			
+
 			logger.info("getting the usercontext..");
 			uc = UserContext.get();
-		}catch(Throwable e){
-			logger.log(Level.SEVERE,"Unable to get domain or usercontext",e);
+		} catch (Throwable e) {
+			logger.log(Level.SEVERE, "Unable to get domain or usercontext", e);
 			throw new RepositoryLoginException(e);
 		}
-		
-		ObjectStore os=null;
+
+		ObjectStore os = null;
 		try {
 			os = getRawObjectStore(userName, userPassword, conn, domain, objectStoreName, uc);
 		} catch (Throwable e) {
-			logger.log(Level.WARNING,"Unable to conenct to the Object Store with user: "+ userName);
+			logger.log(Level.WARNING, "Unable to connect to the Object Store with user: "
+			        + userName);
 			String shortName = FileUtil.getShortName(userName);
-			logger.log(Level.INFO,"Trying to connect Object Store with user: "+ shortName+ " in short name format.");
-			try{
+			logger.log(Level.INFO, "Trying to connect Object Store with user: "
+			        + shortName + " in short name format.");
+			try {
 				os = getRawObjectStore(shortName, userPassword, conn, domain, objectStoreName, uc);
-			}catch(Throwable th){
-				logger.log(Level.SEVERE,"Problems while connecting to FileNet object store. Got Exception: ",th);
+			} catch (Throwable th) {
+				logger.log(Level.SEVERE, "Problems while connecting to FileNet object store. Got Exception: ", th);
 				throw new RepositoryLoginException(e);
 			}
 		}
@@ -86,18 +89,20 @@ public class FnObjectFactory implements IObjectFactory {
 	}
 
 	public ISearch getSearch(IObjectStore objectStore)
-			throws RepositoryException {
+	        throws RepositoryException {
 		SearchScope search = new SearchScope(objectStore.getObjectStore());
 
 		return new FnSearch(search);
 	}
 
-	private ObjectStore getRawObjectStore(String userName, String userPassword, IConnection conn, Domain domain, String objectStoreName, UserContext uc) throws RepositoryException{
-		logger.info("creating the subject for user: "+userName);
+	private ObjectStore getRawObjectStore(String userName, String userPassword,
+	        IConnection conn, Domain domain, String objectStoreName,
+	        UserContext uc) throws RepositoryException {
+		logger.info("creating the subject for user: " + userName);
 		Subject s = UserContext.createSubject((Connection) conn.getConnection(), userName, userPassword, "FileNetP8");
 		uc.pushSubject(s);
 		logger.info("Creating the FileNet object store instance..");
-		ObjectStore os = Factory.ObjectStore.fetchInstance(domain,objectStoreName, null);
+		ObjectStore os = Factory.ObjectStore.fetchInstance(domain, objectStoreName, null);
 		os.refresh();
 		logger.config("Connection to FileNet ObjectStore is successful...");
 		return os;

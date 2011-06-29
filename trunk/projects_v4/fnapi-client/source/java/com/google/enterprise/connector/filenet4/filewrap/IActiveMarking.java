@@ -15,15 +15,12 @@
 package com.google.enterprise.connector.filenet4.filewrap;
 
 /**
- * This interface is responsible to authorize a target user against all the
- * Access Control Entries of a target document for ACL Security policies, and
- * Marking set USE rigths.
+ * ActiveMarking interface with the functionality to authorize the Document for
+ * specific marking value.
  * 
  * @author Dhanashri_Deshpande
  */
-public interface IPermissions {
+public interface IActiveMarking {
 
 	public boolean authorize(String Username);
-
-	public boolean authorizeMarking(String Username);
 }
