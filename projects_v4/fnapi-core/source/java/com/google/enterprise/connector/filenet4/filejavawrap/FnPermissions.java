@@ -79,24 +79,24 @@ public class FnPermissions implements IPermissions {
 				granteeName = perm.get_GranteeName();
 				if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
 					LOGGER.log(Level.INFO, "Grantee Name is [" + granteeName
-							+ "] is of type USER");
+					        + "] is of type USER");
 					// compare username with complete granteeName or shortName
 					// of the grantee
 					if ((granteeName.equalsIgnoreCase(username)
-							|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username) || FileUtil.getShortName(granteeName).equalsIgnoreCase(username))) {
+					        || granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username) || FileUtil.getShortName(granteeName).equalsIgnoreCase(username))) {
 						LOGGER.log(Level.INFO, "Authorization for user: ["
-								+ username + "] is Successful");
+						        + username + "] is Successful");
 						return true;
 					} else {
-						LOGGER.log(Level.FINER, "Grantee Name ["
-								+ granteeName
-								+ "] does not match with search user ["
-								+ username
-								+ "]. Authorization will continue with the next Grantee Name");
+						LOGGER.log(Level.INFO, "Grantee Name ["
+						        + granteeName
+						        + "] does not match with search user ["
+						        + username
+						        + "]. Authorization will continue with the next Grantee Name");
 					}
 				} else if (perm.get_GranteeType() == SecurityPrincipalType.GROUP) { // GROUP
 					LOGGER.log(Level.INFO, "Grantee Name [" + granteeName
-							+ "] is of type GROUP");
+					        + "] is of type GROUP");
 					if (granteeName.equalsIgnoreCase(AUTHENTICATED_USERS)) {
 						// #AUTHENTICATED-USERS is a logical group in FileNet P8
 						// Systems, which gets automatically
@@ -110,7 +110,7 @@ public class FnPermissions implements IPermissions {
 						// document contains #AUTHENTICATED-USERS
 						// group in its ACL or ACE.
 						LOGGER.log(Level.INFO, "Authorization for user: ["
-								+ username + "] is Successful");
+						        + username + "] is Successful");
 						return true;
 					} else {
 						Connection conn = perm.getConnection();
@@ -120,12 +120,12 @@ public class FnPermissions implements IPermissions {
 							found = searchUserInGroup(username, group);
 							if (found) {
 								LOGGER.log(Level.INFO, "Authorization for user: ["
-										+ username + "] is Successful");
+								        + username + "] is Successful");
 								return true;
 							}
 						} catch (Exception e) {
 							LOGGER.log(Level.WARNING, "Skipping Group ["
-									+ granteeName + "], as it is not found.", e);
+							        + granteeName + "], as it is not found.", e);
 						}
 					}
 				}
@@ -135,14 +135,14 @@ public class FnPermissions implements IPermissions {
 			// If the document have no view content or more Access Security
 			// Level to any user
 			LOGGER.log(Level.WARNING, "Authorization for user: ["
-					+ username
-					+ "] FAILED due to insufficient Access Security Levels. Minimum expected Access Security Level is \"View Content\"");
+			        + username
+			        + "] FAILED due to insufficient Access Security Levels. Minimum expected Access Security Level is \"View Content\"");
 		} else {
 			LOGGER.log(Level.WARNING, "Authorization for user: ["
-					+ username
-					+ "] FAILED. Probable reason: ["
-					+ username
-					+ "] does not have sufficient security access rights and hence not listed as one of authorized users");
+			        + username
+			        + "] FAILED. Probable reason: ["
+			        + username
+			        + "] does not have sufficient security access rights and hence not listed as one of authorized users");
 		}
 		return false;
 	}
@@ -164,21 +164,21 @@ public class FnPermissions implements IPermissions {
 		boolean hasUseRights = false;
 
 		LOGGER.log(Level.FINE, "Checking user : [" + username
-				+ "] For USE right over the Document");
+		        + "] For USE right over the Document");
 
 		while (iter.hasNext()) {
 			AccessPermission perm = (AccessPermission) iter.next();
 
-			LOGGER.log(Level.FINE, "Checking user : [" + username
-					+ "] For USE right over the Document with new Grantee");
+			LOGGER.log(Level.INFO, "Checking user : [" + username
+			        + "] For USE right over the Document with new Grantee");
 
 			if (checkGranteeName(perm, username)) {
 
 				LOGGER.log(Level.FINEST, "Access Type is:["
-						+ perm.get_AccessType() + "]");
+				        + perm.get_AccessType() + "]");
 
 				LOGGER.log(Level.FINEST, "Access Mask is:["
-						+ perm.get_AccessMask() + "]");
+				        + perm.get_AccessMask() + "]");
 
 				if (perm.get_AccessType().equals(AccessType.ALLOW)) {
 					// Check whether the search user has USE Right over the
@@ -190,12 +190,12 @@ public class FnPermissions implements IPermissions {
 						return true;
 					} else {
 						LOGGER.log(Level.FINE, " User: [" + username
-								+ "] does not have USE right over the document");
+						        + "] does not have USE right over the document");
 						hasUseRights = false;
 					}
 				} else {
 					LOGGER.log(Level.FINE, " User: [" + username
-							+ "] does not have USE right over the document");
+					        + "] does not have USE right over the document");
 					hasUseRights = false;
 				}
 			}
@@ -205,12 +205,12 @@ public class FnPermissions implements IPermissions {
 		}
 
 		if (hasUseRights == true) {
-			LOGGER.log(Level.FINE, " User: [" + username
-					+ "] has USE right over the document ");
+			LOGGER.log(Level.INFO, " User: [" + username
+			        + "] has USE right over the document ");
 			return true;
 		} else {
-			LOGGER.log(Level.FINE, " User: [" + username
-					+ "] does not have USE right over the document");
+			LOGGER.log(Level.WARNING, " User: [" + username
+			        + "] does not have USE right over the document");
 			return false;
 		}
 
@@ -231,23 +231,23 @@ public class FnPermissions implements IPermissions {
 		String granteeName = perm.get_GranteeName();
 		boolean found = false;
 
-		LOGGER.log(Level.FINE, "Matching the Grantee Name [" + granteeName
-				+ "] with search USER : [" + username + "]");
+		LOGGER.log(Level.INFO, "Matching the Grantee Name [" + granteeName
+		        + "] with search USER : [" + username + "]");
 
 		// check the type of the Grantee (USER or GROUP) for the given
 		// permission
 
 		if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
 			LOGGER.log(Level.FINE, "Grantee Name is [" + granteeName
-					+ "] is of type USER");
+			        + "] is of type USER");
 
 			// Match the full Grantee Name and search user name.
 
 			if (granteeName.equalsIgnoreCase(username)
-					|| granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
-					|| FileUtil.getShortName(granteeName).equalsIgnoreCase(username)) {
-				LOGGER.log(Level.FINE, "Grantee Name [" + granteeName
-						+ "] matches with search USER [" + username + "]");
+			        || granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
+			        || FileUtil.getShortName(granteeName).equalsIgnoreCase(username)) {
+				LOGGER.log(Level.INFO, "Grantee Name [" + granteeName
+				        + "] matches with search USER [" + username + "]");
 
 				return true;
 			} else if (getShortName(granteeName).equalsIgnoreCase(username)) {// Match
@@ -258,29 +258,29 @@ public class FnPermissions implements IPermissions {
 				// and
 				// search
 				// username.
-				LOGGER.log(Level.FINE, "Grantee Name ["
-						+ getShortName(granteeName)
-						+ "] matches with search USER [" + username + "]");
+				LOGGER.log(Level.INFO, "Grantee Name ["
+				        + getShortName(granteeName)
+				        + "] matches with search USER [" + username + "]");
 
 				return true;
 			} else {
-				LOGGER.log(Level.FINE, "Grantee Name ["
-						+ granteeName
-						+ "] does not match with search user ["
-						+ username
-						+ "]. Checking will continue with the next Grantee Name");
+				LOGGER.log(Level.WARNING, "Grantee Name ["
+				        + granteeName
+				        + "] does not match with search user ["
+				        + username
+				        + "]. Checking will continue with the next Grantee Name");
 			}
 		} else if (perm.get_GranteeType() == SecurityPrincipalType.GROUP) { // GROUP
 			LOGGER.log(Level.FINE, "Grantee Name [" + granteeName
-					+ "] is of type GROUP");
+			        + "] is of type GROUP");
 
 			// Check whether the search user is member of #AUTHENTICATED-USERS
 			// Group. If not then search username in the group.
 
 			if (granteeName.equalsIgnoreCase(AUTHENTICATED_USERS)) {
 
-				LOGGER.log(Level.FINE, "Grantee Name [" + granteeName
-						+ "] contains search USER [" + username + "]");
+				LOGGER.log(Level.INFO, "Grantee [" + granteeName
+				        + "] contains search USER [" + username + "]");
 				return true;
 
 			} else {
@@ -290,13 +290,13 @@ public class FnPermissions implements IPermissions {
 					group = com.filenet.api.core.Factory.Group.fetchInstance(conn, perm.get_GranteeName(), null);
 					found = searchUserInGroup(username, group);
 					if (found) {
-						LOGGER.log(Level.FINE, "Grantee Name [" + granteeName
-								+ "] contains search USER [" + username + "]");
+						LOGGER.log(Level.INFO, "Grantee [" + granteeName
+						        + "] contains search USER [" + username + "]");
 						return true;
 					}
 				} catch (Exception e) {
 					LOGGER.log(Level.FINE, "Skipping Group [" + granteeName
-							+ "], as it is not found." + e.getMessage());
+					        + "], as it is not found." + e.getMessage());
 				}
 			}
 		}
@@ -321,12 +321,12 @@ public class FnPermissions implements IPermissions {
 				if (null != mytok1) {
 					// filter for the shortened name
 					StringTokenizer innerToken = new StringTokenizer(mytok1,
-							"=");
+					        "=");
 					if ((null != innerToken) && (innerToken.countTokens() == 2)) {
 						String key = innerToken.nextToken();
 						if (null != key) {
 							if ((key.equalsIgnoreCase("cn"))
-									|| (key.equalsIgnoreCase("uid"))) {
+							        || (key.equalsIgnoreCase("uid"))) {
 								shortUserName = innerToken.nextToken();
 								break;
 							}
@@ -354,15 +354,15 @@ public class FnPermissions implements IPermissions {
 		while (itUser.hasNext()) {
 			user = (User) itUser.next();
 			LOGGER.log(Level.FINER, "Searching the USER [" + user.get_Name()
-					+ "][" + user.get_Email() + "] in GROUP ["
-					+ group.get_Name() + "]");
+			        + "][" + user.get_Email() + "] in GROUP ["
+			        + group.get_Name() + "]");
 
 			if (user.get_Name().equalsIgnoreCase(username)
-					|| user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
-					|| FileUtil.getShortName(user.get_Name()).equalsIgnoreCase(username)
-					|| user.get_ShortName().equalsIgnoreCase(username)) {
+			        || user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
+			        || FileUtil.getShortName(user.get_Name()).equalsIgnoreCase(username)
+			        || user.get_ShortName().equalsIgnoreCase(username)) {
 				LOGGER.log(Level.FINE, "Search USER [" + username
-						+ "] found in GROUP [" + group.get_Name() + "]");
+				        + "] found in GROUP [" + group.get_Name() + "]");
 				return true;
 			}
 		}
