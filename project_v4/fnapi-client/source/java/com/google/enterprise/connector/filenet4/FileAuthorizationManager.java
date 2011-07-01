@@ -38,7 +38,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 	}
 
 	public FileAuthorizationManager(IConnection conn, IObjectStore objectStore,
-			boolean checkMarkings) {
+	        boolean checkMarkings) {
 		this.conn = conn;
 		this.objectStore = objectStore;
 		this.checkMarkings = checkMarkings;
@@ -59,7 +59,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 	 */
 
 	public Collection authorizeDocids(Collection docids,
-			AuthenticationIdentity identity) throws RepositoryException {
+	        AuthenticationIdentity identity) throws RepositoryException {
 
 		if (null == docids) {
 			logger.severe("Got null docids for authZ .. returning null");
@@ -87,7 +87,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 				if (propertyDefinition instanceof PropertyDefinitionString) {
 					MarkingSet markingSet = ((PropertyDefinitionString) propertyDefinition).get_MarkingSet();
 					if (markingSet != null) {
-						logger.log(Level.INFO, "Document class has properties associated with Markings set");
+						logger.log(Level.INFO, "Document class has property associated with Markings set");
 						hasMarkings = true;
 						break;
 					}
@@ -113,42 +113,42 @@ public class FileAuthorizationManager implements AuthorizationManager {
 			String docId = (String) docidList.get(i);
 			try {
 				logger.config("Getting version series for document DocID: "
-						+ docId);
+				        + docId);
 				versionSeries = (IVersionSeries) objectStore.getObject(ClassNames.VERSION_SERIES, URLDecoder.decode(docId, "UTF-8"));
 			} catch (UnsupportedEncodingException e) {
-				logger.log(Level.WARNING, "Unable to Decode: Encoding is not supported for the document with ID: "
-						+ docId);
+				logger.log(Level.WARNING, "Unable to Decode: Encoding is not supported for the document with DocID: "
+				        + docId);
 				versionSeries = null;
 			} catch (RepositoryException e) {
 				logger.log(Level.WARNING, "Error : document Version Series Id "
-						+ docId + " may no longer exist. Message: "
-						+ e.getLocalizedMessage());
+				        + docId + " may no longer exist. Message: "
+				        + e.getLocalizedMessage());
 				versionSeries = null;
 			}
 
 			if (versionSeries != null) {
 				logger.config("Authorizing DocID: " + docId + " for user: "
-						+ identity.getUsername());
+				        + identity.getUsername());
 				// Check whether the search user is authorized to view document
 				// contents or
 				// not.
 				if (versionSeries.getReleasedVersion().getPermissions().authorize(identity.getUsername())) {
 					logger.log(Level.INFO, "As per the ACLS User "
-							+ identity.getUsername()
-							+ " is authorized for document Id" + docId);
+					        + identity.getUsername()
+					        + " is authorized for document DocID " + docId);
 					authorizationResponse = new AuthorizationResponse(true,
-							docId);
+					        docId);
 
 					if (this.checkMarkings) {
 						logger.log(Level.INFO, "Authorizing DocID: " + docId
-								+ " for user: " + identity.getUsername()
-								+ " for Marking sets ");
+						        + " for user: " + identity.getUsername()
+						        + " for Marking sets ");
 
 						// check whether current document has property values
 						// set for properties associated with marking sets or
 						// not //
 						if (versionSeries.getReleasedVersion().getActiveMarkings() != null) {
-							logger.log(Level.INFO, "Document has properties associated with Markings set");
+							logger.log(Level.INFO, "Document has property associated with Markings set");
 
 							// check whether USER is authorized to view the
 							// document as per the Marking set security applied
@@ -156,48 +156,49 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
 							if (versionSeries.getReleasedVersion().getActiveMarkings().authorize(identity.getUsername())) {
 								logger.log(Level.INFO, "As per the Marking Sets User "
-										+ identity.getUsername()
-										+ " is authorized for document Id "
-										+ docId);
+								        + identity.getUsername()
+								        + " is authorized for document DocID "
+								        + docId);
 								authorizationResponse = new AuthorizationResponse(
-										true, docId);
+								        true, docId);
 							} else {
 								logger.log(Level.INFO, "As per the Marking Sets User "
-										+ identity.getUsername()
-										+ " is NOT authorized for document Id "
-										+ docId);
+								        + identity.getUsername()
+								        + " is NOT authorized for document DocID "
+								        + docId);
 								authorizationResponse = new AuthorizationResponse(
-										false, docId);
+								        false, docId);
 							}
 
 						} else {
-							logger.log(Level.INFO, "Document does not have properties associated with Marking Sets "
-									+ docId);
+							logger.log(Level.INFO, "Document does not have property associated with Marking Sets "
+							        + docId);
 							logger.log(Level.INFO, "User "
-									+ identity.getUsername()
-									+ " is authorized for document Id " + docId);
+							        + identity.getUsername()
+							        + " is authorized for document DocID "
+							        + docId);
 							authorizationResponse = new AuthorizationResponse(
-									true, docId);
+							        true, docId);
 						}
 					} else {
-						logger.log(Level.INFO, "Either Document class does not have properties associated with Markings set or Connetcor is not configurd to check Marking sets ");
+						logger.log(Level.INFO, "Either Document class does not have property associated with Markings set or Connetcor is not configurd to check Marking sets ");
 						logger.log(Level.INFO, "User " + identity.getUsername()
-								+ " is authorized for document Id " + docId);
+						        + " is authorized for document DocID " + docId);
 						authorizationResponse = new AuthorizationResponse(true,
-								docId);
+						        docId);
 					}
 				} else {
 					authorizationResponse = new AuthorizationResponse(false,
-							docId);
+					        docId);
 					logger.log(Level.INFO, "As per the ACLS User "
-							+ identity.getUsername()
-							+ " is NOT authorized for document Id " + docId);
+					        + identity.getUsername()
+					        + " is NOT authorized for document DocID " + docId);
 				}
 			} else {
 				authorizationResponse = new AuthorizationResponse(false, docId);
 				logger.log(Level.INFO, "User " + identity.getUsername()
-						+ " is NOT authorized for document Id " + docId
-						+ "version series null");
+				        + " is NOT authorized for document DocID " + docId
+				        + "version series null");
 			}
 			authorizeDocids.add(authorizationResponse);
 		}
@@ -205,7 +206,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 	}
 
 	public List authorizeTokens(List tokenList, String username)
-			throws RepositoryException {
+	        throws RepositoryException {
 
 		return null;
 	}

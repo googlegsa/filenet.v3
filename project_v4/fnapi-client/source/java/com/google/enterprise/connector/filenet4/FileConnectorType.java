@@ -159,7 +159,7 @@ public class FileConnectorType implements ConnectorType {
 	public ConfigureResponse getConfigForm(Locale language) {
 
 		try {
-			LOGGER.info("language used " + language.getLanguage());
+			LOGGER.info("Language used " + language.getLanguage());
 			resource = ResourceBundle.getBundle(LOCALE_FILE, language);
 		} catch (MissingResourceException e) {
 			resource = ResourceBundle.getBundle(LOCALE_FILE);

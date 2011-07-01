@@ -54,21 +54,21 @@ public class FnActiveMarkingList implements IActiveMarkingList {
 
 		while (markings.hasNext()) {
 			LOGGER.log(Level.INFO, "Authorizing user :[" + username
-					+ "] for Marking Sets ");
+			        + "] for Marking Sets ");
 
 			ActiveMarking marking = markings.next();
 			FnActiveMarking currentMarking = new FnActiveMarking(marking);
 
 			if (!(currentMarking.authorize(username))) {
 				LOGGER.log(Level.INFO, "User "
-						+ username
-						+ " is not authorized for Marking value : "
-						+ currentMarking.getActiveMarking().get_Marking().get_MarkingValue());
+				        + username
+				        + " is not authorized for Marking value : "
+				        + currentMarking.getActiveMarking().get_Marking().get_MarkingValue());
 				return false;
 			}
 		}
 		LOGGER.log(Level.INFO, "User " + username
-				+ " is authorized with all Marking Sets ");
+		        + " is authorized to view the document ");
 		return true;
 	}
 }

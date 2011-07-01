@@ -45,7 +45,7 @@ public class FileConnector implements Connector {
 		URL conf = FileConnector.class.getResource("/jaas.conf");
 		if (conf != null) {
 			LOGGER.info("setting sytem property java.security.auth.login.config to "
-					+ conf.getPath());
+			        + conf.getPath());
 			// System.setProperty("java.security.auth.login.config",
 			// conf.getPath());
 		} else {
@@ -59,15 +59,15 @@ public class FileConnector implements Connector {
 
 		Session sess = null;
 		if (!(object_factory == null || username == null || password == null
-				|| object_store == null || workplace_display_url == null || content_engine_url == null)) {
+		        || object_store == null || workplace_display_url == null || content_engine_url == null)) {
 
 			LOGGER.info("Creating fileSession object...");
 			sess = new FileSession(object_factory, username, password,
-					object_store, workplace_display_url, content_engine_url,
-					is_public.equals("true"), check_marking.equals("on"),
-					useIDForChangeDetection.equals("true"),
-					additional_where_clause, delete_additional_where_clause,
-					included_meta, excluded_meta, db_timezone);
+			        object_store, workplace_display_url, content_engine_url,
+			        is_public.equals("true"), check_marking.equals("on"),
+			        useIDForChangeDetection.equals("true"),
+			        additional_where_clause, delete_additional_where_clause,
+			        included_meta, excluded_meta, db_timezone);
 		}
 		return sess;
 
@@ -107,7 +107,7 @@ public class FileConnector implements Connector {
 	public void setWorkplace_display_url(String displayUrl) {
 		this.workplace_display_url = displayUrl;
 		LOGGER.config("Set Workplace Display URL to "
-				+ this.workplace_display_url);
+		        + this.workplace_display_url);
 	}
 
 	public String getIs_public() {
@@ -135,7 +135,7 @@ public class FileConnector implements Connector {
 	public void setAdditional_where_clause(String additionalWhereClause) {
 		this.additional_where_clause = additionalWhereClause;
 		LOGGER.config("Set Additional Where Clause to "
-				+ this.additional_where_clause);
+		        + this.additional_where_clause);
 	}
 
 	public String getDelete_additional_where_clause() {
@@ -143,10 +143,10 @@ public class FileConnector implements Connector {
 	}
 
 	public void setDelete_additional_where_clause(
-			String deleteadditionalWhereClause) {
+	        String deleteadditionalWhereClause) {
 		this.delete_additional_where_clause = deleteadditionalWhereClause;
-		LOGGER.config("Set Additional Where Clause for DELETE to "
-				+ this.delete_additional_where_clause);
+		LOGGER.config("Set Additional DELETE Clause to "
+		        + this.delete_additional_where_clause);
 	}
 
 	public HashSet getExcluded_meta() {
@@ -191,6 +191,8 @@ public class FileConnector implements Connector {
 
 	public void setUseIDForChangeDetection(String useIDForChangeDetection) {
 		this.useIDForChangeDetection = useIDForChangeDetection;
+		LOGGER.config("Set useIDForChangeDetection to "
+		        + this.useIDForChangeDetection);
 	}
 
 }
