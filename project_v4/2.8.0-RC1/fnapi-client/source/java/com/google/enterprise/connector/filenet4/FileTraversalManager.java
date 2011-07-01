@@ -156,7 +156,7 @@ public class FileTraversalManager implements TraversalManager {
 		// to delete for deleted documents
 		String queryStringToDelete = buildQueryToDelete(checkPoint);
 		ISearch searchToDelete = fileObjectFactory.getSearch(objectStore);
-		LOGGER.log(Level.INFO, "Query to get deleted documents: "
+		LOGGER.log(Level.INFO, "Query to get deleted documents (Documents deleted from repository): "
 		        + queryStringToDelete);
 		IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
 
@@ -167,10 +167,10 @@ public class FileTraversalManager implements TraversalManager {
 			String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(checkPoint);
 
 			ISearch searchToDeleteDocs = fileObjectFactory.getSearch(objectStore);
-			LOGGER.log(Level.INFO, "Query to get documents matching to the Delete where clause: "
+			LOGGER.log(Level.INFO, "Query to get documents satisfying the delete where clause: "
 			        + queryStringToDeleteDocs);
 			IObjectSet objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
-			LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents matching to the Delete where clause): "
+			LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents satisfying the delete where clause): "
 			        + objectSetToDeleteDocs.getSize());
 
 			if ((objectSet.getSize() > 0)
@@ -227,7 +227,7 @@ public class FileTraversalManager implements TraversalManager {
 				query = new StringBuffer(additionalWhereClause);
 				query.replace(0, 6, "SELECT TOP " + batchint + " ");
 				LOGGER.fine("Using Custom Query[" + additionalWhereClause
-				        + "], will add Checkpoint in next step.");
+				        + "]");
 			} else {
 				query.append(additionalWhereClause);
 			}
@@ -272,7 +272,7 @@ public class FileTraversalManager implements TraversalManager {
 				query = new StringBuffer(deleteadditionalWhereClause);
 				query.replace(0, 6, "SELECT TOP " + batchint + " ");
 				LOGGER.fine("Using Custom Query[" + deleteadditionalWhereClause
-				        + "], will add Checkpoint in next step.");
+				        + "]");
 			} else {
 				query.append(deleteadditionalWhereClause);
 			}
@@ -298,7 +298,7 @@ public class FileTraversalManager implements TraversalManager {
 	private String buildQueryToDelete(String checkpoint)
 	        throws RepositoryException {
 
-		LOGGER.fine("Build query to get the documents removed : ");
+		LOGGER.fine("Build query to get the documents removed from repository: ");
 		StringBuffer query = new StringBuffer("SELECT ");
 		if (batchint > 0) {
 			query.append("TOP " + batchint + " ");

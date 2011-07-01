@@ -48,24 +48,22 @@ public class FileSession implements Session {
 	private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());
 
 	public FileSession(String iObjectFactory, String userName,
-			String userPassword, String objectStoreName, String displayUrl,
-			String contentEngineUri, boolean isPublic, boolean checkMarking,
-			boolean useIDForChangeDetection, String additionalWhereClause,
-			String deleteadditionalWhereClause, HashSet included_meta,
-			HashSet excluded_meta, String db_timezone)
-			throws RepositoryException, RepositoryLoginException {
+	        String userPassword, String objectStoreName, String displayUrl,
+	        String contentEngineUri, boolean isPublic, boolean checkMarking,
+	        boolean useIDForChangeDetection, String additionalWhereClause,
+	        String deleteadditionalWhereClause, HashSet included_meta,
+	        HashSet excluded_meta, String db_timezone)
+	        throws RepositoryException, RepositoryLoginException {
 
 		setFileObjectFactory(iObjectFactory);
 
-		LOGGER.info("getting connection for content engine: "
-				+ contentEngineUri);
+		LOGGER.info("Getting connection for content engine: "
+		        + contentEngineUri);
 		connection = fileObjectFactory.getConnection(contentEngineUri);
 
-		LOGGER.info("trying to access object store: " + objectStoreName
-				+ " for user: " + userName);
+		LOGGER.info("Trying to access object store: " + objectStoreName
+		        + " for user: " + userName);
 		objectStore = fileObjectFactory.getObjectStore(objectStoreName, connection, userName, userPassword);
-
-		LOGGER.info("objectStore ok user:" + userName);
 
 		this.displayUrl = getDisplayURL(displayUrl, objectStoreName);
 		this.isPublic = isPublic;
@@ -83,36 +81,36 @@ public class FileSession implements Session {
 			displayUrl = displayUrl.substring(0, displayUrl.length() - 1);
 		}
 		if (displayUrl.contains("/getContent")
-				&& displayUrl.endsWith("/getContent")) {
+		        && displayUrl.endsWith("/getContent")) {
 			return displayUrl + "?objectStoreName=" + objectStoreName
-					+ "&objectType=document&versionStatus=1&vsId=";
+			        + "&objectType=document&versionStatus=1&vsId=";
 		} else {
 			return displayUrl + "/getContent?objectStoreName="
-					+ objectStoreName
-					+ "&objectType=document&versionStatus=1&vsId=";
+			        + objectStoreName
+			        + "&objectType=document&versionStatus=1&vsId=";
 		}
 	}
 
 	private void setFileObjectFactory(String objectFactory)
-			throws RepositoryException {
+	        throws RepositoryException {
 
 		try {
 			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
 		} catch (InstantiationException e) {
 			LOGGER.log(Level.WARNING, "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
 			throw new RepositoryException(
-					"Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
-					e);
+			        "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
+			        e);
 		} catch (IllegalAccessException e) {
 			LOGGER.log(Level.WARNING, "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
 			throw new RepositoryException(
-					"Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
-					e);
+			        "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
+			        e);
 		} catch (ClassNotFoundException e) {
 			LOGGER.log(Level.WARNING, "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found");
 			throw new RepositoryException(
-					"The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",
-					e);
+			        "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",
+			        e);
 		}
 
 	}
@@ -120,25 +118,25 @@ public class FileSession implements Session {
 	public TraversalManager getTraversalManager() throws RepositoryException {
 		// logger.info("getTraversalManager");
 		FileTraversalManager fileQTM = new FileTraversalManager(
-				fileObjectFactory, objectStore, this.isPublic,
-				this.useIDForChangeDetection, this.displayUrl,
-				this.additionalWhereClause, this.deleteadditionalWhereClause,
-				this.included_meta, this.excluded_meta, this.db_timezone);
+		        fileObjectFactory, objectStore, this.isPublic,
+		        this.useIDForChangeDetection, this.displayUrl,
+		        this.additionalWhereClause, this.deleteadditionalWhereClause,
+		        this.included_meta, this.excluded_meta, this.db_timezone);
 		return fileQTM;
 	}
 
 	public AuthenticationManager getAuthenticationManager()
-			throws RepositoryException {
+	        throws RepositoryException {
 		FileAuthenticationManager fileAm = new FileAuthenticationManager(
-				connection);
+		        connection);
 		return fileAm;
 	}
 
 	public AuthorizationManager getAuthorizationManager()
-			throws RepositoryException {
+	        throws RepositoryException {
 
 		FileAuthorizationManager fileAzm = new FileAuthorizationManager(
-				connection, objectStore, checkMarking);
+		        connection, objectStore, checkMarking);
 		return fileAzm;
 	}
 

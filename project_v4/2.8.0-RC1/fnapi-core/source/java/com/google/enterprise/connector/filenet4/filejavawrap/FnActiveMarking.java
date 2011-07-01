@@ -56,30 +56,36 @@ public class FnActiveMarking implements IActiveMarking {
 	public boolean authorize(String username) {
 
 		boolean hasAccess = false;
-		LOGGER.log(Level.FINE, "Authorizing user:[" + username
-				+ "] For marking set value : "
-				+ this.marking.get_Marking().get_MarkingValue());
+		LOGGER.log(Level.INFO, "Authorizing user:[" + username
+		        + "] For marking set value : "
+		        + this.marking.get_Marking().get_MarkingValue());
 
 		hasAccess = ((new FnPermissions(
-				this.marking.get_Marking().get_Permissions())).authorizeMarking(username));
+		        this.marking.get_Marking().get_Permissions())).authorizeMarking(username));
 
 		// Check whether the user has USE rights over the document or not.
 		// If user does not have USE rights then ConstraintMask check is
 		// required.
 
 		if (hasAccess) {
-			LOGGER.log(Level.FINE, " User: [" + username
-					+ "] has USE right for the marking value : "
-					+ this.marking.get_Marking().get_MarkingValue());
-
+			LOGGER.log(Level.INFO, " User: [" + username
+			        + "] has USE right for the marking value : "
+			        + this.marking.get_Marking().get_MarkingValue());
+			LOGGER.log(Level.INFO, " User: ["
+			        + username
+			        + "] is authorized to view the document with marking value : "
+			        + this.marking.get_Marking().get_MarkingValue());
 		} else {
-			LOGGER.log(Level.FINE, " User: [" + username
-					+ "] does not have USE right for the marking value : "
-					+ this.marking.get_Marking().get_MarkingValue());
-			LOGGER.log(Level.FINE, " Authorizing User: [" + username
-					+ "] for Constraint mask with marking value : "
-					+ this.marking.get_Marking().get_MarkingValue());
-
+			LOGGER.log(Level.INFO, " User: [" + username
+			        + "] does not have USE right for the marking value : "
+			        + this.marking.get_Marking().get_MarkingValue());
+			LOGGER.log(Level.INFO, " User: ["
+			        + username
+			        + "] need to authorize for Constraint mask with marking value : "
+			        + this.marking.get_Marking().get_MarkingValue());
+			LOGGER.log(Level.INFO, " Authorizing User: [" + username
+			        + "] for Constraint mask with marking value : "
+			        + this.marking.get_Marking().get_MarkingValue());
 			hasAccess = checkConstraintMask();
 		}
 		return hasAccess;
@@ -101,9 +107,9 @@ public class FnActiveMarking implements IActiveMarking {
 		// if (!(((this.marking.get_Marking().get_ConstraintMask()) &
 		// ACCESS_LEVEL) == ACCESS_LEVEL)) {
 		if ((!(((this.marking.get_Marking().get_ConstraintMask()) & VIEW_CONTENT_MASK_LEVEL) == VIEW_CONTENT_MASK_LEVEL))
-				&& ((!(((this.marking.get_Marking().get_ConstraintMask()) & VIEW_PROPERTIES_MASK_LEVEL) == VIEW_PROPERTIES_MASK_LEVEL)) || (!(((this.marking.get_Marking().get_ConstraintMask()) & MODIFY_OWNER_MASK_LEVEL) == MODIFY_OWNER_MASK_LEVEL)))) {
+		        && ((!(((this.marking.get_Marking().get_ConstraintMask()) & VIEW_PROPERTIES_MASK_LEVEL) == VIEW_PROPERTIES_MASK_LEVEL)) || (!(((this.marking.get_Marking().get_ConstraintMask()) & MODIFY_OWNER_MASK_LEVEL) == MODIFY_OWNER_MASK_LEVEL)))) {
 			LOGGER.log(Level.INFO, "Authorization is Successful for Constraint mask with marking value : "
-					+ this.marking.get_Marking().get_MarkingValue());
+			        + this.marking.get_Marking().get_MarkingValue());
 			return true;
 		} else {
 			LOGGER.log(Level.WARNING, "Authorization FAILED due to insufficient Access Security Levels. Minimum expected Access Security Level is \"View Content\"");

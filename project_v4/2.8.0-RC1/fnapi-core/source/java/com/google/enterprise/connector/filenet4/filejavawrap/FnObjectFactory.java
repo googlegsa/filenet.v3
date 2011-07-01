@@ -98,7 +98,7 @@ public class FnObjectFactory implements IObjectFactory {
 	private ObjectStore getRawObjectStore(String userName, String userPassword,
 	        IConnection conn, Domain domain, String objectStoreName,
 	        UserContext uc) throws RepositoryException {
-		logger.info("creating the subject for user: " + userName);
+		logger.info("Creating the subject for user: " + userName);
 		Subject s = UserContext.createSubject((Connection) conn.getConnection(), userName, userPassword, "FileNetP8");
 		uc.pushSubject(s);
 		logger.info("Creating the FileNet object store instance..");
