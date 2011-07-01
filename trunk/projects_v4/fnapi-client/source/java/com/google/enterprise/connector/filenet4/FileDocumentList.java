@@ -73,10 +73,10 @@ public class FileDocumentList implements DocumentList {
 		        + this.objectSet.getSize());
 
 		// Docs to Delete
-		logger.log(Level.INFO, "Number of new documents to be removed: "
+		logger.log(Level.INFO, "Number of new documents to be removed (Documents deleted from repository): "
 		        + this.objectSetToDelete.getSize());
 
-		logger.log(Level.INFO, "Number of new documents to be removed: (matching delete where clause) "
+		logger.log(Level.INFO, "Number of new documents to be removed (Documents satisfying additional delete clause): "
 		        + this.objectSetToDeleteDocs.getSize());
 
 	}
@@ -106,7 +106,7 @@ public class FileDocumentList implements DocumentList {
 		        + this.objectSet.getSize());
 
 		// Docs to Delete
-		logger.log(Level.INFO, "Number of new documents to be removed: "
+		logger.log(Level.INFO, "Number of new documents to be removed: (Documents deleted from repository) "
 		        + this.objectSetToDelete.getSize());
 
 	}
@@ -134,9 +134,9 @@ public class FileDocumentList implements DocumentList {
 
 		logger.log(Level.FINE, "Number of documents to be retrieved: "
 		        + dataLen);
-		logger.log(Level.FINE, "Number of indexes to be deleted from appliance (Matching Delete where clause): "
+		logger.log(Level.FINE, "Number of indexes to be deleted from appliance (Documents satisfying additional delete clause): "
 		        + dataLenToDeleteDocs);
-		logger.log(Level.FINE, "Number of indexes to be deleted from appliance: "
+		logger.log(Level.FINE, "Number of indexes to be deleted from appliance (Documents deleted from repository): "
 		        + dataLenToDelete);
 
 		logger.log(Level.FINE, "Index of the document in list " + index);
@@ -165,7 +165,7 @@ public class FileDocumentList implements DocumentList {
 		} else if ((index >= dataLen)
 		        && index < (dataLenToDeleteDocs + dataLen)) {
 			if (this.ObjectItToDeleteDocs.hasNext()) {
-				logger.info("DEL...(Documents satisfying additional delete clause) ");
+				logger.info("DELETE...(Documents satisfying additional delete clause) ");
 				IBaseObject doc = (IBaseObject) this.ObjectItToDeleteDocs.next();
 				docIdToDeleteDocs = doc.getId(SpiConstants.ActionType.ADD);
 				Date dateLastModified = doc.getModifyDate(SpiConstants.ActionType.ADD);
@@ -192,7 +192,7 @@ public class FileDocumentList implements DocumentList {
 		        && index < (dataLenToDelete + dataLenToDeleteDocs + dataLen)) {
 
 			if (this.ObjectItToDelete.hasNext()) {
-				logger.info("DEL...(Documents deleted from repository)");
+				logger.info("DELETE...(Documents deleted from repository)");
 				IBaseObject doc = (IBaseObject) this.ObjectItToDelete.next();
 				if (doc.getClassNameEvent().contains("DeletionEvent")) {
 
