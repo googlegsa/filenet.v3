@@ -462,7 +462,13 @@ public class FileConnectorType implements ConnectorType {
 				if (value == null) {
 					value = "";
 				}
-				buf.append(value);
+				try {
+					XmlUtils.xmlAppendAttrValue(value, buf);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					LOGGER.severe("SEVERE" + e.getStackTrace());
+				}
+
 				buf.append(OPEN_ELEMENT);
 				buf.append("/" + TEXTAREA);
 				buf.append(CLOSE_TAG);
