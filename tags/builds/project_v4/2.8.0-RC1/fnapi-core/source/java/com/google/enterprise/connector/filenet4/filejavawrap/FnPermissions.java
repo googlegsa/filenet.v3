@@ -22,12 +22,8 @@ import com.filenet.api.collection.UserSet;
 import com.filenet.api.constants.AccessLevel;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.AccessType;
-import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.core.Connection;
-import com.filenet.api.core.Factory;
-import com.filenet.api.property.FilterElement;
-import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.security.Group;
 import com.filenet.api.security.User;
@@ -69,14 +65,6 @@ public class FnPermissions implements IPermissions {
 		boolean found;
 		boolean accessLevelFailure = true;
 		Iterator iter = perms.iterator();
-		User currentUser = null;
-		PropertyFilter pf = new PropertyFilter();
-		pf.addIncludeProperty(new FilterElement(null, null, null,
-		        PropertyNames.EMAIL));
-		pf.addIncludeProperty(new FilterElement(null, null, null,
-		        PropertyNames.SHORT_NAME));
-		pf.addIncludeProperty(new FilterElement(null, null, null,
-		        PropertyNames.NAME));
 		String granteeName;
 		LOGGER.log(Level.FINE, "Authorizing user:[" + username + "]");
 		while (iter.hasNext()) {
@@ -92,70 +80,12 @@ public class FnPermissions implements IPermissions {
 				if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
 					LOGGER.log(Level.INFO, "Grantee Name is [" + granteeName
 					        + "] is of type USER");
-					currentUser = Factory.User.fetchInstance(perm.getConnection(), granteeName, pf);
-
 					// compare username with complete granteeName or shortName
 					// of the grantee
-					if (granteeName.equalsIgnoreCase(username)) {
-						LOGGER.log(Level.INFO, "Grantee Name [" + granteeName
-						        + "] matches with search USER [" + username
-						        + "]");
-						return true;
-					} else if (getShortName(granteeName) != null
-					        && (getShortName(granteeName).equalsIgnoreCase(username))) {
-						LOGGER.log(Level.INFO, "Grantee Name ["
-						        + getShortName(granteeName)
-						        + "] matches with search USER [" + username
-						        + "]");
-						return true;
-					} else if ((granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0] != null)
-					        && (granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username))) {
-						LOGGER.log(Level.INFO, "Grantee Name ["
-						        + getShortName(granteeName)
-						        + "] matches with search USER [" + username
-						        + "]");
-						return true;
-					} else if ((FileUtil.getShortName(granteeName) != null)
-					        && (FileUtil.getShortName(granteeName).equalsIgnoreCase(username))) {
-						LOGGER.log(Level.INFO, "Grantee Name ["
-						        + getShortName(granteeName)
-						        + "] matches with search USER [" + username
-						        + "]");
-						return true;
-					} else if (((currentUser.get_Name() != null))
-					        && (currentUser.get_Name().equalsIgnoreCase(username))) {
-						LOGGER.log(Level.INFO, "Grantee Name ["
-						        + getShortName(granteeName)
-						        + "] matches with search USER [" + username
-						        + "]");
-						return true;
-					} else if ((currentUser.get_Email() != null)
-					        && (currentUser.get_Email().equalsIgnoreCase(username))) {
-						LOGGER.log(Level.INFO, "Grantee Name ["
-						        + getShortName(granteeName)
-						        + "] matches with search USER [" + username
-						        + "]");
-						return true;
-					} else if ((currentUser.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0] != null)
-					        && (currentUser.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username))) {
-						LOGGER.log(Level.INFO, "Grantee Name ["
-						        + getShortName(granteeName)
-						        + "] matches with search USER [" + username
-						        + "]");
-						return true;
-					} else if ((getShortName(currentUser.get_Name()) != null)
-					        && (getShortName(currentUser.get_Name()).equalsIgnoreCase(username))) {
-						LOGGER.log(Level.INFO, "Grantee Name ["
-						        + getShortName(granteeName)
-						        + "] matches with search USER [" + username
-						        + "]");
-						return true;
-					} else if (((currentUser.get_ShortName() != null))
-					        && (currentUser.get_ShortName().equalsIgnoreCase(username))) {
-						LOGGER.log(Level.INFO, "Grantee Name ["
-						        + getShortName(granteeName)
-						        + "] matches with search USER [" + username
-						        + "]");
+					if ((granteeName.equalsIgnoreCase(username)
+					        || granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username) || FileUtil.getShortName(granteeName).equalsIgnoreCase(username))) {
+						LOGGER.log(Level.INFO, "Authorization for user: ["
+						        + username + "] is Successful");
 						return true;
 					} else {
 						LOGGER.log(Level.INFO, "Grantee Name ["
@@ -300,14 +230,6 @@ public class FnPermissions implements IPermissions {
 
 		String granteeName = perm.get_GranteeName();
 		boolean found = false;
-		User currentUser = null;
-		PropertyFilter pf = new PropertyFilter();
-		pf.addIncludeProperty(new FilterElement(null, null, null,
-		        PropertyNames.EMAIL));
-		pf.addIncludeProperty(new FilterElement(null, null, null,
-		        PropertyNames.SHORT_NAME));
-		pf.addIncludeProperty(new FilterElement(null, null, null,
-		        PropertyNames.NAME));
 
 		LOGGER.log(Level.INFO, "Matching the Grantee Name [" + granteeName
 		        + "] with search USER : [" + username + "]");
@@ -319,60 +241,27 @@ public class FnPermissions implements IPermissions {
 			LOGGER.log(Level.FINE, "Grantee Name is [" + granteeName
 			        + "] is of type USER");
 
-			currentUser = Factory.User.fetchInstance(perm.getConnection(), granteeName, pf);
 			// Match the full Grantee Name and search user name.
 
-			if (granteeName.equalsIgnoreCase(username)) {
+			if (granteeName.equalsIgnoreCase(username)
+			        || granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
+			        || FileUtil.getShortName(granteeName).equalsIgnoreCase(username)) {
 				LOGGER.log(Level.INFO, "Grantee Name [" + granteeName
 				        + "] matches with search USER [" + username + "]");
+
 				return true;
-			} else if (getShortName(granteeName) != null
-			        && (getShortName(granteeName).equalsIgnoreCase(username))) {
+			} else if (getShortName(granteeName).equalsIgnoreCase(username)) {// Match
+				// the
+				// Short
+				// Grantee
+				// Name
+				// and
+				// search
+				// username.
 				LOGGER.log(Level.INFO, "Grantee Name ["
 				        + getShortName(granteeName)
 				        + "] matches with search USER [" + username + "]");
-				return true;
-			} else if ((granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0] != null)
-			        && (granteeName.split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username))) {
-				LOGGER.log(Level.INFO, "Grantee Name ["
-				        + getShortName(granteeName)
-				        + "] matches with search USER [" + username + "]");
-				return true;
-			} else if ((FileUtil.getShortName(granteeName) != null)
-			        && (FileUtil.getShortName(granteeName).equalsIgnoreCase(username))) {
-				LOGGER.log(Level.INFO, "Grantee Name ["
-				        + getShortName(granteeName)
-				        + "] matches with search USER [" + username + "]");
-				return true;
-			} else if (((currentUser.get_Name() != null))
-			        && (currentUser.get_Name().equalsIgnoreCase(username))) {
-				LOGGER.log(Level.INFO, "Grantee Name ["
-				        + getShortName(granteeName)
-				        + "] matches with search USER [" + username + "]");
-				return true;
-			} else if ((currentUser.get_Email() != null)
-			        && (currentUser.get_Email().equalsIgnoreCase(username))) {
-				LOGGER.log(Level.INFO, "Grantee Name ["
-				        + getShortName(granteeName)
-				        + "] matches with search USER [" + username + "]");
-				return true;
-			} else if ((currentUser.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0] != null)
-			        && (currentUser.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username))) {
-				LOGGER.log(Level.INFO, "Grantee Name ["
-				        + getShortName(granteeName)
-				        + "] matches with search USER [" + username + "]");
-				return true;
-			} else if ((getShortName(currentUser.get_Name()) != null)
-			        && (getShortName(currentUser.get_Name()).equalsIgnoreCase(username))) {
-				LOGGER.log(Level.INFO, "Grantee Name ["
-				        + getShortName(granteeName)
-				        + "] matches with search USER [" + username + "]");
-				return true;
-			} else if (((currentUser.get_ShortName() != null))
-			        && (currentUser.get_ShortName().equalsIgnoreCase(username))) {
-				LOGGER.log(Level.INFO, "Grantee Name ["
-				        + getShortName(granteeName)
-				        + "] matches with search USER [" + username + "]");
+
 				return true;
 			} else {
 				LOGGER.log(Level.WARNING, "Grantee Name ["
@@ -468,28 +357,10 @@ public class FnPermissions implements IPermissions {
 			        + "][" + user.get_Email() + "] in GROUP ["
 			        + group.get_Name() + "]");
 
-			if ((user.get_Name() != null)
-			        && (user.get_Name().equalsIgnoreCase(username))) {
-				LOGGER.log(Level.FINE, "Search USER [" + username
-				        + "] found in GROUP [" + group.get_Name() + "]");
-				return true;
-			} else if (((user.get_Email() != null))
-			        && (user.get_Email().equalsIgnoreCase(username))) {
-				LOGGER.log(Level.FINE, "Search USER [" + username
-				        + "] found in GROUP [" + group.get_Name() + "]");
-				return true;
-			} else if ((user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0] != null)
-			        && (user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username))) {
-				LOGGER.log(Level.FINE, "Search USER [" + username
-				        + "] found in GROUP [" + group.get_Name() + "]");
-				return true;
-			} else if (((FileUtil.getShortName(user.get_Name()) != null))
-			        && (FileUtil.getShortName(user.get_Name()).equalsIgnoreCase(username))) {
-				LOGGER.log(Level.FINE, "Search USER [" + username
-				        + "] found in GROUP [" + group.get_Name() + "]");
-				return true;
-			} else if ((user.get_ShortName() != null)
-			        && (user.get_ShortName().equalsIgnoreCase(username))) {
+			if (user.get_Name().equalsIgnoreCase(username)
+			        || user.get_Name().split(ACTIVE_DIRECTORY_SYMBOL)[0].equalsIgnoreCase(username)
+			        || FileUtil.getShortName(user.get_Name()).equalsIgnoreCase(username)
+			        || user.get_ShortName().equalsIgnoreCase(username)) {
 				LOGGER.log(Level.FINE, "Search USER [" + username
 				        + "] found in GROUP [" + group.get_Name() + "]");
 				return true;
@@ -505,4 +376,5 @@ public class FnPermissions implements IPermissions {
 		}
 		return false;
 	}
+
 }
