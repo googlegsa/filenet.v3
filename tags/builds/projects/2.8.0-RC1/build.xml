@@ -3,9 +3,10 @@
 <project name="connector-file" default="connector-file" basedir=".">
 
     <!-- ========================= PROPERTIES ============================= -->
-    <property name="version" value="1.0"/>
 
     <!-- Define Directories. -->
+    <property name="projects.dir" value=".." />
+    <property file="build.properties" />
     <property name="build" value="build"/>
     <property name="dist" value="dist"/>
     <property name="config" value="fnapi-client/config"/>
@@ -43,6 +44,14 @@
                        </path>
     <!-- =========================== TASKS =============================== -->
     <target name="connector-file" depends="clean,init,compile_tests,compile-client,jar">
+    </target>
+
+    <target name="prebuild" unless="svnversion">
+        <exec executable="svnversion" spawn="false"
+              failifexecutionfails="false"
+              outputproperty="svnversion">
+              <arg line="."/>
+        </exec>
     </target>
 
     <target name="init">
@@ -103,7 +112,8 @@
             </classpath>
         </javac>
     </target>
-    <target name="jar" description="connector-file">
+    <target name="jar" description="connector-file"  depends="prebuild">
+        <tstamp />
         <jar jarfile="${jarfile}">
             <fileset dir="${config}">
                 <include name="**/*.xml"/>
@@ -119,10 +129,10 @@
             <!--creation of manifest file-->
             <manifest>
                 <attribute name="Implementation-Title" value="Filenet Connector"/>
-                  <attribute name="Implementation-Version" value="2.8.0"/>
+                <attribute name="Implementation-Version" value="${version} (build ${svnversion} ${TODAY})"/>
                 <attribute name="Implementation-Vendor" value="Google Inc."/>
                 <attribute name="Specification-Title" value="Connector Manager SPI"/>
-                <attribute name="Specification-Version" value="2.8.0"/>
+                <attribute name="Specification-Version" value="${specification_version}"/>
                 <attribute name="Specification-Vendor" value="Google Inc."/>
                 <attribute name="Main-Class" value="com.google.enterprise.connector.file.FileMain" />
             </manifest>
