@@ -16,6 +16,7 @@ import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.core.Factory;
 import com.filenet.api.security.MarkingSet;
+import com.filenet.api.util.UserContext;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -25,6 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.security.auth.Subject;
 
 public class FileAuthorizationManager implements AuthorizationManager {
 
@@ -76,6 +79,13 @@ public class FileAuthorizationManager implements AuthorizationManager {
 		// check for the marking sets applied over the document class
 
 		try {
+			// In some cases current FileNet connection looses UserContext
+			// object associated with it; hence need to fetch userContext for
+			// each and every AuthZ request
+
+			Subject subject = this.conn.getSubject();
+			UserContext.get().pushSubject(subject);
+
 			DocumentClassDefinition documentClassDefinition = Factory.DocumentClassDefinition.fetchInstance(this.objectStore.getObjectStore(), GuidConstants.Class_Document, null);
 			PropertyDefinitionList propertyDefinitionList = documentClassDefinition.get_PropertyDefinitions();
 			Iterator<PropertyDefinition> propertyDefinitionIterator = propertyDefinitionList.iterator();
@@ -202,6 +212,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 			}
 			authorizeDocids.add(authorizationResponse);
 		}
+		UserContext.get().popSubject();
 		return authorizeDocids;
 	}
 
