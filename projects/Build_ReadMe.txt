@@ -1,27 +1,34 @@
-Configure the development environment for the FileNet connector (Running build.xml with ANT) for IBM FileNet P8 Systems 3.5.2
-=============================================================================================================================
-1. Put "ant-contrib-1.0b3.jar" in the $ANT_HOME\lib.
-You can download this jar from "http://sourceforge.net/project/showfiles.php?group_id=36177".
-2. Copy all the jars from lib folder of connector manager and put it in "\source\third_party\lib" directory.
-3. Copy all the files mentioned below and put it in "\source\third_party\lib" directory.
+Following are the steps to build Google Enterprise Connector for IBM FileNet P8 Systems 3.5.2:
+===============================================================================================
+1. Ensure that you have Apache Ant installed on your system. It can be downloaded from http://ant.apache.org/bindownload.cgi
+
+2. Ensure that an environment variable with the name ANT_HOME is created on your system and is pointing to the installed ANT home directory.
+
+3. Ensure that "ant-contrib-1.0b3.jar" is present in the $ANT_HOME\lib. It can be downloaded from  "http://sourceforge.net/project/showfiles.php?group_id=36177".
+
+4. Ensure that "Silk SVN, Subversion" is installed on your system. It can be downloaded from  "http://www.sliksvn.com/en/download".
+
+5. Ensure that an system environment variable with the name PATH is created on your system and is pointing to the installed Silk SVN, Subversion bin directory.
+
+6. Ensure that the latest Connector Manager binaries are present on your system. Latest Connector Manager binaries can be downloaded from http://code.google.com/p/google-enterprise-connector-manager/downloads/list
+
+Required Connector Manager libraries:
+* connector-spi.jar
+* connector-util.jar
+* connector.jar
+* connector-logging.jar
+
+7. The Connector Manager required libraries should be in '/{CONNECTOR_MANAGER_DIR}/dist/jarfile/' folder. 
+Run the Connector Manager build to create Connector Manager required libraries.
 
 Required files for IBM FileNet P8 Systems 3.5.2 connector configuration: Default location for this jar on IBM FileNet P8 Systems 3.5.2 server is "< FILENET_HOME >\Workplace\WEB-INF\lib"
 
-� javaapi.jar
-� activation.jar
-� mailapi.jar
-� p8cjares.jar
-� log4j.1.2.x.jar
-� soap.jar
-� spring.jar
+* javaapi.jar
+* activation.jar
+* mailapi.jar
+* p8cjares.jar
+* soap.jar
 
-4. Copy the file junit.jar from your IBM FileNet P8 Systems 3.5.2 server and put it in "\source\third_party\lib" directory.
+8. Copy all the  above required jars to the "\<FileNet_Source_Directory>\third_party\lib" directory. 
 
-CONFIGURATION
-=============
-Open Eclipse and create a java project from the existing source from http://code.google.com/p/google-enterprise-connector-file/.
-Add all the jars that are in third_party\lib and file_third_party\lib to the classpath of the project.
-
-JUNIT TESTS
-===========
-To run the unit tests, add FileNet environment configuration to the FnMockConnection.java, FnConnection.java, FileNETConnection.java files.
+9. On command prompt, navigate to the FileNet source directory where build.xml is present and execute 'ant' command. The 'connector-file.jar' will be created in the dist/jarfile directory.
