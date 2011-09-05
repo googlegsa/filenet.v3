@@ -59,7 +59,7 @@ public class FileSession implements Session {
 
 		LOGGER.info("Getting connection for content engine: "
 		        + contentEngineUri);
-		connection = fileObjectFactory.getConnection(contentEngineUri);
+		connection = fileObjectFactory.getConnection(contentEngineUri, userName, userPassword);
 
 		LOGGER.info("Trying to access object store: " + objectStoreName
 		        + " for user: " + userName);
@@ -76,6 +76,12 @@ public class FileSession implements Session {
 		this.db_timezone = db_timezone;
 	}
 
+	/**
+	 * To return display url associated with the specific document
+	 * 
+	 * @param displayUrl
+	 * @param objectStoreName
+	 */
 	private String getDisplayURL(String displayUrl, String objectStoreName) {
 		if (displayUrl.endsWith("/getContent/")) {
 			displayUrl = displayUrl.substring(0, displayUrl.length() - 1);
@@ -91,6 +97,12 @@ public class FileSession implements Session {
 		}
 	}
 
+	/**
+	 * To set FileNet objectFactory
+	 * 
+	 * @param objectFactory
+	 * @throws RepositoryException
+	 */
 	private void setFileObjectFactory(String objectFactory)
 	        throws RepositoryException {
 
@@ -115,6 +127,9 @@ public class FileSession implements Session {
 
 	}
 
+	/**
+	 * To return the TraversalManager class object
+	 */
 	public TraversalManager getTraversalManager() throws RepositoryException {
 		// logger.info("getTraversalManager");
 		FileTraversalManager fileQTM = new FileTraversalManager(
@@ -125,6 +140,9 @@ public class FileSession implements Session {
 		return fileQTM;
 	}
 
+	/**
+	 * To return the AuthenticationManager class object.
+	 */
 	public AuthenticationManager getAuthenticationManager()
 	        throws RepositoryException {
 		FileAuthenticationManager fileAm = new FileAuthenticationManager(
@@ -132,6 +150,9 @@ public class FileSession implements Session {
 		return fileAm;
 	}
 
+	/**
+	 * To returns the AuthorizationManager class object.
+	 */
 	public AuthorizationManager getAuthorizationManager()
 	        throws RepositoryException {
 
@@ -139,6 +160,13 @@ public class FileSession implements Session {
 		        connection, objectStore, checkMarking);
 		return fileAzm;
 	}
+
+	/**
+	 * To return the Search object for searching.
+	 * 
+	 * @return
+	 * @throws RepositoryException
+	 */
 
 	public ISearch getSearch() throws RepositoryException {
 		ISearch search = fileObjectFactory.getSearch(objectStore);
