@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright (C) 2007-2011 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,12 +13,6 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4;
 
-import java.util.Iterator;
-import com.filenet.api.util.UserContext;
-import com.google.enterprise.connector.filenet4.FileConnector;
-import com.google.enterprise.connector.filenet4.FileDocument;
-import com.google.enterprise.connector.filenet4.FileDocumentProperty;
-import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -26,7 +20,9 @@ import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
-import junit.framework.TestCase;
+import com.filenet.api.util.UserContext;
+
+import java.util.Iterator;
 
 public class FileDocumentTest extends FileNetTestCase {
 
@@ -35,9 +31,9 @@ public class FileDocumentTest extends FileNetTestCase {
 	IConnection conn;
 	UserContext uc;
 	IObjectFactory iof;
-	
+
 	protected void setUp() throws Exception {
-		
+
 		FileConnector connec = new FileConnector();
 		connec.setUsername(TestConnection.adminUsername);
 		connec.setPassword(TestConnection.adminPassword);
@@ -45,24 +41,27 @@ public class FileDocumentTest extends FileNetTestCase {
 		connec.setWorkplace_display_url(TestConnection.displayURL);
 		connec.setObject_factory(TestConnection.objectFactory);
 		connec.setContent_engine_url(TestConnection.uri);
-		
-		fs = (FileSession)connec.login();
 
-		iof= (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
-		IConnection conn = iof.getConnection(TestConnection.uri);
-//		Domain domain = Factory.Domain.getInstance(conn.getConnection(), "P8.V4");
+		fs = (FileSession) connec.login();
+
+		iof = (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
+		IConnection conn = iof.getConnection(TestConnection.uri, TestConnection.adminUsername, TestConnection.adminPassword);
+		// Domain domain = Factory.Domain.getInstance(conn.getConnection(),
+		// "P8.V4");
 		ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.username, TestConnection.password);
 
 	}
 
-	
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
 	 */
 	public void testFindProperty() throws RepositoryException {
-				
-		FileDocument fd = new FileDocument(TestConnection.docId1, null, ios, false, TestConnection.displayURL, TestConnection.included_meta, TestConnection.excluded_meta, ActionType.ADD);
-		
+
+		FileDocument fd = new FileDocument(TestConnection.docId1, null, ios,
+		        false, TestConnection.displayURL, TestConnection.included_meta,
+		        TestConnection.excluded_meta, ActionType.ADD);
+
 		Property prop = fd.findProperty("Id");
 
 		assertTrue(prop instanceof FileDocumentProperty);
@@ -71,14 +70,15 @@ public class FileDocumentTest extends FileNetTestCase {
 	}
 
 	/*
-	 * Test method for 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
+	 * Test method for
+	 * 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
 	 */
 	public void testGetPropertyNames() throws RepositoryException {
 
 		FileDocument fd = new FileDocument(TestConnection.docId2, null, ios,
-			false, TestConnection.displayURL, TestConnection.included_meta,
-				TestConnection.excluded_meta, ActionType.ADD);
-	//	 Set set = fdpm.getPropertyNames();
+		        false, TestConnection.displayURL, TestConnection.included_meta,
+		        TestConnection.excluded_meta, ActionType.ADD);
+		// Set set = fdpm.getPropertyNames();
 
 		Iterator properties = fd.getPropertyNames().iterator();
 

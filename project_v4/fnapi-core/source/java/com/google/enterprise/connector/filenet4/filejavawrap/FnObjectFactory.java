@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.FileUtil;
@@ -34,8 +35,10 @@ import java.util.logging.Logger;
 import javax.security.auth.Subject;
 
 /**
- *FileNet object factory.
- **/
+ * Class to set FileNet objectFactory and perform operations with objectFactory
+ * like getConnection associated with objectFactory, get specific objectStore
+ * object.
+ */
 public class FnObjectFactory implements IObjectFactory {
 	private static Logger logger = null;
 
@@ -47,9 +50,10 @@ public class FnObjectFactory implements IObjectFactory {
 		super();
 	}
 
-	public IConnection getConnection(String contentEngineUri)
+	public IConnection getConnection(String contentEngineUri, String userName,
+	        String userPassword)
 	        throws RepositoryException {
-		return new FnConnection(contentEngineUri);
+		return new FnConnection(contentEngineUri, userName, userPassword);
 	}
 
 	public IObjectStore getObjectStore(String objectStoreName,
