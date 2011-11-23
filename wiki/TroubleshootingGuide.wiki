@@ -160,8 +160,8 @@ Following may be, one of the reasons for documents getting skipped:
 
   #   Configure Time-Zone in Advanced Configuration: If still customer gets any issues with the timezone then a Time-Zone Delta value can be configured in
         Advanced Configuration as follows: 
-            # Open "CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\connectors\Filenet_P8\<<connector-instance>>\connectorInstance.xml"
-            # Uncomment the property tag: <<property name="db_timezone" value=""/>> and give the Time-Zone Delta value in the format GMT(+|-)hh:ss 
+            # Open "CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\connectors\Filenet_P8\_connector-instance_\connectorInstance.xml"
+            # Uncomment the property tag: _property name="db_timezone" value=""/_ and give the Time-Zone Delta value in the format GMT(+|-)hh:ss 
             # Time-Zone Delta is solely based on the TimeZone which is maintained by your database server. Thus there can be following three cases in which
                 Database Server stores the time-stamp for any stored document:
                     i. (Current Time + Current Machine's TimeZone): For e.g. Current Time is 1:00 PM and Current Machine's TimeZone is GMT+05:30. Thus if 
