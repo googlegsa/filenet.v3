@@ -145,7 +145,6 @@ These jars should be present in the classpath. Due to unavailability of these ja
   #    Restart the connector service.
 
 
----------------
 ||*7. After one complete crawl cycle, connector is crawling first batch of documents repetitively.*||
 
 *Problem Description:*
