@@ -158,7 +158,7 @@ Following may be, one of the reasons for documents getting skipped:
 
 *Resolution/Quick Workaround:*
 
-  #   Configure Time-Zone in Advanced Configuration: If still customer gets any issues with the timezone then a tim-Zone Delta value can be configured in
+  #   Configure Time-Zone in Advanced Configuration: If still customer gets any issues with the timezone then a Time-Zone Delta value can be configured in
         Advanced Configuration as follows: 
             # Open "CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\connectors\Filenet_P8\<connector-instance>\connectorInstance.xml"
             # Uncomment the property tag: <property name="db_timezone" value=""/> and give the Time-Zone Delta value in the format GMT(+|-)hh:ss 
