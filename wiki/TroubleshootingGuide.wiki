@@ -174,8 +174,11 @@ Following may be, one of the reasons for documents getting skipped:
                         then the time-stamp stored in database is (01:00PM). In this case TimeZone Delta value should be GMT+<Current Machine's TimeZone> For
                         E.g. GMT+05:30.
 
+||*8. After upgrading to connector version 2.8.0, we noticed that 'Make Public' option is not visible on the connector configuration UI. How to make the URLs fed by the connector public? .*||
 
+*Resolution/Quick Workaround:*
 
+To make all documents fed by the connector public, use Crawl and Index -> Crawler Access to add '^googleconnector://connectorname.localhost/' URL pattern, add credentials and check the 'Make Public' check-box. You need to wait for about 5 minutes for the change to take effect.
 
 ---------------
 ===Diagnosing the Connector Logs===
