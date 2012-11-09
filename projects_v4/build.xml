@@ -35,7 +35,6 @@
     <property name="javaapi.jarfile" value="${jarfile.dir}/javaapi.jar" />
     <property name="conn_logging.jarfile" value="${jarfile.dir}/connector-logging.jar" />
     <property name="conn_util.jarfile" value="${jarfile.dir}/connector-util.jar" />
-    <property name="wasp.jarfile" value="${jarfile.dir}/wasp.jar" />
 
     <property file="${config}/build_code_coverage.properties"/>
                     <path id="cobertura.classpath">
@@ -91,7 +90,6 @@
                 <pathelement location="${spring.jarfile}" />
                 <pathelement location="${conn_logging.jarfile}" />
                 <pathelement location="${conn_util.jarfile}" />
-                <pathelement location="${wasp.jarfile}" />
             </classpath>
         </javac>
     </target>
@@ -111,7 +109,6 @@
                 <pathelement location="${spring.jarfile}" />
                 <pathelement location="${conn_logging.jarfile}" />
                 <pathelement location="${conn_util.jarfile}" />
-                <pathelement location="${wasp.jarfile}" />
             </classpath>
         </javac>
     </target>
