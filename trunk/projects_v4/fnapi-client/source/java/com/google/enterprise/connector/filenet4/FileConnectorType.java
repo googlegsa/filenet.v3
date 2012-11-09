@@ -24,10 +24,6 @@ import com.google.enterprise.connector.spi.ConnectorType;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.XmlUtils;
 
-import org.idoox.util.RuntimeWrappedException;
-import org.idoox.wasp.UnknownProtocolException;
-import org.idoox.xmlrpc.MessageCreatingException;
-
 import com.filenet.api.exception.EngineRuntimeException;
 
 import java.io.IOException;
@@ -467,27 +463,8 @@ public class FileConnectorType implements ConnectorType {
 								} else {
 									bundleMessage = resource.getString("content_engine_url_invalid");
 								}
-							} else if (ere.getCause() instanceof RuntimeWrappedException) {
-								errorMsg = ere.getCause().getMessage();
-								if (errorMsg.indexOf("Jetty") != -1) {
-									bundleMessage = resource.getString("jetty_jar_error");
-								} else if (ere.getCause() != null
-								        && ere.getCause().getCause() != null
-								        && ere.getCause().getCause().getCause() != null
-								        && ere.getCause().getCause().getCause() instanceof SSLHandshakeException) {
-									bundleMessage = resource.getString("content_engine_url_invalid");
-								} else if (ere.getCause() != null
-								        && ere.getCause().getCause() != null
-								        && ere.getCause().getCause().getCause() != null
-								        && ere.getCause().getCause().getCause() instanceof MessageCreatingException) {
-									bundleMessage = resource.getString("builtin_serialization_jar_error");
-								} else {
-									bundleMessage = ere.getLocalizedMessage();
-								}
 							} else if (ere.getCause() instanceof ExceptionInInitializerError) {
 								bundleMessage = resource.getString("jaxrpc_jar_error");
-							} else if (ere.getCause() instanceof UnknownProtocolException) {
-								bundleMessage = resource.getString("saaj_jar_error");
 							} else {
 								bundleMessage = resource.getString("content_engine_url_invalid");
 							}
