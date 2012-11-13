@@ -21,7 +21,7 @@ import java.util.jar.Manifest;
 
 /**
  * Dump the Version info from the Manifest for the Connector's JAR file.
- * This is set as the default main() for the JAR if running the jar 
+ * This is set as the default main() for the JAR if running the jar
  * stand-alone.  This makes it easy to dump the Connector's JAR Manifest
  * (including version and build info) simply by running the command:
  *   java -jar /path/to/connector-otex.jar

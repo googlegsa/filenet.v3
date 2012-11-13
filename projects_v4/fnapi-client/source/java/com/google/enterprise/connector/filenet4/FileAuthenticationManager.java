@@ -31,54 +31,54 @@ import com.google.enterprise.connector.spi.RepositoryException;
  * */
 public class FileAuthenticationManager implements AuthenticationManager {
 
-	IConnection conn;
+  IConnection conn;
 
-	private static Logger logger = null;
-	static {
-		logger = Logger.getLogger(FileAuthenticationManager.class.getName());
-	}
+  private static Logger logger = null;
+  static {
+    logger = Logger.getLogger(FileAuthenticationManager.class.getName());
+  }
 
-	public FileAuthenticationManager(IConnection conn) {
-		this.conn = conn;
-	}
+  public FileAuthenticationManager(IConnection conn) {
+    this.conn = conn;
+  }
 
-	/**
-	 * authenticates the user
-	 * @param authenticationIdentity: contains user credentials 
-	 * */
-	public AuthenticationResponse authenticate(AuthenticationIdentity authenticationIdentity)throws RepositoryException {
-		String username = authenticationIdentity.getUsername();
-		String password = authenticationIdentity.getPassword();
+  /**
+   * authenticates the user
+   * @param authenticationIdentity: contains user credentials
+   * */
+  public AuthenticationResponse authenticate(AuthenticationIdentity authenticationIdentity)throws RepositoryException {
+    String username = authenticationIdentity.getUsername();
+    String password = authenticationIdentity.getPassword();
 
-		IUserContext uc = conn.getUserContext();
+    IUserContext uc = conn.getUserContext();
 
-		try {
-			return authenticate(username, password, uc);
-		} catch (Throwable e) {
-			logger.log(Level.WARNING,"Authentication Failed for user " + username);
-			String shortName = FileUtil.getShortName(username);
-			logger.log(Level.INFO,"Trying to authenticate with Short Name: " + shortName);
-			try{
-				return authenticate(shortName, password, uc);
-			}catch(Throwable th){
-				logger.log(Level.WARNING,"Authentication Failed for user " + shortName);
-				logger.log(Level.FINE,"While authenticating got exception",th);
-				return new AuthenticationResponse(false, "");
-			}
-		}
-	}
+    try {
+      return authenticate(username, password, uc);
+    } catch (Throwable e) {
+      logger.log(Level.WARNING,"Authentication Failed for user " + username);
+      String shortName = FileUtil.getShortName(username);
+      logger.log(Level.INFO,"Trying to authenticate with Short Name: " + shortName);
+      try {
+        return authenticate(shortName, password, uc);
+      } catch (Throwable th) {
+        logger.log(Level.WARNING,"Authentication Failed for user " + shortName);
+        logger.log(Level.FINE,"While authenticating got exception",th);
+        return new AuthenticationResponse(false, "");
+      }
+    }
+  }
 
-	/**
-	 * Wrapper over authenticate method of UserContext class.
-	 * @param username UserName which needs to be authenticated
-	 * @param password Valid password of the user name
-	 * @param uc	   UserContext reference
-	 * @return		   Returns the Authentication response
-	 * @throws RepositoryException
-	 */
-	private AuthenticationResponse authenticate(String username, String password, IUserContext uc) throws RepositoryException {
-		uc.authenticate(username, password);
-		logger.info("Authentication Succeeded for user " + username);
-		return new AuthenticationResponse(true, "");
-	}
+  /**
+   * Wrapper over authenticate method of UserContext class.
+   * @param username UserName which needs to be authenticated
+   * @param password Valid password of the user name
+   * @param uc     UserContext reference
+   * @return       Returns the Authentication response
+   * @throws RepositoryException
+   */
+  private AuthenticationResponse authenticate(String username, String password, IUserContext uc) throws RepositoryException {
+    uc.authenticate(username, password);
+    logger.info("Authentication Succeeded for user " + username);
+    return new AuthenticationResponse(true, "");
+  }
 }

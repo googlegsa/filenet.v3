@@ -31,52 +31,52 @@ import junit.framework.TestCase;
 
 public class FileAuthorizationManagerTest extends FileNetTestCase {
 
-	public void testAuthorizeDocids() throws RepositoryLoginException, RepositoryException {
+  public void testAuthorizeDocids() throws RepositoryLoginException, RepositoryException {
 
-		FileConnector connec = new FileConnector();
-		connec.setUsername(TestConnection.adminUsername);
-		connec.setPassword(TestConnection.adminPassword);
-		connec.setObject_store(TestConnection.objectStore);
-		connec.setWorkplace_display_url(TestConnection.displayURL);
-		connec.setObject_factory(TestConnection.objectFactory);
-		connec.setContent_engine_url(TestConnection.uri);
+    FileConnector connec = new FileConnector();
+    connec.setUsername(TestConnection.adminUsername);
+    connec.setPassword(TestConnection.adminPassword);
+    connec.setObject_store(TestConnection.objectStore);
+    connec.setWorkplace_display_url(TestConnection.displayURL);
+    connec.setObject_factory(TestConnection.objectFactory);
+    connec.setContent_engine_url(TestConnection.uri);
 
-		FileSession fs = (FileSession)connec.login();
-		FileAuthorizationManager fam = (FileAuthorizationManager) fs.getAuthorizationManager();
-//		FileAuthenticationManager fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
-//		FileAuthenticationIdentity fai = new FileAuthenticationIdentity(TestConnection.username, TestConnection.password);
-//		AuthenticationResponse ar = fatm.authenticate(fai);
+    FileSession fs = (FileSession)connec.login();
+    FileAuthorizationManager fam = (FileAuthorizationManager) fs.getAuthorizationManager();
+//    FileAuthenticationManager fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
+//    FileAuthenticationIdentity fai = new FileAuthenticationIdentity(TestConnection.username, TestConnection.password);
+//    AuthenticationResponse ar = fatm.authenticate(fai);
 
-		Map expectedResults = new HashMap();
-		expectedResults.put(TestConnection.docVsId1, Boolean.FALSE);
-		expectedResults.put(TestConnection.docVsId2, Boolean.FALSE);
-		expectedResults.put(TestConnection.docVsId3, Boolean.TRUE);
-		expectedResults.put(TestConnection.docVsId4, Boolean.TRUE);
+    Map expectedResults = new HashMap();
+    expectedResults.put(TestConnection.docVsId1, Boolean.FALSE);
+    expectedResults.put(TestConnection.docVsId2, Boolean.FALSE);
+    expectedResults.put(TestConnection.docVsId3, Boolean.TRUE);
+    expectedResults.put(TestConnection.docVsId4, Boolean.TRUE);
 
-		testAuthorization(fam, expectedResults, TestConnection.username, TestConnection.password);
+    testAuthorization(fam, expectedResults, TestConnection.username, TestConnection.password);
 
-	}
+  }
 
-	private void testAuthorization(FileAuthorizationManager fam, Map expectedResults, String username, String password) throws RepositoryException {
+  private void testAuthorization(FileAuthorizationManager fam, Map expectedResults, String username, String password) throws RepositoryException {
 
-		List docids = new LinkedList(expectedResults.keySet());
+    List docids = new LinkedList(expectedResults.keySet());
 
-//		List resultSet = (List) fam.authorizeDocids(docids,
-//				new FileAuthenticationIdentity(username, password));
-		List resultSet = (List) fam.authorizeDocids(docids,
-				new FileAuthenticationIdentity(username, null));
+//    List resultSet = (List) fam.authorizeDocids(docids,
+//        new FileAuthenticationIdentity(username, password));
+    List resultSet = (List) fam.authorizeDocids(docids,
+        new FileAuthenticationIdentity(username, null));
 
-		Boolean expected;
-		AuthorizationResponse ar;
-		for (Iterator i = resultSet.iterator(); i.hasNext();) {
-			ar = (AuthorizationResponse) i.next();
-			String uuid = ar.getDocid();
+    Boolean expected;
+    AuthorizationResponse ar;
+    for (Iterator i = resultSet.iterator(); i.hasNext();) {
+      ar = (AuthorizationResponse) i.next();
+      String uuid = ar.getDocid();
 
-			expected = (Boolean) expectedResults.get(uuid);
-			assertEquals(username + " access to " + uuid, expected
-					.booleanValue(), ar.isValid());
+      expected = (Boolean) expectedResults.get(uuid);
+      assertEquals(username + " access to " + uuid, expected
+          .booleanValue(), ar.isValid());
 
 
-		}
-	}
+    }
+  }
 }

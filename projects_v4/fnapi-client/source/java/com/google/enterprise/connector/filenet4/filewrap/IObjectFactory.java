@@ -23,15 +23,15 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
  */
 public interface IObjectFactory {
 
-	public IConnection getConnection(String contentEngineUri, String userName,
-	        String userPassword)
-	        throws RepositoryException;
+  public IConnection getConnection(String contentEngineUri, String userName,
+          String userPassword)
+          throws RepositoryException;
 
-	public IObjectStore getObjectStore(String objectStoreName,
-	        IConnection connection, String userId, String password)
-	        throws RepositoryException, RepositoryLoginException;
+  public IObjectStore getObjectStore(String objectStoreName,
+          IConnection connection, String userId, String password)
+          throws RepositoryException, RepositoryLoginException;
 
-	public ISearch getSearch(IObjectStore objectStore)
-	        throws RepositoryException;
+  public ISearch getSearch(IObjectStore objectStore)
+          throws RepositoryException;
 
 }

@@ -17,46 +17,46 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FnSearch implements ISearch {
 
-	SearchScope search;
+  SearchScope search;
 
-	private static Logger logger;
-	
-	private static String dateFirstPush ;
-	
-	static{
-		logger = Logger.getLogger(FnSearch.class.getName());
-	}
-	public FnSearch(SearchScope search) {
-		this.search = search;
-	}
+  private static Logger logger;
 
-	public IObjectSet execute(String query) throws RepositoryException {
-		LinkedList objectList = new LinkedList();
-		IndependentObjectSet myObjects;
+  private static String dateFirstPush ;
 
-		SearchSQL sqlObject = new SearchSQL();
-		sqlObject.setQueryString(query);
+  static {
+    logger = Logger.getLogger(FnSearch.class.getName());
+  }
+  public FnSearch(SearchScope search) {
+    this.search = search;
+  }
 
-		Integer myPageSize = new Integer(100);
+  public IObjectSet execute(String query) throws RepositoryException {
+    LinkedList objectList = new LinkedList();
+    IndependentObjectSet myObjects;
 
-		PropertyFilter myFilter = new PropertyFilter();
-		int myFilterLevel = 1;
+    SearchSQL sqlObject = new SearchSQL();
+    sqlObject.setQueryString(query);
 
-		myFilter.setMaxRecursion(myFilterLevel);
-		
-		Boolean continuable = new Boolean(true);
+    Integer myPageSize = new Integer(100);
 
-		try {
-			myObjects = search.fetchObjects(sqlObject, myPageSize, myFilter,
-					continuable);
-		} catch (Exception e) {
-			throw new RepositoryException(e);
-		}
-		Iterator it = myObjects.iterator();
-		while (it.hasNext()) {
-			objectList.add(new FnBaseObject((IndependentObject) it.next()));
-		}
-		return new FnObjectList(objectList);
-	}
+    PropertyFilter myFilter = new PropertyFilter();
+    int myFilterLevel = 1;
+
+    myFilter.setMaxRecursion(myFilterLevel);
+
+    Boolean continuable = new Boolean(true);
+
+    try {
+      myObjects = search.fetchObjects(sqlObject, myPageSize, myFilter,
+          continuable);
+    } catch (Exception e) {
+      throw new RepositoryException(e);
+    }
+    Iterator it = myObjects.iterator();
+    while (it.hasNext()) {
+      objectList.add(new FnBaseObject((IndependentObject) it.next()));
+    }
+    return new FnObjectList(objectList);
+  }
 
 }

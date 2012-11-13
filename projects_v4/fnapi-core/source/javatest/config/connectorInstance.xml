@@ -3,79 +3,79 @@
 
 
 <beans>
-    <bean id="Filenet_P8" class="com.google.enterprise.connector.filenet4.FileConnector" parent="filenet-connector-defaults" singleton="false">
+  <bean id="Filenet_P8" class="com.google.enterprise.connector.filenet4.FileConnector" parent="filenet-connector-defaults" singleton="false">
 
-    <property name="useIDForChangeDetection" value="true"/>
-    <property name="is_public" value="false"/>
-    <!--
-            <property name="db_timezone" value="GMT+05:30"/>
-            <property name="included_meta">
-            <set>
-                <value>ClassificationStatus</value>
-                <value>ContentSize</value>
-                <value>CurrentState</value>
-                <value>DateCreated</value>
-                <value>DateLastModified</value>
-                <value>DocumentTitle</value>
-                <value>Id</value>
-                <value>IsCurrentVersion</value>
-                <value>IsFrozenVersion</value>
-                <value>IsReserved</value>
-                <value>LastModifier</value>
-                <value>LockTimeout</value>
-                <value>LockToken</value>
-                <value>MajorVersionNumber</value>
-                <value>MimeType</value>
-                <value>MinorVersionNumber</value>
-                <value>Name</value>
-                <value>Owner</value>
-                <value>StorageLocation</value>
-                <value>VersionStatus</value>
-            </set>
-        </property>
-        <property name="excluded_meta">
-            <set>
-                <value>AccessMask</value>
-                <value>ActiveMarkings</value>
-                <value>Annotations</value>
-                <value>AuditedEvents</value>
-                <value>ClassDescription</value>
-                <value>ContentElements</value>
-                <value>ContentElementsPresent</value>
-                <value>ContentRetentionDate</value>
-                <value>CreatePending</value>
-                <value>CurrentVersion</value>
-                <value>DateContentLastAccessed</value>
-                <value>DeletePending</value>
-                <value>DestinationDocuments</value>
-                <value>DocumentLifecyclePolicy</value>
-                <value>EntryTemplateId</value>
-                <value>EntryTemplateLaunchedWorkflowNumber</value>
-                <value>EntryTemplateObjectStoreName</value>
-                <value>FoldersFiledIn</value>
-                <value>IsInExceptionState</value>
-                <value>IsVersioningEnabled</value>
-                <value>LockOwner</value>
-                <value>ObjectStore</value>
-                <value>ObjectType</value>
-                <value>OIID</value>
-                <value>OwnerDocument</value>
-                <value>PendingOperation</value>
-                <value>Properties</value>
-                <value>PublicationInfo</value>
-                <value>ReleasedVersion</value>
-                <value>Reservation</value>
-                <value>ReservationType</value>
-                <value>SecurityParent</value>
-                <value>SecurityPolicy</value>
-                <value>SourceDocument</value>
-                <value>StoragePolicy</value>
-                <value>UpdatePending</value>
-                <value>VersionSeries</value>
-                <value>WorkflowSubscriptions</value>
-            </set>
-        </property>
-    -->
-    </bean>
+  <property name="useIDForChangeDetection" value="true"/>
+  <property name="is_public" value="false"/>
+  <!--
+      <property name="db_timezone" value="GMT+05:30"/>
+      <property name="included_meta">
+      <set>
+        <value>ClassificationStatus</value>
+        <value>ContentSize</value>
+        <value>CurrentState</value>
+        <value>DateCreated</value>
+        <value>DateLastModified</value>
+        <value>DocumentTitle</value>
+        <value>Id</value>
+        <value>IsCurrentVersion</value>
+        <value>IsFrozenVersion</value>
+        <value>IsReserved</value>
+        <value>LastModifier</value>
+        <value>LockTimeout</value>
+        <value>LockToken</value>
+        <value>MajorVersionNumber</value>
+        <value>MimeType</value>
+        <value>MinorVersionNumber</value>
+        <value>Name</value>
+        <value>Owner</value>
+        <value>StorageLocation</value>
+        <value>VersionStatus</value>
+      </set>
+    </property>
+    <property name="excluded_meta">
+      <set>
+        <value>AccessMask</value>
+        <value>ActiveMarkings</value>
+        <value>Annotations</value>
+        <value>AuditedEvents</value>
+        <value>ClassDescription</value>
+        <value>ContentElements</value>
+        <value>ContentElementsPresent</value>
+        <value>ContentRetentionDate</value>
+        <value>CreatePending</value>
+        <value>CurrentVersion</value>
+        <value>DateContentLastAccessed</value>
+        <value>DeletePending</value>
+        <value>DestinationDocuments</value>
+        <value>DocumentLifecyclePolicy</value>
+        <value>EntryTemplateId</value>
+        <value>EntryTemplateLaunchedWorkflowNumber</value>
+        <value>EntryTemplateObjectStoreName</value>
+        <value>FoldersFiledIn</value>
+        <value>IsInExceptionState</value>
+        <value>IsVersioningEnabled</value>
+        <value>LockOwner</value>
+        <value>ObjectStore</value>
+        <value>ObjectType</value>
+        <value>OIID</value>
+        <value>OwnerDocument</value>
+        <value>PendingOperation</value>
+        <value>Properties</value>
+        <value>PublicationInfo</value>
+        <value>ReleasedVersion</value>
+        <value>Reservation</value>
+        <value>ReservationType</value>
+        <value>SecurityParent</value>
+        <value>SecurityPolicy</value>
+        <value>SourceDocument</value>
+        <value>StoragePolicy</value>
+        <value>UpdatePending</value>
+        <value>VersionSeries</value>
+        <value>WorkflowSubscriptions</value>
+      </set>
+    </property>
+  -->
+  </bean>
 
 </beans>

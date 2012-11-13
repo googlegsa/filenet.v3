@@ -33,144 +33,144 @@ import java.util.logging.Logger;
 
 public class FileSession implements Session {
 
-	private IObjectFactory fileObjectFactory;
-	private IObjectStore objectStore;
-	private IConnection connection;
-	private String displayUrl;
-	private boolean isPublic;
-	private boolean checkMarking;
-	private boolean useIDForChangeDetection;
-	private String additionalWhereClause;
-	private String deleteadditionalWhereClause;
-	private HashSet included_meta;
-	private HashSet excluded_meta;
-	private String db_timezone;
-	private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());
+  private IObjectFactory fileObjectFactory;
+  private IObjectStore objectStore;
+  private IConnection connection;
+  private String displayUrl;
+  private boolean isPublic;
+  private boolean checkMarking;
+  private boolean useIDForChangeDetection;
+  private String additionalWhereClause;
+  private String deleteadditionalWhereClause;
+  private HashSet included_meta;
+  private HashSet excluded_meta;
+  private String db_timezone;
+  private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());
 
-	public FileSession(String iObjectFactory, String userName,
-	        String userPassword, String objectStoreName, String displayUrl,
-	        String contentEngineUri, boolean isPublic, boolean checkMarking,
-	        boolean useIDForChangeDetection, String additionalWhereClause,
-	        String deleteadditionalWhereClause, HashSet included_meta,
-	        HashSet excluded_meta, String db_timezone)
-	        throws RepositoryException, RepositoryLoginException {
+  public FileSession(String iObjectFactory, String userName,
+          String userPassword, String objectStoreName, String displayUrl,
+          String contentEngineUri, boolean isPublic, boolean checkMarking,
+          boolean useIDForChangeDetection, String additionalWhereClause,
+          String deleteadditionalWhereClause, HashSet included_meta,
+          HashSet excluded_meta, String db_timezone)
+          throws RepositoryException, RepositoryLoginException {
 
-		setFileObjectFactory(iObjectFactory);
+    setFileObjectFactory(iObjectFactory);
 
-		LOGGER.info("Getting connection for content engine: "
-		        + contentEngineUri);
-		connection = fileObjectFactory.getConnection(contentEngineUri, userName, userPassword);
+    LOGGER.info("Getting connection for content engine: "
+            + contentEngineUri);
+    connection = fileObjectFactory.getConnection(contentEngineUri, userName, userPassword);
 
-		LOGGER.info("Trying to access object store: " + objectStoreName
-		        + " for user: " + userName);
-		objectStore = fileObjectFactory.getObjectStore(objectStoreName, connection, userName, userPassword);
+    LOGGER.info("Trying to access object store: " + objectStoreName
+            + " for user: " + userName);
+    objectStore = fileObjectFactory.getObjectStore(objectStoreName, connection, userName, userPassword);
 
-		this.displayUrl = getDisplayURL(displayUrl, objectStoreName);
-		this.isPublic = isPublic;
-		this.useIDForChangeDetection = useIDForChangeDetection;
-		this.checkMarking = checkMarking;
-		this.additionalWhereClause = additionalWhereClause;
-		this.deleteadditionalWhereClause = deleteadditionalWhereClause;
-		this.included_meta = included_meta;
-		this.excluded_meta = excluded_meta;
-		this.db_timezone = db_timezone;
-	}
+    this.displayUrl = getDisplayURL(displayUrl, objectStoreName);
+    this.isPublic = isPublic;
+    this.useIDForChangeDetection = useIDForChangeDetection;
+    this.checkMarking = checkMarking;
+    this.additionalWhereClause = additionalWhereClause;
+    this.deleteadditionalWhereClause = deleteadditionalWhereClause;
+    this.included_meta = included_meta;
+    this.excluded_meta = excluded_meta;
+    this.db_timezone = db_timezone;
+  }
 
-	/**
-	 * To return display url associated with the specific document
-	 * 
-	 * @param displayUrl
-	 * @param objectStoreName
-	 */
-	private String getDisplayURL(String displayUrl, String objectStoreName) {
-		if (displayUrl.endsWith("/getContent/")) {
-			displayUrl = displayUrl.substring(0, displayUrl.length() - 1);
-		}
-		if (displayUrl.contains("/getContent")
-		        && displayUrl.endsWith("/getContent")) {
-			return displayUrl + "?objectStoreName=" + objectStoreName
-			        + "&objectType=document&versionStatus=1&vsId=";
-		} else {
-			return displayUrl + "/getContent?objectStoreName="
-			        + objectStoreName
-			        + "&objectType=document&versionStatus=1&vsId=";
-		}
-	}
+  /**
+   * To return display url associated with the specific document
+   *
+   * @param displayUrl
+   * @param objectStoreName
+   */
+  private String getDisplayURL(String displayUrl, String objectStoreName) {
+    if (displayUrl.endsWith("/getContent/")) {
+      displayUrl = displayUrl.substring(0, displayUrl.length() - 1);
+    }
+    if (displayUrl.contains("/getContent")
+            && displayUrl.endsWith("/getContent")) {
+      return displayUrl + "?objectStoreName=" + objectStoreName
+              + "&objectType=document&versionStatus=1&vsId=";
+    } else {
+      return displayUrl + "/getContent?objectStoreName="
+              + objectStoreName
+              + "&objectType=document&versionStatus=1&vsId=";
+    }
+  }
 
-	/**
-	 * To set FileNet objectFactory
-	 * 
-	 * @param objectFactory
-	 * @throws RepositoryException
-	 */
-	private void setFileObjectFactory(String objectFactory)
-	        throws RepositoryException {
+  /**
+   * To set FileNet objectFactory
+   *
+   * @param objectFactory
+   * @throws RepositoryException
+   */
+  private void setFileObjectFactory(String objectFactory)
+          throws RepositoryException {
 
-		try {
-			fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
-		} catch (InstantiationException e) {
-			LOGGER.log(Level.WARNING, "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
-			throw new RepositoryException(
-			        "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
-			        e);
-		} catch (IllegalAccessException e) {
-			LOGGER.log(Level.WARNING, "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
-			throw new RepositoryException(
-			        "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
-			        e);
-		} catch (ClassNotFoundException e) {
-			LOGGER.log(Level.WARNING, "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found");
-			throw new RepositoryException(
-			        "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",
-			        e);
-		}
+    try {
+      fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
+    } catch (InstantiationException e) {
+      LOGGER.log(Level.WARNING, "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
+      throw new RepositoryException(
+              "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
+              e);
+    } catch (IllegalAccessException e) {
+      LOGGER.log(Level.WARNING, "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
+      throw new RepositoryException(
+              "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
+              e);
+    } catch (ClassNotFoundException e) {
+      LOGGER.log(Level.WARNING, "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found");
+      throw new RepositoryException(
+              "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",
+              e);
+    }
 
-	}
+  }
 
-	/**
-	 * To return the TraversalManager class object
-	 */
-	public TraversalManager getTraversalManager() throws RepositoryException {
-		// logger.info("getTraversalManager");
-		FileTraversalManager fileQTM = new FileTraversalManager(
-		        fileObjectFactory, objectStore, this.isPublic,
-		        this.useIDForChangeDetection, this.displayUrl,
-		        this.additionalWhereClause, this.deleteadditionalWhereClause,
-		        this.included_meta, this.excluded_meta, this.db_timezone);
-		return fileQTM;
-	}
+  /**
+   * To return the TraversalManager class object
+   */
+  public TraversalManager getTraversalManager() throws RepositoryException {
+    // logger.info("getTraversalManager");
+    FileTraversalManager fileQTM = new FileTraversalManager(
+            fileObjectFactory, objectStore, this.isPublic,
+            this.useIDForChangeDetection, this.displayUrl,
+            this.additionalWhereClause, this.deleteadditionalWhereClause,
+            this.included_meta, this.excluded_meta, this.db_timezone);
+    return fileQTM;
+  }
 
-	/**
-	 * To return the AuthenticationManager class object.
-	 */
-	public AuthenticationManager getAuthenticationManager()
-	        throws RepositoryException {
-		FileAuthenticationManager fileAm = new FileAuthenticationManager(
-		        connection);
-		return fileAm;
-	}
+  /**
+   * To return the AuthenticationManager class object.
+   */
+  public AuthenticationManager getAuthenticationManager()
+          throws RepositoryException {
+    FileAuthenticationManager fileAm = new FileAuthenticationManager(
+            connection);
+    return fileAm;
+  }
 
-	/**
-	 * To returns the AuthorizationManager class object.
-	 */
-	public AuthorizationManager getAuthorizationManager()
-	        throws RepositoryException {
+  /**
+   * To returns the AuthorizationManager class object.
+   */
+  public AuthorizationManager getAuthorizationManager()
+          throws RepositoryException {
 
-		FileAuthorizationManager fileAzm = new FileAuthorizationManager(
-		        connection, objectStore, checkMarking);
-		return fileAzm;
-	}
+    FileAuthorizationManager fileAzm = new FileAuthorizationManager(
+            connection, objectStore, checkMarking);
+    return fileAzm;
+  }
 
-	/**
-	 * To return the Search object for searching.
-	 * 
-	 * @return
-	 * @throws RepositoryException
-	 */
+  /**
+   * To return the Search object for searching.
+   *
+   * @return
+   * @throws RepositoryException
+   */
 
-	public ISearch getSearch() throws RepositoryException {
-		ISearch search = fileObjectFactory.getSearch(objectStore);
-		return search;
-	}
+  public ISearch getSearch() throws RepositoryException {
+    ISearch search = fileObjectFactory.getSearch(objectStore);
+    return search;
+  }
 
 }

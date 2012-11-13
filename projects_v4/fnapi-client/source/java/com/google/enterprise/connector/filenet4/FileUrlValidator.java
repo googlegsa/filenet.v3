@@ -71,7 +71,7 @@ class FileUrlValidator {
 
   /** The connect timeout; only used in Java SE 5.0 or later. */
   private volatile int connectTimeout = 60 * 1000;
- 
+
   /** The read timeout; only used in Java SE 5.0 or later. */
   private volatile int readTimeout = 60 * 1000;
 

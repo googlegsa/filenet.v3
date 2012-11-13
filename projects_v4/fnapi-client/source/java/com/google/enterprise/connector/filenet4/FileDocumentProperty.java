@@ -31,34 +31,34 @@ import com.google.enterprise.connector.spi.Value;
  */
 public class FileDocumentProperty implements Property {
 
-	private static Logger logger = Logger.getLogger(FileDocumentList.class
-			.getName());
-	private String name;
+  private static Logger logger = Logger.getLogger(FileDocumentList.class
+      .getName());
+  private String name;
 
-	private Iterator iter;
+  private Iterator iter;
 
-	public FileDocumentProperty(String name) {
-		this.name = name;
-	}
+  public FileDocumentProperty(String name) {
+    this.name = name;
+  }
 
-	public FileDocumentProperty(String name, List value) {
-		this.name = name;
-		this.iter = value.iterator();
-	}
+  public FileDocumentProperty(String name, List value) {
+    this.name = name;
+    this.iter = value.iterator();
+  }
 
-	public Value nextValue() throws RepositoryException {
-		Value value = null;
-		if (this.iter.hasNext()) {
-			Object object = this.iter.next();
-			if(object instanceof Value){
-				value = (Value)object;
-			}
-		}
-		return value;
-	}
+  public Value nextValue() throws RepositoryException {
+    Value value = null;
+    if (this.iter.hasNext()) {
+      Object object = this.iter.next();
+      if (object instanceof Value) {
+        value = (Value)object;
+      }
+    }
+    return value;
+  }
 
-	public String getName() throws RepositoryException {
-		return name;
-	}
+  public String getName() throws RepositoryException {
+    return name;
+  }
 
 }

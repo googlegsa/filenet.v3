@@ -1,106 +1,106 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
 <beans>
-    <bean id="filenet-connector-defaults">
-        <property name="username" value="${username}" />
-        <property name="password" value="${Password}" />
-        <property name="object_store" value="${object_store}" />
-        <property name="content_engine_url" value="${content_engine_url}" />
-        <property name="workplace_display_url" value="${workplace_display_url}" />
-        <property name="object_factory" value="com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory" />
-        <property name="additional_where_clause" value="${additional_where_clause}" />
-        <property name="delete_additional_where_clause" value="${delete_additional_where_clause}" />
-        <property name="check_marking" value="${check_marking}" />
-        <property name="db_timezone" value=""/>
-        <property name="included_meta">
-            <set>
-                <value>ClassificationStatus</value>
-                <value>ContentSize</value>
-                <value>CurrentState</value>
-                <value>DateCreated</value>
-                <value>DateLastModified</value>
-                <value>DocumentTitle</value>
-                <value>Id</value>
-                <value>IsCurrentVersion</value>
-                <value>IsFrozenVersion</value>
-                <value>IsReserved</value>
-                <value>LastModifier</value>
-                <value>LockTimeout</value>
-                <value>LockToken</value>
-                <value>MajorVersionNumber</value>
-                <value>MimeType</value>
-                <value>MinorVersionNumber</value>
-                <value>Name</value>
-                <value>Owner</value>
-                <value>StorageLocation</value>
-                <value>VersionStatus</value>
-            </set>
-        </property>
-        <property name="excluded_meta">
-            <set>
-                <value>AccessMask</value>
-                <value>ActiveMarkings</value>
-                <value>Annotations</value>
-                <value>AuditedEvents</value>
-                <value>ClassDescription</value>
-                <value>ContentElements</value>
-                <value>ContentElementsPresent</value>
-                <value>ContentRetentionDate</value>
-                <value>CreatePending</value>
-                <value>CurrentVersion</value>
-                <value>DateContentLastAccessed</value>
-                <value>DeletePending</value>
-                <value>DestinationDocuments</value>
-                <value>DocumentLifecyclePolicy</value>
-                <value>EntryTemplateId</value>
-                <value>EntryTemplateLaunchedWorkflowNumber</value>
-                <value>EntryTemplateObjectStoreName</value>
-                <value>FoldersFiledIn</value>
-                <value>IsInExceptionState</value>
-                <value>IsVersioningEnabled</value>
-                <value>LockOwner</value>
-                <value>ObjectStore</value>
-                <value>ObjectType</value>
-                <value>OIID</value>
-                <value>OwnerDocument</value>
-                <value>PendingOperation</value>
-                <value>Properties</value>
-                <value>PublicationInfo</value>
-                <value>ReleasedVersion</value>
-                <value>Reservation</value>
-                <value>ReservationType</value>
-                <value>SecurityParent</value>
-                <value>SecurityPolicy</value>
-                <value>SourceDocument</value>
-                <value>StoragePolicy</value>
-                <value>UpdatePending</value>
-                <value>VersionSeries</value>
-                <value>WorkflowSubscriptions</value>
-            </set>
-        </property>
-    </bean>
+  <bean id="filenet-connector-defaults">
+    <property name="username" value="${username}" />
+    <property name="password" value="${Password}" />
+    <property name="object_store" value="${object_store}" />
+    <property name="content_engine_url" value="${content_engine_url}" />
+    <property name="workplace_display_url" value="${workplace_display_url}" />
+    <property name="object_factory" value="com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory" />
+    <property name="additional_where_clause" value="${additional_where_clause}" />
+    <property name="delete_additional_where_clause" value="${delete_additional_where_clause}" />
+    <property name="check_marking" value="${check_marking}" />
+    <property name="db_timezone" value=""/>
+    <property name="included_meta">
+      <set>
+        <value>ClassificationStatus</value>
+        <value>ContentSize</value>
+        <value>CurrentState</value>
+        <value>DateCreated</value>
+        <value>DateLastModified</value>
+        <value>DocumentTitle</value>
+        <value>Id</value>
+        <value>IsCurrentVersion</value>
+        <value>IsFrozenVersion</value>
+        <value>IsReserved</value>
+        <value>LastModifier</value>
+        <value>LockTimeout</value>
+        <value>LockToken</value>
+        <value>MajorVersionNumber</value>
+        <value>MimeType</value>
+        <value>MinorVersionNumber</value>
+        <value>Name</value>
+        <value>Owner</value>
+        <value>StorageLocation</value>
+        <value>VersionStatus</value>
+      </set>
+    </property>
+    <property name="excluded_meta">
+      <set>
+        <value>AccessMask</value>
+        <value>ActiveMarkings</value>
+        <value>Annotations</value>
+        <value>AuditedEvents</value>
+        <value>ClassDescription</value>
+        <value>ContentElements</value>
+        <value>ContentElementsPresent</value>
+        <value>ContentRetentionDate</value>
+        <value>CreatePending</value>
+        <value>CurrentVersion</value>
+        <value>DateContentLastAccessed</value>
+        <value>DeletePending</value>
+        <value>DestinationDocuments</value>
+        <value>DocumentLifecyclePolicy</value>
+        <value>EntryTemplateId</value>
+        <value>EntryTemplateLaunchedWorkflowNumber</value>
+        <value>EntryTemplateObjectStoreName</value>
+        <value>FoldersFiledIn</value>
+        <value>IsInExceptionState</value>
+        <value>IsVersioningEnabled</value>
+        <value>LockOwner</value>
+        <value>ObjectStore</value>
+        <value>ObjectType</value>
+        <value>OIID</value>
+        <value>OwnerDocument</value>
+        <value>PendingOperation</value>
+        <value>Properties</value>
+        <value>PublicationInfo</value>
+        <value>ReleasedVersion</value>
+        <value>Reservation</value>
+        <value>ReservationType</value>
+        <value>SecurityParent</value>
+        <value>SecurityPolicy</value>
+        <value>SourceDocument</value>
+        <value>StoragePolicy</value>
+        <value>UpdatePending</value>
+        <value>VersionSeries</value>
+        <value>WorkflowSubscriptions</value>
+      </set>
+    </property>
+  </bean>
 
-    <bean id="propertyPlaceholderConfigurer"
-          class="com.google.enterprise.connector.instantiator.EncryptedPropertyPlaceholderConfigurer">
-        <property name="properties">
-            <props>
-                <prop key="username"></prop>
-                <prop key="password"></prop>
-                <prop key="object_store"></prop>
-                <prop key="content_engine_url"></prop>
-                <prop key="workplace_display_url"></prop>
-                <prop key="object_factory"></prop>
-                <prop key="additional_where_clause"></prop>
-                <prop key="delete_additional_where_clause"></prop>
-                <prop key="is_public"></prop>
-                <prop key="check_marking"></prop>
-                <prop key="useIDForChangeDetection"></prop>
-                <!--
-                <prop key="included_meta"></prop>
-                <prop key="excluded_meta"></prop>
-                <prop key="db_timezone"></prop>
-                 -->
-            </props>
-        </property>
-    </bean>
+  <bean id="propertyPlaceholderConfigurer"
+      class="com.google.enterprise.connector.instantiator.EncryptedPropertyPlaceholderConfigurer">
+    <property name="properties">
+      <props>
+        <prop key="username"></prop>
+        <prop key="password"></prop>
+        <prop key="object_store"></prop>
+        <prop key="content_engine_url"></prop>
+        <prop key="workplace_display_url"></prop>
+        <prop key="object_factory"></prop>
+        <prop key="additional_where_clause"></prop>
+        <prop key="delete_additional_where_clause"></prop>
+        <prop key="is_public"></prop>
+        <prop key="check_marking"></prop>
+        <prop key="useIDForChangeDetection"></prop>
+        <!--
+        <prop key="included_meta"></prop>
+        <prop key="excluded_meta"></prop>
+        <prop key="db_timezone"></prop>
+         -->
+      </props>
+    </property>
+  </bean>
 </beans>
