@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.google.enterprise.filenet;
 
@@ -20,43 +20,43 @@ import junit.framework.TestCase;
  */
 public class FileNetTestSuite extends TestCase
 {
-	static TestNG testng = new TestNG();
-	static TestListenerAdapter tla = new TestListenerAdapter();
-	
-	
-	@BeforeSuite
-	public void setup()
-	{
-		Tasks.startConnectorService();
-		Tasks.getSession();
-		Tasks.setfeedlogtrue();
-	}
-	
-	@AfterSuite
-	public void teardown()
-	{
-		Tasks.endSession();
-		Tasks.stopConnectorService();
-		Tasks.sleep(60);
-		FileUtils.ClearLogs();
-	}
-	@Test
-	public void FilenetTestSuite()
-	{
-		testng.setDefaultTestName("Connector Traversal");
-		testng.setOutputDirectory("TestResults\\TestNG");
-		testng.addListener(tla);
-		
-		testng.setTestClasses
-		(
-				new Class[]
-				          {
-							FileNet.class,
-							FilenetPublicfeed.class
-				          }
-		);
+  static TestNG testng = new TestNG();
+  static TestListenerAdapter tla = new TestListenerAdapter();
 
-		testng.run();
-	}
+
+  @BeforeSuite
+  public void setup()
+  {
+    Tasks.startConnectorService();
+    Tasks.getSession();
+    Tasks.setfeedlogtrue();
+  }
+
+  @AfterSuite
+  public void teardown()
+  {
+    Tasks.endSession();
+    Tasks.stopConnectorService();
+    Tasks.sleep(60);
+    FileUtils.ClearLogs();
+  }
+  @Test
+  public void FilenetTestSuite()
+  {
+    testng.setDefaultTestName("Connector Traversal");
+    testng.setOutputDirectory("TestResults\\TestNG");
+    testng.addListener(tla);
+
+    testng.setTestClasses
+    (
+        new Class[]
+                  {
+              FileNet.class,
+              FilenetPublicfeed.class
+                  }
+    );
+
+    testng.run();
+  }
 }
 

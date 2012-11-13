@@ -8,9 +8,9 @@ import com.google.enterprise.connector.spi.Session;
 
 public interface ISession {
 
-	public IUser verify() throws RepositoryLoginException, RepositoryException;
+  public IUser verify() throws RepositoryLoginException, RepositoryException;
 
-	public void setConfiguration(FileInputStream stream);
+  public void setConfiguration(FileInputStream stream);
 
-	public Session getSession();
+  public Session getSession();
 }

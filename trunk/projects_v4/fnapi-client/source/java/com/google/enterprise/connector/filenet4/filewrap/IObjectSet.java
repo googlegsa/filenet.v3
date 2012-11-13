@@ -4,7 +4,7 @@ import java.util.Iterator;
 
 public interface IObjectSet {
 
-	public int getSize();
+  public int getSize();
 
-	public Iterator getIterator();
+  public Iterator getIterator();
 }

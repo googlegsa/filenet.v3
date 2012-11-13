@@ -4,6 +4,6 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 public interface ISearch {
 
-	public IObjectSet execute(String query) throws RepositoryException;
+  public IObjectSet execute(String query) throws RepositoryException;
 
 }

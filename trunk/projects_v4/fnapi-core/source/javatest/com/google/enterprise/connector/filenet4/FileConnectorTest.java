@@ -23,23 +23,23 @@ import junit.framework.TestCase;
 
 public class FileConnectorTest extends FileNetTestCase {
 
-	/*
-	 * Test method for 'com.google.enterprise.connector.file.FileConnector.login()'
-	 */
-	public void testLogin() throws RepositoryLoginException, RepositoryException {
-	
-		FileConnector connec = new FileConnector();
-		connec.setUsername(TestConnection.adminUsername);
-		connec.setPassword(TestConnection.adminPassword);
-		connec.setObject_store(TestConnection.objectStore);
-		connec.setWorkplace_display_url(TestConnection.displayURL);
-		connec.setObject_factory(TestConnection.objectFactory);
-		connec.setContent_engine_url(TestConnection.uri);
-		
-		Session fs = connec.login();
-		assertNotNull(fs);
-		assertTrue(fs instanceof FileSession);
-	
-	}
+  /*
+   * Test method for 'com.google.enterprise.connector.file.FileConnector.login()'
+   */
+  public void testLogin() throws RepositoryLoginException, RepositoryException {
+
+    FileConnector connec = new FileConnector();
+    connec.setUsername(TestConnection.adminUsername);
+    connec.setPassword(TestConnection.adminPassword);
+    connec.setObject_store(TestConnection.objectStore);
+    connec.setWorkplace_display_url(TestConnection.displayURL);
+    connec.setObject_factory(TestConnection.objectFactory);
+    connec.setContent_engine_url(TestConnection.uri);
+
+    Session fs = connec.login();
+    assertNotNull(fs);
+    assertTrue(fs instanceof FileSession);
+
+  }
 
 }

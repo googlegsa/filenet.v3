@@ -6,19 +6,19 @@ import java.util.LinkedList;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 
 public class FnObjectList implements IObjectSet {
-	LinkedList objectList;
+  LinkedList objectList;
 
-	public FnObjectList(LinkedList objectList) {
-		super();
-		this.objectList = objectList;
-	}
+  public FnObjectList(LinkedList objectList) {
+    super();
+    this.objectList = objectList;
+  }
 
-	public int getSize() {
-		return objectList.size();
-	}
+  public int getSize() {
+    return objectList.size();
+  }
 
-	public Iterator getIterator() {
-		return objectList.iterator();
-	}
+  public Iterator getIterator() {
+    return objectList.iterator();
+  }
 
 }

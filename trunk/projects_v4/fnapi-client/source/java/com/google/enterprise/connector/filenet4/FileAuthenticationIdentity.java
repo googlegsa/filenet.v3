@@ -4,25 +4,25 @@ import com.google.enterprise.connector.spi.AuthenticationIdentity;
 
 public class FileAuthenticationIdentity implements AuthenticationIdentity {
 
-	private String username;
-	private String domain;
-	private String password;
+  private String username;
+  private String domain;
+  private String password;
 
-	public FileAuthenticationIdentity(String username, String password) {
-		this.username = username;
-		this.password = password;
-	}
+  public FileAuthenticationIdentity(String username, String password) {
+    this.username = username;
+    this.password = password;
+  }
 
-	public String getUsername() {
-		return username;
-	}
+  public String getUsername() {
+    return username;
+  }
 
-	public String getPassword() {
-		return password;
-	}
+  public String getPassword() {
+    return password;
+  }
 
-	public String getDomain() {
-		return domain;
-	}
+  public String getDomain() {
+    return domain;
+  }
 
 }

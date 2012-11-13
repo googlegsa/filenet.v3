@@ -5,9 +5,9 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 public interface IUserContext {
 
-	public String getName() throws RepositoryException;
+  public String getName() throws RepositoryException;
 
-	void authenticate(String username, String password)
-			throws RepositoryLoginException;
+  void authenticate(String username, String password)
+      throws RepositoryLoginException;
 
 }

@@ -25,10 +25,10 @@ import javax.security.auth.Subject;
  */
 public interface IConnection {
 
-	public Connection getConnection() throws RepositoryException;
+  public Connection getConnection() throws RepositoryException;
 
-	public IUserContext getUserContext();
+  public IUserContext getUserContext();
 
-	public Subject getSubject();
+  public Subject getSubject();
 
 }

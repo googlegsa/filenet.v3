@@ -15,8 +15,8 @@ package com.google.enterprise.connector.filenet4;
 
 import junit.framework.TestCase;
 
-public abstract class FileNetTestCase extends TestCase{
-	static {
-		System.setProperty(TestConnection.property_wasp_location, TestConnection.wsi_path);
-	}
+public abstract class FileNetTestCase extends TestCase {
+  static {
+    System.setProperty(TestConnection.property_wasp_location, TestConnection.wsi_path);
+  }
 }
