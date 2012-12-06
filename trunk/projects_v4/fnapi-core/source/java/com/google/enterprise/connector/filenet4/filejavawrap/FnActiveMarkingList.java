@@ -49,8 +49,8 @@ public class FnActiveMarkingList implements IActiveMarkingList {
    */
 
   public boolean authorize(String username) {
-
-    Iterator<ActiveMarking> markings = this.markings.iterator();
+    @SuppressWarnings("unchecked") Iterator<ActiveMarking> markings =
+        this.markings.iterator();
 
     while (markings.hasNext()) {
       LOGGER.log(Level.INFO, "Authorizing user :[" + username

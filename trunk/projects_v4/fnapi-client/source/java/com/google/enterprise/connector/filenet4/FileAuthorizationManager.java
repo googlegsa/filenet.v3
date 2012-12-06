@@ -61,16 +61,17 @@ public class FileAuthorizationManager implements AuthorizationManager {
    *      com.google.enterprise.connector.spi.AuthenticationIdentity)
    */
 
-  public Collection authorizeDocids(Collection docids,
-          AuthenticationIdentity identity) throws RepositoryException {
-
+  public Collection<AuthorizationResponse> authorizeDocids(
+      Collection<String> docids, AuthenticationIdentity identity)
+      throws RepositoryException {
     if (null == docids) {
       logger.severe("Got null docids for authZ .. returning null");
       return null;
     }
 
-    List authorizeDocids = new ArrayList();
-    List docidList = new ArrayList(docids);
+    List<AuthorizationResponse> authorizeDocids =
+        new ArrayList<AuthorizationResponse>();
+    List<String> docidList = new ArrayList<String>(docids);
     IVersionSeries versionSeries = null;
     AuthorizationResponse authorizationResponse;
 
@@ -88,7 +89,9 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
       DocumentClassDefinition documentClassDefinition = Factory.DocumentClassDefinition.fetchInstance(this.objectStore.getObjectStore(), GuidConstants.Class_Document, null);
       PropertyDefinitionList propertyDefinitionList = documentClassDefinition.get_PropertyDefinitions();
-      Iterator<PropertyDefinition> propertyDefinitionIterator = propertyDefinitionList.iterator();
+      @SuppressWarnings("unchecked")
+          Iterator<PropertyDefinition> propertyDefinitionIterator =
+          propertyDefinitionList.iterator();
       boolean hasMarkings = false;
 
       while (propertyDefinitionIterator.hasNext()) {
@@ -119,8 +122,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
     // Iterate through the DocId list and authorize the search user. Add the
     // authorization result to
     // AuthorizationResponse list
-    for (int i = 0; i < docidList.size(); i++) {
-      String docId = (String) docidList.get(i);
+    for (String docId : docidList) {
       try {
         logger.config("Getting version series for document DocID: "
                 + docId);

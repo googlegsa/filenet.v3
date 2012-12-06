@@ -11,10 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package com.google.enterprise.connector.filenet4.filewrap;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.Value;
 
 import java.io.InputStream;
 import java.util.List;
@@ -26,46 +28,39 @@ import java.util.Set;
  * @author pankaj_chouhan
  */
 public interface IDocument extends IBaseObject {
+  void fetch(Set<String> includedMeta) throws RepositoryDocumentException;
 
-  public void fetch(Set includedMeta) throws RepositoryDocumentException;
+  IPermissions getPermissions() throws RepositoryException;
 
-  public IPermissions getPermissions() throws RepositoryException;
+  InputStream getContent() throws RepositoryDocumentException;
 
-  public InputStream getContent() throws RepositoryDocumentException;
+  IVersionSeries getVersionSeries() throws RepositoryDocumentException;;
 
-  public IVersionSeries getVersionSeries() throws RepositoryDocumentException;;
+  Set getPropertyName() throws RepositoryDocumentException;
 
-  public Set getPropertyName() throws RepositoryDocumentException;
+  String getPropertyType(String name) throws RepositoryDocumentException;
 
-  public String getPropertyType(String name)
+  void getPropertyStringValue(String name, List<Value> set)
       throws RepositoryDocumentException;
 
-  /*
-   * public String getPropertyStringValue(String name) throws
-   * RepositoryDocumentException;
-   */
-  public void getPropertyStringValue(String name, List set)
+  void getPropertyGuidValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  public void getPropertyGuidValue(String name, List list)
+  void getPropertyLongValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  public void getPropertyLongValue(String name, List list)
+  void getPropertyDoubleValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  public void getPropertyDoubleValue(String name, List list)
+  void getPropertyDateValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  public void getPropertyDateValue(String name, List list)
+  void getPropertyBooleanValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  public void getPropertyBooleanValue(String name, List list)
+  void getPropertyBinaryValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  public void getPropertyBinaryValue(String name, List list)
-      throws RepositoryDocumentException;
-
-  public IActiveMarkingList getActiveMarkings()
-      throws RepositoryDocumentException;;
+  IActiveMarkingList getActiveMarkings() throws RepositoryDocumentException;;
 
 }

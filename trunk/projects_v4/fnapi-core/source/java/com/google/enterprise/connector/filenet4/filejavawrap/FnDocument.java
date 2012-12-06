@@ -20,6 +20,7 @@ import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
+import com.google.enterprise.connector.spi.Value;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
 import com.google.enterprise.connector.spiimpl.BooleanValue;
 import com.google.enterprise.connector.spiimpl.DateValue;
@@ -58,10 +59,9 @@ import java.util.logging.Logger;
  * @author pankaj_chouhan
  */
 public class FnDocument implements IDocument {
-
   Document doc;
-  Map metas;
-  Map metaTypes;
+  Map<String, Object> metas;
+  Map<String, String> metaTypes;
 
   private static Logger logger = null;
   {
@@ -77,19 +77,17 @@ public class FnDocument implements IDocument {
     if (includedMeta != null) {
       if (includedMeta.size() == 0) {
         pf.addIncludeProperty(new FilterElement(null, null, null,
-            (String) null)); // Removed the hardcoded metadata
-        // values. -Pankaj 06/05/2009
+            (String) null, null));
       } else {
-
         pf.addIncludeProperty(new FilterElement(null, null, null,
             "Id ClassDescription ContentElements DateLastModified MimeType VersionSeries "
                 + PropertyNames.RELEASED_VERSION + " "
-                + PropertyNames.VERSION_SERIES_ID));
+                + PropertyNames.VERSION_SERIES_ID, null));
       }
 
       for (Object object : includedMeta) {
         pf.addIncludeProperty(new FilterElement(null, null, null,
-            (String) object));
+            (String) object, null));
       }
     }
 
@@ -105,40 +103,37 @@ public class FnDocument implements IDocument {
   }
 
   private void setMetaTypes() {
-    metaTypes = new HashMap();
-    String propertyName, propertyType;
+    metaTypes = new HashMap<String, String>();
     PropertyDescriptionList propDescList = doc.get_ClassDescription().get_PropertyDescriptions();
 
     Iterator it8 = propDescList.iterator();
     while (it8.hasNext()) {
       PropertyDescription propDesc = (PropertyDescription) it8.next();
-      propertyName = propDesc.get_SymbolicName().toUpperCase();
-      propertyType = propDesc.get_DataType().toString();
+      String propertyName = propDesc.get_SymbolicName().toUpperCase();
+      String propertyType = propDesc.get_DataType().toString();
       metaTypes.put(propertyName, propertyType);
     }
   }
 
   private void setMeta() {
-    metas = new HashMap();
-    Properties props;
-    Object value;
-    props = doc.getProperties();
+    metas = new HashMap<String, Object>();
+    Properties props = doc.getProperties();
     Property[] prop = props.toArray();
     for (Property property : prop) {
-      value = property.getObjectValue();
+      Object value = property.getObjectValue();
       if (value != null) {
         metas.put(property.getPropertyName(), value);
       }
     }
   }
 
-  public Set getPropertyName() {
+  public Set<String> getPropertyName() {
     return metas.keySet();
   }
 
   public String getPropertyType(String name)
       throws RepositoryDocumentException {
-    return (String) metaTypes.get(name.toUpperCase());
+    return metaTypes.get(name.toUpperCase());
   }
 
   public IVersionSeries getVersionSeries() {
@@ -220,8 +215,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  public void getPropertyStringValue(String propertyName, List valuesList)
-      throws RepositoryDocumentException {
+  public void getPropertyStringValue(String propertyName,
+      List<Value> valuesList) throws RepositoryDocumentException {
     Object value = null;
     try {
       Properties props = doc.getProperties();
@@ -270,7 +265,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  public void getPropertyGuidValue(String propertyName, List valuesList)
+  public void getPropertyGuidValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
     try {
       String id = null;
@@ -305,13 +300,10 @@ public class FnDocument implements IDocument {
             } else {
               id = prop.getIdValue().toString();
               if (id != null)
-                // Whenever the ID is retrieved from FileNet, it
-                // comes with "{"
-                // and "}" surrounded and ID is in between these
-                // curly braces
-                // FileNEt connector needs ID without curly
-                // braces. Thus removing
-                // the curly braces.
+                // Whenever the ID is retrieved from FileNet, it comes with
+                // "{" and "}" surrounded and ID is in between these curly
+                // braces FileNet connector needs ID without curly braces.
+                // Thus removing the curly braces.
                 valuesList.add(new StringValue(
                     id.substring(1, id.length() - 1)));
             }
@@ -337,7 +329,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  public void getPropertyLongValue(String propertyName, List valuesList)
+  public void getPropertyLongValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
     try {
       Properties props = doc.getProperties();
@@ -388,8 +380,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  public void getPropertyDoubleValue(String propertyName, List valuesList)
-      throws RepositoryDocumentException {
+  public void getPropertyDoubleValue(String propertyName,
+      List<Value> valuesList) throws RepositoryDocumentException {
     try {
 
       Properties props = doc.getProperties();
@@ -447,7 +439,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  public void getPropertyDateValue(String propertyName, List valuesList)
+  public void getPropertyDateValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
     try {
       Properties props = doc.getProperties();
@@ -497,8 +489,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  public void getPropertyBooleanValue(String propertyName, List valuesList)
-      throws RepositoryDocumentException {
+  public void getPropertyBooleanValue(String propertyName,
+      List<Value> valuesList) throws RepositoryDocumentException {
     try {
       Properties props = doc.getProperties();
       Property[] property = props.toArray();
@@ -542,8 +534,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  public void getPropertyBinaryValue(String propertyName, List valuesList)
-      throws RepositoryDocumentException {
+  public void getPropertyBinaryValue(String propertyName,
+      List<Value> valuesList) throws RepositoryDocumentException {
     try {
       Properties props = doc.getProperties();
       Property[] property = props.toArray();

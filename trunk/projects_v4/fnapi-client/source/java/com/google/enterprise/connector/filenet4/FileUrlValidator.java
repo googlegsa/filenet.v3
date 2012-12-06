@@ -258,11 +258,11 @@ class FileUrlValidator {
    */
    private void setTimeouts(URLConnection conn) {
     try {
-      Class c = URLConnection.class;
+      Class<URLConnection> c = URLConnection.class;
       Method setConnectTimeout = c.getMethod("setConnectTimeout",
-          new Class[] { int.class });
+          new Class<?>[] { int.class });
       Method setReadTimeout = c.getMethod("setReadTimeout",
-          new Class[] { int.class });
+          new Class<?>[] { int.class });
 
       final Integer[] connectTimeoutArg = { new Integer(connectTimeout) };
       setConnectTimeout.invoke(conn, (Object[]) connectTimeoutArg);

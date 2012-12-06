@@ -27,11 +27,12 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.Session;
 import com.google.enterprise.connector.spi.TraversalManager;
 
-import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileSession implements Session {
+  private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());
 
   private IObjectFactory fileObjectFactory;
   private IObjectStore objectStore;
@@ -42,18 +43,17 @@ public class FileSession implements Session {
   private boolean useIDForChangeDetection;
   private String additionalWhereClause;
   private String deleteadditionalWhereClause;
-  private HashSet included_meta;
-  private HashSet excluded_meta;
+  private Set<String> included_meta;
+  private Set<String> excluded_meta;
   private String db_timezone;
-  private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());
 
   public FileSession(String iObjectFactory, String userName,
-          String userPassword, String objectStoreName, String displayUrl,
-          String contentEngineUri, boolean isPublic, boolean checkMarking,
-          boolean useIDForChangeDetection, String additionalWhereClause,
-          String deleteadditionalWhereClause, HashSet included_meta,
-          HashSet excluded_meta, String db_timezone)
-          throws RepositoryException, RepositoryLoginException {
+      String userPassword, String objectStoreName, String displayUrl,
+      String contentEngineUri, boolean isPublic, boolean checkMarking,
+      boolean useIDForChangeDetection, String additionalWhereClause,
+      String deleteadditionalWhereClause, Set<String> included_meta,
+      Set<String> excluded_meta, String db_timezone)
+      throws RepositoryException, RepositoryLoginException {
 
     setFileObjectFactory(iObjectFactory);
 

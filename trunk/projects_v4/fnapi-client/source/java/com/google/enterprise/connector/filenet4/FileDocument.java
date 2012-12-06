@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
@@ -19,6 +20,7 @@ import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.Value;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
 import com.google.enterprise.connector.spiimpl.BooleanValue;
 import com.google.enterprise.connector.spiimpl.DateValue;
@@ -41,7 +43,6 @@ import java.util.logging.Logger;
  * @author pankaj_chouhan
  */
 public class FileDocument implements Document {
-
   private String docId;
   private IObjectStore objectStore;
   private IDocument document = null;
@@ -50,8 +51,8 @@ public class FileDocument implements Document {
   private String versionId;
   private Date timeStamp;
   private String vsDocId;
-  private HashSet included_meta = null;
-  private HashSet excluded_meta = null;
+  private Set<String> included_meta = null;
+  private Set excluded_meta = null;
   private static Logger logger = null;
   {
     logger = Logger.getLogger(FileDocument.class.getName());
@@ -59,8 +60,8 @@ public class FileDocument implements Document {
   private SpiConstants.ActionType action;
 
   public FileDocument(String docId, Date timeStamp, IObjectStore objectStore,
-          boolean isPublic, String displayUrl, HashSet included_meta,
-          HashSet excluded_meta, SpiConstants.ActionType action) {
+          boolean isPublic, String displayUrl, Set<String> included_meta,
+          Set<String> excluded_meta, SpiConstants.ActionType action) {
     this.docId = docId;
     this.timeStamp = timeStamp;
     this.objectStore = objectStore;
@@ -73,7 +74,7 @@ public class FileDocument implements Document {
 
   public FileDocument(String docId, String commonVersionId, Date timeStamp,
           IObjectStore objectStore, boolean isPublic, String displayUrl,
-          HashSet included_meta, HashSet excluded_meta,
+          Set<String> included_meta, Set<String> excluded_meta,
           SpiConstants.ActionType action) {
     this.docId = docId;
     this.versionId = commonVersionId;
@@ -100,7 +101,7 @@ public class FileDocument implements Document {
 
   public Property findProperty(String name)
           throws RepositoryDocumentException {
-    LinkedList list = new LinkedList();
+    LinkedList<Value> list = new LinkedList<Value>();
 
     if (SpiConstants.ActionType.ADD.equals(action)) {
       fetch();
@@ -198,13 +199,12 @@ public class FileDocument implements Document {
     return new FileDocumentProperty(name, list);
   }
 
-  public Set getPropertyNames() throws RepositoryDocumentException {
+  public Set<String> getPropertyNames() throws RepositoryDocumentException {
     fetch();
-    HashSet properties = new HashSet();
+    Set<String> properties = new HashSet<String>();
     Set documentProperties = this.document.getPropertyName();
-    String property;
     for (Iterator iter = documentProperties.iterator(); iter.hasNext();) {
-      property = (String) iter.next();
+      String property = (String) iter.next();
       if (property != null) {
         if (included_meta.size() != 0) {
           // includeMeta - exludeMeta

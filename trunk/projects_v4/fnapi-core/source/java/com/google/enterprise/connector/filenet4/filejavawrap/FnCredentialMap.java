@@ -4,17 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 class FnCredentialMap {
-
-  private static Map authUser = null;
+  private static Map<String, String> authUser = null;
 
   protected static synchronized void putUserCred(String name, String password) {
-    authUser.put(name,password);
+    authUser.put(name, password);
   }
 
   protected static synchronized String getUserCred(String name) {
-    return (String) authUser.get(name);
+    return authUser.get(name);
   }
-
 
   protected static synchronized boolean containsUserCred(String name) {
     return authUser.containsKey(name);
@@ -25,7 +23,6 @@ class FnCredentialMap {
   }
 
   protected static synchronized void init() {
-    authUser = new HashMap();
+    authUser = new HashMap<String, String>();
   }
-
 }
