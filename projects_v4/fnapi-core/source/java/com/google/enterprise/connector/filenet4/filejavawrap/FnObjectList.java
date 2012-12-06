@@ -1,14 +1,15 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
 
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 
 public class FnObjectList implements IObjectSet {
-  LinkedList objectList;
+  List<? extends IBaseObject> objectList;
 
-  public FnObjectList(LinkedList objectList) {
+  public FnObjectList(List<? extends IBaseObject> objectList) {
     super();
     this.objectList = objectList;
   }

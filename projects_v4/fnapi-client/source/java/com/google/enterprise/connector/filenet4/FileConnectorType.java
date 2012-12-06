@@ -98,8 +98,8 @@ public class FileConnectorType implements ConnectorType {
   private static final String ACCESS_DENIED_EXCEPTION = "com.filenet.api.exception.EngineRuntimeException: E_ACCESS_DENIED:";
   private static final String RETRIEVE_SQL_SYNTAX_ERROR = "com.filenet.api.exception.EngineRuntimeException: RETRIEVE_SQL_SYNTAX_ERROR:";
   private static Logger LOGGER = Logger.getLogger(FileConnectorType.class.getName());
-  private List keys = null;
-  private Set keySet = null;
+  private List<String> keys = null;
+  private Set<String> keySet = null;
   private String initialConfigForm = null;
   private ResourceBundle resource;
   private String validation = "";
@@ -111,12 +111,12 @@ public class FileConnectorType implements ConnectorType {
    *
    * @param keys A list of String keys
    */
-  public void setConfigKeys(List keys) {
+  public void setConfigKeys(List<String> keys) {
     if (this.keys != null) {
       throw new IllegalStateException();
     }
     this.keys = keys;
-    this.keySet = new HashSet(keys);
+    this.keySet = new HashSet<String>(keys);
   }
 
   /**
@@ -127,7 +127,6 @@ public class FileConnectorType implements ConnectorType {
    * @param keys An array of String keys
    */
   public void setConfigKeys(String[] keys) {
-
     setConfigKeys(Arrays.asList(keys));
   }
 
@@ -177,7 +176,7 @@ public class FileConnectorType implements ConnectorType {
    *
    * @return com.google.enterprise.connector.spi.ConfigureResponse;
    */
-  public ConfigureResponse getPopulatedConfigForm(Map configMap,
+  public ConfigureResponse getPopulatedConfigForm(Map<String, String> configMap,
           Locale language) {
     try {
       resource = ResourceBundle.getBundle(LOCALE_FILE, language);
@@ -196,10 +195,10 @@ public class FileConnectorType implements ConnectorType {
    * or key.equals(WHERECLAUSE) or key.equals(FILEURI)or
    * key.equals(CHECKMARKING)
    */
-  private String validateConfigMap(Map configData) {
-    for (Iterator i = keys.iterator(); i.hasNext();) {
-      String key = (String) i.next();
-      String val = (String) configData.get(key);
+  private String validateConfigMap(Map<String, String> configData) {
+    for (Iterator<String> i = keys.iterator(); i.hasNext();) {
+      String key = i.next();
+      String val = configData.get(key);
       // TODO remove unrelevant FILEURI
 
       if (!key.equals(FNCLASS)
@@ -223,8 +222,8 @@ public class FileConnectorType implements ConnectorType {
    *
    * @return com.google.enterprise.connector.spi.ConfigureResponse;
    */
-  public ConfigureResponse validateConfig(Map configData, Locale language,
-          ConnectorFactory connectorFactory) {
+  public ConfigureResponse validateConfig(Map<String, String> configData,
+      Locale language, ConnectorFactory connectorFactory) {
     LOGGER.log(Level.FINEST, "Entering into function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
     try {
       resource = ResourceBundle.getBundle(LOCALE_FILE, language);
@@ -251,18 +250,10 @@ public class FileConnectorType implements ConnectorType {
     if (validation.equals("")) {
       try {
         LOGGER.info("Attempting to create FileNet4 connector instance");
-        configData.put(CONTENT_ENGINE_URL, rightTrim(((String) configData.get(CONTENT_ENGINE_URL)).trim(), '/'));// Removing
-        // the
-        // extra
-        // slashes
-        // at
-        // the
-        // right
-        // end
-        // of
-        // content
-        // engine
-        // url
+        // Removing the extra slashes at the right end of content
+        // engine URL.
+        configData.put(CONTENT_ENGINE_URL,
+            rightTrim((configData.get(CONTENT_ENGINE_URL)).trim(), '/'));
 
         FileConnector conn = (FileConnector) connectorFactory.makeConnector(configData);
         if (null == conn) {
@@ -278,24 +269,24 @@ public class FileConnectorType implements ConnectorType {
           session.getTraversalManager();// test on the objectStore
           // name
           LOGGER.log(Level.INFO, "Connection to Object Store "
-                  + (String) configData.get("object_store")
-                  + " is Successful");
+              + configData.get("object_store") + " is Successful");
         } else {
           LOGGER.log(Level.INFO, "Connection to Content Engine URL Failed");
         }
 
-        testWorkplaceUrl(((String) configData.get("workplace_display_url")).trim());
+        testWorkplaceUrl(configData.get("workplace_display_url").trim());
 
         StringBuffer query = new StringBuffer();
 
-        if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
-          if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT)) {
-            if (((String) configData.get(WHERECLAUSE)).trim().toUpperCase().contains(((this.VERSIONQUERY)).toUpperCase())) {
-              query = new StringBuffer(
-                      ((String) configData.get(WHERECLAUSE)).trim());
+        if (configData.get(WHERECLAUSE).trim().toUpperCase()
+            .startsWith(this.SELECT)) {
+          if (configData.get(WHERECLAUSE).trim().toUpperCase()
+              .startsWith(this.QUERYFORMAT)) {
+            if (configData.get(WHERECLAUSE).trim().toUpperCase()
+                .contains(((this.VERSIONQUERY)).toUpperCase())) {
+              query = new StringBuffer(configData.get(WHERECLAUSE).trim());
               LOGGER.fine("Using Custom Query["
-                      + ((String) configData.get(WHERECLAUSE)).trim()
-                      + "]");
+                  + configData.get(WHERECLAUSE).trim() + "]");
             } else {
               this.validation = WHERECLAUSE;
               form = makeConfigForm(configData, this.validation);
@@ -312,7 +303,7 @@ public class FileConnectorType implements ConnectorType {
           }
         } else {
           query.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-          query.append(((String) configData.get(WHERECLAUSE)).trim());
+          query.append(configData.get(WHERECLAUSE).trim());
         }
 
         try {
@@ -350,13 +341,13 @@ public class FileConnectorType implements ConnectorType {
 
         StringBuffer deleteuery = new StringBuffer();
 
-        if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.SELECT)) {
-          if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().startsWith(this.QUERYFORMAT)) {
-            if (((String) configData.get(DELETEWHERECLAUSE)).trim().toUpperCase().contains(((this.VERSIONQUERY)).toUpperCase())) {
+        if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase().startsWith(this.SELECT)) {
+          if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase().startsWith(this.QUERYFORMAT)) {
+            if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase().contains(((this.VERSIONQUERY)).toUpperCase())) {
               deleteuery = new StringBuffer(
-                      ((String) configData.get(DELETEWHERECLAUSE)).trim());
+                      configData.get(DELETEWHERECLAUSE).trim());
               LOGGER.fine("Using Custom Query["
-                      + ((String) configData.get(DELETEWHERECLAUSE)).trim()
+                      + configData.get(DELETEWHERECLAUSE).trim()
                       + "]");
             } else {
               this.validation = DELETEWHERECLAUSE;
@@ -374,7 +365,7 @@ public class FileConnectorType implements ConnectorType {
           }
         } else {
           deleteuery.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-          deleteuery.append(((String) configData.get(DELETEWHERECLAUSE)).trim());
+          deleteuery.append(configData.get(DELETEWHERECLAUSE).trim());
         }
 
         try {
@@ -409,9 +400,9 @@ public class FileConnectorType implements ConnectorType {
           }
         }
 
-        if (!((String) configData.get(WHERECLAUSE)).trim().equalsIgnoreCase("")
-                || !((String) configData.get(DELETEWHERECLAUSE)).trim().equalsIgnoreCase("")) {
-          if ((((String) configData.get(WHERECLAUSE)).trim()).equalsIgnoreCase(((String) configData.get(DELETEWHERECLAUSE)).trim())) {
+        if (!configData.get(WHERECLAUSE).trim().equalsIgnoreCase("")
+                || !configData.get(DELETEWHERECLAUSE).trim().equalsIgnoreCase("")) {
+          if ((configData.get(WHERECLAUSE).trim()).equalsIgnoreCase(configData.get(DELETEWHERECLAUSE).trim())) {
             this.validation = DELETEWHERECLAUSE;
             form = makeConfigForm(configData, this.validation);
             return new ConfigureResponse(
@@ -538,13 +529,14 @@ public class FileConnectorType implements ConnectorType {
    * @param configMap
    * @return config form snippet
    */
-  private String makeConfigForm(Map configMap, String validate) {
+  private String makeConfigForm(Map<String, String> configMap,
+      String validate) {
     StringBuffer buf = new StringBuffer(2048);
     String value = " ";
-    for (Iterator i = keys.iterator(); i.hasNext();) {
-      String key = (String) i.next();
+    for (Iterator<String> i = keys.iterator(); i.hasNext();) {
+      String key = i.next();
       if (configMap != null) {
-        value = (String) configMap.get(key);
+        value = configMap.get(key);
       }
 
       if (key.equals(CHECKMARKING)) {
@@ -615,12 +607,12 @@ public class FileConnectorType implements ConnectorType {
       }
     }
     if (configMap != null) {
-      Iterator i = new TreeSet(configMap.keySet()).iterator();
+      Iterator<String> i = new TreeSet<String>(configMap.keySet()).iterator();
       while (i.hasNext()) {
-        String key = (String) i.next();
+        String key = i.next();
         if (!keySet.contains(key)) {
           // add another hidden field to preserve this data
-          String val = (String) configMap.get(key);
+          String val = configMap.get(key);
           buf.append("<input type=\"hidden\" value=\"");
           buf.append(val);
           buf.append("\" name=\"");

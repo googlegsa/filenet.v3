@@ -15,7 +15,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,18 +40,18 @@ public class FileDocumentList implements DocumentList {
   private String docIdToDelete = "";
   private String docIdToDeleteDocs = "";
   private boolean isPublic;
-  private HashSet included_meta;
-  private HashSet excluded_meta;
+  private Set<String> included_meta;
+  private Set<String> excluded_meta;
   private int index = -1;
   // private NodeList data = null;
   // private NodeList dataToDelete = null;
   private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
 
   public FileDocumentList(IObjectSet objectSet,
-          IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
-          IObjectStore objectStore, boolean isPublic, String displayUrl,
-          HashSet included_meta, HashSet excluded_meta, String dateFirstPush,
-          String checkPoint) {
+      IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
+      IObjectStore objectStore, boolean isPublic, String displayUrl,
+      Set<String> included_meta, Set<String> excluded_meta,
+      String dateFirstPush, String checkPoint) {
     this.objectSet = objectSet;
     this.objectSetToDeleteDocs = objectSetToDeleteDocs;
     this.objectSetToDelete = objectSetToDelete;
@@ -82,9 +82,9 @@ public class FileDocumentList implements DocumentList {
   }
 
   public FileDocumentList(IObjectSet objectSet, IObjectSet objectSetToDelete,
-          IObjectStore objectStore, boolean isPublic, String displayUrl,
-          HashSet included_meta, HashSet excluded_meta, String dateFirstPush,
-          String checkPoint) {
+      IObjectStore objectStore, boolean isPublic, String displayUrl,
+      Set<String> included_meta, Set<String> excluded_meta,
+      String dateFirstPush, String checkPoint) {
     this.objectSet = objectSet;
     this.objectSetToDelete = objectSetToDelete;
     this.objectSetToDeleteDocs = null;

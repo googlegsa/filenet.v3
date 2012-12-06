@@ -31,7 +31,7 @@ public class FnSearch implements ISearch {
   }
 
   public IObjectSet execute(String query) throws RepositoryException {
-    LinkedList objectList = new LinkedList();
+    LinkedList<FnBaseObject> objectList = new LinkedList<FnBaseObject>();
     IndependentObjectSet myObjects;
 
     SearchSQL sqlObject = new SearchSQL();

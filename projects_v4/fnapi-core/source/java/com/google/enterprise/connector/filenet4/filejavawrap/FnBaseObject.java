@@ -33,13 +33,13 @@ public class FnBaseObject implements IBaseObject {
     PropertyFilter pf = new PropertyFilter();
 
     pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.RELEASED_VERSION));
+        PropertyNames.RELEASED_VERSION, null));
     pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.VERSION_SERIES));
+        PropertyNames.VERSION_SERIES, null));
     pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.VERSION_SERIES_ID));
+        PropertyNames.VERSION_SERIES_ID, null));
     pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.ID));
+        PropertyNames.ID, null));
 
     this.object.fetchProperties(pf);
 

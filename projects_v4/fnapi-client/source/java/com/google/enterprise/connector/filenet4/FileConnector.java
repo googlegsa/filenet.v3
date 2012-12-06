@@ -6,14 +6,13 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.Session;
 
 import java.net.URL;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
 public class FileConnector implements Connector {
-
   private String object_factory;
   private String username;
   private String password;
@@ -25,8 +24,8 @@ public class FileConnector implements Connector {
   private String useIDForChangeDetection = "false";
   private String additional_where_clause;
   private String delete_additional_where_clause = "";
-  private HashSet included_meta;
-  private HashSet excluded_meta;
+  private Set<String> included_meta;
+  private Set<String> excluded_meta;
   private String db_timezone;
 
   public String getDb_timezone() {
@@ -149,20 +148,20 @@ public class FileConnector implements Connector {
             + this.delete_additional_where_clause);
   }
 
-  public HashSet getExcluded_meta() {
+  public Set<String> getExcluded_meta() {
     return excluded_meta;
   }
 
-  public void setExcluded_meta(HashSet excluded_meta) {
+  public void setExcluded_meta(Set<String> excluded_meta) {
     this.excluded_meta = excluded_meta;
     LOGGER.config("Setting excluded_meta to " + excluded_meta);
   }
 
-  public HashSet getIncluded_meta() {
+  public Set<String> getIncluded_meta() {
     return included_meta;
   }
 
-  public void setIncluded_meta(HashSet included_meta) {
+  public void setIncluded_meta(Set<String> included_meta) {
     this.included_meta = included_meta;
     LOGGER.config("Setting included_meta to " + included_meta);
   }

@@ -61,13 +61,13 @@ public class FnPermissions implements IPermissions {
 
   private void setPropertyFilter() {
     pf.addIncludeProperty(new FilterElement(null, null, null,
-            PropertyNames.EMAIL));
+            PropertyNames.EMAIL, null));
     pf.addIncludeProperty(new FilterElement(null, null, null,
-            PropertyNames.SHORT_NAME));
+            PropertyNames.SHORT_NAME, null));
     pf.addIncludeProperty(new FilterElement(null, null, null,
-            PropertyNames.NAME));
+            PropertyNames.NAME, null));
     pf.addIncludeProperty(new FilterElement(null, null, null,
-            PropertyNames.DISTINGUISHED_NAME));
+            PropertyNames.DISTINGUISHED_NAME, null));
   }
 
   /**

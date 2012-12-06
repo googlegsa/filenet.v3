@@ -41,7 +41,7 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.HashSet;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,16 +93,16 @@ public class FileTraversalManager implements TraversalManager {
   private String displayUrl;
   private boolean isPublic;
   private boolean useIDForChangeDetection;
-  private HashSet included_meta;
-  private HashSet excluded_meta;
+  private Set<String> included_meta;
+  private Set<String> excluded_meta;
   private String db_timezone;
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
-          IObjectStore objectStore, boolean b,
-          boolean useIDForChangeDetection, String displayUrl,
-          String additionalWhereClause, String deleteadditionalWhereClause,
-          HashSet included_meta, HashSet excluded_meta, String db_timezone)
-          throws RepositoryException {
+      IObjectStore objectStore, boolean b,
+      boolean useIDForChangeDetection, String displayUrl,
+      String additionalWhereClause, String deleteadditionalWhereClause,
+      Set<String> included_meta, Set<String> excluded_meta,
+      String db_timezone) throws RepositoryException {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
     this.isPublic = b;
@@ -116,11 +116,11 @@ public class FileTraversalManager implements TraversalManager {
   }
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
-          IObjectStore objectStore, ISession fileSession, boolean b,
-          boolean useIDForChangeDetection, String displayUrl,
-          String additionalWhereClause, String deleteadditionalWhereClause,
-          HashSet included_meta, HashSet excluded_meta, String db_timezone)
-          throws RepositoryException {
+      IObjectStore objectStore, ISession fileSession, boolean b,
+      boolean useIDForChangeDetection, String displayUrl,
+      String additionalWhereClause, String deleteadditionalWhereClause,
+      Set<String> included_meta, Set<String> excluded_meta, String db_timezone)
+      throws RepositoryException {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
     this.fileSession = fileSession;
