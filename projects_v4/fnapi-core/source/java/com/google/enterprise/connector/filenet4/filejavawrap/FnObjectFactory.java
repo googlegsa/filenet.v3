@@ -1,10 +1,10 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright 2007-2010 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,31 +59,19 @@ public class FnObjectFactory implements IObjectFactory {
   public IObjectStore getObjectStore(String objectStoreName,
           IConnection conn, String userName, String userPassword)
           throws RepositoryException, RepositoryLoginException {
-
-    Domain domain = null;
-    UserContext uc = null;
-    try {
-      logger.info("getting the instance of domain from connection");
-      domain = Factory.Domain.getInstance((Connection) conn.getConnection(), null);
-
-      logger.info("getting the usercontext..");
-      uc = UserContext.get();
-    } catch (Throwable e) {
-      logger.log(Level.SEVERE, "Unable to get domain or usercontext", e);
-      throw new RepositoryLoginException(e);
-    }
-
     ObjectStore os = null;
     try {
-      os = getRawObjectStore(userName, userPassword, conn, domain, objectStoreName, uc);
+      os = getRawObjectStore(userName, userPassword, conn.getConnection(), 
+              objectStoreName);
     } catch (Throwable e) {
       logger.log(Level.WARNING, "Unable to connect to the Object Store with user: "
-              + userName);
+              + userName, e);
       String shortName = FileUtil.getShortName(userName);
       logger.log(Level.INFO, "Trying to connect Object Store with user: "
               + shortName + " in short name format.");
       try {
-        os = getRawObjectStore(shortName, userPassword, conn, domain, objectStoreName, uc);
+        os = getRawObjectStore(shortName, userPassword, conn.getConnection(),
+                objectStoreName);
       } catch (Throwable th) {
         logger.log(Level.SEVERE, "Problems while connecting to FileNet object store. Got Exception: ", th);
         throw new RepositoryLoginException(e);
@@ -99,14 +87,17 @@ public class FnObjectFactory implements IObjectFactory {
     return new FnSearch(search);
   }
 
-  private ObjectStore getRawObjectStore(String userName, String userPassword,
-          IConnection conn, Domain domain, String objectStoreName,
-          UserContext uc) throws RepositoryException {
+  private ObjectStore getRawObjectStore(String userName, String userPassword, 
+          Connection conn, String objectStoreName) throws RepositoryException {
     logger.info("Creating the subject for user: " + userName);
-    Subject s = UserContext.createSubject((Connection) conn.getConnection(), userName, userPassword, "FileNetP8");
-    uc.pushSubject(s);
-    logger.info("Creating the FileNet object store instance..");
-    ObjectStore os = Factory.ObjectStore.fetchInstance(domain, objectStoreName, null);
+    Subject s = UserContext.createSubject(conn, userName, userPassword, 
+        "FileNetP8");
+    UserContext.get().pushSubject(s);
+    Domain domain = Factory.Domain.fetchInstance(conn, null, null);
+    logger.log(Level.INFO, "Fetch domain: {0}", domain);
+    logger.info("Creating the FileNet object store instance.");
+    ObjectStore os = Factory.ObjectStore.fetchInstance(domain, objectStoreName,
+        null);
     os.refresh();
     logger.config("Connection to FileNet ObjectStore is successful...");
     return os;
