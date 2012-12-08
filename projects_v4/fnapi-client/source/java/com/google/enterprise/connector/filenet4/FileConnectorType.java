@@ -23,6 +23,8 @@ import com.google.enterprise.connector.spi.ConnectorFactory;
 import com.google.enterprise.connector.spi.ConnectorType;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.XmlUtils;
+import com.google.enterprise.connector.util.UrlValidator;
+import com.google.enterprise.connector.util.UrlValidatorException;
 
 import com.filenet.api.exception.EngineRuntimeException;
 
@@ -509,9 +511,9 @@ public class FileConnectorType implements ConnectorType {
     // Added by Pankaj on 04/05/2009 to remove the dependency of
     // Httpclient.jar file
     try {
-      new FileUrlValidator().validate(workplaceServerUrl);
+      new UrlValidator().validate(workplaceServerUrl);
       LOGGER.log(Level.INFO, "Connection to Workplace URL is Successful");
-    } catch (FileUrlValidatorException e) {
+    } catch (UrlValidatorException e) {
       LOGGER.log(Level.WARNING, resource.getString("workplace_url_error"));
       throw new RepositoryException(
               resource.getString("workplace_url_error"));
