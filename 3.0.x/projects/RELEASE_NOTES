@@ -1,0 +1,139 @@
+﻿Release Notes:
+===============
+
+Google Search Appliance Connector for IBM FileNet P8 3.5.2
+
+This document contains the release notes for Google Search Appliance Connector for IBM FileNet P8 3.5.2
+The following sections describe the release in detail and provide information that supplements the main documentation.
+See the Issues Tab on the Code Site for the current list of known issues and workarounds.
+
+Web Site: http://code.google.com/p/google-enterprise-connector-file/issues/list
+
+
+Release 2.8, <Month> <Date>, <Year>
+==========================
+
+Introduction
+------------------
+This is the patch release of this product. See the product website for a complete description.
+
+Version Compatibility
+-----------------------
+This version works with Connector Manager version 2.6.x and above.
+
+Platform Support
+------------------
+The connector can be installed and run on both 32-bit & 64-bit Windows and Linux environments
+
+Certified Against
+-------------------
+32-bit:
+-------
+Microsoft Windows Server 2003
+Enterprise Edition
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 2.00 GB of RAM
+
+Red Hat Linux 5 (32-bit)
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 2.00 GB of RAM
+
+64-bit:
+--------
+Microsoft Windows Server 2003
+Enterprise x64 Edition
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 2.00 GB of RAM
+
+SUSE Linux Enterprise Server 11 (x86_64)
+Intel(R) Xeon(R) CPU
+E5504 @ 2.00GHz, 2.00 GB of RAM
+
+Features
+--------------
+1. The connector crawls all documents which are supported by IBM FileNet server 3.5.2.
+2. The connector always runs in an incremental mode and keeps feeding the updated documents to the Google Search Appliance (GSA).
+3. The auditing feature ensures that documents are deleted from the GSA index when they are deleted from the repository.
+4. The connector handles serve-time authentication and authorization.
+
+Steps to deploy patch
+---------------------
+1. Stop connector service (If running).
+2. Navigate to the folder CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\lib.
+3. Replace the existing connector-file.jar with the latest jar.
+4. Open the connectorInstance.xml file, Add the following lines 
+		 <property name="useIDForChangeDetection" value="true"/>
+         <property name="is_public" value="false"/>
+   just after the line
+   <bean id="FileConnectorInstance"
+          class="com.google.enterprise.connector.filenet3.FileConnector"
+          parent="filenet-connector-defaults"
+          singleton="false">        
+		 
+5. Navigate to the folder CONNECTOR_HOME\Tomcat\webapps\connector-manager\WEB-INF\connectors\Filenet_P8_3.5.2\<Connector Instance>.
+6. Delete <Connector Instance>_state.txt file.
+7. Start the connector service.
+
+Note :
+<property name="useIDForChangeDetection" value="true"/> : Connector will use document ID for change detection.
+<property name="useIDForChangeDetection" value="false"/> : Connector will not use document ID for change detection.
+
+<property name="is_public" value="true"/> : Connector will feed all the crawled documents as ‘Public’ documents.
+<property name="is_public" value="false"/> : Connector will feed all the crawled documents as ‘Secure’ documents.
+
+Issues Fixed
+------------
+- [Issue 4445625] : Remove 'Make Public' Check box from connector Configuration page.
+Description : 
+O 'Make Public' check box on connector configuration page allows to configure connector to send public feeds. 
+Since GSA has provision to configure connector to send public feeds and no any other connector provides this 
+type of configuration element, to keep FileNet connector consistent with other connector 'Make Public' check box is removed from configuration page. 
+O For backward compatibility, Added ‘is_public’ property in the ConnectorInstance.xml with default value as ‘false’
+hence the connector will send the secure feed to the GSA.To configure the connector to send public feed, 
+modify the ConnectorInstance.xml set the ‘is_public’ property value to ‘true’.
+
+<property name="is_public" value="true"/> : Connector will feed all the crawled documents as ‘Public’ documents.
+<property name="is_public" value="false"/> : Connector will feed all the crawled documents as ‘Secure’ documents.
+
+- [Issue 4352584] : Authorization failing due comparison criterion.
+Description:
+O FileNet connector fails to authorize the user with Email id or any other user identity format and 
+logs error messages as "INFO: User abc@yyyy.com is NOT authorized for document Id %<Doc id to authorize>%7D". 
+
+- [Issue 4348956] : To Provide 'Additional Delete Clause' on connector configuration page for sending delete feed 
+for documents matching particular condition.
+Description:
+O To Delete the documents indexed on GSA which does not match the condition specified in the 
+'Addition Where Clause' added 'Additional Delete Clause' field on connector configuration page 
+to send delete feed for documents matching particular condition.
+
+- [Issue 4445643] : Provision to set the ID comparison criteria for change detection.
+Description:
+O There is no provision for the user to specify whether to use ID for change detection while crawling.
+Currently connector uses ID and last_modified_date for change detection by default and there is no option to ignore IDs.
+O This provision is given in ConnectorInstance.xml with default value as ‘true’.
+<property name="useIDForChangeDetection" value="true"/> : Connector will use document ID for change detection.
+<property name="useIDForChangeDetection" value="false"/> : Connector will not use document ID for change detection.
+
+- [Issue 4444700] : Crawling specific subclass of the document class.
+Description: 
+O Currently, there is no provision to crawl specific sub class of document class; 
+hence FileNet connector crawls all the documents under the Document class and it’s subclasses. 
+There should be a provision to crawl a specific subclass of document class instead of crawling all the documents 
+of the document class.
+O Added provision to enter FileNet query specifying the sub class name to crawl the documents under 
+that sub class as Additional_Where_Clause and Additional_Delete_Clause.
+
+Sample Query : SELECT Id,DateLastModified FROM CustomClass WHERE VersionStatus=1 and ContentSize IS NOT NULL
+CustomClass - Custom sub class of the Document class.
+
+Known Limitations
+-------------------
+- Issue 11: Documents which are checked in as only minor version and don't have any major version at all, will not be crawled.
+- Issue 14: Few words are displayed in English on connector configuration page in GSA when we change the language on IE & Mozilla browsers.
+- 'Deny' permissions are not honored for ACL check in authorization.
+- Security policies applied over the document class or individual document are not honored for authorization.
+- Federated documents (Documents physically present in external repository and referred in FileNet repository) will not be crawled.
+- Query to send delete feeds for the documents removed from FileNet repository cannot be customized.
+- Folder level security is not honored in authorization.
+- Marking set security is not honored in authorization.

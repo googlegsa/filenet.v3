@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="connector-fileV4" default="connector-fileV4" basedir=".">
+
+  <!-- ========================= PROPERTIES ============================= -->
+  <property file="${user.home}/google-enterprise-connector-file.properties" />
+  <property file="google-enterprise-connector-file.properties" />
+  <property file="version.properties" />
+
+  <property name="COMPILE_DEBUG_FLAG" value="true" />
+  <property name="COMPILE_DEBUG_LEVEL" value="source,lines,vars" />
+  <property name="COMPILE_TARGET" value="1.5" />
+  <property name="COMPILE_BOOTCLASSPATH" value="${build.bootclasspath}" />
+
+  <!-- Define Directories. -->
+  <property name="build" value="build" />
+  <property name="dist" value="dist" />
+  <property name="config" value="fnapi-client/config" />
+  <property name="jarfile.dir" value="third_party/lib"/>
+  <property name="file_jarfile.dir" value="file_third_party/lib"/>
+
+  <property name="build-client" value="fnapi-client/build" />
+  <property name="src-client" value="fnapi-client/source/java" />
+  <property name="classes-client" value="${build-client}/classes" />
+
+  <property name="build-core" value="fnapi-core/build" />
+  <property name="src-core" value="fnapi-core/source/java" />
+  <property name="classes-core" value="${build-core}/classes" />
+
+  <property name="jar.dir"  value="${dist}/jar" />
+  <property name="jarfile"  value="${jar.dir}/connector-file4.jar" />
+
+  <property name="file.jarfile" location="${jarfile.dir}/Jace.jar" />
+  <property name="junit.jarfile" location="${jarfile.dir}/junit.jar" />
+  <property name="javaapi.jarfile" value="${jarfile.dir}/javaapi.jar" />
+
+  <property name="connector-manager-projects.dir"
+            location="${build.connector.manager.home}/projects" />
+  <property name="connector-manager.dir"
+            location="${connector-manager-projects.dir}/connector-manager" />
+  <property name="thirdparty.jar.dir"
+            location="${connector-manager.dir}/third-party" />
+  <property name="spi.jar.dir" value="${connector-manager.dir}/dist/jarfile" />
+  <property name="spi.jarfile" value="${spi.jar.dir}/connector-spi.jar" />
+  <property name="json.jarfile" location="${thirdparty.jar.dir}/prod/json.jar" />
+
+  <property file="${config}/build_code_coverage.properties"/>
+  <path id="cobertura.classpath">
+    <fileset dir="${thirdparty.jar.dir}/cobertura">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <!-- =========================== TASKS =============================== -->
+  <target name="connector-fileV4" depends="clean,init,compile_tests,compile-client,jar">
+  </target>
+
+  <target name="prebuild" unless="svnversion">
+    <exec executable="svnversion" spawn="false"
+      failifexecutionfails="false"
+      outputproperty="svnversion">
+      <arg line="."/>
+    </exec>
+  </target>
+
+  <target name="init">
+    <mkdir dir="${build}" />
+    <mkdir dir="${dist}" />
+    <mkdir dir="${build-core}" />
+    <mkdir dir="${build-client}" />
+    <mkdir dir="${classes-core}" />
+    <mkdir dir="${classes-client}" />
+    <mkdir dir="${jar.dir}" />
+  </target>
+
+  <target name="compile-client" depends="init">
+    <!-- compile java source files -->
+    <javac srcdir="${src-core}" destdir="${classes-core}"
+           includeantruntime="false"
+           debug="${COMPILE_DEBUG_FLAG}" debuglevel="${COMPILE_DEBUG_LEVEL}"
+           target="${COMPILE_TARGET}" source="${COMPILE_TARGET}">
+      <!-- CM, GData, and P8 JAR Class-Path references are not available. -->
+      <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
+      <bootclasspath path="${COMPILE_BOOTCLASSPATH}"/>
+      <classpath>
+        <pathelement location="${javaapi.jarfile}" />
+        <pathelement location="${file.jarfile}" />
+        <pathelement location="${spi.jarfile}" />
+        <pathelement location="${classes-client}" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="compile_tests" depends="init">
+    <!-- compile java source files for tests -->
+    <javac srcdir="${src-client}" destdir="${classes-client}"
+           includeantruntime="false"
+           debug="${COMPILE_DEBUG_FLAG}" debuglevel="${COMPILE_DEBUG_LEVEL}"
+           target="${COMPILE_TARGET}" source="${COMPILE_TARGET}">
+      <!-- CM, GData, and P8 JAR Class-Path references are not available. -->
+      <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
+      <bootclasspath path="${COMPILE_BOOTCLASSPATH}"/>
+      <classpath>
+        <pathelement location="${file.jarfile}" />
+        <pathelement location="${spi.jarfile}" />
+        <pathelement location="${json.jarfile}" />
+        <pathelement location="${junit.jarfile}" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="jar" description="connector-file" depends="prebuild">
+    <tstamp />
+    <jar jarfile="${jarfile}">
+      <fileset dir="${config}">
+          <include name="**/*.xml"/>
+          <exclude name="**/logging.properties"/>
+          <include name="**/*.properties"/>
+      </fileset>
+      <fileset dir="${classes-client}"/>
+      <fileset dir="${classes-core}"/>
+      <fileset file="jaas.conf"/>
+
+      <!--creation of manifest file-->
+      <manifest>
+        <attribute name="Implementation-Title" value="Filenet Connector"/>
+        <attribute name="Implementation-Version" value="${version} (build ${svnversion} ${TODAY})"/>
+        <attribute name="Implementation-Vendor" value="Google Inc."/>
+        <attribute name="Specification-Title" value="Connector Manager SPI"/>
+        <attribute name="Specification-Version" value="${version.spi}"/>
+        <attribute name="Specification-Vendor" value="Google Inc."/>
+        <attribute name="Main-Class" value="com.google.enterprise.connector.file.FileMain" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean" description="Deletes all build files.">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+    <delete dir="${build-core}" />
+    <delete dir="${build-client}" />
+    <delete dir="${classes-core}" />
+    <delete dir="${classes-client}" />
+  </target>
+
+  <!--Cobertura Report Generation -->
+
+  <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+
+  <target name="init_code_coverage">
+    <mkdir dir="${classes.dir}" />
+    <mkdir dir="${instrumented.dir}" />
+    <mkdir dir="${reports.xml.dir}" />
+    <mkdir dir="${reports.html.dir}" />
+    <mkdir dir="${coverage.xml.dir}" />
+    <mkdir dir="${coverage.summaryxml.dir}" />
+    <mkdir dir="${coverage.html.dir}" />
+  </target>
+
+  <target name="compile_code_coverage"
+          depends="init_code_coverage,compile-client,compile_tests"/>
+
+  <target name="instrument" depends="compile_code_coverage">
+    <!--
+        Remove the coverage data file and any old instrumentation.
+    -->
+    <delete file="cobertura.ser"/>
+    <delete dir="${instrumented.dir}" />
+
+    <!--
+        Instrument the application classes, writing the
+        instrumented classes into ${build.instrumented.dir}.
+    -->
+    <cobertura-instrument todir="${instrumented.dir}">
+      <!--
+          The following line causes instrument to ignore any
+          source line containing a reference to log4j, for the
+          purposes of coverage reporting.
+      -->
+      <ignore regex="org.apache.log4j.*" />
+
+      <fileset dir="${classes.dir}">
+        <!--
+            Instrument all the application classes, but
+            don't instrument the test classes.
+        -->
+        <include name="**/*.class" />
+        <exclude name="**/*Test.class" />
+      </fileset>
+    </cobertura-instrument>
+  </target>
+
+  <target name="run_tests" depends="instrument">
+    <property name="test.suite" value="*" />
+    <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
+      <!--
+          Note the classpath order: instrumented classes are before the
+          original (uninstrumented) classes.  This is important.
+      -->
+      <sysproperty key="net.sourceforge.cobertura.datafile"
+                   file="${basedir}/cobertura.ser" />
+      <classpath>
+        <fileset dir="${jarfile.dir}" includes="**/*.jar" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="tests/junit.jar" />
+        </fileset>
+      </classpath>
+      <classpath location="${instrumented.dir}" />
+
+      <!--
+          The instrumented classes reference classes used by the
+          Cobertura runtime, so Cobertura and its dependencies
+          must be on your classpath.
+      -->
+      <classpath refid="cobertura.classpath" />
+
+      <formatter type="xml" />
+      <batchtest todir="${reports.xml.dir}" unless="testcase">
+        <fileset dir="${test.core.dir}">
+          <include name="**/${test.suite}Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <junitreport todir="${reports.xml.dir}">
+      <fileset dir="${reports.xml.dir}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report format="frames" todir="${reports.html.dir}" />
+    </junitreport>
+
+    <fail if="test.failed" message="Test failure"/>
+  </target>
+
+  <target name="coverage-report">
+    <!--
+        Generate an XML file containing the coverage data using
+        the "srcdir" attribute.
+    -->
+    <cobertura-report srcdir="${src.client.dir}" destdir="${coverage.xml.dir}" format="xml" />
+  </target>
+
+  <target name="alternate-coverage-report">
+    <!--
+        Generate a series of HTML files containing the coverage
+        data in a user-readable form using nested source filesets.
+    -->
+    <cobertura-report destdir="${coverage.html.dir}">
+      <fileset dir="${src.client.dir}">
+        <include name="**/*.java"/>
+      </fileset>
+    </cobertura-report>
+  </target>
+
+  <target name="clean_code_coverage" description="Remove all files created by the build/test process.">
+    <delete dir="${classes.dir}" />
+    <delete dir="${instrumented.dir}" />
+    <delete dir="${reports.dir}" />
+    <delete file="cobertura.log" />
+    <delete file="cobertura.ser" />
+  </target>
+
+  <target name="run_code_coverage" depends="run_tests,coverage-report,alternate-coverage-report" description="Compile, instrument ourself, run the tests and generate JUnit and coverage reports."/>
+
+</project>
