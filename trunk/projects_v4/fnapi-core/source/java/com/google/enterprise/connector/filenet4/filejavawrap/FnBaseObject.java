@@ -19,14 +19,12 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@SuppressWarnings("rawtypes")
 public class FnBaseObject implements IBaseObject {
+  private static final Logger logger =
+      Logger.getLogger(FnBaseObject.class.getName());
 
-  private IndependentObject object;
-
-  private static Logger logger = null;
-  {
-    logger = Logger.getLogger(FnBaseObject.class.getName());
-  }
+  private final IndependentObject object;
 
   public FnBaseObject(IndependentObject object) {
     this.object = object;

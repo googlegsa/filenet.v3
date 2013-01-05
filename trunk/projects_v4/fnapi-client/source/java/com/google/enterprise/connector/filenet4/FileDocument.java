@@ -19,6 +19,7 @@ import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
+import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 import com.google.enterprise.connector.spiimpl.BinaryValue;
@@ -43,6 +44,9 @@ import java.util.logging.Logger;
  * @author pankaj_chouhan
  */
 public class FileDocument implements Document {
+  private static final Logger logger =
+      Logger.getLogger(FileDocument.class.getName());
+
   private String docId;
   private IObjectStore objectStore;
   private IDocument document = null;
@@ -52,11 +56,8 @@ public class FileDocument implements Document {
   private Date timeStamp;
   private String vsDocId;
   private Set<String> included_meta = null;
-  private Set excluded_meta = null;
-  private static Logger logger = null;
-  {
-    logger = Logger.getLogger(FileDocument.class.getName());
-  }
+  private Set<String> excluded_meta = null;
+
   private SpiConstants.ActionType action;
 
   public FileDocument(String docId, Date timeStamp, IObjectStore objectStore,
@@ -108,35 +109,35 @@ public class FileDocument implements Document {
       if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(new BinaryValue(document.getContent()));
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(new StringValue(this.displayUrl + vsDocId));
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(BooleanValue.makeBooleanValue(this.isPublic ? true
                 : false));
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         this.document.getPropertyDateValue("DateLastModified", list);
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
         document.getPropertyStringValue("MimeType", list);
         logger.log(Level.FINEST, "Getting property: " + name);
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_SEARCHURL.equals(name)) {
         return null;
       } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(new StringValue(vsDocId));
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
         list.add(new StringValue(action.toString()));
         logger.fine("Getting Property " + name + " : "
                 + action.toString());
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       }
 
       String type = document.getPropertyType(name);
@@ -184,27 +185,26 @@ public class FileDocument implements Document {
 
         DateValue tmpDtVal = new DateValue(tmpCal);
         list.add(tmpDtVal);
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(new StringValue(action.toString()));
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(new StringValue(versionId));
         // logger.fine("versionId : " + versionId);
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       }
     }
-    return new FileDocumentProperty(name, list);
+    return new SimpleProperty(list);
   }
 
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
     fetch();
     Set<String> properties = new HashSet<String>();
-    Set documentProperties = this.document.getPropertyName();
-    for (Iterator iter = documentProperties.iterator(); iter.hasNext();) {
-      String property = (String) iter.next();
+    Set<String> documentProperties = document.getPropertyName();
+    for (String property : documentProperties) {
       if (property != null) {
         if (included_meta.size() != 0) {
           // includeMeta - exludeMeta

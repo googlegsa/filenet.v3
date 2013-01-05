@@ -36,7 +36,7 @@ public interface IDocument extends IBaseObject {
 
   IVersionSeries getVersionSeries() throws RepositoryDocumentException;;
 
-  Set getPropertyName() throws RepositoryDocumentException;
+  Set<String> getPropertyName() throws RepositoryDocumentException;
 
   String getPropertyType(String name) throws RepositoryDocumentException;
 

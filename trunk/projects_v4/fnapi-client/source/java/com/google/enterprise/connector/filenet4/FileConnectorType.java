@@ -281,11 +281,11 @@ public class FileConnectorType implements ConnectorType {
         StringBuffer query = new StringBuffer();
 
         if (configData.get(WHERECLAUSE).trim().toUpperCase()
-            .startsWith(this.SELECT)) {
+            .startsWith(SELECT)) {
           if (configData.get(WHERECLAUSE).trim().toUpperCase()
-              .startsWith(this.QUERYFORMAT)) {
+              .startsWith(QUERYFORMAT)) {
             if (configData.get(WHERECLAUSE).trim().toUpperCase()
-                .contains(((this.VERSIONQUERY)).toUpperCase())) {
+                .contains(VERSIONQUERY.toUpperCase())) {
               query = new StringBuffer(configData.get(WHERECLAUSE).trim());
               LOGGER.fine("Using Custom Query["
                   + configData.get(WHERECLAUSE).trim() + "]");
@@ -343,9 +343,12 @@ public class FileConnectorType implements ConnectorType {
 
         StringBuffer deleteuery = new StringBuffer();
 
-        if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase().startsWith(this.SELECT)) {
-          if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase().startsWith(this.QUERYFORMAT)) {
-            if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase().contains(((this.VERSIONQUERY)).toUpperCase())) {
+        if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase()
+            .startsWith(SELECT)) {
+          if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase()
+              .startsWith(QUERYFORMAT)) {
+            if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase()
+                .contains(((VERSIONQUERY)).toUpperCase())) {
               deleteuery = new StringBuffer(
                       configData.get(DELETEWHERECLAUSE).trim());
               LOGGER.fine("Using Custom Query["
