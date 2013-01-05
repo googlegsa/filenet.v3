@@ -30,9 +30,9 @@ public class FileDocumentList implements DocumentList {
   private IObjectSet objectSetToDelete = null;
   private IObjectSet objectSetToDeleteDocs = null;
   private FileDocument fileDocument = null;
-  private Iterator ObjectIt = null;
-  private Iterator ObjectItToDelete = null;
-  private Iterator ObjectItToDeleteDocs = null;
+  private Iterator<? extends IBaseObject> objectIt = null;
+  private Iterator<? extends IBaseObject> objectItToDelete = null;
+  private Iterator<? extends IBaseObject> objectItToDeleteDocs = null;
   private String docId = "";
   private String displayUrl;
   private String lastCheckPoint;
@@ -64,9 +64,9 @@ public class FileDocumentList implements DocumentList {
     this.lastCheckPoint = checkPoint;
 
     this.index = 0;
-    this.ObjectIt = objectSet.getIterator();
-    this.ObjectItToDelete = objectSetToDelete.getIterator();
-    this.ObjectItToDeleteDocs = objectSetToDeleteDocs.getIterator();
+    this.objectIt = objectSet.getIterator();
+    this.objectItToDelete = objectSetToDelete.getIterator();
+    this.objectItToDeleteDocs = objectSetToDeleteDocs.getIterator();
 
     // Docs to Add
     logger.log(Level.INFO, "Number of new documents discovered: "
@@ -97,9 +97,9 @@ public class FileDocumentList implements DocumentList {
     this.lastCheckPoint = checkPoint;
 
     this.index = 0;
-    this.ObjectIt = objectSet.getIterator();
-    this.ObjectItToDelete = objectSetToDelete.getIterator();
-    this.ObjectItToDeleteDocs = null;
+    this.objectIt = objectSet.getIterator();
+    this.objectItToDelete = objectSetToDelete.getIterator();
+    this.objectItToDeleteDocs = null;
 
     // Docs to Add
     logger.log(Level.INFO, "Number of new documents discovered: "
@@ -143,8 +143,8 @@ public class FileDocumentList implements DocumentList {
 
     if (index > -1 && index < dataLen) {
       logger.info("ADD...");
-      if (this.ObjectIt.hasNext()) {
-        IBaseObject doc = (IBaseObject) this.ObjectIt.next();
+      if (objectIt.hasNext()) {
+        IBaseObject doc = objectIt.next();
 
         docId = doc.getId(SpiConstants.ActionType.ADD);
         Date dateLastModified = doc.getModifyDate(SpiConstants.ActionType.ADD);
@@ -164,9 +164,9 @@ public class FileDocumentList implements DocumentList {
       }
     } else if ((index >= dataLen)
             && index < (dataLenToDeleteDocs + dataLen)) {
-      if (this.ObjectItToDeleteDocs.hasNext()) {
+      if (objectItToDeleteDocs.hasNext()) {
         logger.info("DELETE...(Documents satisfying additional delete clause) ");
-        IBaseObject doc = (IBaseObject) this.ObjectItToDeleteDocs.next();
+        IBaseObject doc = objectItToDeleteDocs.next();
         docIdToDeleteDocs = doc.getId(SpiConstants.ActionType.ADD);
         Date dateLastModified = doc.getModifyDate(SpiConstants.ActionType.ADD);
         String commonVersionId = doc.getVersionSeriesId(SpiConstants.ActionType.ADD);
@@ -187,15 +187,12 @@ public class FileDocumentList implements DocumentList {
           index++;
         }
       }
-
     } else if ((index >= dataLenToDeleteDocs + dataLen)
             && index < (dataLenToDelete + dataLenToDeleteDocs + dataLen)) {
-
-      if (this.ObjectItToDelete.hasNext()) {
+      if (objectItToDelete.hasNext()) {
         logger.info("DELETE...(Documents deleted from repository)");
-        IBaseObject doc = (IBaseObject) this.ObjectItToDelete.next();
+        IBaseObject doc = objectItToDelete.next();
         if (doc.getClassNameEvent().contains("DeletionEvent")) {
-
           docIdToDelete = doc.getId(SpiConstants.ActionType.DELETE);
           Date dateLastModified = doc.getModifyDate(SpiConstants.ActionType.DELETE);
           String commonVersionId = doc.getVersionSeriesId(SpiConstants.ActionType.DELETE);

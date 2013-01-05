@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
@@ -63,8 +64,6 @@ public class FileDocumentTest extends FileNetTestCase {
             TestConnection.excluded_meta, ActionType.ADD);
 
     Property prop = fd.findProperty("Id");
-
-    assertTrue(prop instanceof FileDocumentProperty);
     assertEquals(TestConnection.docId1, prop.nextValue().toString());
 
   }

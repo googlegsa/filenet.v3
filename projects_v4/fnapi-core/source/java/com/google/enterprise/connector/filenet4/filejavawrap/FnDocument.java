@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
@@ -58,21 +59,21 @@ import java.util.logging.Logger;
  *
  * @author pankaj_chouhan
  */
+@SuppressWarnings("rawtypes")
 public class FnDocument implements IDocument {
-  Document doc;
-  Map<String, Object> metas;
-  Map<String, String> metaTypes;
+  private static final Logger logger =
+      Logger.getLogger(FnDocument.class.getName());
 
-  private static Logger logger = null;
-  {
-    logger = Logger.getLogger(FnDocument.class.getName());
-  }
+  private final Document doc;
+  private Map<String, Object> metas;
+  private Map<String, String> metaTypes;
 
   public FnDocument(Document doc) {
     this.doc = doc;
   }
 
-  public void fetch(Set includedMeta) throws RepositoryDocumentException {
+  public void fetch(Set<String> includedMeta)
+      throws RepositoryDocumentException {
     PropertyFilter pf = new PropertyFilter();
     if (includedMeta != null) {
       if (includedMeta.size() == 0) {
@@ -85,9 +86,8 @@ public class FnDocument implements IDocument {
                 + PropertyNames.VERSION_SERIES_ID, null));
       }
 
-      for (Object object : includedMeta) {
-        pf.addIncludeProperty(new FilterElement(null, null, null,
-            (String) object, null));
+      for (String name : includedMeta) {
+        pf.addIncludeProperty(new FilterElement(null, null, null, name, null));
       }
     }
 
@@ -146,7 +146,6 @@ public class FnDocument implements IDocument {
 
   public Date getModifyDate(ActionType action)
       throws RepositoryDocumentException {
-    // String ModifyDate;
     Date ModifyDate = new Date();
     try {
       if (SpiConstants.ActionType.DELETE.equals(action)) {
@@ -190,7 +189,7 @@ public class FnDocument implements IDocument {
   public InputStream getContent() {
     InputStream ip = null;
     try {
-      List contentList = (List) doc.get_ContentElements();
+      List contentList = doc.get_ContentElements();
       ContentTransfer content = (ContentTransfer) contentList.get(0);
       ip = content.accessContentStream();
       return ip;
