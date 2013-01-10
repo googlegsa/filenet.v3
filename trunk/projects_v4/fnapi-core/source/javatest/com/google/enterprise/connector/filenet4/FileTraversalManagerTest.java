@@ -48,7 +48,7 @@ public class FileTraversalManagerTest extends FileNetTestCase {
    */
   public void testStartTraversal() throws RepositoryException {
 
-    ftm.setBatchHint(200);
+    ftm.setBatchHint(TestConnection.batchSize);
     DocumentList set = this.ftm.startTraversal();
     long counter = 0;
     com.google.enterprise.connector.spi.Document doc = null;
@@ -61,7 +61,7 @@ public class FileTraversalManagerTest extends FileNetTestCase {
         doc = set.nextDocument();
         counter++;
     }
-    assertEquals(200, counter);
+    assertEquals(TestConnection.batchSize, counter);
 
 
   }
@@ -71,7 +71,7 @@ public class FileTraversalManagerTest extends FileNetTestCase {
    */
   public void testResumeTraversal() throws RepositoryException {
 
-    ftm.setBatchHint(200);
+    ftm.setBatchHint(TestConnection.batchSize);
     DocumentList set = this.ftm.resumeTraversal(TestConnection.checkpoint2);
     assertNotNull(set);
     int counter = 0;
@@ -81,7 +81,7 @@ public class FileTraversalManagerTest extends FileNetTestCase {
       doc = set.nextDocument();
       counter++;
     }
-    assertEquals(200, counter);
+    assertEquals(TestConnection.batchSize, counter);
 
   }
 

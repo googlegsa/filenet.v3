@@ -1,74 +1,112 @@
-/*
- * Copyright 2009 Google Inc.
+// Copyright 2009 Google Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
- */
 package com.google.enterprise.connector.filenet4;
 
 import java.util.HashSet;
+import java.util.Properties;
 
 public class TestConnection {
-
-  public static String adminUsername = "username";
-  public static String adminPassword = "password";
-  public static String username = "username";
-  public static String password = "password";
-  public static String wrongPassword = "incorrectpassword";
-  public static String uri = "http://<servername>:<port>/wsi/FNCEWS40DIME";
-  public static String objectFactory = "com.google.enterprise.connector.file.filejavawrap.FnObjectFactory";
-  public static String displayURL = "http://<servername>:<port>/Workplace/getContent";
-  public static String incorrectDisplayURL = "http://<incorrectservername>:<port>/Workplace/getContent";
-  public static String objectStore = "objectstore";
-  public static String property_wasp_location = "wasp.location";
-  public static String wsi_path = "E:\\FileNet Connector\\share\\wsi";
-  public static String wrong_additional_where_clause = "and Document.this INSUBFOLDER";
-  public static String additional_where_clause = "and Document.this INSUBFOLDER '/Fold1'";
-  public static String where_clause_error_message = "Where Clause is syntactically incorrect.";
-  public static String workplace_url__error_message = "Unable to validate Workplace URL. Could not connect to the Workplace. Either remote server is down or URL is not in proper format.: ";
-  public static String repeatedSlashContentEngineURL = "http://<servername>:<port>/wsi/FNCEWS40DIME/////////////";
-  public static String currentUserContext = "Administrator@p8.v4";
+  public static final int batchSize;
+  public static final String adminUsername;
+  public static final String adminPassword;
+  public static final String username;
+  public static final String password;
+  public static final String wrongPassword;
+  public static final String uri;
+  public static final String objectStore;
+  public static final String objectFactory;
+  public static final String displayURL;
+  public static final String incorrectDisplayURL;
+  public static final String property_wasp_location;
+  public static final String wsi_path;
+  public static final String repeatedSlashContentEngineURL;
+  public static final String currentUserContext;
+  public static final String wrong_additional_where_clause;
+  public static final String additional_where_clause;
+  public static final String where_clause_error_message;
+  public static final String workplace_url__error_message;
 
   // docId1 is Doc1 available for Administrator only
-  public static String docId1 = "3811870F-410F-4C25-B853-CAC56014C552";
+  public static final String docId1;
 
   // docVsId1
-  public static String docVsId1 = "1D80A5F2-D452-46D6-8670-6A97207F171B";
+  public static final String docVsId1;
 
   // docId2 is TestAuthentication available for Administrator and JPasquon
   // user
-  public static String docId2 = "27CDE7CA-3273-4324-B468-D6C0C8550732";
+  public static final String docId2;
 
   // docVsId1
-  public static String docVsId2 = "C3581336-144F-43C8-BA6E-6F7CC7B160BF";
+  public static final String docVsId2;
 
   // docId3 is Herb Alpert & The Tijuana Brass - Greatest Hits - 08 - Tijuana
   // Taxi.mp3 available for all user
-  public static String docId3 = "6745F58B-55DD-41EC-BC43-2EC6D6991780";
+  public static final String docId3;
 
   // docVsId1
-  public static String docVsId3 = "9EAE0F8B-BC7A-4C04-B459-E7AB0094E8A8";
+  public static final String docVsId3;
 
   // docId4 isAuthentication in P8 4.0.pdf available for all user
-  public static String docId4 = "D791EBD8-E27C-48D4-A63E-EACEE727689D";
+  public static final String docId4;
 
   // docVsId1
-  public static String docVsId4 = "6B585D5C-4931-4C7E-BFC0-62D6A583FC8A";
+  public static final String docVsId4;
 
   // CHeckpoint of the last modified document TestAuthentication.pdf
-  public static String checkpoint1 = "{\"uuidToDelete\":\"\",\"uuid\":\"4E26DEC8-CDEE-4146-961B-E43E85400D8C\",\"lastRemoveDate\":\"2008-09-15T09:38:58.781\",\"lastModified\":\"2008-01-16T10:35:00.327\"}";
-  public static String checkpoint2 = "{\"uuidToDelete\":\"\",\"uuid\":\"4E26DEC8-CDEE-4146-961B-E43E85400D8C\",\"lastRemoveDate\":\"2008-09-15T09:38:58.781\",\"lastModified\":\"2008-01-16T10:35:00.327\"}";
+  public static final String checkpoint1;
+  public static final String checkpoint2;
 
+  static {
+    Properties props = System.getProperties();
+    batchSize = Integer.parseInt(props.getProperty("batchSize"));
+    adminUsername = props.getProperty("adminUsername");
+    adminPassword = props.getProperty("adminPassword");
+    username = props.getProperty("username");
+    password = props.getProperty("password");
+    wrongPassword = props.getProperty("wrongPassword");
+    uri = props.getProperty("wsUri");
+    objectStore = props.getProperty("objectStoreName");
+    objectFactory = props.getProperty("objectFactoryClass");
+    displayURL = props.getProperty("displayUrl");
+    incorrectDisplayURL = props.getProperty("incorrectDisplayUrl");
+    property_wasp_location = props.getProperty("waspLocation");
+    wsi_path = props.getProperty("wsiPath");
+    repeatedSlashContentEngineURL = 
+        props.getProperty("repeatedSlashContentEngineURL");
+    currentUserContext = props.getProperty("currentUserContext");
+
+    wrong_additional_where_clause = 
+        props.getProperty("wrong_additional_where_clause");
+    additional_where_clause = props.getProperty("additional_where_clause");
+    where_clause_error_message = 
+        props.getProperty("where_clause_error_message");
+    workplace_url__error_message = 
+        props.getProperty("workplace_url__error_message");
+
+    docId1 = props.getProperty("docId1");
+    docId2 = props.getProperty("docId2");
+    docId3 = props.getProperty("docId3");
+    docId4 = props.getProperty("docId4");
+    docVsId1 = props.getProperty("docVsId1");
+    docVsId2 = props.getProperty("docVsId2");
+    docVsId3 = props.getProperty("docVsId3");
+    docVsId4 = props.getProperty("docVsId4");
+    checkpoint1 = props.getProperty("checkpoint1");
+    checkpoint2 = props.getProperty("checkpoint2");
+  }
+  
   public static HashSet<String> included_meta = null;
   static {
     included_meta = new HashSet<String>();
