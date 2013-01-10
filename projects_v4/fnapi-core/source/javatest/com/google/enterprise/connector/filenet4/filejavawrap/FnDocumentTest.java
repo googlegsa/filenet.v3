@@ -74,7 +74,7 @@ public class FnDocumentTest extends FileNetTestCase {
 
     uc = new FnUserContext(conn);
     uc.authenticate(TestConnection.username, TestConnection.password);
-    vs = (IVersionSeries) ios.getObject(ClassNames.VERSION_SERIES, TestConnection.docVsId1);
+    vs = fd.getVersionSeries();
     fd2 = vs.getReleasedVersion();
 
   }

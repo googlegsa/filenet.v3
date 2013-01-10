@@ -27,9 +27,6 @@ import junit.framework.TestCase;
 
 public class FileConnectorTypeTest extends FileNetTestCase {
 
-  static {
-    System.setProperty(TestConnection.property_wasp_location, TestConnection.wsi_path);
-  }
   public void testValidateConfigWithBlankWhereClause() {
     HashMap<String, String> map = new HashMap<String, String>();
     String[] fields = { "username", "Password", "object_store",
@@ -45,18 +42,19 @@ public class FileConnectorTypeTest extends FileNetTestCase {
     map.put("additional_where_clause", "");//NOT COMPULSORY
     map.put("authentication_type", "");
     map.put("is_public", "on");
+    map.put("delete_additional_where_clause", "");
+    map.put("check_marking", "");
     FileConnectorType testConnectorType = new FileConnectorType();
     testConnectorType.setConfigKeys(fields);
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
     assertNull(resp);//NULL - IF NO ERROR VALUE FOUND
-
   }
 
   public void testValidateConfigIncorrectWhereClause() {
     HashMap<String, String> map = new HashMap<String, String>();
     String[] fields = { "username", "Password", "object_store",
         "object_factory", "workplace_display_url",
-        "content_engine_url", "is_public",
+        "content_engine_url",
         "additional_where_clause", "authentication_type" };
     map.put("username", TestConnection.adminUsername);
     map.put("Password", TestConnection.adminPassword);
@@ -67,12 +65,13 @@ public class FileConnectorTypeTest extends FileNetTestCase {
     map.put("additional_where_clause", TestConnection.wrong_additional_where_clause);//NOT COMPULSORY
     map.put("authentication_type", "");
     map.put("is_public", "on");
+    map.put("delete_additional_where_clause", "");
+    map.put("check_marking", "");
     FileConnectorType testConnectorType = new FileConnectorType();
     testConnectorType.setConfigKeys(fields);
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
     //    assertNull(resp);//NULL - IF NO ERROR VALUE FOUND
-    assertEquals(TestConnection.where_clause_error_message, resp.getMessage());
-
+    assertTrue(resp.getMessage().indexOf(TestConnection.where_clause_error_message) > -1);
   }
 
   public void testValidateConfigCorrectWhereClause() {
@@ -90,11 +89,12 @@ public class FileConnectorTypeTest extends FileNetTestCase {
     map.put("additional_where_clause", TestConnection.additional_where_clause);//NOT COMPULSORY
     map.put("authentication_type", "");
     map.put("is_public", "on");
+    map.put("delete_additional_where_clause", "");
+    map.put("check_marking", "");
     FileConnectorType testConnectorType = new FileConnectorType();
     testConnectorType.setConfigKeys(fields);
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
-    assertEquals(TestConnection.where_clause_error_message, resp.getMessage());
-
+    assertNull(resp);
   }
 
   public void testInvalidWorkplaceURL() {
@@ -113,14 +113,15 @@ public class FileConnectorTypeTest extends FileNetTestCase {
       map.put("additional_where_clause", TestConnection.additional_where_clause);//NOT COMPULSORY
       map.put("authentication_type", "");
       map.put("is_public", "on");
+      map.put("delete_additional_where_clause", "");
+      map.put("check_marking", "");
       FileConnectorType testConnectorType = new FileConnectorType();
       testConnectorType.setConfigKeys(fields);
       ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
-      assertEquals(TestConnection.workplace_url__error_message + new URL(TestConnection.incorrectDisplayURL).getHost(), resp.getMessage());
+      assertEquals(TestConnection.workplace_url__error_message, resp.getMessage());
     } catch (Exception e) {
       System.out.println("Incorrect URL");
     }
-
   }
 
   public void testRepeatedSlashContentEngineURL() {
@@ -139,10 +140,11 @@ public class FileConnectorTypeTest extends FileNetTestCase {
     map.put("additional_where_clause", "");//NOT COMPULSORY
     map.put("authentication_type", "");
     map.put("is_public", "on");
+    map.put("delete_additional_where_clause", "");
+    map.put("check_marking", "");
     FileConnectorType testConnectorType = new FileConnectorType();
     testConnectorType.setConfigKeys(fields);
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
     assertNull(resp);//NULL - IF NO ERROR VALUE FOUND
-
   }
 }

@@ -27,6 +27,9 @@
   <property name="src-core" value="fnapi-core/source/java" />
   <property name="classes-core" value="${build-core}/classes" />
 
+  <property name="src-test" value="fnapi-core/source/javatest" />
+  <property name="classes-test" value="${build-core}/test" />
+
   <property name="jar.dir"  value="${dist}/jar" />
   <property name="jarfile"  value="${jar.dir}/connector-file4.jar" />
 
@@ -44,6 +47,11 @@
   <property name="spi.jarfile" value="${spi.jar.dir}/connector-spi.jar" />
   <property name="json.jarfile" location="${thirdparty.jar.dir}/prod/json.jar" />
 
+  <propertyset id="javatest.properties">
+    <propertyref prefix="test."/>
+    <mapper type="glob" from="test.*" to="*"/>
+  </propertyset>
+
   <property file="${config}/build_code_coverage.properties"/>
   <path id="cobertura.classpath">
     <fileset dir="${thirdparty.jar.dir}/cobertura">
@@ -52,7 +60,7 @@
   </path>
 
   <!-- =========================== TASKS =============================== -->
-  <target name="connector-fileV4" depends="clean,init,compile_tests,compile-client,jar">
+  <target name="connector-fileV4" depends="clean,init,compile-client,compile-core,jar">
   </target>
 
   <target name="prebuild" unless="svnversion">
@@ -70,10 +78,11 @@
     <mkdir dir="${build-client}" />
     <mkdir dir="${classes-core}" />
     <mkdir dir="${classes-client}" />
+    <mkdir dir="${classes-test}" />
     <mkdir dir="${jar.dir}" />
   </target>
 
-  <target name="compile-client" depends="init">
+  <target name="compile-core" depends="init">
     <!-- compile java source files -->
     <javac srcdir="${src-core}" destdir="${classes-core}"
            includeantruntime="false"
@@ -91,7 +100,7 @@
     </javac>
   </target>
 
-  <target name="compile_tests" depends="init">
+  <target name="compile-client" depends="init">
     <!-- compile java source files for tests -->
     <javac srcdir="${src-client}" destdir="${classes-client}"
            includeantruntime="false"
@@ -105,6 +114,21 @@
         <pathelement location="${spi.jarfile}" />
         <pathelement location="${json.jarfile}" />
         <pathelement location="${junit.jarfile}" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="compile-test" depends="init">
+    <!-- compile java source files for tests -->
+    <javac srcdir="${src-test}" destdir="${classes-test}"
+           includeantruntime="false"
+           debug="${COMPILE_DEBUG_FLAG}" debuglevel="${COMPILE_DEBUG_LEVEL}"
+           target="${COMPILE_TARGET}" source="${COMPILE_TARGET}">
+      <!-- CM, GData, and P8 JAR Class-Path references are not available. -->
+      <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
+      <classpath>
+        <fileset dir="${jarfile.dir}" includes="**/*.jar" />
+        <fileset dir="${jar.dir}" includes="**/*.jar" />
       </classpath>
     </javac>
   </target>
@@ -141,6 +165,7 @@
     <delete dir="${build-client}" />
     <delete dir="${classes-core}" />
     <delete dir="${classes-client}" />
+    <delete dir="${classes-test}" />
   </target>
 
   <!--Cobertura Report Generation -->
@@ -148,7 +173,6 @@
   <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
 
   <target name="init_code_coverage">
-    <mkdir dir="${classes.dir}" />
     <mkdir dir="${instrumented.dir}" />
     <mkdir dir="${reports.xml.dir}" />
     <mkdir dir="${reports.html.dir}" />
@@ -158,7 +182,7 @@
   </target>
 
   <target name="compile_code_coverage"
-          depends="init_code_coverage,compile-client,compile_tests"/>
+          depends="init_code_coverage,compile-core,compile-client"/>
 
   <target name="instrument" depends="compile_code_coverage">
     <!--
@@ -179,7 +203,15 @@
       -->
       <ignore regex="org.apache.log4j.*" />
 
-      <fileset dir="${classes.dir}">
+      <fileset dir="${classes-core}">
+        <!--
+            Instrument all the application classes, but
+            don't instrument the test classes.
+        -->
+        <include name="**/*.class" />
+        <exclude name="**/*Test.class" />
+      </fileset>
+      <fileset dir="${classes-client}">
         <!--
             Instrument all the application classes, but
             don't instrument the test classes.
@@ -190,7 +222,7 @@
     </cobertura-instrument>
   </target>
 
-  <target name="run_tests" depends="instrument">
+  <target name="run_tests" depends="instrument,compile-test">
     <property name="test.suite" value="*" />
     <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
       <!--
@@ -204,8 +236,11 @@
         <fileset dir="${thirdparty.jar.dir}">
           <include name="tests/junit.jar" />
         </fileset>
+        <fileset dir="${jar.dir}" includes="**/*.jar" />
       </classpath>
       <classpath location="${instrumented.dir}" />
+      <classpath location="${classes-core}" />
+      <classpath location="${classes-test}" />
 
       <!--
           The instrumented classes reference classes used by the
@@ -213,10 +248,10 @@
           must be on your classpath.
       -->
       <classpath refid="cobertura.classpath" />
-
+      <syspropertyset refid="javatest.properties"/>
       <formatter type="xml" />
       <batchtest todir="${reports.xml.dir}" unless="testcase">
-        <fileset dir="${test.core.dir}">
+        <fileset dir="${src-test}">
           <include name="**/${test.suite}Test.java" />
         </fileset>
       </batchtest>
@@ -253,7 +288,6 @@
   </target>
 
   <target name="clean_code_coverage" description="Remove all files created by the build/test process.">
-    <delete dir="${classes.dir}" />
     <delete dir="${instrumented.dir}" />
     <delete dir="${reports.dir}" />
     <delete file="cobertura.log" />

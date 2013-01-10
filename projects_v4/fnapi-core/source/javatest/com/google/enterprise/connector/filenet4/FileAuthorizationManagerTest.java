@@ -47,7 +47,7 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
 //    FileAuthenticationIdentity fai = new FileAuthenticationIdentity(TestConnection.username, TestConnection.password);
 //    AuthenticationResponse ar = fatm.authenticate(fai);
 
-    Map expectedResults = new HashMap();
+    Map<String, Boolean> expectedResults = new HashMap<String, Boolean>();
     expectedResults.put(TestConnection.docVsId1, Boolean.FALSE);
     expectedResults.put(TestConnection.docVsId2, Boolean.FALSE);
     expectedResults.put(TestConnection.docVsId3, Boolean.TRUE);
@@ -57,9 +57,11 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
 
   }
 
-  private void testAuthorization(FileAuthorizationManager fam, Map expectedResults, String username, String password) throws RepositoryException {
+  private void testAuthorization(FileAuthorizationManager fam,
+          Map<String, Boolean> expectedResults, 
+          String username, String password) throws RepositoryException {
 
-    List docids = new LinkedList(expectedResults.keySet());
+    List<String> docids = new LinkedList<String>(expectedResults.keySet());
 
 //    List resultSet = (List) fam.authorizeDocids(docids,
 //        new FileAuthenticationIdentity(username, password));
@@ -72,7 +74,7 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
       ar = (AuthorizationResponse) i.next();
       String uuid = ar.getDocid();
 
-      expected = (Boolean) expectedResults.get(uuid);
+      expected = expectedResults.get(uuid);
       assertEquals(username + " access to " + uuid, expected
           .booleanValue(), ar.isValid());
 
