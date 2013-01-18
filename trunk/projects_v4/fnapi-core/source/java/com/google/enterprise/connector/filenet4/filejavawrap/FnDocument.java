@@ -39,8 +39,6 @@ import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.util.Id;
-import com.filenet.wcm.api.BaseRuntimeException;
-import com.filenet.wcm.api.InsufficientPermissionException;
 
 import java.io.InputStream;
 import java.util.Calendar;
@@ -192,20 +190,11 @@ public class FnDocument implements IDocument {
       List contentList = doc.get_ContentElements();
       ContentTransfer content = (ContentTransfer) contentList.get(0);
       ip = content.accessContentStream();
-      return ip;
-    } catch (InsufficientPermissionException e) {
-      logger.log(Level.WARNING, "User does not have sufficient permission to retrive the content of document for "
-          + this.doc.get_Id() + " " + e.getLocalizedMessage());
-      return ip;
-    } catch (BaseRuntimeException e) {
-      logger.log(Level.WARNING, "Unable to retrieve the content of file for "
-          + this.doc.get_Id() + " " + e.getLocalizedMessage());
-      return ip;
     } catch (Exception er) {
       logger.log(Level.WARNING, "Unable to retrieve the content of file for "
           + this.doc.get_Id() + " " + er.getLocalizedMessage(), er);
-      return ip;
     }
+    return ip;
   }
 
   /**
