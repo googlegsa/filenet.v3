@@ -178,11 +178,7 @@ public class FileDocument implements Document {
       if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         Calendar tmpCal = Calendar.getInstance();
-
-        long timeDateMod = timeStamp.getTime();
-        timeStamp.setTime(timeDateMod + 1000);
         tmpCal.setTime(timeStamp);
-
         DateValue tmpDtVal = new DateValue(tmpCal);
         list.add(tmpDtVal);
         return new SimpleProperty(list);
