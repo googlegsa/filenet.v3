@@ -22,10 +22,6 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
-import com.google.enterprise.connector.spiimpl.BinaryValue;
-import com.google.enterprise.connector.spiimpl.BooleanValue;
-import com.google.enterprise.connector.spiimpl.DateValue;
-import com.google.enterprise.connector.spiimpl.StringValue;
 
 import com.filenet.api.constants.ClassNames;
 
@@ -108,16 +104,15 @@ public class FileDocument implements Document {
       fetch();
       if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new BinaryValue(document.getContent()));
+        list.add(Value.getBinaryValue(document.getContent()));
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new StringValue(this.displayUrl + vsDocId));
+        list.add(Value.getStringValue(this.displayUrl + vsDocId));
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(BooleanValue.makeBooleanValue(this.isPublic ? true
-                : false));
+        list.add(Value.getBooleanValue(this.isPublic));
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
@@ -131,10 +126,10 @@ public class FileDocument implements Document {
         return null;
       } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new StringValue(vsDocId));
+        list.add(Value.getStringValue(vsDocId));
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
-        list.add(new StringValue(action.toString()));
+        list.add(Value.getStringValue(action.toString()));
         logger.fine("Getting Property " + name + " : "
                 + action.toString());
         return new SimpleProperty(list);
@@ -179,17 +174,15 @@ public class FileDocument implements Document {
         logger.log(Level.FINEST, "Getting property: " + name);
         Calendar tmpCal = Calendar.getInstance();
         tmpCal.setTime(timeStamp);
-        DateValue tmpDtVal = new DateValue(tmpCal);
-        list.add(tmpDtVal);
+        list.add(Value.getDateValue(tmpCal));
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new StringValue(action.toString()));
+        list.add(Value.getStringValue(action.toString()));
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new StringValue(versionId));
-        // logger.fine("versionId : " + versionId);
+        list.add(Value.getStringValue(versionId));
         return new SimpleProperty(list);
       }
     }
@@ -203,13 +196,13 @@ public class FileDocument implements Document {
     for (String property : documentProperties) {
       if (property != null) {
         if (included_meta.size() != 0) {
-          // includeMeta - exludeMeta
+          // includeMeta - excludeMeta
           logger.log(Level.FINE, "Metadata set will be (includeMeta - exludeMeta)");
           if ((!excluded_meta.contains(property) && included_meta.contains(property))) {
             properties.add(property);
           }
         } else {
-          // superSet - exludeMeta
+          // superSet - excludeMeta
           logger.log(Level.FINE, "Metadata set will be (superSet - exludeMeta)");
           if ((!excluded_meta.contains(property) || included_meta.contains(property))) {
             properties.add(property);

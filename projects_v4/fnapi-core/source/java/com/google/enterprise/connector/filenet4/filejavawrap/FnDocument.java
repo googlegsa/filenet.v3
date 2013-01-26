@@ -22,12 +22,6 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.Value;
-import com.google.enterprise.connector.spiimpl.BinaryValue;
-import com.google.enterprise.connector.spiimpl.BooleanValue;
-import com.google.enterprise.connector.spiimpl.DateValue;
-import com.google.enterprise.connector.spiimpl.DoubleValue;
-import com.google.enterprise.connector.spiimpl.LongValue;
-import com.google.enterprise.connector.spiimpl.StringValue;
 
 import com.filenet.api.collection.PropertyDescriptionList;
 import com.filenet.api.constants.PropertyNames;
@@ -222,12 +216,10 @@ public class FnDocument implements IDocument {
             // metadata is single-valued.
             if (value instanceof List) {
               for (Object object : (List) value) {
-                valuesList.add(new StringValue(
-                    object.toString()));
+                valuesList.add(Value.getStringValue(object.toString()));
               }
             } else {
-              valuesList.add(new StringValue(
-                  prop.getStringValue()));
+              valuesList.add(Value.getStringValue(prop.getStringValue()));
             }
           }
           return;
@@ -282,7 +274,7 @@ public class FnDocument implements IDocument {
                   // FileNEt connector needs ID without curly
                   // braces. Thus removing
                   // the curly braces.
-                  valuesList.add(new StringValue(
+                  valuesList.add(Value.getStringValue(
                       id.substring(1, id.length() - 1)));
               }
             } else {
@@ -292,7 +284,7 @@ public class FnDocument implements IDocument {
                 // "{" and "}" surrounded and ID is in between these curly
                 // braces FileNet connector needs ID without curly braces.
                 // Thus removing the curly braces.
-                valuesList.add(new StringValue(
+                valuesList.add(Value.getStringValue(
                     id.substring(1, id.length() - 1)));
             }
           }
@@ -339,11 +331,11 @@ public class FnDocument implements IDocument {
                 // connector-manager contains only LongValue
                 // Thus need to map Integer value of FileNet to
                 // LongValue.
-                valuesList.add(new LongValue(
+                valuesList.add(Value.getLongValue(
                     ((Integer) object).longValue()));
               }
             } else {
-              valuesList.add(new LongValue(
+              valuesList.add(Value.getLongValue(
                   prop.getInteger32Value().longValue()));
             }
           }
@@ -388,11 +380,11 @@ public class FnDocument implements IDocument {
             if (value instanceof List) {
               for (Object object : (List) value) {
                 if (object instanceof Double)
-                  valuesList.add(new DoubleValue(
+                  valuesList.add(Value.getDoubleValue(
                       ((Double) object).doubleValue()));
               }
             } else {
-              valuesList.add(new DoubleValue(
+              valuesList.add(Value.getDoubleValue(
                   prop.getFloat64Value().doubleValue()));
             }
           }
@@ -448,12 +440,12 @@ public class FnDocument implements IDocument {
               for (Object object : (List) value) {
                 Calendar c = Calendar.getInstance();
                 c.setTime((Date) object);
-                valuesList.add(new DateValue(c));
+                valuesList.add(Value.getDateValue(c));
               }
             } else {
               Calendar c = Calendar.getInstance();
               c.setTime(prop.getDateTimeValue());
-              valuesList.add(new DateValue(c));
+              valuesList.add(Value.getDateValue(c));
             }
           }
           return;
@@ -495,10 +487,12 @@ public class FnDocument implements IDocument {
             // metadata is single-valued.
             if (value instanceof List) {
               for (Object object : (List) value) {
-                valuesList.add(BooleanValue.makeBooleanValue(((Boolean) object).booleanValue()));
+                valuesList.add(Value.getBooleanValue(
+                    ((Boolean) object).booleanValue()));
               }
             } else {
-              valuesList.add(BooleanValue.makeBooleanValue((prop.getBooleanValue().booleanValue())));
+              valuesList.add(Value.getBooleanValue(
+                  prop.getBooleanValue().booleanValue()));
             }
           }
           return;
@@ -541,8 +535,7 @@ public class FnDocument implements IDocument {
             if (value instanceof List) {
               logger.log(Level.WARNING, "Binary MultiValued Metadat is currently not supported. Binary MultiValued metadata will not be fed to GSA");
             } else {
-              valuesList.add(new BinaryValue(
-                  prop.getBinaryValue()));
+              valuesList.add(Value.getBinaryValue(prop.getBinaryValue()));
             }
           }
           return;
