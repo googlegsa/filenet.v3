@@ -18,6 +18,7 @@
   <property name="config" value="fnapi-client/config" />
   <property name="jarfile.dir" value="third_party/lib"/>
   <property name="file_jarfile.dir" value="file_third_party/lib"/>
+  <property name="downloads.dir" value="downloads" />
 
   <property name="build-client" value="fnapi-client/build" />
   <property name="src-client" value="fnapi-client/source/java" />
@@ -80,6 +81,7 @@
     <mkdir dir="${classes-client}" />
     <mkdir dir="${classes-test}" />
     <mkdir dir="${jar.dir}" />
+    <mkdir dir="${downloads.dir}" />
   </target>
 
   <target name="compile-core" depends="init">
@@ -166,6 +168,7 @@
     <delete dir="${classes-core}" />
     <delete dir="${classes-client}" />
     <delete dir="${classes-test}" />
+    <delete dir="${downloads.dir}" />
   </target>
 
   <!--Cobertura Report Generation -->
@@ -296,4 +299,61 @@
 
   <target name="run_code_coverage" depends="run_tests,coverage-report,alternate-coverage-report" description="Compile, instrument ourself, run the tests and generate JUnit and coverage reports."/>
 
+  <!-- Zip and Archive -->
+  <target name="download-bin-archive" depends="jar">
+    <property name="bin.archive" value="connector-file4-${version}" />
+    <zip destfile="${downloads.dir}/${bin.archive}.zip">
+      <zipfileset file="${jarfile}" prefix="${bin.archive}" />
+      <zipfileset file="RELEASE_NOTES" prefix="${bin.archive}" />
+      <zipfileset file="README.txt" prefix="${bin.archive}" />
+      <zipfileset file="jaas.conf" prefix="${bin.archive}/Config" />
+      <zipfileset dir="../License" prefix="${bin.archive}/License" />
+      <zipfileset file="${config}/config/logging.properties"
+                  prefix="${bin.archive}/Config" />
+      <zipfileset file="${jarfile.dir}/commons-logging.jar"
+                  prefix="${bin.archive}/Lib" />
+      <zipfileset file="${jarfile.dir}/json.jar"
+                  prefix="${bin.archive}/Lib" />
+      <zipfileset file="${jarfile.dir}/log4j-1.2.15.jar"
+                  prefix="${bin.archive}/Lib" />
+      <zipfileset file="${jarfile.dir}/LICENSE" prefix="${bin.archive}/Lib" />
+    </zip>
+    <checksum algorithm="SHA-1">
+      <fileset dir="${downloads.dir}">
+        <include name="${bin.archive}*" />
+      </fileset>
+    </checksum>
+  </target>
+
+  <target name="download-src-archive" depends="">
+    <property name="src.archive" value="connector-file4-${version}-src" />
+    <zip destfile="${downloads.dir}/${src.archive}.zip">
+      <zipfileset file="Build_ReadMe.txt" prefix="${src.archive}" />
+      <zipfileset file="../RELEASE_NOTES" prefix="${src.archive}" />
+      <zipfileset file="README.txt" prefix="${src.archive}" />
+      <zipfileset dir="../License" prefix="${src.archive}/License" />
+      <zipfileset file="version.properties" prefix="${src.archive}/source" />
+      <zipfileset file="build.xml" prefix="${src.archive}/source" />
+      <zipfileset dir="file_third_party"
+                  prefix="${src.archive}/source/file_third_party" />
+      <zipfileset dir="fnapi-client"
+                  prefix="${src.archive}/source/fnapi-client" />
+      <zipfileset dir="fnapi-core" prefix="${src.archive}/source/fnapi-core" />
+      <zipfileset file="third_party/lib/commons-logging.jar"
+                  prefix="${src.archive}/source/third_party/lib" />
+      <zipfileset file="third_party/lib/connector-logging.jar"
+                  prefix="${src.archive}/source/third_party/lib" />
+      <zipfileset file="third_party/lib/junit-4.9.jar"
+                  prefix="${src.archive}/source/third_party/lib" />
+      <zipfileset file="third_party/lib/log4j-1.2.15.jar"
+                  prefix="${src.archive}/source/third_party/lib" />
+      <zipfileset file="third_party/lib/spring.jar"
+                  prefix="${src.archive}/source/third_party/lib" />
+    </zip>
+    <checksum algorithm="SHA-1">
+      <fileset dir="${downloads.dir}">
+        <include name="${src.archive}*" />
+      </fileset>
+    </checksum>
+  </target>
 </project>
