@@ -95,14 +95,13 @@ public class FileTraversalManager implements TraversalManager {
   private boolean useIDForChangeDetection;
   private Set<String> included_meta;
   private Set<String> excluded_meta;
-  private String db_timezone;
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
       IObjectStore objectStore, boolean b,
       boolean useIDForChangeDetection, String displayUrl,
       String additionalWhereClause, String deleteadditionalWhereClause,
-      Set<String> included_meta, Set<String> excluded_meta,
-      String db_timezone) throws RepositoryException {
+      Set<String> included_meta, Set<String> excluded_meta)
+      throws RepositoryException {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
     this.isPublic = b;
@@ -112,14 +111,13 @@ public class FileTraversalManager implements TraversalManager {
     this.deleteadditionalWhereClause = deleteadditionalWhereClause;
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
-    this.db_timezone = db_timezone;
   }
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
       IObjectStore objectStore, ISession fileSession, boolean b,
       boolean useIDForChangeDetection, String displayUrl,
       String additionalWhereClause, String deleteadditionalWhereClause,
-      Set<String> included_meta, Set<String> excluded_meta, String db_timezone)
+      Set<String> included_meta, Set<String> excluded_meta)
       throws RepositoryException {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
@@ -132,7 +130,6 @@ public class FileTraversalManager implements TraversalManager {
     this.deleteadditionalWhereClause = deleteadditionalWhereClause;
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
-    this.db_timezone = db_timezone;
   }
 
   public DocumentList startTraversal() throws RepositoryException {
@@ -493,27 +490,15 @@ public class FileTraversalManager implements TraversalManager {
    * @return
    */
   protected String extractNativeDateFromCheckpoint(JSONObject jo,
-          String checkPoint, String param) {
-    String dateString = null;
+          String checkPoint, String param) throws RepositoryException {
     try {
-      dateString = jo.getString(param);
-      // dateString = "2008-09-05T09:40:04.073";
+      // Need to validate the zone info in the date time string
+      return FileUtil.getQueryTimeString(jo.getString(param));
     } catch (JSONException e) {
-      LOGGER.log(Level.WARNING, "Could not get last modified/removed date from checkPoint string: "
+      throw new RepositoryException(
+          "Could not get last modified/removed date from checkPoint string: "
               + checkPoint, e);
-      throw new IllegalArgumentException(
-              "Could not get last modified/removed date from checkPoint string: "
-                      + checkPoint, e);
     }
-
-    String timeZoneOffset = null;
-    if (this.db_timezone == null || this.db_timezone.equalsIgnoreCase("")) {
-      timeZoneOffset = FileUtil.getTimeZone(Calendar.getInstance());
-    } else {
-      timeZoneOffset = FileUtil.getTimeZone(this.db_timezone);
-    }
-
-    return dateString + timeZoneOffset;
   }
 
   /**

@@ -13,28 +13,24 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4;
 
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import com.google.enterprise.connector.spi.Property;
+import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.Value;
+
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-/**
- * Utility class, which will have independent utility methods, that can be used by other classes.
- * @author pankaj_chouhan
- *
- */
 public class FileUtil {
+  private static final Logger logger =
+      Logger.getLogger(FileUtil.class.getName());
 
-  private static Logger logger = null;
-  static {
-    logger = Logger.getLogger(FileUtil.class.getName());
-  }
+  private static final Pattern ZONE_PATTERN =
+      Pattern.compile("(?:(Z)|([+-][0-9]{2})(:)?([0-9]{2})?)$");
+
+  private static final String ZULU_WITH_COLON = "+00:00";
 
   private FileUtil() {
   }
@@ -72,83 +68,44 @@ public class FileUtil {
   }
 
   /**
-     * Validates the String to check whether it represents an IP address or not
-     * and returns the boolean status.
-     *
-     * @param ip IP adress to be validated in the form of string.
-     * @return If ip address matches the regular expression then true else false
-     *         is returned.
-     */
-    public static boolean isIPAddress(String ip) {
-        if (ip.matches("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"))
-            return true;
-        else
-            return false;
+   * Retrieve date time value from property and convert it to a proper format.
+   * @param Property prop - Document LastModified time
+   * @return String - date time in ISO8601 format including zone
+   * @throws RepositoryException
+   */
+  public static String getQueryTimeString(Property prop)
+      throws RepositoryException {
+    Value val = prop.nextValue();
+    if (prop.nextValue() != null) {
+      logger.log(Level.WARNING, "Property contains multivalue datetime");
     }
-
-    /**
-     * Validates the server name to check whether it is in FQDN format or not
-     * and returns the boolean status.
-     *
-     * @param serverName Server Name to be validated in the form of string.
-     * @return Returns true if Server Name is in FQDN format else returns false.
-     */
-    public static boolean isFQHN(String serverName) {
-        if (serverName.indexOf(".") == -1
-                || serverName.lastIndexOf(".") == serverName.length() - 1) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * To fetch the host name or host ip address from a given URL.
-     * @param strURL Target URL, whose host name is to be fetched.
-     * @return Return the Host Name or Host IP. Returns null, if URL is in malformed state.
-     */
-    public static String getHost(String strURL) {
-    try {
-      URL url = new URL(strURL);
-      return url.getHost();
-    } catch (MalformedURLException e) {
-      logger.log(Level.WARNING, "Malformed URL has occurred. Either no legal protocol could be found in a URL string or the URL string could not be parsed. URL string is: ["+strURL+"]", e);
-      return null;
-    }
+    return val.toString();
   }
 
-    /**
-     * To fetch the Fully Qualified Host Name.
-     * @param host ShortName of the host.
-     * @return Returns Fully Qualified Host Name
-     */
-    public static String getFQHN(String host) {
-    try {
-      return InetAddress.getByName(host).getCanonicalHostName();
-    } catch (UnknownHostException e) {
-      logger.log(Level.WARNING, "Unable to reach the Host: ["+host+"]", e);
-      return null;
+  /**
+   * Validate the time string by:
+   * (a) appending zone portion (+/-hh:mm) or
+   * (b) inserting the colon into zone portion
+   * if it does not already have zone or colon.
+   * 
+   * @param String checkpoint - in ISO8601 format
+   * @return String - date time in ISO8601 format including zone
+   * @throws RepositoryException
+   */
+  public static String getQueryTimeString(String checkpoint) {
+    Matcher matcher = ZONE_PATTERN.matcher(checkpoint);
+    if (matcher.find()) {
+      String timeZone = matcher.group();
+      if (timeZone.length() == 5) {
+        return checkpoint.substring(0, matcher.start()) + 
+            timeZone.substring(0,3) + ":" + timeZone.substring(3);
+      } else if (timeZone.length() == 3) {
+        return checkpoint + ":00";
+      } else {
+        return checkpoint.replaceFirst("Z$", FileUtil.ZULU_WITH_COLON);
+      }
+    } else {
+      return checkpoint + ZULU_WITH_COLON;
     }
-  }
-
-    /**
-     * Converts the Timezone offset from the format GMT(+|-)hh:mm to (+|-)hh:mm
-     * @param offset Offset in the format GMT(+|-)hh:mm
-     * @return Timezone offset in the format (+|-)hh:mm
-     */
-    public static String getTimeZone(String offset) {
-      return offset.replaceFirst("GMT", "");
-    }
-
-    /**
-     * Takes the Calendar instance and fetches the current timezone offset in the format (+|-)hhmm.
-     * Inserts the ":" in the above format and returns the timezonezone offset in the format (+|-)hh:mm
-     * @param cal Local Calendar instance
-     * @return Timezone offset in the format (+|-)hh:mm
-     */
-    public static String getTimeZone(Calendar cal) {
-    DateFormat dateStandard = new SimpleDateFormat("Z");
-    StringBuffer strDate = new StringBuffer(dateStandard.format(cal.getTime()));
-    //Insert the ":" to convert the result in the format (+|-)hh:mm
-    return (strDate.insert(strDate.length()-2, ':')).toString();
   }
 }

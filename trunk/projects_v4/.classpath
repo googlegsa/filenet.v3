@@ -19,5 +19,6 @@
 	<classpathentry kind="lib" path="third_party/lib/stax-api.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/xlxpScanner.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/xlxpScannerUtils.jar"/>
+	<classpathentry kind="lib" path="/Users/tdnguyen/gsa/gdata/java/lib/gdata-core-1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
