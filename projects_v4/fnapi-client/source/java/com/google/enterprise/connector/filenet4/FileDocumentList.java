@@ -12,8 +12,6 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 import java.util.Iterator;
@@ -21,6 +19,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileDocumentList implements DocumentList {
+  private static final Logger logger = 
+      Logger.getLogger(FileDocumentList.class.getName());
 
   private static final long serialVersionUID = 1L;
   private FileDocument fileDocumentToDelete = null;
@@ -43,9 +43,6 @@ public class FileDocumentList implements DocumentList {
   private Set<String> included_meta;
   private Set<String> excluded_meta;
   private int index = -1;
-  // private NodeList data = null;
-  // private NodeList dataToDelete = null;
-  private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
@@ -249,20 +246,9 @@ public class FileDocumentList implements DocumentList {
 
     if (fileDocument != null) {
       Property val = fetchAndVerifyValueForCheckpoint(fileDocument, SpiConstants.PROPNAME_LASTMODIFIED);
-
-      try {
-        String dateStr = val.nextValue().toString();
-        dateString = FileDateValue.calendarToIso8601(dateStr);
-      } catch (ParseException e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for add. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      } catch (Exception e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for add. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      }
+      dateString = FileUtil.getQueryTimeString(val);
       logger.log(Level.FINE, "dateString of the checkpoint of added document is "
               + dateString);
-
     } else if (lastCheckPoint != null) {
       logger.fine("Get the last modified date from the last checkpoint ");
       JSONObject jo;
@@ -286,20 +272,9 @@ public class FileDocumentList implements DocumentList {
 
     if (fileDocumentToDeleteDocs != null) {
       Property val = fetchAndVerifyValueForCheckpoint(fileDocumentToDeleteDocs, SpiConstants.PROPNAME_LASTMODIFIED);
-
-      try {
-        String dateStr = val.nextValue().toString();
-        dateStringDocumentToDeleteDocs = FileDateValue.calendarToIso8601(dateStr);
-      } catch (ParseException e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for add. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      } catch (Exception e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for add. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      }
+      dateStringDocumentToDeleteDocs = FileUtil.getQueryTimeString(val);
       logger.log(Level.FINE, "dateString of the checkpoint of deleted document is "
               + dateStringDocumentToDeleteDocs);
-
     } else if (lastCheckPoint != null) {
       logger.fine("Get the last modified date from the last checkpoint ");
       JSONObject jo;
@@ -322,17 +297,8 @@ public class FileDocumentList implements DocumentList {
 
     if (fileDocumentToDelete != null) {
       Property valToDelete = fetchAndVerifyValueForCheckpoint(fileDocumentToDelete, SpiConstants.PROPNAME_LASTMODIFIED);
-      Calendar date = null;
-      try {
-        String dateStr = valToDelete.nextValue().toString();
-        dateStringDocumentToDelete = FileDateValue.calendarToIso8601(dateStr);
-      } catch (ParseException e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for delete. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      } catch (Exception e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for delete. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      }
+      dateStringDocumentToDelete =
+              FileUtil.getQueryTimeString(valToDelete);
       logger.log(Level.FINE, "dateString of the checkpoint of deleted document is "
               + dateStringDocumentToDelete);
     } else if (lastCheckPoint != null) {
@@ -380,5 +346,4 @@ public class FileDocumentList implements DocumentList {
     }
     return property;
   }
-
 }
