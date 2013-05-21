@@ -13,10 +13,15 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4;
 
+import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.property.FilterElement;
+import com.filenet.api.property.PropertyFilter;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,6 +70,34 @@ public class FileUtil {
       shortUserName = longName.substring(0, longName.indexOf("@"));
     }
     return shortUserName;
+  }
+
+  /** Creates a default property filter for document. */
+  public static PropertyFilter getDocumentPropertyFilter(
+      Set<String> includedMetaNames) {
+    Set<String> filterSet = new HashSet<String>();
+    if (includedMetaNames != null) {
+      filterSet.addAll(includedMetaNames);
+    }
+    filterSet.add(PropertyNames.ID);
+    filterSet.add(PropertyNames.CLASS_DESCRIPTION);
+    filterSet.add(PropertyNames.CONTENT_ELEMENTS);
+    filterSet.add(PropertyNames.DATE_LAST_MODIFIED);
+    filterSet.add(PropertyNames.MIME_TYPE);
+    filterSet.add(PropertyNames.VERSION_SERIES);
+    filterSet.add(PropertyNames.VERSION_SERIES_ID);
+    filterSet.add(PropertyNames.RELEASED_VERSION);
+    
+    StringBuilder buf = new StringBuilder();
+    for (String filterName : filterSet) {
+      buf.append(filterName).append(" ");
+    }
+    buf.deleteCharAt(buf.length() - 1);
+    
+    PropertyFilter filter = new PropertyFilter();
+    filter.addIncludeProperty(
+        new FilterElement(null, null, null, buf.toString(), null));
+    return filter;
   }
 
   /**

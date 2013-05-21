@@ -57,45 +57,18 @@ public class FnDocument implements IDocument {
       Logger.getLogger(FnDocument.class.getName());
 
   private final Document doc;
-  private Map<String, Object> metas;
-  private Map<String, String> metaTypes;
+  private final Map<String, Object> metas;
+  private final Map<String, String> metaTypes;
 
   public FnDocument(Document doc) {
     this.doc = doc;
-  }
-
-  public void fetch(Set<String> includedMeta)
-      throws RepositoryDocumentException {
-    PropertyFilter pf = new PropertyFilter();
-    if (includedMeta != null) {
-      if (includedMeta.size() == 0) {
-        pf.addIncludeProperty(new FilterElement(null, null, null,
-            (String) null, null));
-      } else {
-        pf.addIncludeProperty(new FilterElement(null, null, null,
-            "Id ClassDescription ContentElements DateLastModified MimeType VersionSeries "
-                + PropertyNames.RELEASED_VERSION + " "
-                + PropertyNames.VERSION_SERIES_ID, null));
-      }
-
-      for (String name : includedMeta) {
-        pf.addIncludeProperty(new FilterElement(null, null, null, name, null));
-      }
-    }
-
-    pf.setMaxRecursion(1);
-    try {
-      doc.fetchProperties(pf);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    setMetaTypes();
+    this.metas = new HashMap<String, Object>();
     setMeta();
+    this.metaTypes = new HashMap<String, String>();
+    setMetaTypes();
   }
 
   private void setMetaTypes() {
-    metaTypes = new HashMap<String, String>();
     PropertyDescriptionList propDescList = doc.get_ClassDescription().get_PropertyDescriptions();
 
     Iterator it8 = propDescList.iterator();
@@ -108,7 +81,6 @@ public class FnDocument implements IDocument {
   }
 
   private void setMeta() {
-    metas = new HashMap<String, Object>();
     Properties props = doc.getProperties();
     Property[] prop = props.toArray();
     for (Property property : prop) {

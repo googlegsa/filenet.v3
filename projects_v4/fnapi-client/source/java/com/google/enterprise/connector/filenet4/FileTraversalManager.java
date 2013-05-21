@@ -215,6 +215,8 @@ public class FileTraversalManager implements TraversalManager {
     query.append(PropertyNames.ID);
     query.append(",");
     query.append(PropertyNames.DATE_LAST_MODIFIED);
+    query.append(",");
+    query.append(PropertyNames.RELEASED_VERSION);
     query.append(" FROM ");
     query.append(tableName);
     query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");

@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.filenet.api.constants.ClassNames;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
@@ -23,12 +24,9 @@ import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
-import com.filenet.api.constants.ClassNames;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.logging.Level;
@@ -88,12 +86,11 @@ public class FileDocument implements Document {
     if (document != null) {
       return;
     }
-    document = (IDocument) objectStore.getObject(ClassNames.DOCUMENT, docId);
-    document.fetch(included_meta);
-    logger.log(Level.FINE, "Fetch document for DocId " + docId);
-    this.vsDocId = document.getVersionSeries().getId(action);
-    logger.log(Level.FINE, "VersionSeriesID for document is : "
-            + this.vsDocId);
+    document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
+        FileUtil.getDocumentPropertyFilter(included_meta));
+    logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
+    vsDocId = document.getVersionSeries().getId(action);
+    logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
   public Property findProperty(String name)

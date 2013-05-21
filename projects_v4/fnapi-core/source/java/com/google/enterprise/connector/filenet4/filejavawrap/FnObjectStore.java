@@ -1,19 +1,20 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.ObjectStore;
 import com.filenet.api.core.VersionSeries;
+import com.filenet.api.property.PropertyFilter;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FnObjectStore implements IObjectStore {
   private static final Logger logger =
@@ -38,21 +39,39 @@ public class FnObjectStore implements IObjectStore {
 
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException {
-    IndependentObject obj = null;
     try {
-      obj = objectStore.getObject(type, id);
+      IndependentObject obj = objectStore.getObject(type, id);
       if (type.equals(ClassNames.VERSION_SERIES)) {
-        VersionSeries vs = (VersionSeries) objectStore.getObject(type, id);
+        VersionSeries vs = (VersionSeries) obj;
         vs.refresh();
         return new FnVersionSeries(vs);
       } else if (type.equals(ClassNames.DOCUMENT)) {
-        return new FnDocument((Document) objectStore.getObject(type, id));
+        return new FnDocument((Document) obj);
       } else {
         return new FnBaseObject(obj);
       }
     } catch (Exception e) {
       logger.log(Level.WARNING,
           "Unable to get VersionSeries or Document object", e);
+      throw new RepositoryDocumentException(e);
+    }
+  }
+
+  public IBaseObject fetchObject(String type, String id, PropertyFilter filter)
+          throws RepositoryDocumentException {
+    IndependentObject obj = null;
+    try {
+      obj = objectStore.fetchObject(type, id, filter);
+      if (type.equals(ClassNames.VERSION_SERIES)) {
+        return new FnVersionSeries((VersionSeries) obj);
+      } else if (type.equals(ClassNames.DOCUMENT)) {
+        return new FnDocument((Document) obj);
+      } else {
+        return new FnBaseObject(obj);
+      }
+    } catch (Exception e) {
+      logger.log(Level.WARNING,
+          "Unable to fetch VersionSeries or Document object", e);
       throw new RepositoryDocumentException(e);
     }
   }
