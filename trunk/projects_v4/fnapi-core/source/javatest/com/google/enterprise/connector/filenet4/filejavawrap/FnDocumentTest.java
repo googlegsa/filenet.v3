@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileNetTestCase;
 import com.google.enterprise.connector.filenet4.FileSession;
+import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
@@ -69,8 +70,8 @@ public class FnDocumentTest extends FileNetTestCase {
     // null);
     ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.adminUsername, TestConnection.adminPassword);
 
-    fd = (IDocument) ios.getObject(ClassNames.DOCUMENT, TestConnection.docId1);
-    fd.fetch(TestConnection.included_meta);
+    fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT, TestConnection.docId1,
+        FileUtil.getDocumentPropertyFilter(TestConnection.included_meta));
 
     uc = new FnUserContext(conn);
     uc.authenticate(TestConnection.username, TestConnection.password);

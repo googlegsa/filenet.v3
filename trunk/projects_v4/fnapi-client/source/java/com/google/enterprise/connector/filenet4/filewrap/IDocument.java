@@ -28,7 +28,6 @@ import java.util.Set;
  * @author pankaj_chouhan
  */
 public interface IDocument extends IBaseObject {
-  void fetch(Set<String> includedMeta) throws RepositoryDocumentException;
 
   IPermissions getPermissions() throws RepositoryException;
 

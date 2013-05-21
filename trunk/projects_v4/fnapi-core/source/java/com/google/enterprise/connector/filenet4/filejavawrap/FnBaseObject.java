@@ -28,19 +28,6 @@ public class FnBaseObject implements IBaseObject {
 
   public FnBaseObject(IndependentObject object) {
     this.object = object;
-    PropertyFilter pf = new PropertyFilter();
-
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.RELEASED_VERSION, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.VERSION_SERIES, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.VERSION_SERIES_ID, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.ID, null));
-
-    this.object.fetchProperties(pf);
-
   }
 
   public String getClassNameEvent() throws RepositoryDocumentException {
