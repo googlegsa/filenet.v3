@@ -6,10 +6,31 @@ Google Search Appliance Connector for FileNet
 This document contains the release notes for Google Search Appliance Connector
 for FileNet. This connector supports IBM FileNet P8 4.0 through 5.1.  The
 following sections describe the release in detail and provide information that
-supplements the main documentation.  See the Issues Tab on the Code Site for
-the current list of known issues and workarounds.
+supplements the main documentation.
 
 Web Site: http://code.google.com/p/google-enterprise-connector-file/
+
+
+Release 3.0.8, May 23, 2013
+===========================
+
+This is an upgrade release with bug fixes.  Users of previous versions are encouraged to upgrade.
+
+Summary of Changes
+------------------
+ * Issue 7508912: Fix API_FETCH_MERGE_PROPERTY_ERROR exception: "Can not fetch
+   and merge the new property values because the object has been changed on
+   the server since it was last retrieved.  Try using refresh first".
+ * Issue 7680949: Remove one second added to the last modified time.
+ * Issue 7945517: Remove dependency on Content Java API compatibility layer
+   javaapi.jar.
+ * Issue 8078908: Fix UTC time conversion logic and checkpointing and
+   deprecate db_timezone configuration.
+
+Version Compatibility
+---------------------
+Connector instances created using versions 2.0.0 or later may be used with this
+version.  This version works with Connector Manager version 3.0.0 or later.
 
 
 Release 3.0.4, December 2012
