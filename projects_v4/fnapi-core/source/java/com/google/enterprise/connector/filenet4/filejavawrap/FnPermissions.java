@@ -44,14 +44,16 @@ import java.util.logging.Logger;
  *
  * @author pankaj_chouhan
  */
+@SuppressWarnings("rawtypes")
 public class FnPermissions implements IPermissions {
+  private static final Logger LOGGER =
+      Logger.getLogger(FnDocument.class.getName());
 
   private AccessPermissionList perms;
   private int ACCESS_LEVEL = AccessLevel.VIEW_AS_INT;
   private final String AUTHENTICATED_USERS = "#AUTHENTICATED-USERS";
   private String ACTIVE_DIRECTORY_SYMBOL = "@";
   private int ACCESS_OBJECT_LEVEL = AccessRight.USE_MARKING_AS_INT;
-  private Logger LOGGER = Logger.getLogger(FnDocument.class.getName());
   private PropertyFilter pf = new PropertyFilter();
 
   public FnPermissions(AccessPermissionList perms) {

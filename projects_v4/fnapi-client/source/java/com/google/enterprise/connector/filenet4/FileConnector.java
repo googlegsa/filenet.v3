@@ -13,6 +13,9 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 
 public class FileConnector implements Connector {
+  private static Logger LOGGER =
+      Logger.getLogger(FileConnector.class.getName());
+
   private String object_factory;
   private String username;
   private String password;
@@ -26,18 +29,14 @@ public class FileConnector implements Connector {
   private String delete_additional_where_clause = "";
   private Set<String> included_meta;
   private Set<String> excluded_meta;
-  private String db_timezone;
 
-  public String getDb_timezone() {
-    return db_timezone;
-  }
+  // The db_timezone property is deprecated; however, its setter remains here
+  // for backward compatibility.
 
   public void setDb_timezone(String dbTimezone) {
-    db_timezone = dbTimezone;
-    LOGGER.config("Set Database Server's TimeZone to " + this.db_timezone);
+    LOGGER.warning("Deprecated db_timezone property, set to " + dbTimezone +
+        ", will be ignored");
   }
-
-  private static Logger LOGGER = Logger.getLogger(FileConnector.class.getName());
 
   public Session login() throws RepositoryLoginException, RepositoryException {
 
@@ -66,7 +65,7 @@ public class FileConnector implements Connector {
               is_public.equals("true"), check_marking.equals("on"),
               useIDForChangeDetection.equals("true"),
               additional_where_clause, delete_additional_where_clause,
-              included_meta, excluded_meta, db_timezone);
+              included_meta, excluded_meta);
     }
     return sess;
 

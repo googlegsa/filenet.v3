@@ -15,17 +15,13 @@ import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 
+@SuppressWarnings("rawtypes")
 public class FnSearch implements ISearch {
+  private static final Logger logger =
+      Logger.getLogger(FnSearch.class.getName());
 
-  SearchScope search;
+  private final SearchScope search;
 
-  private static Logger logger;
-
-  private static String dateFirstPush ;
-
-  static {
-    logger = Logger.getLogger(FnSearch.class.getName());
-  }
   public FnSearch(SearchScope search) {
     this.search = search;
   }

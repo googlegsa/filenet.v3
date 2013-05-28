@@ -19,30 +19,15 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@SuppressWarnings("rawtypes")
 public class FnBaseObject implements IBaseObject {
+  private static final Logger logger =
+      Logger.getLogger(FnBaseObject.class.getName());
 
-  private IndependentObject object;
-
-  private static Logger logger = null;
-  {
-    logger = Logger.getLogger(FnBaseObject.class.getName());
-  }
+  private final IndependentObject object;
 
   public FnBaseObject(IndependentObject object) {
     this.object = object;
-    PropertyFilter pf = new PropertyFilter();
-
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.RELEASED_VERSION, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.VERSION_SERIES, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.VERSION_SERIES_ID, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-        PropertyNames.ID, null));
-
-    this.object.fetchProperties(pf);
-
   }
 
   public String getClassNameEvent() throws RepositoryDocumentException {

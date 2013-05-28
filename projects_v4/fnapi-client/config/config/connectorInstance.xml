@@ -4,12 +4,9 @@
 
 <beans>
   <bean id="Filenet_P8" class="com.google.enterprise.connector.filenet4.FileConnector" parent="filenet-connector-defaults" singleton="false">
-  <!-- Enter the value of db_timezone in the format GMT(+|-)hh:ss
-       For e.g. GMT+05:30 -->
   <property name="useIDForChangeDetection" value="true"/>
   <property name="is_public" value="false"/>
   <!--
-    <property name="db_timezone" value=""/>
     <property name="included_meta">
       <set>
         <value>ClassificationStatus</value>
