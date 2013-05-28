@@ -45,14 +45,13 @@ public class FileSession implements Session {
   private String deleteadditionalWhereClause;
   private Set<String> included_meta;
   private Set<String> excluded_meta;
-  private String db_timezone;
 
   public FileSession(String iObjectFactory, String userName,
       String userPassword, String objectStoreName, String displayUrl,
       String contentEngineUri, boolean isPublic, boolean checkMarking,
       boolean useIDForChangeDetection, String additionalWhereClause,
       String deleteadditionalWhereClause, Set<String> included_meta,
-      Set<String> excluded_meta, String db_timezone)
+      Set<String> excluded_meta)
       throws RepositoryException, RepositoryLoginException {
 
     setFileObjectFactory(iObjectFactory);
@@ -73,7 +72,6 @@ public class FileSession implements Session {
     this.deleteadditionalWhereClause = deleteadditionalWhereClause;
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
-    this.db_timezone = db_timezone;
   }
 
   /**
@@ -136,7 +134,7 @@ public class FileSession implements Session {
             fileObjectFactory, objectStore, this.isPublic,
             this.useIDForChangeDetection, this.displayUrl,
             this.additionalWhereClause, this.deleteadditionalWhereClause,
-            this.included_meta, this.excluded_meta, this.db_timezone);
+            this.included_meta, this.excluded_meta);
     return fileQTM;
   }
 

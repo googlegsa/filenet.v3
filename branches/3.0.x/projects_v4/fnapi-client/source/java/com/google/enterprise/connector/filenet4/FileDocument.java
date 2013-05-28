@@ -14,24 +14,19 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.filenet.api.constants.ClassNames;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
+import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
-import com.google.enterprise.connector.spiimpl.BinaryValue;
-import com.google.enterprise.connector.spiimpl.BooleanValue;
-import com.google.enterprise.connector.spiimpl.DateValue;
-import com.google.enterprise.connector.spiimpl.StringValue;
-
-import com.filenet.api.constants.ClassNames;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.logging.Level;
@@ -43,6 +38,9 @@ import java.util.logging.Logger;
  * @author pankaj_chouhan
  */
 public class FileDocument implements Document {
+  private static final Logger logger =
+      Logger.getLogger(FileDocument.class.getName());
+
   private String docId;
   private IObjectStore objectStore;
   private IDocument document = null;
@@ -52,11 +50,8 @@ public class FileDocument implements Document {
   private Date timeStamp;
   private String vsDocId;
   private Set<String> included_meta = null;
-  private Set excluded_meta = null;
-  private static Logger logger = null;
-  {
-    logger = Logger.getLogger(FileDocument.class.getName());
-  }
+  private Set<String> excluded_meta = null;
+
   private SpiConstants.ActionType action;
 
   public FileDocument(String docId, Date timeStamp, IObjectStore objectStore,
@@ -91,12 +86,11 @@ public class FileDocument implements Document {
     if (document != null) {
       return;
     }
-    document = (IDocument) objectStore.getObject(ClassNames.DOCUMENT, docId);
-    document.fetch(included_meta);
-    logger.log(Level.FINE, "Fetch document for DocId " + docId);
-    this.vsDocId = document.getVersionSeries().getId(action);
-    logger.log(Level.FINE, "VersionSeriesID for document is : "
-            + this.vsDocId);
+    document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
+        FileUtil.getDocumentPropertyFilter(included_meta));
+    logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
+    vsDocId = document.getVersionSeries().getId(action);
+    logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
   public Property findProperty(String name)
@@ -107,36 +101,35 @@ public class FileDocument implements Document {
       fetch();
       if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new BinaryValue(document.getContent()));
-        return new FileDocumentProperty(name, list);
+        list.add(Value.getBinaryValue(document.getContent()));
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new StringValue(this.displayUrl + vsDocId));
-        return new FileDocumentProperty(name, list);
+        list.add(Value.getStringValue(this.displayUrl + vsDocId));
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(BooleanValue.makeBooleanValue(this.isPublic ? true
-                : false));
-        return new FileDocumentProperty(name, list);
+        list.add(Value.getBooleanValue(this.isPublic));
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         this.document.getPropertyDateValue("DateLastModified", list);
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
         document.getPropertyStringValue("MimeType", list);
         logger.log(Level.FINEST, "Getting property: " + name);
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_SEARCHURL.equals(name)) {
         return null;
       } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new StringValue(vsDocId));
-        return new FileDocumentProperty(name, list);
+        list.add(Value.getStringValue(vsDocId));
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
-        list.add(new StringValue(action.toString()));
+        list.add(Value.getStringValue(action.toString()));
         logger.fine("Getting Property " + name + " : "
                 + action.toString());
-        return new FileDocumentProperty(name, list);
+        return new SimpleProperty(list);
       }
 
       String type = document.getPropertyType(name);
@@ -177,43 +170,36 @@ public class FileDocument implements Document {
       if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         Calendar tmpCal = Calendar.getInstance();
-
-        long timeDateMod = timeStamp.getTime();
-        timeStamp.setTime(timeDateMod + 1000);
         tmpCal.setTime(timeStamp);
-
-        DateValue tmpDtVal = new DateValue(tmpCal);
-        list.add(tmpDtVal);
-        return new FileDocumentProperty(name, list);
+        list.add(Value.getDateValue(tmpCal));
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new StringValue(action.toString()));
-        return new FileDocumentProperty(name, list);
+        list.add(Value.getStringValue(action.toString()));
+        return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(new StringValue(versionId));
-        // logger.fine("versionId : " + versionId);
-        return new FileDocumentProperty(name, list);
+        list.add(Value.getStringValue(versionId));
+        return new SimpleProperty(list);
       }
     }
-    return new FileDocumentProperty(name, list);
+    return new SimpleProperty(list);
   }
 
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
     fetch();
     Set<String> properties = new HashSet<String>();
-    Set documentProperties = this.document.getPropertyName();
-    for (Iterator iter = documentProperties.iterator(); iter.hasNext();) {
-      String property = (String) iter.next();
+    Set<String> documentProperties = document.getPropertyName();
+    for (String property : documentProperties) {
       if (property != null) {
         if (included_meta.size() != 0) {
-          // includeMeta - exludeMeta
+          // includeMeta - excludeMeta
           logger.log(Level.FINE, "Metadata set will be (includeMeta - exludeMeta)");
           if ((!excluded_meta.contains(property) && included_meta.contains(property))) {
             properties.add(property);
           }
         } else {
-          // superSet - exludeMeta
+          // superSet - excludeMeta
           logger.log(Level.FINE, "Metadata set will be (superSet - exludeMeta)");
           if ((!excluded_meta.contains(property) || included_meta.contains(property))) {
             properties.add(property);

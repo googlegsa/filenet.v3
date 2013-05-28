@@ -67,7 +67,7 @@ public class FnObjectFactoryTest extends TestCase {
   public void testGetObjectStore() throws RepositoryLoginException,
           RepositoryException {
     assertNotNull(ios);
-    assertEquals("GED", ios.getName());
+    assertEquals(TestConnection.objectStore, ios.getName());
   }
 
   /*
@@ -76,12 +76,16 @@ public class FnObjectFactoryTest extends TestCase {
    */
   public void testGetSearch() throws RepositoryException {
     ISearch is = iof.getSearch(ios);
-    IObjectSet test = is.execute("SELECT TOP 50 d.Id, d.DateLastModified FROM Document AS d WHERE d.Id='3811870F-410F-4C25-B853-CAC56014C552' and VersionStatus=1 and ContentSize IS NOT NULL  AND (ISCLASS(d, Document) OR ISCLASS(d, WorkflowDefinition))  ORDER BY DateLastModified,Id");
+    IObjectSet test = is.execute(
+        "SELECT TOP 50 d.Id, d.DateLastModified FROM Document AS d WHERE d.Id='"
+        + TestConnection.docId1 + "' and VersionStatus=1 "
+        + "and ContentSize IS NOT NULL  AND (ISCLASS(d, Document) " 
+        + "OR ISCLASS(d, WorkflowDefinition))  ORDER BY DateLastModified,Id");
     assertEquals(1, test.getSize());
     Iterator it = test.getIterator();
     while (it.hasNext()) {
       IBaseObject ibo = (IBaseObject) it.next();
-      assertEquals("3811870F-410F-4C25-B853-CAC56014C552", ibo.getId(ActionType.ADD));
+      assertEquals(TestConnection.docId1, ibo.getId(ActionType.ADD));
     }
   }
 

@@ -11,6 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
@@ -21,12 +22,6 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.Value;
-import com.google.enterprise.connector.spiimpl.BinaryValue;
-import com.google.enterprise.connector.spiimpl.BooleanValue;
-import com.google.enterprise.connector.spiimpl.DateValue;
-import com.google.enterprise.connector.spiimpl.DoubleValue;
-import com.google.enterprise.connector.spiimpl.LongValue;
-import com.google.enterprise.connector.spiimpl.StringValue;
 
 import com.filenet.api.collection.PropertyDescriptionList;
 import com.filenet.api.constants.PropertyNames;
@@ -38,8 +33,6 @@ import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.util.Id;
-import com.filenet.wcm.api.BaseRuntimeException;
-import com.filenet.wcm.api.InsufficientPermissionException;
 
 import java.io.InputStream;
 import java.util.Calendar;
@@ -58,52 +51,24 @@ import java.util.logging.Logger;
  *
  * @author pankaj_chouhan
  */
+@SuppressWarnings("rawtypes")
 public class FnDocument implements IDocument {
-  Document doc;
-  Map<String, Object> metas;
-  Map<String, String> metaTypes;
+  private static final Logger logger =
+      Logger.getLogger(FnDocument.class.getName());
 
-  private static Logger logger = null;
-  {
-    logger = Logger.getLogger(FnDocument.class.getName());
-  }
+  private final Document doc;
+  private final Map<String, Object> metas;
+  private final Map<String, String> metaTypes;
 
   public FnDocument(Document doc) {
     this.doc = doc;
-  }
-
-  public void fetch(Set includedMeta) throws RepositoryDocumentException {
-    PropertyFilter pf = new PropertyFilter();
-    if (includedMeta != null) {
-      if (includedMeta.size() == 0) {
-        pf.addIncludeProperty(new FilterElement(null, null, null,
-            (String) null, null));
-      } else {
-        pf.addIncludeProperty(new FilterElement(null, null, null,
-            "Id ClassDescription ContentElements DateLastModified MimeType VersionSeries "
-                + PropertyNames.RELEASED_VERSION + " "
-                + PropertyNames.VERSION_SERIES_ID, null));
-      }
-
-      for (Object object : includedMeta) {
-        pf.addIncludeProperty(new FilterElement(null, null, null,
-            (String) object, null));
-      }
-    }
-
-    pf.setMaxRecursion(1);
-    try {
-      doc.fetchProperties(pf);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    setMetaTypes();
+    this.metas = new HashMap<String, Object>();
     setMeta();
+    this.metaTypes = new HashMap<String, String>();
+    setMetaTypes();
   }
 
   private void setMetaTypes() {
-    metaTypes = new HashMap<String, String>();
     PropertyDescriptionList propDescList = doc.get_ClassDescription().get_PropertyDescriptions();
 
     Iterator it8 = propDescList.iterator();
@@ -116,7 +81,6 @@ public class FnDocument implements IDocument {
   }
 
   private void setMeta() {
-    metas = new HashMap<String, Object>();
     Properties props = doc.getProperties();
     Property[] prop = props.toArray();
     for (Property property : prop) {
@@ -146,7 +110,6 @@ public class FnDocument implements IDocument {
 
   public Date getModifyDate(ActionType action)
       throws RepositoryDocumentException {
-    // String ModifyDate;
     Date ModifyDate = new Date();
     try {
       if (SpiConstants.ActionType.DELETE.equals(action)) {
@@ -190,23 +153,14 @@ public class FnDocument implements IDocument {
   public InputStream getContent() {
     InputStream ip = null;
     try {
-      List contentList = (List) doc.get_ContentElements();
+      List contentList = doc.get_ContentElements();
       ContentTransfer content = (ContentTransfer) contentList.get(0);
       ip = content.accessContentStream();
-      return ip;
-    } catch (InsufficientPermissionException e) {
-      logger.log(Level.WARNING, "User does not have sufficient permission to retrive the content of document for "
-          + this.doc.get_Id() + " " + e.getLocalizedMessage());
-      return ip;
-    } catch (BaseRuntimeException e) {
-      logger.log(Level.WARNING, "Unable to retrieve the content of file for "
-          + this.doc.get_Id() + " " + e.getLocalizedMessage());
-      return ip;
     } catch (Exception er) {
       logger.log(Level.WARNING, "Unable to retrieve the content of file for "
           + this.doc.get_Id() + " " + er.getLocalizedMessage(), er);
-      return ip;
     }
+    return ip;
   }
 
   /**
@@ -234,12 +188,10 @@ public class FnDocument implements IDocument {
             // metadata is single-valued.
             if (value instanceof List) {
               for (Object object : (List) value) {
-                valuesList.add(new StringValue(
-                    object.toString()));
+                valuesList.add(Value.getStringValue(object.toString()));
               }
             } else {
-              valuesList.add(new StringValue(
-                  prop.getStringValue()));
+              valuesList.add(Value.getStringValue(prop.getStringValue()));
             }
           }
           return;
@@ -294,7 +246,7 @@ public class FnDocument implements IDocument {
                   // FileNEt connector needs ID without curly
                   // braces. Thus removing
                   // the curly braces.
-                  valuesList.add(new StringValue(
+                  valuesList.add(Value.getStringValue(
                       id.substring(1, id.length() - 1)));
               }
             } else {
@@ -304,7 +256,7 @@ public class FnDocument implements IDocument {
                 // "{" and "}" surrounded and ID is in between these curly
                 // braces FileNet connector needs ID without curly braces.
                 // Thus removing the curly braces.
-                valuesList.add(new StringValue(
+                valuesList.add(Value.getStringValue(
                     id.substring(1, id.length() - 1)));
             }
           }
@@ -351,11 +303,11 @@ public class FnDocument implements IDocument {
                 // connector-manager contains only LongValue
                 // Thus need to map Integer value of FileNet to
                 // LongValue.
-                valuesList.add(new LongValue(
+                valuesList.add(Value.getLongValue(
                     ((Integer) object).longValue()));
               }
             } else {
-              valuesList.add(new LongValue(
+              valuesList.add(Value.getLongValue(
                   prop.getInteger32Value().longValue()));
             }
           }
@@ -400,11 +352,11 @@ public class FnDocument implements IDocument {
             if (value instanceof List) {
               for (Object object : (List) value) {
                 if (object instanceof Double)
-                  valuesList.add(new DoubleValue(
+                  valuesList.add(Value.getDoubleValue(
                       ((Double) object).doubleValue()));
               }
             } else {
-              valuesList.add(new DoubleValue(
+              valuesList.add(Value.getDoubleValue(
                   prop.getFloat64Value().doubleValue()));
             }
           }
@@ -460,12 +412,12 @@ public class FnDocument implements IDocument {
               for (Object object : (List) value) {
                 Calendar c = Calendar.getInstance();
                 c.setTime((Date) object);
-                valuesList.add(new DateValue(c));
+                valuesList.add(Value.getDateValue(c));
               }
             } else {
               Calendar c = Calendar.getInstance();
               c.setTime(prop.getDateTimeValue());
-              valuesList.add(new DateValue(c));
+              valuesList.add(Value.getDateValue(c));
             }
           }
           return;
@@ -507,10 +459,12 @@ public class FnDocument implements IDocument {
             // metadata is single-valued.
             if (value instanceof List) {
               for (Object object : (List) value) {
-                valuesList.add(BooleanValue.makeBooleanValue(((Boolean) object).booleanValue()));
+                valuesList.add(Value.getBooleanValue(
+                    ((Boolean) object).booleanValue()));
               }
             } else {
-              valuesList.add(BooleanValue.makeBooleanValue((prop.getBooleanValue().booleanValue())));
+              valuesList.add(Value.getBooleanValue(
+                  prop.getBooleanValue().booleanValue()));
             }
           }
           return;
@@ -553,8 +507,7 @@ public class FnDocument implements IDocument {
             if (value instanceof List) {
               logger.log(Level.WARNING, "Binary MultiValued Metadat is currently not supported. Binary MultiValued metadata will not be fed to GSA");
             } else {
-              valuesList.add(new BinaryValue(
-                  prop.getBinaryValue()));
+              valuesList.add(Value.getBinaryValue(prop.getBinaryValue()));
             }
           }
           return;

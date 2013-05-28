@@ -1,15 +1,11 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.ObjectStore;
 import com.filenet.api.core.VersionSeries;
-import com.filenet.wcm.api.InsufficientPermissionException;
-import com.filenet.wcm.api.RemoteServerException;
+import com.filenet.api.property.PropertyFilter;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -17,16 +13,18 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class FnObjectStore implements IObjectStore {
+  private static final Logger logger =
+      Logger.getLogger(FnDocument.class.getName());
 
   private ObjectStore objectStore;
   private IConnection connection;
   private String login;
   private String password;
-  private static Logger logger = null;
-  {
-    logger = Logger.getLogger(FnDocument.class.getName());
-  }
+
   public FnObjectStore(ObjectStore objectStore, IConnection connection,
       String login, String password) {
     this.objectStore = objectStore;
@@ -41,41 +39,50 @@ public class FnObjectStore implements IObjectStore {
 
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException {
-    IndependentObject obj = null;
     try {
-      obj = objectStore.getObject(type, id);
+      IndependentObject obj = objectStore.getObject(type, id);
       if (type.equals(ClassNames.VERSION_SERIES)) {
-        VersionSeries vs = (VersionSeries) objectStore.getObject(type, id);
+        VersionSeries vs = (VersionSeries) obj;
         vs.refresh();
         return new FnVersionSeries(vs);
-      }
-      if (type.equals(ClassNames.DOCUMENT)) {
-        return new FnDocument((Document) objectStore.getObject(type, id));
+      } else if (type.equals(ClassNames.DOCUMENT)) {
+        return new FnDocument((Document) obj);
+      } else {
+        return new FnBaseObject(obj);
       }
     } catch (Exception e) {
-      logger.log(Level.WARNING, "Unable to get Object got VersionSeries or Document",e);
+      logger.log(Level.WARNING,
+          "Unable to get VersionSeries or Document object", e);
       throw new RepositoryDocumentException(e);
     }
-    return new FnBaseObject(obj);
+  }
 
+  public IBaseObject fetchObject(String type, String id, PropertyFilter filter)
+          throws RepositoryDocumentException {
+    IndependentObject obj = null;
+    try {
+      obj = objectStore.fetchObject(type, id, filter);
+      if (type.equals(ClassNames.VERSION_SERIES)) {
+        return new FnVersionSeries((VersionSeries) obj);
+      } else if (type.equals(ClassNames.DOCUMENT)) {
+        return new FnDocument((Document) obj);
+      } else {
+        return new FnBaseObject(obj);
+      }
+    } catch (Exception e) {
+      logger.log(Level.WARNING,
+          "Unable to fetch VersionSeries or Document object", e);
+      throw new RepositoryDocumentException(e);
+    }
   }
 
   public String getName() throws RepositoryException {
-
-    String objectStoreName = null;
     try {
-      objectStoreName = this.objectStore.get_Name();
-    } catch (RemoteServerException e) {
-      logger.log(Level.WARNING, "Unable to connect to the remote server");
-      throw new RepositoryException(e);
-    } catch (InsufficientPermissionException e) {
-      logger.log(Level.WARNING, "User does not have sufficient permissions to access the Object Store");
-      throw new RepositoryException(e);
+      return this.objectStore.get_Name();
     } catch (Exception e) {
-      logger.log(Level.WARNING, "Unable to get Name");
+      logger.log(Level.WARNING, "Unable to get Object Store name");
       throw new RepositoryException(e);
     }
-    return objectStoreName;
   }
 
   public ObjectStore getObjectStore() {

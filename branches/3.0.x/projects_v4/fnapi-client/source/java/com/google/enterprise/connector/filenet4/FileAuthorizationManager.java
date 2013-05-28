@@ -30,15 +30,12 @@ import java.util.logging.Logger;
 import javax.security.auth.Subject;
 
 public class FileAuthorizationManager implements AuthorizationManager {
+  private static final Logger logger =
+      Logger.getLogger(FileAuthorizationManager.class.getName());
 
   IConnection conn;
   IObjectStore objectStore;
   boolean checkMarkings;
-
-  private static Logger logger = null;
-  static {
-    logger = Logger.getLogger(FileAuthorizationManager.class.getName());
-  }
 
   public FileAuthorizationManager(IConnection conn, IObjectStore objectStore,
           boolean checkMarkings) {
@@ -47,7 +44,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
     this.checkMarkings = checkMarkings;
   }
 
-  /***
+  /**
    * To authorize a given username against the grantee-names, present in all
    * the Access Control Entries for all the permission of the target document.
    *
@@ -60,7 +57,6 @@ public class FileAuthorizationManager implements AuthorizationManager {
    * @see com.google.enterprise.connector.spi.AuthorizationManager#authorizeDocids(java.util.Collection,
    *      com.google.enterprise.connector.spi.AuthenticationIdentity)
    */
-
   public Collection<AuthorizationResponse> authorizeDocids(
       Collection<String> docids, AuthenticationIdentity identity)
       throws RepositoryException {
@@ -216,11 +212,5 @@ public class FileAuthorizationManager implements AuthorizationManager {
     }
     UserContext.get().popSubject();
     return authorizeDocids;
-  }
-
-  public List authorizeTokens(List tokenList, String username)
-          throws RepositoryException {
-
-    return null;
   }
 }

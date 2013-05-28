@@ -12,7 +12,6 @@
 	<classpathentry kind="lib" path="third_party/lib/json.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/Jace.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/spring.jar"/>
-	<classpathentry kind="lib" path="third_party/lib/javaapi.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/junit-4.9.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/listener.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/log4j-1.2.9.jar"/>
@@ -20,5 +19,6 @@
 	<classpathentry kind="lib" path="third_party/lib/stax-api.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/xlxpScanner.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/xlxpScannerUtils.jar"/>
+	<classpathentry kind="lib" path="/Users/tdnguyen/gsa/gdata/java/lib/gdata-core-1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

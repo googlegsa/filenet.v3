@@ -12,8 +12,6 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Set;
 import java.util.Iterator;
@@ -21,6 +19,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileDocumentList implements DocumentList {
+  private static final Logger logger = 
+      Logger.getLogger(FileDocumentList.class.getName());
 
   private static final long serialVersionUID = 1L;
   private FileDocument fileDocumentToDelete = null;
@@ -30,9 +30,9 @@ public class FileDocumentList implements DocumentList {
   private IObjectSet objectSetToDelete = null;
   private IObjectSet objectSetToDeleteDocs = null;
   private FileDocument fileDocument = null;
-  private Iterator ObjectIt = null;
-  private Iterator ObjectItToDelete = null;
-  private Iterator ObjectItToDeleteDocs = null;
+  private Iterator<? extends IBaseObject> objectIt = null;
+  private Iterator<? extends IBaseObject> objectItToDelete = null;
+  private Iterator<? extends IBaseObject> objectItToDeleteDocs = null;
   private String docId = "";
   private String displayUrl;
   private String lastCheckPoint;
@@ -43,9 +43,6 @@ public class FileDocumentList implements DocumentList {
   private Set<String> included_meta;
   private Set<String> excluded_meta;
   private int index = -1;
-  // private NodeList data = null;
-  // private NodeList dataToDelete = null;
-  private static Logger logger = Logger.getLogger(FileDocumentList.class.getName());
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
@@ -64,9 +61,9 @@ public class FileDocumentList implements DocumentList {
     this.lastCheckPoint = checkPoint;
 
     this.index = 0;
-    this.ObjectIt = objectSet.getIterator();
-    this.ObjectItToDelete = objectSetToDelete.getIterator();
-    this.ObjectItToDeleteDocs = objectSetToDeleteDocs.getIterator();
+    this.objectIt = objectSet.getIterator();
+    this.objectItToDelete = objectSetToDelete.getIterator();
+    this.objectItToDeleteDocs = objectSetToDeleteDocs.getIterator();
 
     // Docs to Add
     logger.log(Level.INFO, "Number of new documents discovered: "
@@ -97,9 +94,9 @@ public class FileDocumentList implements DocumentList {
     this.lastCheckPoint = checkPoint;
 
     this.index = 0;
-    this.ObjectIt = objectSet.getIterator();
-    this.ObjectItToDelete = objectSetToDelete.getIterator();
-    this.ObjectItToDeleteDocs = null;
+    this.objectIt = objectSet.getIterator();
+    this.objectItToDelete = objectSetToDelete.getIterator();
+    this.objectItToDeleteDocs = null;
 
     // Docs to Add
     logger.log(Level.INFO, "Number of new documents discovered: "
@@ -143,8 +140,8 @@ public class FileDocumentList implements DocumentList {
 
     if (index > -1 && index < dataLen) {
       logger.info("ADD...");
-      if (this.ObjectIt.hasNext()) {
-        IBaseObject doc = (IBaseObject) this.ObjectIt.next();
+      if (objectIt.hasNext()) {
+        IBaseObject doc = objectIt.next();
 
         docId = doc.getId(SpiConstants.ActionType.ADD);
         Date dateLastModified = doc.getModifyDate(SpiConstants.ActionType.ADD);
@@ -164,9 +161,9 @@ public class FileDocumentList implements DocumentList {
       }
     } else if ((index >= dataLen)
             && index < (dataLenToDeleteDocs + dataLen)) {
-      if (this.ObjectItToDeleteDocs.hasNext()) {
+      if (objectItToDeleteDocs.hasNext()) {
         logger.info("DELETE...(Documents satisfying additional delete clause) ");
-        IBaseObject doc = (IBaseObject) this.ObjectItToDeleteDocs.next();
+        IBaseObject doc = objectItToDeleteDocs.next();
         docIdToDeleteDocs = doc.getId(SpiConstants.ActionType.ADD);
         Date dateLastModified = doc.getModifyDate(SpiConstants.ActionType.ADD);
         String commonVersionId = doc.getVersionSeriesId(SpiConstants.ActionType.ADD);
@@ -187,15 +184,12 @@ public class FileDocumentList implements DocumentList {
           index++;
         }
       }
-
     } else if ((index >= dataLenToDeleteDocs + dataLen)
             && index < (dataLenToDelete + dataLenToDeleteDocs + dataLen)) {
-
-      if (this.ObjectItToDelete.hasNext()) {
+      if (objectItToDelete.hasNext()) {
         logger.info("DELETE...(Documents deleted from repository)");
-        IBaseObject doc = (IBaseObject) this.ObjectItToDelete.next();
+        IBaseObject doc = objectItToDelete.next();
         if (doc.getClassNameEvent().contains("DeletionEvent")) {
-
           docIdToDelete = doc.getId(SpiConstants.ActionType.DELETE);
           Date dateLastModified = doc.getModifyDate(SpiConstants.ActionType.DELETE);
           String commonVersionId = doc.getVersionSeriesId(SpiConstants.ActionType.DELETE);
@@ -252,20 +246,9 @@ public class FileDocumentList implements DocumentList {
 
     if (fileDocument != null) {
       Property val = fetchAndVerifyValueForCheckpoint(fileDocument, SpiConstants.PROPNAME_LASTMODIFIED);
-
-      try {
-        String dateStr = val.nextValue().toString();
-        dateString = FileDateValue.calendarToIso8601(dateStr);
-      } catch (ParseException e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for add. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      } catch (Exception e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for add. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      }
+      dateString = FileUtil.getQueryTimeString(val);
       logger.log(Level.FINE, "dateString of the checkpoint of added document is "
               + dateString);
-
     } else if (lastCheckPoint != null) {
       logger.fine("Get the last modified date from the last checkpoint ");
       JSONObject jo;
@@ -289,20 +272,9 @@ public class FileDocumentList implements DocumentList {
 
     if (fileDocumentToDeleteDocs != null) {
       Property val = fetchAndVerifyValueForCheckpoint(fileDocumentToDeleteDocs, SpiConstants.PROPNAME_LASTMODIFIED);
-
-      try {
-        String dateStr = val.nextValue().toString();
-        dateStringDocumentToDeleteDocs = FileDateValue.calendarToIso8601(dateStr);
-      } catch (ParseException e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for add. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      } catch (Exception e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for add. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      }
+      dateStringDocumentToDeleteDocs = FileUtil.getQueryTimeString(val);
       logger.log(Level.FINE, "dateString of the checkpoint of deleted document is "
               + dateStringDocumentToDeleteDocs);
-
     } else if (lastCheckPoint != null) {
       logger.fine("Get the last modified date from the last checkpoint ");
       JSONObject jo;
@@ -325,17 +297,8 @@ public class FileDocumentList implements DocumentList {
 
     if (fileDocumentToDelete != null) {
       Property valToDelete = fetchAndVerifyValueForCheckpoint(fileDocumentToDelete, SpiConstants.PROPNAME_LASTMODIFIED);
-      Calendar date = null;
-      try {
-        String dateStr = valToDelete.nextValue().toString();
-        dateStringDocumentToDelete = FileDateValue.calendarToIso8601(dateStr);
-      } catch (ParseException e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for delete. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      } catch (Exception e1) {
-        logger.log(Level.WARNING, "Unable to parse the date string for delete. Date string format may be incorrect.", e1);
-        throw new RepositoryException("Unexpected JSON problem", e1);
-      }
+      dateStringDocumentToDelete =
+              FileUtil.getQueryTimeString(valToDelete);
       logger.log(Level.FINE, "dateString of the checkpoint of deleted document is "
               + dateStringDocumentToDelete);
     } else if (lastCheckPoint != null) {
@@ -383,5 +346,4 @@ public class FileDocumentList implements DocumentList {
     }
     return property;
   }
-
 }
