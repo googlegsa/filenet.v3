@@ -14,14 +14,16 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.filenet.api.core.Document;
+import com.filenet.api.core.Factory;
+import com.filenet.api.util.UserContext;
+import com.google.enterprise.connector.filenet4.filejavawrap.FnPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
-
-import com.filenet.api.util.UserContext;
 
 import java.util.Iterator;
 
@@ -82,5 +84,21 @@ public class FileDocumentTest extends FileNetTestCase {
     }
     assertTrue(counter > 0);
     assertTrue(counter <= TestConnection.included_meta.size());
+  }
+
+  /*
+   * Test document permissions such that Administrator user is not in the
+   * document ACL but is the creator and owner and the #CREATOR-OWNER ACE must
+   * be present in the ACL with AccessLevel.VIEW_AS_INT access or above.
+   */
+  public void testPermissions() throws RepositoryException {
+    Document doc = Factory.Document.fetchInstance(ios.getObjectStore(),
+        TestConnection.docId4, null);
+    FnPermissions perms = new FnPermissions(doc.get_Permissions(), 
+        doc.get_Owner());
+    assertTrue(perms.authorize("Administrator"));
+    
+    FnPermissions perms2 = new FnPermissions(doc.get_Permissions(), null);
+    assertFalse(perms2.authorize("Administrator"));
   }
 }

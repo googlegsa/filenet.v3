@@ -147,7 +147,7 @@ public class FnDocument implements IDocument {
   }
 
   public IPermissions getPermissions() {
-    return new FnPermissions(doc.get_Permissions());
+    return new FnPermissions(doc.get_Permissions(), doc.get_Owner());
   }
 
   public InputStream getContent() {

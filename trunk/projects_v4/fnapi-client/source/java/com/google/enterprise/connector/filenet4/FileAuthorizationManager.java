@@ -189,7 +189,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
                       true, docId);
             }
           } else {
-            logger.log(Level.INFO, "Either Document class does not have property associated with Markings set or Connetcor is not configurd to check Marking sets ");
+            logger.log(Level.INFO, "Either Document class does not have property associated with Marking Sets or Connector is not configured to check Marking Sets ");
             logger.log(Level.INFO, "User " + identity.getUsername()
                     + " is authorized for document DocID " + docId);
             authorizationResponse = new AuthorizationResponse(true,

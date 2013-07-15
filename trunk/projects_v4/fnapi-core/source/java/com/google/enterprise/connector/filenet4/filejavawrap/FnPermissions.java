@@ -49,16 +49,26 @@ public class FnPermissions implements IPermissions {
   private static final Logger LOGGER =
       Logger.getLogger(FnDocument.class.getName());
 
-  private AccessPermissionList perms;
+  private static final String AUTHENTICATED_USERS = "#AUTHENTICATED-USERS";
+  private static final String CREATOR_OWNER = "#CREATOR-OWNER";
+  private static final String ACTIVE_DIRECTORY_SYMBOL = "@";
+
   private int ACCESS_LEVEL = AccessLevel.VIEW_AS_INT;
-  private final String AUTHENTICATED_USERS = "#AUTHENTICATED-USERS";
-  private String ACTIVE_DIRECTORY_SYMBOL = "@";
   private int ACCESS_OBJECT_LEVEL = AccessRight.USE_MARKING_AS_INT;
-  private PropertyFilter pf = new PropertyFilter();
+
+  private final AccessPermissionList perms;
+  private final String owner;
+  private final PropertyFilter pf;
+  
+  public FnPermissions(AccessPermissionList perms, String owner) {
+    this.perms = perms;
+    this.owner = owner;
+    this.pf = new PropertyFilter();
+    setPropertyFilter();
+  }
 
   public FnPermissions(AccessPermissionList perms) {
-    this.perms = perms;
-    setPropertyFilter();
+    this(perms, null);
   }
 
   private void setPropertyFilter() {
@@ -109,6 +119,20 @@ public class FnPermissions implements IPermissions {
             LOGGER.log(Level.INFO, "Grantee Name is ["
                     + granteeName
                     + "] is of type USER");
+            if (granteeName.equalsIgnoreCase(CREATOR_OWNER)) {
+              if (owner != null) {
+                String ownerNames[] = owner.split(ACTIVE_DIRECTORY_SYMBOL);
+                if (username.equalsIgnoreCase(ownerNames[0])) {
+                  LOGGER.log(Level.INFO, "Authorization: [" + username
+                      + "] is authorized as the owner");
+                  return true;
+                }
+              }
+              // Skip to the next ACE since grantee name is #CREATOR-OWNER
+              LOGGER.log(Level.FINER, "Authorization: [" + username + 
+                  "] is not " + owner + " owner, skip to next ACE");
+              continue;
+            }
             currentUser = Factory.User.fetchInstance(perm.getConnection(), granteeName, pf);
 
             // compare username with complete granteeName or
