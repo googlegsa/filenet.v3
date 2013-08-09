@@ -16,8 +16,6 @@
   <property name="build" value="build" />
   <property name="dist" value="dist" />
   <property name="config" value="fnapi-client/config" />
-  <property name="jarfile.dir" value="third_party/lib"/>
-  <property name="file_jarfile.dir" value="file_third_party/lib"/>
   <property name="downloads.dir" value="downloads" />
 
   <property name="build-client" value="fnapi-client/build" />
@@ -34,9 +32,7 @@
   <property name="jar.dir"  value="${dist}/jar" />
   <property name="jarfile"  value="${jar.dir}/connector-file4.jar" />
 
-  <property name="file.jarfile" location="${jarfile.dir}/Jace.jar" />
-  <property name="junit.jarfile" location="${jarfile.dir}/junit.jar" />
-  <property name="javaapi.jarfile" value="${jarfile.dir}/javaapi.jar" />
+  <property name="file.jarfile" location="third_party/lib/Jace.jar" />
 
   <property name="connector-manager-projects.dir"
             location="${build.connector.manager.home}/projects" />
@@ -46,7 +42,6 @@
             location="${connector-manager.dir}/third-party" />
   <property name="spi.jar.dir" value="${connector-manager.dir}/dist/jarfile" />
   <property name="spi.jarfile" value="${spi.jar.dir}/connector-spi.jar" />
-  <property name="json.jarfile" location="${thirdparty.jar.dir}/prod/json.jar" />
 
   <propertyset id="javatest.properties">
     <propertyref prefix="test."/>
@@ -84,7 +79,7 @@
     <mkdir dir="${downloads.dir}" />
   </target>
 
-  <target name="compile-core" depends="init">
+  <target name="compile-core" depends="compile-client">
     <!-- compile java source files -->
     <javac srcdir="${src-core}" destdir="${classes-core}"
            includeantruntime="false"
@@ -94,7 +89,6 @@
       <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
       <bootclasspath path="${COMPILE_BOOTCLASSPATH}"/>
       <classpath>
-        <pathelement location="${javaapi.jarfile}" />
         <pathelement location="${file.jarfile}" />
         <pathelement location="${spi.jarfile}" />
         <pathelement location="${classes-client}" />
@@ -114,13 +108,14 @@
       <classpath>
         <pathelement location="${file.jarfile}" />
         <pathelement location="${spi.jarfile}" />
-        <pathelement location="${json.jarfile}" />
-        <pathelement location="${junit.jarfile}" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="prod/*.jar" />
+        </fileset>
       </classpath>
     </javac>
   </target>
 
-  <target name="compile-test" depends="init">
+  <target name="compile-test" depends="jar">
     <!-- compile java source files for tests -->
     <javac srcdir="${src-test}" destdir="${classes-test}"
            includeantruntime="false"
@@ -128,14 +123,21 @@
            target="${COMPILE_TARGET}" source="${COMPILE_TARGET}">
       <!-- CM, GData, and P8 JAR Class-Path references are not available. -->
       <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
+      <bootclasspath path="${COMPILE_BOOTCLASSPATH}"/>
       <classpath>
-        <fileset dir="${jarfile.dir}" includes="**/*.jar" />
-        <fileset dir="${jar.dir}" includes="**/*.jar" />
+        <pathelement location="${file.jarfile}" />
+        <pathelement location="${spi.jarfile}" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="prod/*.jar" />
+          <include name="tests/*.jar" />
+        </fileset>
+        <pathelement location="${jarfile}" />
       </classpath>
     </javac>
   </target>
 
-  <target name="jar" description="connector-file" depends="prebuild">
+  <target name="jar" description="connector-file"
+          depends="prebuild,compile-core">
     <tstamp />
     <jar jarfile="${jarfile}">
       <fileset dir="${config}">
@@ -235,11 +237,13 @@
       <sysproperty key="net.sourceforge.cobertura.datafile"
                    file="${basedir}/cobertura.ser" />
       <classpath>
-        <fileset dir="${jarfile.dir}" includes="**/*.jar" />
+        <pathelement location="${file.jarfile}" />
+        <pathelement location="${spi.jarfile}" />
         <fileset dir="${thirdparty.jar.dir}">
-          <include name="tests/junit.jar" />
+          <include name="prod/*.jar" />
+          <include name="tests/*.jar" />
         </fileset>
-        <fileset dir="${jar.dir}" includes="**/*.jar" />
+        <pathelement location="${jarfile}" />
       </classpath>
       <classpath location="${instrumented.dir}" />
       <classpath location="${classes-core}" />
@@ -310,13 +314,6 @@
       <zipfileset dir="../License" prefix="${bin.archive}/License" />
       <zipfileset file="${config}/config/logging.properties"
                   prefix="${bin.archive}/Config" />
-      <zipfileset file="${jarfile.dir}/commons-logging.jar"
-                  prefix="${bin.archive}/Lib" />
-      <zipfileset file="${jarfile.dir}/json.jar"
-                  prefix="${bin.archive}/Lib" />
-      <zipfileset file="${jarfile.dir}/log4j-1.2.15.jar"
-                  prefix="${bin.archive}/Lib" />
-      <zipfileset file="${jarfile.dir}/LICENSE" prefix="${bin.archive}/Lib" />
     </zip>
     <checksum algorithm="SHA-1">
       <fileset dir="${downloads.dir}">
@@ -334,21 +331,9 @@
       <zipfileset dir="../License" prefix="${src.archive}/License" />
       <zipfileset file="version.properties" prefix="${src.archive}/source" />
       <zipfileset file="build.xml" prefix="${src.archive}/source" />
-      <zipfileset dir="file_third_party"
-                  prefix="${src.archive}/source/file_third_party" />
       <zipfileset dir="fnapi-client"
                   prefix="${src.archive}/source/fnapi-client" />
       <zipfileset dir="fnapi-core" prefix="${src.archive}/source/fnapi-core" />
-      <zipfileset file="third_party/lib/commons-logging.jar"
-                  prefix="${src.archive}/source/third_party/lib" />
-      <zipfileset file="third_party/lib/connector-logging.jar"
-                  prefix="${src.archive}/source/third_party/lib" />
-      <zipfileset file="third_party/lib/junit-4.9.jar"
-                  prefix="${src.archive}/source/third_party/lib" />
-      <zipfileset file="third_party/lib/log4j-1.2.15.jar"
-                  prefix="${src.archive}/source/third_party/lib" />
-      <zipfileset file="third_party/lib/spring.jar"
-                  prefix="${src.archive}/source/third_party/lib" />
     </zip>
     <checksum algorithm="SHA-1">
       <fileset dir="${downloads.dir}">
