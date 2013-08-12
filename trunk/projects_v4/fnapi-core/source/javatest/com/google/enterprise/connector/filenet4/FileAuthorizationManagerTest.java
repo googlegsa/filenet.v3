@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright 2007-2008 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,13 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.google.enterprise.connector.filenet4;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.FileAuthenticationIdentity;
 import com.google.enterprise.connector.filenet4.FileAuthorizationManager;
@@ -28,6 +23,13 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import junit.framework.TestCase;
+
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileAuthorizationManagerTest extends FileNetTestCase {
 
@@ -60,25 +62,17 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
   private void testAuthorization(FileAuthorizationManager fam,
           Map<String, Boolean> expectedResults, 
           String username, String password) throws RepositoryException {
-
     List<String> docids = new LinkedList<String>(expectedResults.keySet());
 
-//    List resultSet = (List) fam.authorizeDocids(docids,
-//        new FileAuthenticationIdentity(username, password));
-    List resultSet = (List) fam.authorizeDocids(docids,
+    Collection<AuthorizationResponse> resultSet = fam.authorizeDocids(docids,
         new FileAuthenticationIdentity(username, null));
 
-    Boolean expected;
-    AuthorizationResponse ar;
-    for (Iterator i = resultSet.iterator(); i.hasNext();) {
-      ar = (AuthorizationResponse) i.next();
+    for (AuthorizationResponse ar : resultSet) {
       String uuid = ar.getDocid();
 
-      expected = expectedResults.get(uuid);
-      assertEquals(username + " access to " + uuid, expected
-          .booleanValue(), ar.isValid());
-
-
+      Boolean expected = expectedResults.get(uuid);
+      assertEquals(username + " access to " + uuid, expected.booleanValue(),
+          ar.isValid());
     }
   }
 }
