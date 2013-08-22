@@ -26,6 +26,7 @@ import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
+import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
@@ -168,7 +169,7 @@ public class FnDocumentTest extends FileNetTestCase {
    */
   public void ftestGetPermissions() throws RepositoryException {
     IPermissions perm = fd2.getPermissions();
-    boolean test = perm.authorize("");
+    boolean test = perm.authorize(MockUtil.createBlankUser());
     assertEquals(false, test);
   }
 

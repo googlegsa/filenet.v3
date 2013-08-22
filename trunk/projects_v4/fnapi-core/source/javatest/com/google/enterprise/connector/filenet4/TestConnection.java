@@ -19,6 +19,7 @@ import java.util.Properties;
 
 public class TestConnection {
   public static final int batchSize;
+  public static final String domain;
   public static final String adminUsername;
   public static final String adminPassword;
   public static final String username;
@@ -71,6 +72,7 @@ public class TestConnection {
   static {
     Properties props = System.getProperties();
     batchSize = Integer.parseInt(props.getProperty("batchSize"));
+    domain = props.getProperty("domain");
     adminUsername = props.getProperty("adminUsername");
     adminPassword = props.getProperty("adminPassword");
     username = props.getProperty("username");

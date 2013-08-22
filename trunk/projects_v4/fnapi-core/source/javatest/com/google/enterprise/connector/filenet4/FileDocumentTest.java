@@ -14,16 +14,19 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.filenet.api.core.Document;
-import com.filenet.api.core.Factory;
-import com.filenet.api.util.UserContext;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.IUser;
+import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
+
+import com.filenet.api.core.Document;
+import com.filenet.api.core.Factory;
+import com.filenet.api.util.UserContext;
 
 import java.util.Iterator;
 
@@ -34,6 +37,7 @@ public class FileDocumentTest extends FileNetTestCase {
   IConnection conn;
   UserContext uc;
   IObjectFactory iof;
+  IUser adminUser;
 
   protected void setUp() throws Exception {
 
@@ -50,6 +54,8 @@ public class FileDocumentTest extends FileNetTestCase {
     iof = (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
     IConnection conn = iof.getConnection(TestConnection.uri, TestConnection.adminUsername, TestConnection.adminPassword);
     ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.username, TestConnection.password);
+
+    adminUser = MockUtil.createAdministratorUser();
   }
 
   /*
@@ -91,14 +97,15 @@ public class FileDocumentTest extends FileNetTestCase {
    * document ACL but is the creator and owner and the #CREATOR-OWNER ACE must
    * be present in the ACL with AccessLevel.VIEW_AS_INT access or above.
    */
-  public void testPermissions() throws RepositoryException {
+  public void testCreatorOwnerPermissions() throws RepositoryException {
     Document doc = Factory.Document.fetchInstance(ios.getObjectStore(),
         TestConnection.docId4, null);
-    FnPermissions perms = new FnPermissions(doc.get_Permissions(), 
+    FnPermissions perms = new FnPermissions(doc.get_Permissions(),
         doc.get_Owner());
-    assertTrue(perms.authorize("Administrator"));
-    
+    assertEquals(doc.get_Owner(), adminUser.getName());
+    assertTrue(perms.authorize(adminUser));
+
     FnPermissions perms2 = new FnPermissions(doc.get_Permissions(), null);
-    assertFalse(perms2.authorize("Administrator"));
+    assertFalse(perms2.authorize(adminUser));
   }
 }

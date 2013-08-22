@@ -1,7 +1,24 @@
+// Copyright 2007-2008 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.IUser;
+import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationManager;
@@ -33,15 +50,28 @@ public class FileAuthorizationManager implements AuthorizationManager {
   private static final Logger logger =
       Logger.getLogger(FileAuthorizationManager.class.getName());
 
-  IConnection conn;
-  IObjectStore objectStore;
-  boolean checkMarkings;
+  private final IConnection conn;
+  private final IObjectStore objectStore;
+  private boolean checkMarkings;
 
   public FileAuthorizationManager(IConnection conn, IObjectStore objectStore,
           boolean checkMarkings) {
     this.conn = conn;
     this.objectStore = objectStore;
     this.checkMarkings = checkMarkings;
+  }
+
+  private IUser getUser(AuthenticationIdentity id) {
+    // Lookup FileNet user and user's groups
+    IUserContext uc = conn.getUserContext();
+    String username = FileUtil.getUserName(id);
+    try {
+      return uc.lookupUser(username);
+    } catch (RepositoryException e) {
+      logger.log(Level.WARNING, "Failed to lookup user [" + username
+          + "] in FileNet", e);
+      return null;
+    }
   }
 
   /**
@@ -60,6 +90,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
   public Collection<AuthorizationResponse> authorizeDocids(
       Collection<String> docids, AuthenticationIdentity identity)
       throws RepositoryException {
+    long timeStart = System.currentTimeMillis();
     if (null == docids) {
       logger.severe("Got null docids for authZ .. returning null");
       return null;
@@ -73,16 +104,22 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
     logger.info("Authorizing docids for user: " + identity.getUsername());
 
+    // In some cases current FileNet connection loses UserContext
+    // object associated with it; hence need to fetch userContext for
+    // each and every AuthZ request.
+    // TODO(tdnguyen) Refactor this method to properly handle pushSubject and
+    // popSubject
+    Subject subject = conn.getSubject();
+    UserContext.get().pushSubject(subject);
+
+    IUser user = getUser(identity);
+    if (user == null) {
+      UserContext.get().popSubject();
+      return null;
+    }
+
     // check for the marking sets applied over the document class
-
     try {
-      // In some cases current FileNet connection looses UserContext
-      // object associated with it; hence need to fetch userContext for
-      // each and every AuthZ request
-
-      Subject subject = this.conn.getSubject();
-      UserContext.get().pushSubject(subject);
-
       DocumentClassDefinition documentClassDefinition = Factory.DocumentClassDefinition.fetchInstance(this.objectStore.getObjectStore(), GuidConstants.Class_Document, null);
       PropertyDefinitionList propertyDefinitionList = documentClassDefinition.get_PropertyDefinitions();
       @SuppressWarnings("unchecked")
@@ -140,7 +177,8 @@ public class FileAuthorizationManager implements AuthorizationManager {
         // Check whether the search user is authorized to view document
         // contents or
         // not.
-        if (versionSeries.getReleasedVersion().getPermissions().authorize(identity.getUsername())) {
+        IDocument releasedVersion = versionSeries.getReleasedVersion();
+        if (releasedVersion.getPermissions().authorize(user)) {
           logger.log(Level.INFO, "As per the ACLS User "
                   + identity.getUsername()
                   + " is authorized for document DocID " + docId);
@@ -155,14 +193,14 @@ public class FileAuthorizationManager implements AuthorizationManager {
             // check whether current document has property values
             // set for properties associated with marking sets or
             // not //
-            if (versionSeries.getReleasedVersion().getActiveMarkings() != null) {
+            if (releasedVersion.getActiveMarkings() != null) {
               logger.log(Level.INFO, "Document has property associated with Markings set");
 
               // check whether USER is authorized to view the
               // document as per the Marking set security applied
               // over it.
 
-              if (versionSeries.getReleasedVersion().getActiveMarkings().authorize(identity.getUsername())) {
+              if (releasedVersion.getActiveMarkings().authorize(user)) {
                 logger.log(Level.INFO, "As per the Marking Sets User "
                         + identity.getUsername()
                         + " is authorized for document DocID "
@@ -211,6 +249,8 @@ public class FileAuthorizationManager implements AuthorizationManager {
       authorizeDocids.add(authorizationResponse);
     }
     UserContext.get().popSubject();
+    logger.log(Level.FINEST, "Authorization time: {0}ms",
+        (System.currentTimeMillis() - timeStart));
     return authorizeDocids;
   }
 }

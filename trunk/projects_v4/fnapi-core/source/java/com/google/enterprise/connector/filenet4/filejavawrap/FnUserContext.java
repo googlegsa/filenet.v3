@@ -1,6 +1,21 @@
+// Copyright 2008 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
@@ -20,13 +35,10 @@ import javax.security.auth.Subject;
  * @author amit_kagrawal
  */
 public class FnUserContext implements IUserContext {
+  private static final Logger logger =
+      Logger.getLogger(FnUserContext.class.getName());
 
-  IConnection conn;
-
-  private static Logger logger = null;
-  static {
-    logger = Logger.getLogger(FnUserContext.class.getName());
-  }
+  private final IConnection conn;
 
   public FnUserContext(IConnection conn) {
     this.conn = conn;
@@ -38,7 +50,7 @@ public class FnUserContext implements IUserContext {
     return user.get_Name();
   }
 
-  public void authenticate(String username, String password)
+  public IUser authenticate(String username, String password)
           throws RepositoryLoginException {
 
     if (FnCredentialMap.isNull()) {
@@ -48,6 +60,7 @@ public class FnUserContext implements IUserContext {
 
     if (password == null) {
       if (FnCredentialMap.containsUserCred(username)) {
+        // TODO(jlacey) remove password cache
         password = FnCredentialMap.getUserCred(username);
       }
     }
@@ -58,21 +71,34 @@ public class FnUserContext implements IUserContext {
 
     UserContext uc = UserContext.get();
     try {
-
       Subject s = UserContext.createSubject(conn.getConnection(), username, password, "FileNetP8");
       uc.pushSubject(s);
       User u = Factory.User.fetchCurrent(conn.getConnection(), null);
       logger.info("User: " + u.get_Name() + " is authenticated");
 
+      FnCredentialMap.putUserCred(username, password);
+      return new FnUser(u);
     } catch (RepositoryException e) {
       logger.log(Level.WARNING, "Unable to GET connection");
       throw new RepositoryLoginException(e);
     } catch (Throwable e) {
-      logger.log(Level.WARNING, "Unable to GET connection or user is not authenticated");
+      logger.log(Level.WARNING,
+          "Unable to GET connection or user is not authenticated");
       throw new RepositoryLoginException(e);
     }
-
-    FnCredentialMap.putUserCred(username, password);
   }
 
+  // TODO(tdnguyen) This seems to be a strange place to put lookupUser method
+  // here.  Consider moving or refactoring this method.
+  @Override
+  public IUser lookupUser(String username) throws RepositoryException {
+    try {
+      logger.log(Level.FINE, "Lookup user: {0}", username);
+      User user =
+          Factory.User.fetchInstance(conn.getConnection(), username, null);
+      return new FnUser(user);
+    } catch (Exception e) {
+      throw new RepositoryException(username + " username is not found", e);
+    }
+  }
 }
