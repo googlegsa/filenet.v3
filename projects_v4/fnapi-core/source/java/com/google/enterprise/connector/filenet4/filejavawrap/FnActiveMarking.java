@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarking;
+import com.google.enterprise.connector.filenet4.filewrap.IUser;
 
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.security.ActiveMarking;
@@ -53,39 +54,29 @@ public class FnActiveMarking implements IActiveMarking {
    * @return True or False, depending on the success or failure of
    *         authorization.
    */
-  public boolean authorize(String username) {
-
+  public boolean authorize(IUser user) {
     boolean hasAccess = false;
-    LOGGER.log(Level.INFO, "Authorizing user:[" + username
-            + "] For marking set value : "
-            + this.marking.get_Marking().get_MarkingValue());
+    LOGGER.log(Level.INFO, "Authorizing user:[" + user.getName()
+        + "] For marking set value : "
+        + this.marking.get_Marking().get_MarkingValue());
 
     hasAccess = ((new FnPermissions(
-            this.marking.get_Marking().get_Permissions())).authorizeMarking(username));
+        marking.get_Marking().get_Permissions())).authorizeMarking(user));
 
     // Check whether the user has USE rights over the document or not.
     // If user does not have USE rights then ConstraintMask check is
     // required.
 
     if (hasAccess) {
-      LOGGER.log(Level.INFO, " User: [" + username
-              + "] has USE right for the marking value : "
-              + this.marking.get_Marking().get_MarkingValue());
-      LOGGER.log(Level.INFO, " User: ["
-              + username
-              + "] is authorized to view the document with marking value : "
-              + this.marking.get_Marking().get_MarkingValue());
+      LOGGER.log(Level.FINER, "User: [{0}] has USE right and is authorized"
+          + " to view the document.  Marking: {1}",
+          new Object[] {user.getName(),
+              marking.get_Marking().get_MarkingValue()});
     } else {
-      LOGGER.log(Level.INFO, " User: [" + username
-              + "] does not have USE right for the marking value : "
-              + this.marking.get_Marking().get_MarkingValue());
-      LOGGER.log(Level.INFO, " User: ["
-              + username
-              + "] need to authorize for Constraint mask with marking value : "
-              + this.marking.get_Marking().get_MarkingValue());
-      LOGGER.log(Level.INFO, " Authorizing User: [" + username
-              + "] for Constraint mask with marking value : "
-              + this.marking.get_Marking().get_MarkingValue());
+      LOGGER.log(Level.FINER, "User: [{0}] does not have USE right or is not "
+          + "authorized by the constraint mask: {1}",
+          new Object[] {user.getName(),
+              marking.get_Marking().get_MarkingValue()});
       hasAccess = checkConstraintMask();
     }
     return hasAccess;

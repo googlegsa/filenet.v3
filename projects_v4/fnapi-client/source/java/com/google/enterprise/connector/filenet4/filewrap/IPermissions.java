@@ -23,7 +23,7 @@ package com.google.enterprise.connector.filenet4.filewrap;
  */
 public interface IPermissions {
 
-  public boolean authorize(String Username);
+  public boolean authorize(IUser user);
 
-  public boolean authorizeMarking(String Username);
+  public boolean authorizeMarking(IUser user);
 }

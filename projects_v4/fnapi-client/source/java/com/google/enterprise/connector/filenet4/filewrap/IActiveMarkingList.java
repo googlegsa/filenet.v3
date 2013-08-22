@@ -22,5 +22,5 @@ package com.google.enterprise.connector.filenet4.filewrap;
  */
 public interface IActiveMarkingList {
 
-  public boolean authorize(String Username);
+  public boolean authorize(IUser user);
 }

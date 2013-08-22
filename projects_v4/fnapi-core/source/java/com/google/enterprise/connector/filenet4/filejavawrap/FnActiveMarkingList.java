@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
+import com.google.enterprise.connector.filenet4.filewrap.IUser;
 
 import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.security.ActiveMarking;
@@ -32,8 +33,10 @@ import java.util.logging.Logger;
  */
 
 public class FnActiveMarkingList implements IActiveMarkingList {
-  private ActiveMarkingList markings;
-  private static Logger LOGGER = Logger.getLogger(FnDocument.class.getName());
+  private static final Logger LOGGER =
+      Logger.getLogger(FnActiveMarkingList.class.getName());
+
+  private final ActiveMarkingList markings;
 
   public FnActiveMarkingList(ActiveMarkingList markings) {
     this.markings = markings;
@@ -48,27 +51,26 @@ public class FnActiveMarkingList implements IActiveMarkingList {
    *         authorization.
    */
 
-  public boolean authorize(String username) {
+  public boolean authorize(IUser user) {
     @SuppressWarnings("unchecked") Iterator<ActiveMarking> markings =
         this.markings.iterator();
 
+    LOGGER.log(Level.FINER, "Authorizing user :[" + user.getName()
+        + "] for Marking Sets");
     while (markings.hasNext()) {
-      LOGGER.log(Level.INFO, "Authorizing user :[" + username
-              + "] for Marking Sets ");
-
       ActiveMarking marking = markings.next();
       FnActiveMarking currentMarking = new FnActiveMarking(marking);
 
-      if (!(currentMarking.authorize(username))) {
-        LOGGER.log(Level.INFO, "User "
-                + username
-                + " is not authorized for Marking value : "
-                + currentMarking.getActiveMarking().get_Marking().get_MarkingValue());
+      if (!(currentMarking.authorize(user))) {
+        LOGGER.log(Level.FINER,
+            "User {0} is not authorized for Marking value: {1}",
+            new Object[] {user.getName(), currentMarking.getActiveMarking()
+                .get_Marking().get_MarkingValue()});
         return false;
       }
     }
-    LOGGER.log(Level.INFO, "User " + username
-            + " is authorized to view the document ");
+    LOGGER.log(Level.FINER, "User " + user.getName()
+        + " is authorized to view the document");
     return true;
   }
 }

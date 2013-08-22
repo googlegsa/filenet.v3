@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,16 +14,16 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthenticationManager;
 import com.google.enterprise.connector.spi.AuthenticationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * FileNet Authentication Manager. It contains method for authenticating the user while search is performed.
@@ -46,39 +46,17 @@ public class FileAuthenticationManager implements AuthenticationManager {
    * authenticates the user
    * @param authenticationIdentity: contains user credentials
    * */
-  public AuthenticationResponse authenticate(AuthenticationIdentity authenticationIdentity)throws RepositoryException {
-    String username = authenticationIdentity.getUsername();
-    String password = authenticationIdentity.getPassword();
-
+  public AuthenticationResponse authenticate(AuthenticationIdentity id)
+      throws RepositoryException {
     IUserContext uc = conn.getUserContext();
-
+    String username = FileUtil.getUserName(id);
     try {
-      return authenticate(username, password, uc);
+      IUser user = uc.authenticate(username, id.getPassword());
+      return new AuthenticationResponse(true, "", user.getGroupNames());
     } catch (Throwable e) {
-      logger.log(Level.WARNING,"Authentication Failed for user " + username);
-      String shortName = FileUtil.getShortName(username);
-      logger.log(Level.INFO,"Trying to authenticate with Short Name: " + shortName);
-      try {
-        return authenticate(shortName, password, uc);
-      } catch (Throwable th) {
-        logger.log(Level.WARNING,"Authentication Failed for user " + shortName);
-        logger.log(Level.FINE,"While authenticating got exception",th);
-        return new AuthenticationResponse(false, "");
-      }
+      logger.log(Level.WARNING, "Authentication failed for user "
+          + username, e);
+      return new AuthenticationResponse(false, "");
     }
-  }
-
-  /**
-   * Wrapper over authenticate method of UserContext class.
-   * @param username UserName which needs to be authenticated
-   * @param password Valid password of the user name
-   * @param uc     UserContext reference
-   * @return       Returns the Authentication response
-   * @throws RepositoryException
-   */
-  private AuthenticationResponse authenticate(String username, String password, IUserContext uc) throws RepositoryException {
-    uc.authenticate(username, password);
-    logger.info("Authentication Succeeded for user " + username);
-    return new AuthenticationResponse(true, "");
   }
 }
