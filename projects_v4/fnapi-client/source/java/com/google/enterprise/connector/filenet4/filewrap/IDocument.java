@@ -1,10 +1,10 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright 2007-2010 Google Inc.  All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,8 +24,6 @@ import java.util.Set;
 
 /**
  * Interface between the Client Document and Core document.
- *
- * @author pankaj_chouhan
  */
 public interface IDocument extends IBaseObject {
 
@@ -33,13 +31,14 @@ public interface IDocument extends IBaseObject {
 
   InputStream getContent() throws RepositoryDocumentException;
 
-  IVersionSeries getVersionSeries() throws RepositoryDocumentException;;
+  IVersionSeries getVersionSeries() throws RepositoryDocumentException;
 
-  Set<String> getPropertyName() throws RepositoryDocumentException;
+  Set<String> getPropertyNames() throws RepositoryDocumentException;
 
-  String getPropertyType(String name) throws RepositoryDocumentException;
+  void getProperty(String name, List<Value> list)
+      throws RepositoryDocumentException;
 
-  void getPropertyStringValue(String name, List<Value> set)
+  void getPropertyStringValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
   void getPropertyGuidValue(String name, List<Value> list)
@@ -60,6 +59,6 @@ public interface IDocument extends IBaseObject {
   void getPropertyBinaryValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  IActiveMarkingList getActiveMarkings() throws RepositoryDocumentException;;
+  IActiveMarkingList getActiveMarkings() throws RepositoryDocumentException;
 
 }

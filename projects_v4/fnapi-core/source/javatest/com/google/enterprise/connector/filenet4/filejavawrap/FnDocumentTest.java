@@ -29,15 +29,16 @@ import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
+import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
 
 import java.io.InputStream;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -86,42 +87,20 @@ public class FnDocumentTest extends FileNetTestCase {
    * Test method for
    * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyName()'
    */
-  public void ftestGetPropertyName() throws RepositoryException {
-    Set<String> test = fd.getPropertyName();
-    assertNotNull(test);
-    Set<String> Test2 = TestConnection.included_meta;
-    Test2.add("Id");
-    Test2.add("ClassDescription");
-    Test2.add("ContentElements");
-    Test2.add("DateLastModified");
-    Test2.add("MimeType");
-    Test2.add("VersionSeries");
-    Test2.remove("ContentRetentionDate");
-    Test2.remove("CurrentState");
-    Test2.remove("LockTimeout");
-    Test2.remove("LockToken");
-    Test2.remove("StorageLocation");
-
-    Iterator<String> it = Test2.iterator();
-    while (it.hasNext()) {
-      String comp1 = it.next();
-      String comp2 = null;
-      Iterator<String> it2 = test.iterator();
-      while (it2.hasNext()) {
-        comp2 = it2.next();
-        if (comp2.equals(comp1)) {
-          break;
-        }
-      }
-      assertEquals(comp1, comp2);
+  public void testGetPropertyNames() throws RepositoryException {
+    Set<String> propNames = fd.getPropertyNames();
+    assertNotNull(propNames);
+    for (String includedMeta : TestConnection.included_meta) {
+      assertTrue(includedMeta + " is not included",
+          propNames.contains(includedMeta));
     }
   }
 
   /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyType(String)'
+   * Test expected data type of the property value computed by the
+   * IDocument.getProperty(String, List) method.
    */
-  public void ftestGetPropertyType() throws RepositoryException {
+  public void testGetPropertyType() throws RepositoryException {
     String[][] typeArray = TestConnection.type;
 
     Set<String> meta = TestConnection.included_meta;
@@ -131,10 +110,13 @@ public class FnDocumentTest extends FileNetTestCase {
     meta.add("DateLastModified");
     meta.add("MimeType");
     meta.add("VersionSeries");
-    Iterator<String> metaIt = meta.iterator();
-    while (metaIt.hasNext()) {
-      String property = metaIt.next();
-      String typeGet = fd.getPropertyType(property);
+    for (String property : meta) {
+      List<Value> valueList = new LinkedList<Value>();
+      fd.getProperty(property, valueList);
+      // Skip null or empty value
+      if (valueList == null || valueList.size() == 0) {
+        continue;
+      }
       String typeSet = null;
       for (int i = 0; i < typeArray.length; i++) {
         if (typeArray[i][0] == property) {
@@ -142,35 +124,30 @@ public class FnDocumentTest extends FileNetTestCase {
           break;
         }
       }
-      assertEquals(typeGet, typeSet);
+      assertNotNull(typeSet);
+      if ("GUID".equals(typeSet)) {
+        // GUID is stored as StringValue type
+        typeSet = "STRING";
+      }
+      Value value = valueList.get(0);
+      assertTrue(value.getClass().getName().toUpperCase().contains(typeSet));
     }
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getVersionSeries()'
-   */
-  public void ftestGetVersionSeries() throws RepositoryException {
+  public void testGetVersionSeries() throws RepositoryException {
     IVersionSeries vs = fd.getVersionSeries();
     assertEquals("{" + TestConnection.docVsId1 + "}", vs.getId(ActionType.ADD));
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getId()'
-   */
-  public void ftestGetId() throws RepositoryException {
+  public void testGetId() throws RepositoryException {
     assertEquals("{" + TestConnection.docId1 + "}", fd.getId(ActionType.ADD));
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPermissions()'
-   */
-  public void ftestGetPermissions() throws RepositoryException {
-    IPermissions perm = fd2.getPermissions();
-    boolean test = perm.authorize(MockUtil.createBlankUser());
-    assertEquals(false, test);
+  public void testGetPermissions() throws RepositoryException {
+    IPermissions perms = fd.getPermissions();
+    assertNotNull(perms);
+    boolean authorized = perms.authorize(MockUtil.createAdministratorUser());
+    assertTrue("User is not authorized", authorized);
   }
 
   /*
@@ -184,113 +161,129 @@ public class FnDocumentTest extends FileNetTestCase {
     assertTrue(is instanceof InputStream);
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyStringValue(String)'
-   */
+  /* Helper method to compute field names by type */
+  private Set<String> getFieldNames(String type) {
+    Set<String> fieldNames = new HashSet<String>();
+    for (int i = 0; i < TestConnection.type.length; i++) {
+      if (type.equalsIgnoreCase(TestConnection.type[i][1])) {
+        fieldNames.add(TestConnection.type[i][0]);
+      }
+    }
+    return fieldNames;
+  }
+
+  /* Test FnDocument.getPropertyStringValue method */
   public void testGetPropertyStringValue() throws RepositoryException {
-    LinkedList<Value> list = new LinkedList<Value>();
-    fd.getPropertyStringValue("Name", list);
-    try {
-      assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
-    } catch (AssertionError e) {
-      System.out.println(e.getLocalizedMessage());
-      assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
-    }
+    Set<String> fieldNames = getFieldNames("STRING");
+    assertFalse(fieldNames.isEmpty());
 
-    // assertEquals("Doc1", test);
-  }
+    // Remove empty fields
+    fieldNames.remove("ComponentBindingLabel");
+    fieldNames.remove("Creator");
+    fieldNames.remove("CurrentState");
+    fieldNames.remove("EntryTemplateLaunchedWorkflowNumber");
+    fieldNames.remove("EntryTemplateObjectStoreName");
+    fieldNames.remove("LockOwner");
+    fieldNames.remove("StorageLocation");
+    fieldNames.remove("ContentElementsPresent");
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyGuidValue(String)'
-   */
-  public void ftestGetPropertyGuidValue() throws RepositoryException {
-    LinkedList<Value> list = new LinkedList<Value>();
-    fd.getPropertyGuidValue("MyID", list);
-    try {
-      assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
-    } catch (AssertionError e) {
-      System.out.println(e.getLocalizedMessage());
-      assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+    // Test non-empty fields
+    assertFalse(fieldNames.isEmpty());
+    for (String fieldName : fieldNames) {
+      LinkedList<Value> list = new LinkedList<Value>();
+      fd.getPropertyStringValue(fieldName, list);
+      assertFalse(fieldName + " string value is empty", list.isEmpty());
     }
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyLongValue(String)'
-   */
-  public void ftestGetPropertyLongValue() throws RepositoryException {
-    LinkedList<Value> list = new LinkedList<Value>();
-    fd.getPropertyLongValue("MyInteger", list);
-    try {
-      assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
-    } catch (AssertionError e) {
-      System.out.println(e.getLocalizedMessage());
-      assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+  public void testGetPropertyGuidValue() throws RepositoryException {
+    Set<String> fieldNames = getFieldNames("GUID");
+    assertFalse(fieldNames.isEmpty());
+
+    // Remove empty fields
+    fieldNames.remove("IndexationId");
+    fieldNames.remove("EntryTemplateId");
+    fieldNames.remove("LockToken");
+
+    // Test non-empty fields
+    assertFalse(fieldNames.isEmpty());
+    for (String fieldName : fieldNames) {
+      LinkedList<Value> list = new LinkedList<Value>();
+      fd.getPropertyGuidValue(fieldName, list);
+      assertFalse(fieldName + " guid value is null", list.isEmpty());
     }
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyDoubleValue(String)'
-   */
-  public void ftestGetPropertyDoubleValue() throws RepositoryException {
-    LinkedList<Value> list = new LinkedList<Value>();
-    fd.getPropertyDoubleValue("MyFloat", list);
-    Double value = new Double(2998306.0);
-    try {
-      assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
-    } catch (AssertionError e) {
-      System.out.println(e.getLocalizedMessage());
-      assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+  public void testGetPropertyLongValue() throws RepositoryException {
+    Set<String> fieldNames = getFieldNames("LONG");
+    assertFalse(fieldNames.isEmpty());
+
+    // Remove empty fields
+    fieldNames.remove("CompoundDocumentState");
+    fieldNames.remove("LockTimeout");
+    fieldNames.remove("ReservationType");
+
+    // Test non-empty fields
+    assertFalse(fieldNames.isEmpty());
+    for (String fieldName : fieldNames) {
+      LinkedList<Value> list = new LinkedList<Value>();
+      fd.getPropertyLongValue(fieldName, list);
+      assertFalse(fieldName + " long value is empty", list.isEmpty());
     }
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyDateValue(String)'
-   */
-  public void ftestGetPropertyDateValue() throws RepositoryException {
-    LinkedList<Value> list = new LinkedList<Value>();
-    fd.getPropertyDateValue("MyDate", list);
-    Date testSetted = new Date(1183555393920L);
-    try {
-      assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
-    } catch (AssertionError e) {
-      System.out.println(e.getLocalizedMessage());
-      assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+  public void testGetPropertyDoubleValue() throws RepositoryException {
+    Set<String> fieldNames = getFieldNames("DOUBLE");
+    assertFalse(fieldNames.isEmpty());
+    for (String fieldName : fieldNames) {
+      LinkedList<Value> list = new LinkedList<Value>();
+      fd.getPropertyDoubleValue(fieldName, list);
+      assertFalse(fieldName + " double value is empty", list.isEmpty());
     }
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyBooleanValue(String)'
-   */
-  public void ftestGetPropertyBooleanValue() throws RepositoryException {
-    LinkedList<Value> list = new LinkedList<Value>();
-    fd.getPropertyBooleanValue("MyBoolean", list);
-    try {
-      assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
-    } catch (AssertionError e) {
-      System.out.println(e.getLocalizedMessage());
-      assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+  public void testGetPropertyDateValue() throws RepositoryException {
+    Set<String> fieldNames = getFieldNames("DATE");
+    assertFalse(fieldNames.isEmpty());
+
+    // Remove empty fields
+    fieldNames.remove("ContentRetentionDate");
+    fieldNames.remove("DateContentLastAccessed");
+
+    // Test non-empty fields
+    assertFalse(fieldNames.isEmpty());
+    for (String fieldName : fieldNames) {
+      LinkedList<Value> list = new LinkedList<Value>();
+      fd.getPropertyDateValue(fieldName, list);
+      assertFalse(fieldName + " date value is empty", list.isEmpty());
     }
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyBinaryValue(String)'
-   */
-  public void ftestGetPropertyBinaryValue() throws RepositoryException {
-    LinkedList<Value> list = new LinkedList<Value>();
-    fd.getPropertyBinaryValue("MyBinary", list);
-    try {
-      assertEquals("Either Metadata is not found or Metadata is MultiValued.", 1, list.size());
-    } catch (AssertionError e) {
-      System.out.println(e.getLocalizedMessage());
-      assertEquals("Metadata is neither Multivalued nor it is found", 0, list.size());
+  public void testGetPropertyBooleanValue() throws RepositoryException {
+    Set<String> fieldNames = getFieldNames("BOOLEAN");
+    assertFalse(fieldNames.isEmpty());
+
+    // Remove empty fields
+    fieldNames.remove("IsInExceptionState");
+    fieldNames.remove("IsVersioningEnabled");
+    fieldNames.remove("IgnoreRedirect");
+
+    // Test non-empty fields
+    assertFalse(fieldNames.isEmpty());
+    for (String fieldName : fieldNames) {
+      LinkedList<Value> list = new LinkedList<Value>();
+      fd.getPropertyBooleanValue(fieldName, list);
+      assertFalse(fieldName + " boolean value is empty", list.isEmpty());
     }
   }
 
+  public void testGetPropertyBinaryValue() throws RepositoryException {
+    Set<String> fieldNames = getFieldNames("BINARY");
+    assertFalse(fieldNames.isEmpty());
+    for (String fieldName : fieldNames) {
+      LinkedList<Value> list = new LinkedList<Value>();
+      fd.getPropertyBinaryValue(fieldName, list);
+      assertFalse(fieldName + " binary value is empty", list.isEmpty());
+    }
+  }
 }
