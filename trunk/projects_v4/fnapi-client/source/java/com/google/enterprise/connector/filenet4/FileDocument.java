@@ -1,10 +1,10 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright 2007-2010 Google Inc.  All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,8 +34,6 @@ import java.util.logging.Logger;
 
 /**
  * Concrete Document class with all the functionalities of Document
- *
- * @author pankaj_chouhan
  */
 public class FileDocument implements Document {
   private static final Logger logger =
@@ -119,8 +117,6 @@ public class FileDocument implements Document {
         document.getPropertyStringValue("MimeType", list);
         logger.log(Level.FINEST, "Getting property: " + name);
         return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_SEARCHURL.equals(name)) {
-        return null;
       } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(Value.getStringValue(vsDocId));
@@ -130,41 +126,10 @@ public class FileDocument implements Document {
         logger.fine("Getting Property " + name + " : "
                 + action.toString());
         return new SimpleProperty(list);
-      }
-
-      String type = document.getPropertyType(name);
-      if (type == null) // unknows property name
+      } else if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
         return null;
-
-      if (type.equalsIgnoreCase("Binary")) {
-        logger.log(Level.FINEST, "Getting Binary property: [" + name
-                + "]");
-        document.getPropertyBinaryValue(name, list);
-      } else if (type.equalsIgnoreCase("Boolean")) {
-        logger.log(Level.FINEST, "Getting Boolean property: [" + name
-                + "]");
-        document.getPropertyBooleanValue(name, list);
-      } else if (type.equalsIgnoreCase("Date")) {
-        logger.log(Level.FINEST, "Getting Date property: [" + name
-                + "]");
-        document.getPropertyDateValue(name, list);
-      } else if (type.equalsIgnoreCase("Double")
-              || type.equalsIgnoreCase("Float")) {
-        logger.log(Level.FINEST, "Getting Double/Float property: ["
-                + name + "]");
-        document.getPropertyDoubleValue(name, list);
-      } else if (type.equalsIgnoreCase("String")) {
-        logger.info("Getting String property: [" + name + "]");
-        document.getPropertyStringValue(name, list);
-      } else if (type.equalsIgnoreCase("guid")) {
-        logger.log(Level.FINEST, "Getting GUID property: [" + name
-                + "]");
-        document.getPropertyGuidValue(name, list);
-      } else if (type.equalsIgnoreCase("Long")
-              || type.equalsIgnoreCase("Integer")) {
-        logger.log(Level.FINEST, "Getting Long property: [" + name
-                + "]");
-        document.getPropertyLongValue(name, list);
+      } else {
+        document.getProperty(name, list);
       }
     } else {
       if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
@@ -189,7 +154,7 @@ public class FileDocument implements Document {
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
     fetch();
     Set<String> properties = new HashSet<String>();
-    Set<String> documentProperties = document.getPropertyName();
+    Set<String> documentProperties = document.getPropertyNames();
     for (String property : documentProperties) {
       if (property != null) {
         if (included_meta.size() != 0) {
