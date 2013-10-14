@@ -11,6 +11,24 @@ supplements the main documentation.
 Web Site: http://code.google.com/p/google-enterprise-connector-file/
 
 
+Release 3.2.0, October 4, 2013
+================================
+
+This is an upgrade release with enhancements and bug fixes.  Users of previous
+versions are encouraged to upgrade.
+
+Summary of Changes
+------------------
+ * Issue 10448663: Improve authorization performance with faster group
+   membership and property lookup.
+ * Issue 11217176: Support permissions for #CREATOR-OWNER.
+
+Version Compatibility
+---------------------
+Connector instances created using versions 2.0.0 or later may be used with this
+version.  This version works with Connector Manager version 3.0.0 or later. 
+
+
 Release 3.0.8, May 23, 2013
 ===========================
 
