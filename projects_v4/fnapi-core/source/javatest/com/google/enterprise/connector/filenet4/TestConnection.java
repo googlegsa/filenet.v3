@@ -14,6 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.filenet.api.constants.PropertyNames;
+
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -130,7 +132,7 @@ public class TestConnection {
     included_meta.add("Owner");
     included_meta.add("StorageLocation");
     included_meta.add("VersionStatus");
-
+    included_meta.add(PropertyNames.PERMISSIONS);
   }
 
   public static HashSet<String> excluded_meta = null;
