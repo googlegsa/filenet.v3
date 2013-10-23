@@ -1,10 +1,10 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright 2007-2010 Google Inc.  All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,15 +23,30 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.Value;
 
-import com.filenet.api.collection.PropertyDescriptionList;
-import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.collection.BooleanList;
+import com.filenet.api.collection.DateTimeList;
+import com.filenet.api.collection.Float64List;
+import com.filenet.api.collection.IdList;
+import com.filenet.api.collection.Integer32List;
+import com.filenet.api.collection.StringList;
 import com.filenet.api.core.ContentTransfer;
 import com.filenet.api.core.Document;
-import com.filenet.api.meta.PropertyDescription;
-import com.filenet.api.property.FilterElement;
 import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
-import com.filenet.api.property.PropertyFilter;
+import com.filenet.api.property.PropertyBinary;
+import com.filenet.api.property.PropertyBinaryList;
+import com.filenet.api.property.PropertyBoolean;
+import com.filenet.api.property.PropertyBooleanList;
+import com.filenet.api.property.PropertyDateTime;
+import com.filenet.api.property.PropertyDateTimeList;
+import com.filenet.api.property.PropertyFloat64;
+import com.filenet.api.property.PropertyFloat64List;
+import com.filenet.api.property.PropertyId;
+import com.filenet.api.property.PropertyIdList;
+import com.filenet.api.property.PropertyInteger32;
+import com.filenet.api.property.PropertyInteger32List;
+import com.filenet.api.property.PropertyString;
+import com.filenet.api.property.PropertyStringList;
 import com.filenet.api.util.Id;
 
 import java.io.InputStream;
@@ -48,8 +63,6 @@ import java.util.logging.Logger;
 /**
  * Core document class, which directly interacts with the core FileNet APIs
  * related to Documents.
- *
- * @author pankaj_chouhan
  */
 @SuppressWarnings("rawtypes")
 public class FnDocument implements IDocument {
@@ -57,47 +70,66 @@ public class FnDocument implements IDocument {
       Logger.getLogger(FnDocument.class.getName());
 
   private final Document doc;
-  private final Map<String, Object> metas;
-  private final Map<String, String> metaTypes;
+  private final Map<String, Property> metas;
 
   public FnDocument(Document doc) {
     this.doc = doc;
-    this.metas = new HashMap<String, Object>();
-    setMeta();
-    this.metaTypes = new HashMap<String, String>();
-    setMetaTypes();
+    this.metas = getMetas();
   }
 
-  private void setMetaTypes() {
-    PropertyDescriptionList propDescList = doc.get_ClassDescription().get_PropertyDescriptions();
-
-    Iterator it8 = propDescList.iterator();
-    while (it8.hasNext()) {
-      PropertyDescription propDesc = (PropertyDescription) it8.next();
-      String propertyName = propDesc.get_SymbolicName().toUpperCase();
-      String propertyType = propDesc.get_DataType().toString();
-      metaTypes.put(propertyName, propertyType);
-    }
-  }
-
-  private void setMeta() {
+  private Map<String,Property> getMetas() {
+    Map<String,Property> propMap = new HashMap<String,Property>();
     Properties props = doc.getProperties();
-    Property[] prop = props.toArray();
-    for (Property property : prop) {
-      Object value = property.getObjectValue();
-      if (value != null) {
-        metas.put(property.getPropertyName(), value);
-      }
+    Property[] propList = props.toArray();
+    for (Property property : propList) {
+      propMap.put(property.getPropertyName(), property);
     }
+    return propMap;
   }
 
-  public Set<String> getPropertyName() {
+  public Set<String> getPropertyNames() {
     return metas.keySet();
   }
 
-  public String getPropertyType(String name)
+  public void getProperty(String name, List<Value> list)
       throws RepositoryDocumentException {
-    return metaTypes.get(name.toUpperCase());
+    Property prop = metas.get(name);
+    if (prop == null) {
+      logger.log(Level.FINEST, "Property not found: {0}", name);
+      return;
+    }
+    if (prop instanceof PropertyString ||
+        prop instanceof PropertyStringList) {
+      logger.log(Level.FINEST, "Getting String property: [{0}]", name);
+      getPropertyStringValue(name, list);
+    } else if (prop instanceof PropertyBinary ||
+        prop instanceof PropertyBinaryList) {
+      logger.log(Level.FINEST, "Getting Binary property: [{0}]", name);
+      getPropertyBinaryValue(name, list);
+    } else if (prop instanceof PropertyBoolean ||
+        prop instanceof PropertyBooleanList) {
+      logger.log(Level.FINEST, "Getting Boolean property: [{0}]", name);
+      getPropertyBooleanValue(name, list);
+    } else if (prop instanceof PropertyDateTime ||
+        prop instanceof PropertyDateTimeList) {
+      logger.log(Level.FINEST, "Getting Date property: [{0}]", name);
+      getPropertyDateValue(name, list);
+    } else if (prop instanceof PropertyFloat64 ||
+        prop instanceof PropertyFloat64List) {
+      logger.log(Level.FINEST, "Getting Double/Float property: [{0}]", name);
+      getPropertyDoubleValue(name, list);
+    } else if (prop instanceof PropertyInteger32 ||
+        prop instanceof PropertyInteger32List) {
+      logger.log(Level.FINEST, "Getting Integer/Long property: [{0}]", name);
+      getPropertyLongValue(name, list);
+    } else if (prop instanceof PropertyId ||
+        prop instanceof PropertyIdList) {
+      logger.log(Level.FINEST, "Getting Id property: [{0}]", name);
+      getPropertyGuidValue(name, list);
+    } else {
+      logger.log(Level.FINEST, "Property type for {0} is not determined: ",
+          prop.getClass().getName());
+    }
   }
 
   public IVersionSeries getVersionSeries() {
@@ -171,43 +203,35 @@ public class FnDocument implements IDocument {
    */
   public void getPropertyStringValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
-    Object value = null;
-    try {
-      Properties props = doc.getProperties();
-      Property[] property = props.toArray();
-      for (Property prop : property) {
-        String propName = prop.getPropertyName();
-
-        if (propName.equalsIgnoreCase(propertyName)) {
-          value = prop.getObjectValue();
-          if (value != null) {
-            // To distinguish between multi-valued and single-valued
-            // metadata.
-            // If value is instance of List then metadata is
-            // multi-valued else
-            // metadata is single-valued.
-            if (value instanceof List) {
-              for (Object object : (List) value) {
-                valuesList.add(Value.getStringValue(object.toString()));
-              }
-            } else {
-              valuesList.add(Value.getStringValue(prop.getStringValue()));
-            }
-          }
-          return;
+    Property prop = metas.get(propertyName);
+    if (prop == null) {
+      logger.log(Level.FINEST, "{0} property is null", propertyName);
+      return;
+    }
+    if (prop instanceof PropertyString) {
+      String val = prop.getStringValue();
+      if (val != null) {
+        valuesList.add(Value.getStringValue(val));
+      } else {
+        logger.log(Level.FINEST,
+            "{0} property [PropertyString] contains NULL value", propertyName);
+      }
+    } else if (prop instanceof PropertyStringList) {
+      StringList slist = prop.getStringListValue();
+      Iterator iter = slist.iterator();
+      while (iter.hasNext()) {
+        String val = (String) iter.next();
+        if (val != null) {
+          valuesList.add(Value.getStringValue(val));
+        } else {
+          logger.log(Level.FINEST,
+              "{0} property [PropertyStringList] contains NULL value",
+              propertyName);
         }
       }
-    } catch (ClassCastException e) {
-      logger.log(Level.SEVERE, "Encountered ClassCastException while fetching values for property ["
-          + propertyName
-          + "] Skipping the current value ["
-          + (String) value + "]", e);
-    } catch (Exception e1) {
-      logger.log(Level.SEVERE, "Error while trying to get the property "
-          + propertyName + " of the file " + this.doc.get_Id() + " "
-          + e1.getMessage(), e1);
-      RepositoryDocumentException re = new RepositoryDocumentException(e1);
-      throw re;
+    } else {
+      throw new RepositoryDocumentException("Invalid data type: "
+          + propertyName + " property is not a String type");
     }
   }
 
@@ -219,59 +243,42 @@ public class FnDocument implements IDocument {
    */
   public void getPropertyGuidValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
-    try {
-      String id = null;
-      Properties props = doc.getProperties();
-      Property[] property = props.toArray();
-      Object value;
-      for (Property prop : property) {
-        String propName = prop.getPropertyName();
-
-        if (propName.equalsIgnoreCase(propertyName)) {
-          value = prop.getObjectValue();
-          if (value != null) {
-            // To distinguish between multi-valued and single-valued
-            // metadata.
-            // If value is instance of List then metadata is
-            // multi-valued else
-            // metadata is single-valued.
-            if (value instanceof List) {
-              for (Object object : (List) value) {
-                id = object.toString();
-                if (id != null)
-                  // Whenever the ID is retrieved from
-                  // FileNet, it comes with "{"
-                  // and "}" surrounded and ID is in between
-                  // these curly braces
-                  // FileNEt connector needs ID without curly
-                  // braces. Thus removing
-                  // the curly braces.
-                  valuesList.add(Value.getStringValue(
-                      id.substring(1, id.length() - 1)));
-              }
-            } else {
-              id = prop.getIdValue().toString();
-              if (id != null)
-                // Whenever the ID is retrieved from FileNet, it comes with
-                // "{" and "}" surrounded and ID is in between these curly
-                // braces FileNet connector needs ID without curly braces.
-                // Thus removing the curly braces.
-                valuesList.add(Value.getStringValue(
-                    id.substring(1, id.length() - 1)));
-            }
-          }
-          return;
+    Property prop = metas.get(propertyName);
+    if (prop == null) {
+      logger.log(Level.FINEST, "{0} property is null", propertyName);
+      return;
+    }
+    if (prop instanceof PropertyId) {
+      Id val = prop.getIdValue();
+      if (val != null) {
+        String id = val.toString();
+        valuesList.add(Value.getStringValue(id.substring(1, id.length() - 1)));
+      } else {
+        logger.log(Level.FINEST,
+            "{0} property [PropertyId] contains NULL value", propertyName);
+      }
+    } else if (prop instanceof PropertyIdList) {
+      IdList idList = prop.getIdListValue();
+      Iterator iter = idList.iterator();
+      while (iter.hasNext()) {
+        Id val = (Id) iter.next();
+        if (val != null) {
+          // Whenever the ID is retrieved from FileNet, it comes with
+          // "{" and "}" surrounded and ID is in between these curly braces.
+          // FileNet connector needs ID without curly braces.  Thus removing
+          // the curly braces.
+          String id = val.toString();
+          valuesList.add(
+              Value.getStringValue(id.substring(1, id.length() - 1)));
+        } else {
+          logger.log(Level.FINEST,
+              "{0} property [PropertyIdList] contains NULL value",
+              propertyName);
         }
       }
-    } catch (ClassCastException e) {
-      logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "
-          + propertyName, e);
-    } catch (Exception e1) {
-      logger.log(Level.SEVERE, "Error while trying to get the property "
-          + propertyName + " of the file " + this.doc.get_Id() + " "
-          + e1.getMessage(), e1);
-      RepositoryDocumentException re = new RepositoryDocumentException(e1);
-      throw re;
+    } else {
+      throw new RepositoryDocumentException("Invalid data type: "
+          + propertyName + " property is not a PropertyId type");
     }
   }
 
@@ -283,46 +290,36 @@ public class FnDocument implements IDocument {
    */
   public void getPropertyLongValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
-    try {
-      Properties props = doc.getProperties();
-      Property[] property = props.toArray();
-      Object value;
-      for (Property prop : property) {
-        String propName = prop.getPropertyName();
-        if (propName.equalsIgnoreCase(propertyName)) {
-          value = prop.getObjectValue();
-          if (value != null) {
-            // To distinguish between multi-valued and single-valued
-            // metadata.
-            // If value is instance of List then metadata is
-            // multi-valued else
-            // metadata is single-valued.
-            if (value instanceof List) {
-              for (Object object : (List) value) {
-                // FileNet only supports Integer type and
-                // connector-manager contains only LongValue
-                // Thus need to map Integer value of FileNet to
-                // LongValue.
-                valuesList.add(Value.getLongValue(
-                    ((Integer) object).longValue()));
-              }
-            } else {
-              valuesList.add(Value.getLongValue(
-                  prop.getInteger32Value().longValue()));
-            }
-          }
-          return;
+    Property prop = metas.get(propertyName);
+    if (prop == null) {
+      logger.log(Level.FINEST, "{0} property is null", propertyName);
+      return;
+    }
+    if (prop instanceof PropertyInteger32) {
+      Integer val = prop.getInteger32Value();
+      if (val != null) {
+        valuesList.add(Value.getLongValue(val.longValue()));
+      } else {
+        logger.log(Level.FINEST,
+            "{0} property [PropertyInteger32] contains NULL value",
+            propertyName);
+      }
+    } else if (prop instanceof PropertyInteger32List) {
+      Integer32List int32List = prop.getInteger32ListValue();
+      Iterator iter = int32List.iterator();
+      while (iter.hasNext()) {
+        Integer val = (Integer) iter.next();
+        if (val != null) {
+          valuesList.add(Value.getLongValue(val.longValue()));
+        } else {
+          logger.log(Level.FINEST,
+              "{0} property [PropertyInteger32List] contains NULL value",
+              propertyName);
         }
       }
-    } catch (ClassCastException e) {
-      logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "
-          + propertyName, e);
-    } catch (Exception e1) {
-      logger.log(Level.SEVERE, "Error while trying to get the property "
-          + propertyName + " of the file " + this.doc.get_Id() + " "
-          + e1.getMessage(), e1);
-      RepositoryDocumentException re = new RepositoryDocumentException(e1);
-      throw re;
+    } else {
+      throw new RepositoryDocumentException("Invalid data type: "
+          + propertyName + " property is not an Integer32 or Long type");
     }
   }
 
@@ -334,44 +331,35 @@ public class FnDocument implements IDocument {
    */
   public void getPropertyDoubleValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
-    try {
-
-      Properties props = doc.getProperties();
-      Property[] property = props.toArray();
-      Object value;
-      for (Property prop : property) {
-        String propName = prop.getPropertyName();
-        if (propName.equalsIgnoreCase(propertyName)) {
-          value = prop.getObjectValue();
-          if (value != null) {
-            // To distinguish between multi-valued and single-valued
-            // metadata.
-            // If value is instance of List then metadata is
-            // multi-valued else
-            // metadata is single-valued.
-            if (value instanceof List) {
-              for (Object object : (List) value) {
-                if (object instanceof Double)
-                  valuesList.add(Value.getDoubleValue(
-                      ((Double) object).doubleValue()));
-              }
-            } else {
-              valuesList.add(Value.getDoubleValue(
-                  prop.getFloat64Value().doubleValue()));
-            }
-          }
-          return;
+    Property prop = metas.get(propertyName);
+    if (prop == null) {
+      logger.log(Level.FINEST, "{0} property is null", propertyName);
+      return;
+    }
+    if (prop instanceof PropertyFloat64) {
+      Double val = prop.getFloat64Value();
+      if (val != null) {
+        valuesList.add(Value.getDoubleValue(val.doubleValue()));
+      } else {
+        logger.log(Level.FINEST,
+            "{0} property [PropertyFloat64] contains NULL value", propertyName);
+      }
+    } else if (prop instanceof PropertyFloat64List) {
+      Float64List float64List = prop.getFloat64ListValue();
+      Iterator iter = float64List.iterator();
+      while (iter.hasNext()) {
+        Double val = (Double) iter.next();
+        if (val != null) {
+          valuesList.add(Value.getDoubleValue(val.doubleValue()));
+        } else {
+          logger.log(Level.FINEST,
+              "{0} property [PropertyFloat64List] contains NULL value",
+              propertyName);
         }
       }
-    } catch (ClassCastException e) {
-      logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "
-          + propertyName, e);
-    } catch (Exception e1) {
-      logger.log(Level.SEVERE, "Error while trying to get the property "
-          + propertyName + " of the file " + this.doc.get_Id() + " "
-          + e1.getMessage(), e1);
-      RepositoryDocumentException re = new RepositoryDocumentException(e1);
-      throw re;
+    } else {
+      throw new RepositoryDocumentException("Invalid data type: "
+          + propertyName + " property is not a Double type");
     }
   }
 
@@ -393,45 +381,40 @@ public class FnDocument implements IDocument {
    */
   public void getPropertyDateValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
-    try {
-      Properties props = doc.getProperties();
-      Property[] property = props.toArray();
-      Object value;
-      Iterator it = props.iterator();
-      for (Property prop : property) {
-        String propName = prop.getPropertyName();
-        if (propName.equalsIgnoreCase(propertyName)) {
-          value = prop.getObjectValue();
-          if (value != null) {
-            // To distinguish between multi-valued and single-valued
-            // metadata.
-            // If value is instance of List then metadata is
-            // multi-valued else
-            // metadata is single-valued.
-            if (value instanceof List) {
-              for (Object object : (List) value) {
-                Calendar c = Calendar.getInstance();
-                c.setTime((Date) object);
-                valuesList.add(Value.getDateValue(c));
-              }
-            } else {
-              Calendar c = Calendar.getInstance();
-              c.setTime(prop.getDateTimeValue());
-              valuesList.add(Value.getDateValue(c));
-            }
-          }
-          return;
+    Property prop = metas.get(propertyName);
+    if (prop == null) {
+      logger.log(Level.FINEST, "{0} property is null", propertyName);
+      return;
+    }
+    if (prop instanceof PropertyDateTime) {
+      Date val = prop.getDateTimeValue();
+      if (val != null) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(val);
+        valuesList.add(Value.getDateValue(cal));
+      } else {
+        logger.log(Level.FINEST,
+            "{0} property [PropertyDateTime] contains NULL value",
+            propertyName);
+      }
+    } else if (prop instanceof PropertyDateTimeList) {
+      DateTimeList dtList = prop.getDateTimeListValue();
+      Iterator iter = dtList.iterator();
+      while (iter.hasNext()) {
+        Date val = (Date) iter.next();
+        if (val != null) {
+          Calendar cal = Calendar.getInstance();
+          cal.setTime(val);
+          valuesList.add(Value.getDateValue(cal));
+        } else {
+          logger.log(Level.FINEST,
+              "{0} property [PropertyDateTimeList] contains NULL value",
+              propertyName);
         }
       }
-    } catch (ClassCastException e) {
-      logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "
-          + propertyName, e);
-    } catch (Exception e1) {
-      logger.log(Level.SEVERE, "Error while trying to get the property "
-          + propertyName + " of the file " + this.doc.get_Id() + " "
-          + e1.getMessage(), e1);
-      RepositoryDocumentException re = new RepositoryDocumentException(e1);
-      throw re;
+    } else {
+      throw new RepositoryDocumentException("Invalid data type: "
+          + propertyName + " property is not a Date type");
     }
   }
 
@@ -443,42 +426,35 @@ public class FnDocument implements IDocument {
    */
   public void getPropertyBooleanValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
-    try {
-      Properties props = doc.getProperties();
-      Property[] property = props.toArray();
-      Object value;
-      for (Property prop : property) {
-        String propName = prop.getPropertyName();
-        if (propName.equalsIgnoreCase(propertyName)) {
-          value = prop.getObjectValue();
-          if (value != null) {
-            // To distinguish between multi-valued and single-valued
-            // metadata.
-            // If value is instance of List then metadata is
-            // multi-valued else
-            // metadata is single-valued.
-            if (value instanceof List) {
-              for (Object object : (List) value) {
-                valuesList.add(Value.getBooleanValue(
-                    ((Boolean) object).booleanValue()));
-              }
-            } else {
-              valuesList.add(Value.getBooleanValue(
-                  prop.getBooleanValue().booleanValue()));
-            }
-          }
-          return;
+    Property prop = metas.get(propertyName);
+    if (prop == null) {
+      logger.log(Level.FINEST, "{0} property is null", propertyName);
+      return;
+    }
+    if (prop instanceof PropertyBoolean) {
+      Boolean val = prop.getBooleanValue();
+      if (val != null) {
+        valuesList.add(Value.getBooleanValue(val.booleanValue()));
+      } else {
+        logger.log(Level.FINEST,
+            "{0} property [PropertyBoolean] contains NULL value", propertyName);
+      }
+    } else if (prop instanceof PropertyBooleanList) {
+      BooleanList booleanList = prop.getBooleanListValue();
+      Iterator iter = booleanList.iterator();
+      while (iter.hasNext()) {
+        Boolean val = (Boolean) iter.next();
+        if (val != null) {
+          valuesList.add(Value.getBooleanValue(val.booleanValue()));
+        } else {
+          logger.log(Level.FINEST,
+              "{0} property [PropertyBooleanList] contains NULL value",
+              propertyName);
         }
       }
-    } catch (ClassCastException e) {
-      logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "
-          + propertyName, e);
-    } catch (Exception e1) {
-      logger.log(Level.SEVERE, "Error while trying to get the property "
-          + propertyName + " of the file " + this.doc.get_Id() + " "
-          + e1.getMessage(), e1);
-      RepositoryDocumentException re = new RepositoryDocumentException(e1);
-      throw re;
+    } else {
+      throw new RepositoryDocumentException("Invalid data type: "
+          + propertyName + " property is not a Boolean type");
     }
   }
 
@@ -490,38 +466,25 @@ public class FnDocument implements IDocument {
    */
   public void getPropertyBinaryValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
-    try {
-      Properties props = doc.getProperties();
-      Property[] property = props.toArray();
-      Object value;
-      for (Property prop : property) {
-        String propName = prop.getPropertyName();
-        if (propName.equalsIgnoreCase(propertyName)) {
-          value = prop.getObjectValue();
-          if (value != null) {
-            // To distinguish between multi-valued and single-valued
-            // metadata.
-            // If value is instance of List then metadata is
-            // multi-valued else
-            // metadata is single-valued.
-            if (value instanceof List) {
-              logger.log(Level.WARNING, "Binary MultiValued Metadat is currently not supported. Binary MultiValued metadata will not be fed to GSA");
-            } else {
-              valuesList.add(Value.getBinaryValue(prop.getBinaryValue()));
-            }
-          }
-          return;
-        }
+    Property prop = metas.get(propertyName);
+    if (prop == null) {
+      logger.log(Level.FINEST, "{0} property is null", propertyName);
+      return;
+    }
+    if (prop instanceof PropertyBinary) {
+      byte[] val = prop.getBinaryValue();
+      if (val.length > 0) {
+        valuesList.add(Value.getBinaryValue(val));
+      } else {
+        logger.log(Level.FINEST,
+            "{0} property [PropertyBinary] contains NULL value", propertyName);
       }
-    } catch (ClassCastException e) {
-      logger.log(Level.SEVERE, "ClassCastException found but still continuing for property "
-          + propertyName, e);
-    } catch (Exception e1) {
-      logger.log(Level.SEVERE, "Error while trying to get the property "
-          + propertyName + " of the file " + this.doc.get_Id() + " "
-          + e1.getMessage(), e1);
-      RepositoryDocumentException re = new RepositoryDocumentException(e1);
-      throw re;
+    } else if (prop instanceof PropertyBinaryList) {
+      logger.log(Level.FINEST, "Binary MultiValued Metadata is currently not "
+          + "supported. Binary MultiValued metadata will not be fed to GSA");
+    } else {
+      throw new RepositoryDocumentException("Invalid data type: "
+          + propertyName + " property is not a Binary type");
     }
   }
 
