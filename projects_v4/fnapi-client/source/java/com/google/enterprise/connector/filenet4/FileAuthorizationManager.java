@@ -37,13 +37,10 @@ import com.filenet.api.util.UserContext;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +49,6 @@ import javax.security.auth.Subject;
 public class FileAuthorizationManager implements AuthorizationManager {
   private static final Logger logger =
       Logger.getLogger(FileAuthorizationManager.class.getName());
-  private static final int MAX_RESPONSE_MINS = 1;
 
   private final IConnection conn;
   private final IObjectStore objectStore;
@@ -99,6 +95,12 @@ public class FileAuthorizationManager implements AuthorizationManager {
       logger.severe("Got null docids for authZ .. returning null");
       return null;
     }
+
+    List<AuthorizationResponse> authorizeDocids =
+        new ArrayList<AuthorizationResponse>();
+    List<String> docidList = new ArrayList<String>(docids);
+    IVersionSeries versionSeries = null;
+    AuthorizationResponse authorizationResponse;
 
     logger.info("Authorizing docids for user: " + identity.getUsername());
 
@@ -150,60 +152,10 @@ public class FileAuthorizationManager implements AuthorizationManager {
     } catch (Exception ecp) {
       logger.log(Level.SEVERE, ecp.getStackTrace().toString());
     }
-    UserContext.get().popSubject();
-
-    ExecutorService threadPool = Executors.newFixedThreadPool(
-        Runtime.getRuntime().availableProcessors());
-    // Use a concurrent map to collect responses from multiple threads without
-    // synchronization.
-    Map<String, AuthorizationResponse> responses =
-        new ConcurrentHashMap<String, AuthorizationResponse>(docids.size());
-
     // Iterate through the DocId list and authorize the search user. Add the
-    // authorization result to a map of responses.
-    for (String docId : docids) {
-      AuthorizationHandler handler = new AuthorizationHandler(conn, objectStore,
-          checkMarkings, docId, user, responses);
-      threadPool.execute(handler);
-    }
-    threadPool.shutdown();
-    try {
-      if (threadPool.awaitTermination(MAX_RESPONSE_MINS, TimeUnit.MINUTES)) {
-        threadPool.shutdownNow();
-      }
-    } catch (InterruptedException e) {
-      logger.log(Level.FINEST,
-          "Authorization exceeds response threadshold, terminate thread pool",
-          e);
-    }
-
-    logger.log(Level.FINEST, "Authorization time: {0}ms",
-        (System.currentTimeMillis() - timeStart));
-    return responses.values();
-  }
-
-  private static class AuthorizationHandler implements Runnable {
-    private final IConnection conn;
-    private final IObjectStore objectStore;
-    private final boolean checkMarkings;
-    private final String docId;
-    private final IUser user;
-    private final Map<String, AuthorizationResponse> responses;
-
-    public AuthorizationHandler(IConnection conn, IObjectStore os,
-        boolean checkMarkings, String docId, IUser user, Map<String,
-        AuthorizationResponse> responses) {
-      this.conn = conn;
-      this.objectStore = os;
-      this.checkMarkings = checkMarkings;
-      this.docId = docId;
-      this.user = user;
-      this.responses = responses;
-    }
-
-    private AuthorizationResponse getResponse() throws RepositoryException {
-      AuthorizationResponse authorizationResponse = null;
-      IVersionSeries versionSeries = null;
+    // authorization result to
+    // AuthorizationResponse list
+    for (String docId : docidList) {
       try {
         logger.config("Getting version series for document DocID: "
                 + docId);
@@ -221,21 +173,21 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
       if (versionSeries != null) {
         logger.config("Authorizing DocID: " + docId + " for user: "
-                + user.getName());
+                + identity.getUsername());
         // Check whether the search user is authorized to view document
         // contents or
         // not.
         IDocument releasedVersion = versionSeries.getReleasedVersion();
         if (releasedVersion.getPermissions().authorize(user)) {
           logger.log(Level.INFO, "As per the ACLS User "
-                  + user.getName()
+                  + identity.getUsername()
                   + " is authorized for document DocID " + docId);
           authorizationResponse = new AuthorizationResponse(true,
                   docId);
 
           if (this.checkMarkings) {
             logger.log(Level.INFO, "Authorizing DocID: " + docId
-                    + " for user: " + user.getName()
+                    + " for user: " + identity.getUsername()
                     + " for Marking sets ");
 
             // check whether current document has property values
@@ -250,14 +202,14 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
               if (releasedVersion.getActiveMarkings().authorize(user)) {
                 logger.log(Level.INFO, "As per the Marking Sets User "
-                        + user.getName()
+                        + identity.getUsername()
                         + " is authorized for document DocID "
                         + docId);
                 authorizationResponse = new AuthorizationResponse(
                         true, docId);
               } else {
                 logger.log(Level.INFO, "As per the Marking Sets User "
-                        + user.getName()
+                        + identity.getUsername()
                         + " is NOT authorized for document DocID "
                         + docId);
                 authorizationResponse = new AuthorizationResponse(
@@ -268,7 +220,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
               logger.log(Level.INFO, "Document does not have property associated with Marking Sets "
                       + docId);
               logger.log(Level.INFO, "User "
-                      + user.getName()
+                      + identity.getUsername()
                       + " is authorized for document DocID "
                       + docId);
               authorizationResponse = new AuthorizationResponse(
@@ -276,7 +228,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
             }
           } else {
             logger.log(Level.INFO, "Either Document class does not have property associated with Marking Sets or Connector is not configured to check Marking Sets ");
-            logger.log(Level.INFO, "User " + user.getName()
+            logger.log(Level.INFO, "User " + identity.getUsername()
                     + " is authorized for document DocID " + docId);
             authorizationResponse = new AuthorizationResponse(true,
                     docId);
@@ -285,30 +237,20 @@ public class FileAuthorizationManager implements AuthorizationManager {
           authorizationResponse = new AuthorizationResponse(false,
                   docId);
           logger.log(Level.INFO, "As per the ACLS User "
-                  + user.getName()
+                  + identity.getUsername()
                   + " is NOT authorized for document DocID " + docId);
         }
       } else {
         authorizationResponse = new AuthorizationResponse(false, docId);
-        logger.log(Level.INFO, "User " + user.getName()
+        logger.log(Level.INFO, "User " + identity.getUsername()
                 + " is NOT authorized for document DocID " + docId
                 + "version series null");
       }
-      return authorizationResponse;
+      authorizeDocids.add(authorizationResponse);
     }
-
-    @Override
-    public void run() {
-      UserContext.get().pushSubject(conn.getSubject());
-      try {
-        responses.put(docId, getResponse());
-      } catch (RepositoryException e) {
-        logger.log(Level.WARNING, "Failed to authorize docid " + docId
-            + " for user " + user.getName(), e);
-        responses.put(docId, new AuthorizationResponse(false, docId));
-      } finally {
-        UserContext.get().popSubject();
-      }
-    }
+    UserContext.get().popSubject();
+    logger.log(Level.FINEST, "Authorization time: {0}ms",
+        (System.currentTimeMillis() - timeStart));
+    return authorizeDocids;
   }
 }
