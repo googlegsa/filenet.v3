@@ -53,7 +53,10 @@ public class FileAuthorizationManager implements AuthorizationManager {
   private static final Logger logger =
       Logger.getLogger(FileAuthorizationManager.class.getName());
   private static final int MAX_RESPONSE_MINS = 1;
-
+  private static final int AVG_DOCS_PER_THREAD = 16;
+  private static final int AVAILABLE_PROCESSORS =
+      Runtime.getRuntime().availableProcessors();
+  
   private final IConnection conn;
   private final IObjectStore objectStore;
   private boolean checkMarkings;
@@ -152,8 +155,15 @@ public class FileAuthorizationManager implements AuthorizationManager {
     }
     UserContext.get().popSubject();
 
-    ExecutorService threadPool = Executors.newFixedThreadPool(
-        Runtime.getRuntime().availableProcessors());
+    // Compute thread pool size
+    int poolSize = docids.size() / AVG_DOCS_PER_THREAD;
+    if (poolSize > AVAILABLE_PROCESSORS) {
+      poolSize = AVAILABLE_PROCESSORS;
+    } else if (poolSize == 0) {
+      poolSize = 1;
+    }
+    ExecutorService threadPool = Executors.newFixedThreadPool(poolSize);
+
     // Use a concurrent map to collect responses from multiple threads without
     // synchronization.
     Map<String, AuthorizationResponse> responses =
@@ -161,9 +171,10 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
     // Iterate through the DocId list and authorize the search user. Add the
     // authorization result to a map of responses.
-    for (String docId : docids) {
+    Iterator<String> iterator = docids.iterator();
+    for (int i = 0; i < poolSize; i++) {
       AuthorizationHandler handler = new AuthorizationHandler(conn, objectStore,
-          checkMarkings, docId, user, responses);
+          checkMarkings, iterator, user, responses);
       threadPool.execute(handler);
     }
     threadPool.shutdown();
@@ -177,8 +188,9 @@ public class FileAuthorizationManager implements AuthorizationManager {
           e);
     }
 
-    logger.log(Level.FINEST, "Authorization time: {0}ms",
-        (System.currentTimeMillis() - timeStart));
+    logger.log(Level.FINEST, "Authorization: {0} documents, {1} threads, {2}ms",
+        new Object[] {docids.size(), poolSize,
+        (System.currentTimeMillis() - timeStart)});
     return responses.values();
   }
 
@@ -186,22 +198,24 @@ public class FileAuthorizationManager implements AuthorizationManager {
     private final IConnection conn;
     private final IObjectStore objectStore;
     private final boolean checkMarkings;
-    private final String docId;
+    // Iterator instance is shared among worker threads.
+    private final Iterator<String> iterator;
     private final IUser user;
     private final Map<String, AuthorizationResponse> responses;
 
     public AuthorizationHandler(IConnection conn, IObjectStore os,
-        boolean checkMarkings, String docId, IUser user, Map<String,
-        AuthorizationResponse> responses) {
+        boolean checkMarkings, Iterator<String> docidsIterator, IUser user,
+        Map<String, AuthorizationResponse> responses) {
       this.conn = conn;
       this.objectStore = os;
       this.checkMarkings = checkMarkings;
-      this.docId = docId;
+      this.iterator = docidsIterator;
       this.user = user;
       this.responses = responses;
     }
 
-    private AuthorizationResponse getResponse() throws RepositoryException {
+    private AuthorizationResponse getResponse(String docId)
+        throws RepositoryException {
       AuthorizationResponse authorizationResponse = null;
       IVersionSeries versionSeries = null;
       try {
@@ -297,15 +311,26 @@ public class FileAuthorizationManager implements AuthorizationManager {
       return authorizationResponse;
     }
 
+    private String pollIterator() {
+      synchronized (iterator) {
+        return iterator.hasNext() ? iterator.next() : null;
+      }
+    }
+
     @Override
     public void run() {
       UserContext.get().pushSubject(conn.getSubject());
       try {
-        responses.put(docId, getResponse());
-      } catch (RepositoryException e) {
-        logger.log(Level.WARNING, "Failed to authorize docid " + docId
-            + " for user " + user.getName(), e);
-        responses.put(docId, new AuthorizationResponse(false, docId));
+        String docId;
+        while ((docId = pollIterator()) != null) {
+          try {
+            responses.put(docId, getResponse(docId));
+          } catch (RepositoryException e) {
+            logger.log(Level.WARNING, "Failed to authorize docid " + docId
+                + " for user " + user.getName(), e);
+            responses.put(docId, new AuthorizationResponse(false, docId));
+          }
+        }
       } finally {
         UserContext.get().popSubject();
       }
