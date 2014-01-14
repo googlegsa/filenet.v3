@@ -1,19 +1,17 @@
-/*
- * Copyright 2009 Google Inc.
+// Copyright 2009 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
- */
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
@@ -95,12 +93,14 @@ public class FileTraversalManager implements TraversalManager {
   private boolean useIDForChangeDetection;
   private Set<String> included_meta;
   private Set<String> excluded_meta;
+  private final String globalNamespace;
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
       IObjectStore objectStore, boolean b,
       boolean useIDForChangeDetection, String displayUrl,
       String additionalWhereClause, String deleteadditionalWhereClause,
-      Set<String> included_meta, Set<String> excluded_meta)
+      Set<String> included_meta, Set<String> excluded_meta,
+      String globalNamespace)
       throws RepositoryException {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
@@ -111,13 +111,15 @@ public class FileTraversalManager implements TraversalManager {
     this.deleteadditionalWhereClause = deleteadditionalWhereClause;
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
+    this.globalNamespace = globalNamespace;
   }
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
       IObjectStore objectStore, ISession fileSession, boolean b,
       boolean useIDForChangeDetection, String displayUrl,
       String additionalWhereClause, String deleteadditionalWhereClause,
-      Set<String> included_meta, Set<String> excluded_meta)
+      Set<String> included_meta, Set<String> excluded_meta,
+      String globalNamespace)
       throws RepositoryException {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
@@ -130,6 +132,7 @@ public class FileTraversalManager implements TraversalManager {
     this.deleteadditionalWhereClause = deleteadditionalWhereClause;
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
+    this.globalNamespace = globalNamespace;
   }
 
   public DocumentList startTraversal() throws RepositoryException {
@@ -176,7 +179,7 @@ public class FileTraversalManager implements TraversalManager {
         resultSet = new FileDocumentList(objectSet,
                 objectSetToDeleteDocs, objectSetToDelete, objectStore,
                 this.isPublic, this.displayUrl, this.included_meta,
-                this.excluded_meta, dateFirstPush, checkPoint);
+                this.excluded_meta, dateFirstPush, checkPoint, globalNamespace);
 
       }
     } else {
@@ -184,7 +187,7 @@ public class FileTraversalManager implements TraversalManager {
         resultSet = new FileDocumentList(objectSet, objectSetToDelete,
                 objectStore, this.isPublic, this.displayUrl,
                 this.included_meta, this.excluded_meta, dateFirstPush,
-                checkPoint);
+                checkPoint, globalNamespace);
       }
       LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
       LOGGER.log(Level.INFO, "Number of documents sent to GSA: "

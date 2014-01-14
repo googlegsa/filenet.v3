@@ -19,6 +19,7 @@ import com.filenet.api.security.AccessPermission;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -129,6 +130,10 @@ public class AccessPermissionListMock implements AccessPermissionList {
   @Override
   public Object set(int index, Object element) {
     return perms.set(index, (AccessPermission) element);
+  }
+
+  public void shuffle() {
+    Collections.shuffle(perms);
   }
 
   @Override

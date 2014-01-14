@@ -11,6 +11,7 @@
     <property name="additional_where_clause" value="${additional_where_clause}" />
     <property name="delete_additional_where_clause" value="${delete_additional_where_clause}" />
     <property name="check_marking" value="${check_marking}" />
+    <property name="googleGlobalNamespace" value="${googleGlobalNamespace}"/>
     <property name="db_timezone" value=""/>
     <property name="included_meta">
       <set>
@@ -95,11 +96,7 @@
         <prop key="is_public"></prop>
         <prop key="check_marking"></prop>
         <prop key="useIDForChangeDetection"></prop>
-        <!--
-        <prop key="included_meta"></prop>
-        <prop key="excluded_meta"></prop>
-        <prop key="db_timezone"></prop>
-         -->
+        <prop key="googleGlobalNamespace"></prop>
       </props>
     </property>
   </bean>

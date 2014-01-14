@@ -85,6 +85,9 @@
       <classpath>
         <pathelement location="${file.jarfile}" />
         <pathelement location="${spi.jarfile}" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="prod/*.jar" />
+        </fileset>
         <pathelement location="${classes-client}" />
       </classpath>
     </javac>
