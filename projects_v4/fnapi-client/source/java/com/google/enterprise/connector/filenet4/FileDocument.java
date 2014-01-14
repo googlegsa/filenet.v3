@@ -14,20 +14,25 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.filenet.api.constants.ClassNames;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
+import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
+import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 import com.google.enterprise.connector.spi.Value;
+
+import com.filenet.api.constants.ClassNames;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,6 +56,7 @@ public class FileDocument implements Document {
   private Set<String> excluded_meta = null;
 
   private SpiConstants.ActionType action;
+  private final String globalNamespace;
 
   public FileDocument(String docId, Date timeStamp, IObjectStore objectStore,
           boolean isPublic, String displayUrl, Set<String> included_meta,
@@ -63,12 +69,13 @@ public class FileDocument implements Document {
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
     this.action = action;
+    this.globalNamespace = null;
   }
 
   public FileDocument(String docId, String commonVersionId, Date timeStamp,
           IObjectStore objectStore, boolean isPublic, String displayUrl,
           Set<String> included_meta, Set<String> excluded_meta,
-          SpiConstants.ActionType action) {
+          SpiConstants.ActionType action, String globalNamespace) {
     this.docId = docId;
     this.versionId = commonVersionId;
     this.timeStamp = timeStamp;
@@ -78,6 +85,7 @@ public class FileDocument implements Document {
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
     this.action = action;
+    this.globalNamespace = globalNamespace;
   }
 
   private void fetch() throws RepositoryDocumentException {
@@ -91,8 +99,7 @@ public class FileDocument implements Document {
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
-  public Property findProperty(String name)
-          throws RepositoryDocumentException {
+  public Property findProperty(String name) throws RepositoryException {
     LinkedList<Value> list = new LinkedList<Value>();
 
     if (SpiConstants.ActionType.ADD.equals(action)) {
@@ -126,6 +133,18 @@ public class FileDocument implements Document {
         logger.fine("Getting Property " + name + " : "
                 + action.toString());
         return new SimpleProperty(list);
+      } else if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
+        addPrincipals(list, name, document.getPermissions().getAllowUsers());
+        return new SimpleProperty(list);
+      } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
+        addPrincipals(list, name, document.getPermissions().getDenyUsers());
+        return new SimpleProperty(list);
+      } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
+        addPrincipals(list, name, document.getPermissions().getAllowGroups());
+        return new SimpleProperty(list);
+      } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
+        addPrincipals(list, name, document.getPermissions().getDenyGroups());
+        return new SimpleProperty(list);
       } else if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
         return null;
       } else {
@@ -151,9 +170,26 @@ public class FileDocument implements Document {
     return new SimpleProperty(list);
   }
 
+  /*
+   * Helper method to add allow/deny users and groups to property using default
+   * principal type, namespace and case sensitivity.
+   */
+  private void addPrincipals(List<Value> list, String propName,
+      Set<String> names) {
+    FileUtil.addPrincipals(list, PrincipalType.UNKNOWN, globalNamespace, names,
+        CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
+    logger.log(Level.FINEST, "Getting {0}: {1}",
+        new Object[] { propName, names});
+  }
+
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
     fetch();
     Set<String> properties = new HashSet<String>();
+    properties.add(SpiConstants.PROPNAME_ACLUSERS);
+    properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
+    properties.add(SpiConstants.PROPNAME_ACLGROUPS);
+    properties.add(SpiConstants.PROPNAME_ACLDENYGROUPS);
+
     Set<String> documentProperties = document.getPropertyNames();
     for (String property : documentProperties) {
       if (property != null) {
@@ -172,7 +208,6 @@ public class FileDocument implements Document {
         }
       }
     }
-
     return properties;
   }
 }

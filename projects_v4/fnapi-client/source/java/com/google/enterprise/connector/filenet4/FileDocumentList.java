@@ -1,3 +1,17 @@
+// Copyright 2007-2010 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
@@ -43,12 +57,13 @@ public class FileDocumentList implements DocumentList {
   private Set<String> included_meta;
   private Set<String> excluded_meta;
   private int index = -1;
+  private final String globalNamespace;
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
       IObjectStore objectStore, boolean isPublic, String displayUrl,
       Set<String> included_meta, Set<String> excluded_meta,
-      String dateFirstPush, String checkPoint) {
+      String dateFirstPush, String checkPoint, String globalNamespace) {
     this.objectSet = objectSet;
     this.objectSetToDeleteDocs = objectSetToDeleteDocs;
     this.objectSetToDelete = objectSetToDelete;
@@ -64,6 +79,7 @@ public class FileDocumentList implements DocumentList {
     this.objectIt = objectSet.getIterator();
     this.objectItToDelete = objectSetToDelete.getIterator();
     this.objectItToDeleteDocs = objectSetToDeleteDocs.getIterator();
+    this.globalNamespace = globalNamespace;
 
     // Docs to Add
     logger.log(Level.INFO, "Number of new documents discovered: "
@@ -81,7 +97,7 @@ public class FileDocumentList implements DocumentList {
   public FileDocumentList(IObjectSet objectSet, IObjectSet objectSetToDelete,
       IObjectStore objectStore, boolean isPublic, String displayUrl,
       Set<String> included_meta, Set<String> excluded_meta,
-      String dateFirstPush, String checkPoint) {
+      String dateFirstPush, String checkPoint, String globalNamespace) {
     this.objectSet = objectSet;
     this.objectSetToDelete = objectSetToDelete;
     this.objectSetToDeleteDocs = null;
@@ -97,6 +113,7 @@ public class FileDocumentList implements DocumentList {
     this.objectIt = objectSet.getIterator();
     this.objectItToDelete = objectSetToDelete.getIterator();
     this.objectItToDeleteDocs = null;
+    this.globalNamespace = globalNamespace;
 
     // Docs to Add
     logger.log(Level.INFO, "Number of new documents discovered: "
@@ -177,7 +194,8 @@ public class FileDocumentList implements DocumentList {
                   docIdToDeleteDocs, commonVersionId,
                   dateLastModified, this.objectStore, this.isPublic,
                   this.displayUrl, this.included_meta,
-                  this.excluded_meta, SpiConstants.ActionType.DELETE);
+                  this.excluded_meta, SpiConstants.ActionType.DELETE,
+                  globalNamespace);
           index++;
           return fileDocumentToDeleteDocs;
         } else {
@@ -210,7 +228,7 @@ public class FileDocumentList implements DocumentList {
                     this.objectStore, this.isPublic,
                     this.displayUrl, this.included_meta,
                     this.excluded_meta,
-                    SpiConstants.ActionType.DELETE);
+                    SpiConstants.ActionType.DELETE, globalNamespace);
 
             index++;
             return fileDocumentToDelete;

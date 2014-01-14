@@ -1,19 +1,17 @@
-/*
- * Copyright 2009 Google Inc.
+// Copyright 2009 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
- */
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
@@ -45,13 +43,14 @@ public class FileSession implements Session {
   private String deleteadditionalWhereClause;
   private Set<String> included_meta;
   private Set<String> excluded_meta;
+  private final String globalNamespace;
 
   public FileSession(String iObjectFactory, String userName,
       String userPassword, String objectStoreName, String displayUrl,
       String contentEngineUri, boolean isPublic, boolean checkMarking,
       boolean useIDForChangeDetection, String additionalWhereClause,
       String deleteadditionalWhereClause, Set<String> included_meta,
-      Set<String> excluded_meta)
+      Set<String> excluded_meta, String globalNamespace)
       throws RepositoryException, RepositoryLoginException {
 
     setFileObjectFactory(iObjectFactory);
@@ -72,6 +71,7 @@ public class FileSession implements Session {
     this.deleteadditionalWhereClause = deleteadditionalWhereClause;
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
+    this.globalNamespace = globalNamespace;
   }
 
   /**
@@ -134,7 +134,7 @@ public class FileSession implements Session {
             fileObjectFactory, objectStore, this.isPublic,
             this.useIDForChangeDetection, this.displayUrl,
             this.additionalWhereClause, this.deleteadditionalWhereClause,
-            this.included_meta, this.excluded_meta);
+            this.included_meta, this.excluded_meta, globalNamespace);
     return fileQTM;
   }
 
@@ -144,7 +144,7 @@ public class FileSession implements Session {
   public AuthenticationManager getAuthenticationManager()
           throws RepositoryException {
     FileAuthenticationManager fileAm = new FileAuthenticationManager(
-            connection);
+        connection, globalNamespace);
     return fileAm;
   }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Google Inc.
+// Copyright 2010 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,15 +16,20 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.base.Strings;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
+import com.google.enterprise.connector.spi.Principal;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
+import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.property.FilterElement;
 import com.filenet.api.property.PropertyFilter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -103,6 +108,9 @@ public class FileUtil {
     filterSet.add(PropertyNames.VERSION_SERIES);
     filterSet.add(PropertyNames.VERSION_SERIES_ID);
     filterSet.add(PropertyNames.RELEASED_VERSION);
+    filterSet.add(PropertyNames.PERMISSIONS);
+    filterSet.add(PropertyNames.PERMISSION_TYPE);
+    filterSet.add(PropertyNames.PERMISSION_SOURCE);
     
     StringBuilder buf = new StringBuilder();
     for (String filterName : filterSet) {
@@ -155,6 +163,34 @@ public class FileUtil {
       }
     } else {
       return checkpoint + ZULU_WITH_COLON;
+    }
+  }
+
+  /**
+   * Helper method to create a list of principals from names.
+   */
+  public static List<Principal> getPrincipals(PrincipalType principalType,
+      String namespace, Set<String> names,
+      CaseSensitivityType caseSensitivityType) {
+    List<Principal> principalList = new ArrayList<Principal>(names.size());
+    for (String name : names) {
+      Principal principal = new Principal(principalType, namespace, name,
+          caseSensitivityType);
+      principalList.add(principal);
+    }
+    return principalList;
+  }
+
+  /**
+   * Helper method to add names to principal list.
+   */
+  public static void addPrincipals(List<Value> list,
+      PrincipalType principalType, String namespace, Set<String> names,
+      CaseSensitivityType caseSensitivityType) {
+    for (String name : names) {
+      Principal principal = new Principal(principalType, namespace, name,
+          caseSensitivityType);
+      list.add(Value.getPrincipalValue(principal));
     }
   }
 }

@@ -1,10 +1,10 @@
-// Copyright (C) 2007-2011 Google Inc.
+// Copyright 2007-2011 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 import com.filenet.api.core.Document;
@@ -29,6 +30,7 @@ import com.filenet.api.core.Factory;
 import com.filenet.api.util.UserContext;
 
 import java.util.Iterator;
+import java.util.Set;
 
 public class FileDocumentTest extends FileNetTestCase {
 
@@ -70,6 +72,20 @@ public class FileDocumentTest extends FileNetTestCase {
 
     Property prop = fd.findProperty("Id");
     assertEquals(TestConnection.docId1, prop.nextValue().toString());
+
+    // TODO(tdnguyen) Revisit these test cases after fixing FnPermissions
+    // to avoid hard-coding users' names for allow and deny.
+    Property allowUsers = fd.findProperty(SpiConstants.PROPNAME_ACLUSERS);
+    assertNotNull(allowUsers);
+
+    Property denyUsers = fd.findProperty(SpiConstants.PROPNAME_ACLDENYUSERS);
+    assertNotNull(denyUsers);
+
+    Property allowGroups = fd.findProperty(SpiConstants.PROPNAME_ACLGROUPS);
+    assertNotNull(allowGroups);
+
+    Property denyGroups = fd.findProperty(SpiConstants.PROPNAME_ACLDENYGROUPS);
+    assertNotNull(denyGroups);
   }
 
   /*
@@ -89,7 +105,13 @@ public class FileDocumentTest extends FileNetTestCase {
       counter++;
     }
     assertTrue(counter > 0);
-    assertTrue(counter <= TestConnection.included_meta.size());
+    assertTrue(TestConnection.included_meta.size() > 0);
+
+    Set<String> propNames = fd.getPropertyNames();
+    assertTrue(propNames.contains(SpiConstants.PROPNAME_ACLUSERS));
+    assertTrue(propNames.contains(SpiConstants.PROPNAME_ACLDENYUSERS));
+    assertTrue(propNames.contains(SpiConstants.PROPNAME_ACLGROUPS));
+    assertTrue(propNames.contains(SpiConstants.PROPNAME_ACLDENYGROUPS));
   }
 
   /*

@@ -1,3 +1,17 @@
+// Copyright 2009 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.spi.Connector;
@@ -29,6 +43,7 @@ public class FileConnector implements Connector {
   private String delete_additional_where_clause = "";
   private Set<String> included_meta;
   private Set<String> excluded_meta;
+  private String globalNamespace;
 
   // The db_timezone property is deprecated; however, its setter remains here
   // for backward compatibility.
@@ -59,13 +74,14 @@ public class FileConnector implements Connector {
     if (!(object_factory == null || username == null || password == null
             || object_store == null || workplace_display_url == null || content_engine_url == null)) {
 
+      // TODO(tdnguyen) Refactor to pass FileConnector object down
       LOGGER.info("Creating fileSession object...");
       sess = new FileSession(object_factory, username, password,
               object_store, workplace_display_url, content_engine_url,
               is_public.equals("true"), check_marking.equals("on"),
               useIDForChangeDetection.equals("true"),
               additional_where_clause, delete_additional_where_clause,
-              included_meta, excluded_meta);
+              included_meta, excluded_meta, globalNamespace);
     }
     return sess;
 
@@ -145,6 +161,14 @@ public class FileConnector implements Connector {
     this.delete_additional_where_clause = deleteadditionalWhereClause;
     LOGGER.config("Set Additional DELETE Clause to "
             + this.delete_additional_where_clause);
+  }
+
+  public String getGoogleGlobalNamespace() {
+    return globalNamespace;
+  }
+
+  public void setGoogleGlobalNamespace(String globalNamespace) {
+    this.globalNamespace = globalNamespace;
   }
 
   public Set<String> getExcluded_meta() {
