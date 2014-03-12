@@ -11,6 +11,26 @@ supplements the main documentation.
 Web Site: http://code.google.com/p/google-enterprise-connector-file/
 
 
+Release 3.2.4, March 12, 2014
+=============================
+This is an upgrade release with enhancements and bug fixes.  Users of previous
+versions are encouraged to upgrade.
+
+Issues Fixed Since 3.2.0
+------------------------
+11227531 - FileNet connector does not correctly process insertions and deletions
+           in order.
+13418139 - Improve authorization performance with multithreading and performance
+           tuning.
+
+Version Compatibility
+---------------------
+Connector instances created using versions 2.0.0 or later may be used with this
+version.  This version works with Connector Manager version 3.0.0 or later.
+
+Java SE 5.0 is no longer supported.  Java 6 or later is required.
+
+
 Release 3.2.0, October 4, 2013
 ================================
 
