@@ -19,8 +19,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.SpiConstants;
-import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.BooleanList;
@@ -29,8 +27,10 @@ import com.filenet.api.collection.Float64List;
 import com.filenet.api.collection.IdList;
 import com.filenet.api.collection.Integer32List;
 import com.filenet.api.collection.StringList;
+import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.ContentTransfer;
 import com.filenet.api.core.Document;
+import com.filenet.api.events.DeletionEvent;
 import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
 import com.filenet.api.property.PropertyBinary;
@@ -136,45 +136,58 @@ public class FnDocument implements IDocument {
     return new FnVersionSeries(doc.get_VersionSeries());
   }
 
-  public String getId(ActionType action) {
+  public String getId() {
     return doc.get_Id().toString();
   }
 
-  public Date getModifyDate(ActionType action)
-      throws RepositoryDocumentException {
-    Date ModifyDate = new Date();
+  public Date getModifyDate() throws RepositoryDocumentException {
+    Date modifiedDate;
     try {
-      if (SpiConstants.ActionType.DELETE.equals(action)) {
-        ModifyDate = ((com.filenet.apiimpl.core.DeletionEventImpl) doc).get_DateLastModified();
-      } else {// if action==SpiConstants.ActionType.ADD
-        ModifyDate = doc.get_DateLastModified();
+      if (doc instanceof DeletionEvent) {
+        modifiedDate = ((DeletionEvent) doc).get_DateCreated();
+        logger.log(Level.FINEST, "[DeletionEvent] Created on {0}",
+            modifiedDate);
+      } else if (doc instanceof Document) {
+        modifiedDate = doc.get_DateLastModified();
+        logger.log(Level.FINEST, "[Document] Last modified on {0}",
+            modifiedDate);
+      } else {
+        modifiedDate = new Date();
       }
     } catch (Exception e) {
       throw new RepositoryDocumentException(e);
     }
-    return ModifyDate;
+    return modifiedDate;
   }
 
-  public String getClassNameEvent() throws RepositoryDocumentException {
-    return doc.getClassName();
+  @Override
+  public boolean isDeletionEvent() throws RepositoryDocumentException {
+    return (doc instanceof DeletionEvent);
   }
 
-  public String getVersionSeriesId(ActionType action)
-      throws RepositoryDocumentException {
-    Id id;
+  @Override
+  public boolean isReleasedVersion() throws RepositoryDocumentException {
+    if (doc != null && doc instanceof Document) {
+      return VersionStatus.RELEASED.equals(doc.get_VersionStatus());
+    } else {
+      return false;
+    }
+  }
+
+  public String getVersionSeriesId() throws RepositoryDocumentException {
     String strId;
     try {
-      if (SpiConstants.ActionType.DELETE.equals(action)) {
-        id = ((com.filenet.apiimpl.core.DeletionEventImpl) doc).get_VersionSeriesId();
-      } else {// if action==SpiConstants.ActionType.ADD
-        id = ((com.filenet.apiimpl.core.DocumentImpl) doc).get_ReleasedVersion().get_VersionSeries().get_Id();
+      if (doc instanceof DeletionEvent) {
+        Id id = ((DeletionEvent) doc).get_VersionSeriesId();
+        strId = id.toString();
+      } else {
+        Id id = doc.get_VersionSeries().get_Id();
+        strId = id.toString();
+        strId = strId.substring(1, strId.length() - 1);
       }
-
     } catch (Exception e) {
       throw new RepositoryDocumentException(e);
     }
-    strId = id.toString();
-    strId = strId.substring(1, strId.length() - 1);
     return strId;
   }
 

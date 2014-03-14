@@ -38,6 +38,7 @@ public class TestConnection {
   public static final String currentUserContext;
   public static final String wrong_additional_where_clause;
   public static final String additional_where_clause;
+  public static final String additional_delete_where_clause;
   public static final String where_clause_error_message;
   public static final String workplace_url__error_message;
 
@@ -94,6 +95,8 @@ public class TestConnection {
     wrong_additional_where_clause = 
         props.getProperty("wrong_additional_where_clause");
     additional_where_clause = props.getProperty("additional_where_clause");
+    additional_delete_where_clause =
+        props.getProperty("additional_delete_where_clause");
     where_clause_error_message = 
         props.getProperty("where_clause_error_message");
     workplace_url__error_message = 

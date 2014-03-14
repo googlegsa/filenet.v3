@@ -26,7 +26,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
-import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 import com.filenet.api.util.UserContext;
 
@@ -99,7 +98,7 @@ public class FnObjectFactoryTest extends TestCase {
     Iterator<? extends IBaseObject> it = test.getIterator();
     while (it.hasNext()) {
       IBaseObject ibo = it.next();
-      assertEquals(TestConnection.docId1, ibo.getId(ActionType.ADD));
+      assertEquals(TestConnection.docId1, ibo.getId());
     }
   }
 
