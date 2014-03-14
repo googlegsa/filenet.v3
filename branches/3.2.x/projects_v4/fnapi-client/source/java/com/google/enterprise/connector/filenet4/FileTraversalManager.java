@@ -1,21 +1,20 @@
-/*
- * Copyright 2009 Google Inc.
+// Copyright 2009 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
- */
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -95,12 +94,14 @@ public class FileTraversalManager implements TraversalManager {
   private boolean useIDForChangeDetection;
   private Set<String> included_meta;
   private Set<String> excluded_meta;
+  private final String globalNamespace;
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
       IObjectStore objectStore, boolean b,
       boolean useIDForChangeDetection, String displayUrl,
       String additionalWhereClause, String deleteadditionalWhereClause,
-      Set<String> included_meta, Set<String> excluded_meta)
+      Set<String> included_meta, Set<String> excluded_meta,
+      String globalNamespace)
       throws RepositoryException {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
@@ -111,13 +112,15 @@ public class FileTraversalManager implements TraversalManager {
     this.deleteadditionalWhereClause = deleteadditionalWhereClause;
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
+    this.globalNamespace = globalNamespace;
   }
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
       IObjectStore objectStore, ISession fileSession, boolean b,
       boolean useIDForChangeDetection, String displayUrl,
       String additionalWhereClause, String deleteadditionalWhereClause,
-      Set<String> included_meta, Set<String> excluded_meta)
+      Set<String> included_meta, Set<String> excluded_meta,
+      String globalNamespace)
       throws RepositoryException {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
@@ -130,6 +133,7 @@ public class FileTraversalManager implements TraversalManager {
     this.deleteadditionalWhereClause = deleteadditionalWhereClause;
     this.included_meta = included_meta;
     this.excluded_meta = excluded_meta;
+    this.globalNamespace = globalNamespace;
   }
 
   public DocumentList startTraversal() throws RepositoryException {
@@ -152,18 +156,15 @@ public class FileTraversalManager implements TraversalManager {
 
     // to delete for deleted documents
     String queryStringToDelete = buildQueryToDelete(checkPoint);
-    ISearch searchToDelete = fileObjectFactory.getSearch(objectStore);
     LOGGER.log(Level.INFO, "Query to get deleted documents (Documents deleted from repository): "
             + queryStringToDelete);
     IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
 
     // to delete for additional delete clause
-
     if ((deleteadditionalWhereClause != null)
             && !(deleteadditionalWhereClause.equals(""))) {
       String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(checkPoint);
 
-      ISearch searchToDeleteDocs = fileObjectFactory.getSearch(objectStore);
       LOGGER.log(Level.INFO, "Query to get documents satisfying the delete where clause: "
               + queryStringToDeleteDocs);
       IObjectSet objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
@@ -176,7 +177,7 @@ public class FileTraversalManager implements TraversalManager {
         resultSet = new FileDocumentList(objectSet,
                 objectSetToDeleteDocs, objectSetToDelete, objectStore,
                 this.isPublic, this.displayUrl, this.included_meta,
-                this.excluded_meta, dateFirstPush, checkPoint);
+                this.excluded_meta, dateFirstPush, checkPoint, globalNamespace);
 
       }
     } else {
@@ -184,7 +185,7 @@ public class FileTraversalManager implements TraversalManager {
         resultSet = new FileDocumentList(objectSet, objectSetToDelete,
                 objectStore, this.isPublic, this.displayUrl,
                 this.included_meta, this.excluded_meta, dateFirstPush,
-                checkPoint);
+                checkPoint, globalNamespace);
       }
       LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
       LOGGER.log(Level.INFO, "Number of documents sent to GSA: "
@@ -296,17 +297,24 @@ public class FileTraversalManager implements TraversalManager {
    */
   private String buildQueryToDelete(String checkpoint)
           throws RepositoryException {
-
     LOGGER.fine("Build query to get the documents removed from repository: ");
     StringBuffer query = new StringBuffer("SELECT ");
     if (batchint > 0) {
-      query.append("TOP " + batchint + " ");
+      query.append("TOP ");
+      query.append(batchint);
+      query.append(" ");
     }
     // GuidConstants.Class_DeletionEvent = Only deleted objects in event
     // table
-    query.append(PropertyNames.ID + "," + PropertyNames.DATE_CREATED + ","
-            + PropertyNames.VERSION_SERIES_ID + " FROM "
-            + GuidConstants.Class_DeletionEvent);
+    query.append(PropertyNames.ID);
+    query.append(",");
+    query.append(PropertyNames.DATE_CREATED);
+    query.append(",");
+    query.append(PropertyNames.VERSION_SERIES_ID);
+    query.append(",");
+    query.append(PropertyNames.SOURCE_OBJECT_ID);
+    query.append(" FROM ");
+    query.append(GuidConstants.Class_DeletionEvent);
     if (checkpoint != null) {
       LOGGER.fine("Checkpoint is not null");
       query.append(getCheckpointClauseToDelete(checkpoint));
@@ -347,8 +355,10 @@ public class FileTraversalManager implements TraversalManager {
       throw new IllegalArgumentException(
               "CheckPoint string does not parse as JSON: " + checkPoint);
     }
-    String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuid");
-    String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastModified");
+    String uuid = extractDocidFromCheckpoint(jo, checkPoint,
+        JsonField.UUID.toString());
+    String c = extractNativeDateFromCheckpoint(jo, checkPoint,
+        JsonField.LAST_MODIFIED_TIME.toString());
     String queryString = makeCheckpointQueryString(uuid, c);
     return queryString;
   }
@@ -364,7 +374,6 @@ public class FileTraversalManager implements TraversalManager {
 
   private String getCheckpointClauseToDeleteDocs(String checkPoint)
           throws RepositoryException {
-
     JSONObject jo = null;
     try {
       jo = new JSONObject(checkPoint);
@@ -374,9 +383,12 @@ public class FileTraversalManager implements TraversalManager {
       throw new IllegalArgumentException(
               "CheckPoint string does not parse as JSON: " + checkPoint);
     }
-    String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuidToDeleteDocs");
-    String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastModifiedDate");
+    String uuid = extractDocidFromCheckpoint(jo, checkPoint,
+        JsonField.UUID_CUSTOM_DELETED_DOC.toString());
+    String c = extractNativeDateFromCheckpoint(jo, checkPoint,
+        JsonField.LAST_CUSTOM_DELETION_TIME.toString());
     String queryString = makeCheckpointQueryStringToDeleteDocs(uuid, c);
+
     return queryString;
   }
 
@@ -391,7 +403,6 @@ public class FileTraversalManager implements TraversalManager {
 
   private String getCheckpointClauseToDelete(String checkPoint)
           throws RepositoryException {
-
     JSONObject jo = null;
 
     try {
@@ -402,11 +413,13 @@ public class FileTraversalManager implements TraversalManager {
       throw new IllegalArgumentException(
               "CheckPoint string does not parse as JSON: " + checkPoint);
     }
-    String uuid = extractDocidFromCheckpoint(jo, checkPoint, "uuidToDelete");
-    String c = extractNativeDateFromCheckpoint(jo, checkPoint, "lastRemoveDate");
+    String uuid = extractDocidFromCheckpoint(jo, checkPoint,
+        JsonField.UUID_DELETION_EVENT.toString());
+    String c = extractNativeDateFromCheckpoint(jo, checkPoint,
+        JsonField.LAST_DELETION_EVENT_TIME.toString());
     String queryString = makeCheckpointQueryStringToDelete(uuid, c);
-    return queryString;
 
+    return queryString;
   }
 
   /**

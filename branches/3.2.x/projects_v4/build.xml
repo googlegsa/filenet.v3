@@ -9,7 +9,7 @@
 
   <property name="COMPILE_DEBUG_FLAG" value="true" />
   <property name="COMPILE_DEBUG_LEVEL" value="source,lines,vars" />
-  <property name="COMPILE_TARGET" value="1.5" />
+  <property name="COMPILE_TARGET" value="1.6" />
   <property name="COMPILE_BOOTCLASSPATH" value="${build.bootclasspath}" />
 
   <!-- Define Directories. -->
@@ -56,15 +56,9 @@
   </path>
 
   <!-- =========================== TASKS =============================== -->
-  <target name="connector-fileV4" depends="clean,init,compile-client,compile-core,jar">
-  </target>
+  <include file="${connector-manager-projects.dir}/svnbuild.xml" as="svn"/>
 
-  <target name="prebuild" unless="svnversion">
-    <exec executable="svnversion" spawn="false"
-      failifexecutionfails="false"
-      outputproperty="svnversion">
-      <arg line="."/>
-    </exec>
+  <target name="connector-fileV4" depends="clean,init,compile-client,compile-core,jar">
   </target>
 
   <target name="init">
@@ -91,6 +85,9 @@
       <classpath>
         <pathelement location="${file.jarfile}" />
         <pathelement location="${spi.jarfile}" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="prod/*.jar" />
+        </fileset>
         <pathelement location="${classes-client}" />
       </classpath>
     </javac>
@@ -137,7 +134,7 @@
   </target>
 
   <target name="jar" description="connector-file"
-          depends="prebuild,compile-core">
+          depends="compile-core,svn.svn-branch-version">
     <tstamp />
     <jar jarfile="${jarfile}">
       <fileset dir="${config}">
@@ -151,8 +148,10 @@
 
       <!--creation of manifest file-->
       <manifest>
-        <attribute name="Implementation-Title" value="FileNet Connector"/>
-        <attribute name="Implementation-Version" value="${version} (build ${svnversion} ${TODAY})"/>
+        <attribute name="Implementation-Title"
+                   value="Google Search Appliance Connector for FileNet"/>
+        <attribute name="Implementation-Version"
+                   value="${version} (build ${svn.branch.version} ${TODAY})"/>
         <attribute name="Implementation-Vendor" value="Google Inc."/>
         <attribute name="Specification-Title" value="Connector Manager SPI"/>
         <attribute name="Specification-Version" value="${version.spi}"/>
@@ -305,7 +304,7 @@
 
   <!-- Zip and Archive -->
   <target name="download-bin-archive" depends="jar">
-    <property name="bin.archive" value="connector-file4-${version}" />
+    <property name="bin.archive" value="connector-file4-${svn.branch}" />
     <zip destfile="${downloads.dir}/${bin.archive}.zip">
       <zipfileset file="${jarfile}" prefix="${bin.archive}" />
       <zipfileset file="RELEASE_NOTES" prefix="${bin.archive}" />
@@ -322,8 +321,8 @@
     </checksum>
   </target>
 
-  <target name="download-src-archive" depends="">
-    <property name="src.archive" value="connector-file4-${version}-src" />
+  <target name="download-src-archive" depends="svn.svn-branch">
+    <property name="src.archive" value="connector-file4-${svn.branch}-src" />
     <zip destfile="${downloads.dir}/${src.archive}.zip">
       <zipfileset file="Build_ReadMe.txt" prefix="${src.archive}" />
       <zipfileset file="../RELEASE_NOTES" prefix="${src.archive}" />

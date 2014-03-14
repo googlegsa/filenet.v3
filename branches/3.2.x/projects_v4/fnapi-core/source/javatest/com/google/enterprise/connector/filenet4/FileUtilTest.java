@@ -13,17 +13,24 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.spi.Principal;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
+import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
+import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 import com.google.enterprise.connector.spi.Value;
+
+import junit.framework.TestCase;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
-
-import junit.framework.TestCase;
 
 public class FileUtilTest extends TestCase {
   private TimeZone defaultTimeZone = TimeZone.getDefault();
@@ -98,5 +105,40 @@ public class FileUtilTest extends TestCase {
     testQuery("GMT+0400",
         "2013-02-28T23:16:04.597",
         "2013-02-28T23:16:04.597+00:00");
+  }
+
+  public void testGetPrincipals() {
+    Set<String> nameSet = new HashSet<String>();
+    nameSet.add("user1");
+    nameSet.add("user2");
+    nameSet.add("group1");
+    nameSet.add("group2");
+    List<Principal> list = FileUtil.getPrincipals(PrincipalType.UNKNOWN,
+        "Default", nameSet, CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
+    assertEquals(list.size(), 4);
+
+    Principal entry = list.get(0);
+    assertEquals(PrincipalType.UNKNOWN, entry.getPrincipalType());
+    assertEquals("Default", entry.getNamespace());
+    assertTrue(nameSet.contains(entry.getName()));
+    assertEquals(CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE,
+        entry.getCaseSensitivityType());
+  }
+
+  public void testAddPrincipals() {
+    Set<String> nameSet = new HashSet<String>();
+    nameSet.add("user1");
+    nameSet.add("user2");
+    nameSet.add("group1");
+    nameSet.add("group2");
+
+    List<Value> list = new LinkedList<Value>();
+    FileUtil.addPrincipals(list, PrincipalType.UNKNOWN, "Default", nameSet,
+        CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
+    assertEquals(list.size(), 4);
+    String listValueString = list.toString();
+    for (String name : nameSet) {
+      assertTrue(name + " is not found", listValueString.contains(name));
+    }
   }
 }

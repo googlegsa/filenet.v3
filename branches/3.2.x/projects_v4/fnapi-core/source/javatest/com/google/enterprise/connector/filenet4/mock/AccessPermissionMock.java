@@ -25,13 +25,17 @@ import com.filenet.api.security.AccessPermission;
 public class AccessPermissionMock implements AccessPermission {
   private static final long serialVersionUID = 1L;
 
+  private final PermissionSource permSource;
   private AccessType accessType;
   private String granteeName;
   private SecurityPrincipalType secPrincipalType;
   private Integer inheritableDepth = 1;
-  private PermissionSource permSource;
   private Integer accessMask;
-  
+
+  public AccessPermissionMock(PermissionSource permissionSrc) {
+    this.permSource = permissionSrc;
+  }
+
   @Override
   public AccessType get_AccessType() {
     return this.accessType;

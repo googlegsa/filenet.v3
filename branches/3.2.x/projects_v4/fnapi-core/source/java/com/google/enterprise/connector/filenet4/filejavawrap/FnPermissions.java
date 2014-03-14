@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright 2007-2010 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
 
@@ -21,6 +23,7 @@ import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.constants.AccessLevel;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.AccessType;
+import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.property.FilterElement;
@@ -28,7 +31,9 @@ import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.security.Group;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,8 +41,6 @@ import java.util.logging.Logger;
  * Wrapper class over the FileNet API class Permissions. This class is
  * responsible to authorize a target user against all the Access Control Entries
  * of a target document.
- *
- * @author pankaj_chouhan
  */
 @SuppressWarnings("rawtypes")
 public class FnPermissions implements IPermissions {
@@ -53,12 +56,21 @@ public class FnPermissions implements IPermissions {
   private final AccessPermissionList perms;
   private final String owner;
   private final PropertyFilter pf;
-  
+  private final SetMultimap<PermissionSource, String> allowUsers;
+  private final SetMultimap<PermissionSource, String> allowGroups;
+  private final SetMultimap<PermissionSource, String> denyUsers;
+  private final SetMultimap<PermissionSource, String> denyGroups;
+
   public FnPermissions(AccessPermissionList perms, String owner) {
     this.perms = perms;
     this.owner = owner;
     this.pf = new PropertyFilter();
     setPropertyFilter();
+    this.allowUsers = HashMultimap.create();
+    this.allowGroups = HashMultimap.create();
+    this.denyUsers = HashMultimap.create();
+    this.denyGroups = HashMultimap.create();
+    processPermissions();
   }
 
   public FnPermissions(AccessPermissionList perms) {
@@ -271,5 +283,69 @@ public class FnPermissions implements IPermissions {
       }
     }
     return false;
+  }
+
+  private void processPermissions() {
+    Iterator iter = perms.iterator();
+    while (iter.hasNext()) {
+      AccessPermission perm = (AccessPermission) iter.next();
+      int mask = perm.get_AccessMask();
+      if ((mask & ACCESS_LEVEL) != ACCESS_LEVEL) {
+        continue;
+      }
+      if (perm.get_AccessType() == AccessType.ALLOW) {
+        if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
+          allowUsers.put(perm.get_PermissionSource(), perm.get_GranteeName());
+        } else {
+          allowGroups.put(perm.get_PermissionSource(), perm.get_GranteeName());
+        }
+      } else {
+        if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
+          denyUsers.put(perm.get_PermissionSource(), perm.get_GranteeName());
+        } else {
+          denyGroups.put(perm.get_PermissionSource(), perm.get_GranteeName());
+        }
+      }
+    }
+  }
+
+  @Override
+  public Set<String> getAllowUsers() {
+    return new HashSet<String>(allowUsers.values());
+  }
+
+  @Override
+  public Set<String> getAllowUsers(PermissionSource permSrc) {
+    return allowUsers.get(permSrc);
+  }
+
+  @Override
+  public Set<String> getAllowGroups() {
+    return new HashSet<String>(allowGroups.values());
+  }
+
+  @Override
+  public Set<String> getAllowGroups(PermissionSource permSrc) {
+    return allowGroups.get(permSrc);
+  }
+
+  @Override
+  public Set<String> getDenyUsers() {
+    return new HashSet<String>(denyUsers.values());
+  }
+
+  @Override
+  public Set<String> getDenyUsers(PermissionSource permSrc) {
+    return denyUsers.get(permSrc);
+  }
+
+  @Override
+  public Set<String> getDenyGroups() {
+    return new HashSet<String>(denyGroups.values());
+  }
+
+  @Override
+  public Set<String> getDenyGroups(PermissionSource permSrc) {
+    return denyGroups.get(permSrc);
   }
 }

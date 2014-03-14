@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright 2007-2010 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,8 +20,14 @@ import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthenticationManager;
 import com.google.enterprise.connector.spi.AuthenticationResponse;
+import com.google.enterprise.connector.spi.Principal;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
+import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,16 +36,15 @@ import java.util.logging.Logger;
  * @author pankaj_chouhan
  * */
 public class FileAuthenticationManager implements AuthenticationManager {
+  private static final Logger logger =
+      Logger.getLogger(FileAuthenticationManager.class.getName());
+  
+  private final IConnection conn;
+  private final String globalNamespace;
 
-  IConnection conn;
-
-  private static Logger logger = null;
-  static {
-    logger = Logger.getLogger(FileAuthenticationManager.class.getName());
-  }
-
-  public FileAuthenticationManager(IConnection conn) {
+  public FileAuthenticationManager(IConnection conn, String namespace) {
     this.conn = conn;
+    this.globalNamespace = namespace;
   }
 
   /**
@@ -52,7 +57,10 @@ public class FileAuthenticationManager implements AuthenticationManager {
     String username = FileUtil.getUserName(id);
     try {
       IUser user = uc.authenticate(username, id.getPassword());
-      return new AuthenticationResponse(true, "", user.getGroupNames());
+      List<Principal> principalGroups = FileUtil.getPrincipals(
+          PrincipalType.UNKNOWN, globalNamespace, user.getGroupNames(),
+          CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
+      return new AuthenticationResponse(true, "", principalGroups);
     } catch (Throwable e) {
       logger.log(Level.WARNING, "Authentication failed for user "
           + username, e);
