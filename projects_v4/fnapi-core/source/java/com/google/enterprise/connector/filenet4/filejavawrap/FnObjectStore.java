@@ -1,6 +1,7 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.filenet.api.constants.ClassNames;
+import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.ObjectStore;
@@ -95,5 +96,15 @@ public class FnObjectStore implements IObjectStore {
 
   public String getSUserPassword() {
     return password;
+  }
+
+  @Override
+  public DatabaseType get_DatabaseType() throws RepositoryException {
+    try {
+      return objectStore.get_DatabaseType();
+    } catch (Exception e) {
+      logger.log(Level.WARNING, "Unable to get database type", e);
+      throw new RepositoryDocumentException(e);
+    }
   }
 }

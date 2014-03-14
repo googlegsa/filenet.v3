@@ -95,7 +95,7 @@ public class FileDocument implements Document {
     document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
         FileUtil.getDocumentPropertyFilter(included_meta));
     logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
-    vsDocId = document.getVersionSeries().getId(action);
+    vsDocId = document.getVersionSeries().getId();
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
@@ -183,31 +183,36 @@ public class FileDocument implements Document {
   }
 
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
-    fetch();
     Set<String> properties = new HashSet<String>();
+    if (SpiConstants.ActionType.DELETE.equals(action)) {
+      // return empty set of property names
+      return properties;
+    }
     properties.add(SpiConstants.PROPNAME_ACLUSERS);
     properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
     properties.add(SpiConstants.PROPNAME_ACLGROUPS);
     properties.add(SpiConstants.PROPNAME_ACLDENYGROUPS);
 
+    fetch();
     Set<String> documentProperties = document.getPropertyNames();
     for (String property : documentProperties) {
       if (property != null) {
         if (included_meta.size() != 0) {
           // includeMeta - excludeMeta
-          logger.log(Level.FINE, "Metadata set will be (includeMeta - exludeMeta)");
           if ((!excluded_meta.contains(property) && included_meta.contains(property))) {
             properties.add(property);
           }
         } else {
           // superSet - excludeMeta
-          logger.log(Level.FINE, "Metadata set will be (superSet - exludeMeta)");
           if ((!excluded_meta.contains(property) || included_meta.contains(property))) {
             properties.add(property);
           }
         }
       }
     }
+    // TODO(jlacey): Add logging for property names in Connector Manager.
+    logger.log(Level.FINEST, "Property names: {0}", properties);
+
     return properties;
   }
 }
