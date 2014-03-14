@@ -41,7 +41,7 @@ public class FileNetConnectorFactory implements ConnectorFactory {
    *  @see com.google.enterprise.connector.spi.ConnectorFactory#makeConnector(java.util.Map)
    **/
 
-//  @Override
+  @Override
   public Connector makeConnector(Map<String, String> config)  throws RepositoryException {
     DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
     XmlBeanDefinitionReader beanReader = new XmlBeanDefinitionReader(factory);

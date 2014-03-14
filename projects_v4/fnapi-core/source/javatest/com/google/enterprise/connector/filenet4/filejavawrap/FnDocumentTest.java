@@ -29,8 +29,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
-import com.google.enterprise.connector.spi.SpiConstants;
-import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
@@ -136,11 +134,11 @@ public class FnDocumentTest extends FileNetTestCase {
 
   public void testGetVersionSeries() throws RepositoryException {
     IVersionSeries vs = fd.getVersionSeries();
-    assertEquals("{" + TestConnection.docVsId1 + "}", vs.getId(ActionType.ADD));
+    assertEquals("{" + TestConnection.docVsId1 + "}", vs.getId());
   }
 
   public void testGetId() throws RepositoryException {
-    assertEquals("{" + TestConnection.docId1 + "}", fd.getId(ActionType.ADD));
+    assertEquals("{" + TestConnection.docId1 + "}", fd.getId());
   }
 
   public void testGetPermissions() throws RepositoryException {

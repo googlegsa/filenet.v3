@@ -1,10 +1,10 @@
-// Copyright (C) 2007-2010 Google Inc.
+// Copyright 2007-2010 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,6 +47,7 @@ public class FileAuthenticationManagerTest extends FileNetTestCase {
 //    Check FileAuthenticationManager
     AuthenticationResponse ar = fatm.authenticate(fai);
     assertEquals(true, ar.isValid());
+    assertTrue(ar.getGroups().size() > 0);
 
 //    Check FileAuthenticationManager for a wrong user
     FileAuthenticationIdentity faiWrong = new FileAuthenticationIdentity(TestConnection.username, TestConnection.wrongPassword);

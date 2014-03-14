@@ -14,13 +14,19 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.FileConnector;
-import com.google.enterprise.connector.filenet4.FileSession;
-import com.google.enterprise.connector.filenet4.FileTraversalManager;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createNiceMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.easymock.EasyMock.isA;
+
+import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
-
-import junit.framework.TestCase;
 
 public class FileTraversalManagerTest extends FileNetTestCase {
 
@@ -40,7 +46,6 @@ public class FileTraversalManagerTest extends FileNetTestCase {
 
     fs = (FileSession)connec.login();
     ftm = (FileTraversalManager) fs.getTraversalManager();
-
   }
 
   /*
@@ -62,8 +67,6 @@ public class FileTraversalManagerTest extends FileNetTestCase {
         counter++;
     }
     assertEquals(TestConnection.batchSize, counter);
-
-
   }
 
   /*
@@ -96,7 +99,25 @@ public class FileTraversalManagerTest extends FileNetTestCase {
       counter++;
     }
     assertEquals(10, counter);
-
   }
 
+  public void testEmptyObjectStoreMock() throws Exception {
+    IObjectStore os = createNiceMock(IObjectStore.class);
+    IObjectSet objectSet = createNiceMock(IObjectSet.class);
+
+    IObjectFactory factory = createMock(IObjectFactory.class);
+    ISearch search = createMock(ISearch.class);
+    expect(factory.getSearch(os)).andReturn(search);
+    expect(search.execute(isA(String.class))).andReturn(objectSet).times(3);
+    replay(os, factory, search, objectSet);
+
+    FileTraversalManager traversalMgr =
+        new FileTraversalManager(factory, os, false, false,
+            TestConnection.displayURL, TestConnection.additional_where_clause,
+            TestConnection.additional_delete_where_clause,
+            TestConnection.included_meta, TestConnection.excluded_meta, null);
+    DocumentList docList = traversalMgr.startTraversal();
+    assertNull(docList);
+    verify(os, factory, search, objectSet);
+  }
 }
