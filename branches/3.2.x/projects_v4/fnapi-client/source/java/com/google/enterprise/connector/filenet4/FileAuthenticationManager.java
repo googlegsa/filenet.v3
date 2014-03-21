@@ -57,10 +57,12 @@ public class FileAuthenticationManager implements AuthenticationManager {
     String username = FileUtil.getUserName(id);
     try {
       IUser user = uc.authenticate(username, id.getPassword());
-      List<Principal> principalGroups = FileUtil.getPrincipals(
-          PrincipalType.UNKNOWN, globalNamespace, user.getGroupNames(),
-          CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
-      return new AuthenticationResponse(true, "", principalGroups);
+      // Disable ACLs for the 3.2.4 release
+      // List<Principal> principalGroups = FileUtil.getPrincipals(
+      //     PrincipalType.UNKNOWN, globalNamespace, user.getGroupNames(),
+      //     CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
+      // return new AuthenticationResponse(true, "", principalGroups);
+      return new AuthenticationResponse(true, "");
     } catch (Throwable e) {
       logger.log(Level.WARNING, "Authentication failed for user "
           + username, e);
