@@ -1,4 +1,4 @@
-// Copyright 2009 Google Inc. All Rights Reserved.
+// Copyright 2007 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 public class FileConnector implements Connector {
   private static Logger LOGGER =
@@ -53,8 +54,8 @@ public class FileConnector implements Connector {
         ", will be ignored");
   }
 
+  @Override
   public Session login() throws RepositoryLoginException, RepositoryException {
-
     URL conf = FileConnector.class.getResource("/jaas.conf");
     if (conf != null) {
       LOGGER.info("setting sytem property java.security.auth.login.config to "
@@ -67,7 +68,9 @@ public class FileConnector implements Connector {
       // "F:\\Program Files\\GoogleConnectors\\FileNET2\\Tomcat\\webapps\\connector-manager\\WEB-INF\\classes\\jaas.conf");
     }
 
-    HostnameVerifier aa = new FileHNV();
+    HostnameVerifier aa = new HostnameVerifier() {
+        @Override public boolean verify(String arg0, SSLSession arg1) {
+          return true; } };
     HttpsURLConnection.setDefaultHostnameVerifier(aa);
 
     Session sess = null;

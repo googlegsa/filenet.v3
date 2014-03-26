@@ -152,7 +152,7 @@ public class FnDocumentTest extends FileNetTestCase {
    * Test method for
    * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getContent()'
    */
-  public void ftestGetContent() throws RepositoryException {
+  public void testGetContent() throws RepositoryException {
     uc.authenticate(TestConnection.adminUsername, TestConnection.adminPassword);
     InputStream is = fd.getContent();
     assertNotNull(is);
