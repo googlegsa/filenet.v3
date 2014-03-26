@@ -99,6 +99,7 @@ public class FileDocument implements Document {
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
+  @Override
   public Property findProperty(String name) throws RepositoryException {
     LinkedList<Value> list = new LinkedList<Value>();
 
@@ -182,6 +183,7 @@ public class FileDocument implements Document {
         new Object[] { propName, names});
   }
 
+  @Override
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
     Set<String> properties = new HashSet<String>();
     if (SpiConstants.ActionType.DELETE.equals(action)) {

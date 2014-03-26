@@ -14,13 +14,13 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.FileAuthenticationIdentity;
 import com.google.enterprise.connector.filenet4.FileAuthorizationManager;
 import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
+import com.google.enterprise.connector.spi.SimpleAuthenticationIdentity;
 
 import junit.framework.TestCase;
 
@@ -46,7 +46,7 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
     FileSession fs = (FileSession)connec.login();
     FileAuthorizationManager fam = (FileAuthorizationManager) fs.getAuthorizationManager();
 //    FileAuthenticationManager fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
-//    FileAuthenticationIdentity fai = new FileAuthenticationIdentity(TestConnection.username, TestConnection.password);
+//    SimpleAuthenticationIdentity fai = new SimpleAuthenticationIdentity(TestConnection.username, TestConnection.password);
 //    AuthenticationResponse ar = fatm.authenticate(fai);
 
     Map<String, Boolean> expectedResults = new HashMap<String, Boolean>();
@@ -65,7 +65,7 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
     List<String> docids = new LinkedList<String>(expectedResults.keySet());
 
     Collection<AuthorizationResponse> resultSet = fam.authorizeDocids(docids,
-        new FileAuthenticationIdentity(username, null));
+        new SimpleAuthenticationIdentity(username, null));
 
     for (AuthorizationResponse ar : resultSet) {
       String uuid = ar.getDocid();

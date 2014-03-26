@@ -1,3 +1,17 @@
+// Copyright 2008 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.filenet.api.constants.ClassNames;
@@ -21,10 +35,10 @@ public class FnObjectStore implements IObjectStore {
   private static final Logger logger =
       Logger.getLogger(FnDocument.class.getName());
 
-  private ObjectStore objectStore;
-  private IConnection connection;
-  private String login;
-  private String password;
+  private final ObjectStore objectStore;
+  private final IConnection connection;
+  private final String login;
+  private final String password;
 
   public FnObjectStore(ObjectStore objectStore, IConnection connection,
       String login, String password) {
@@ -34,10 +48,12 @@ public class FnObjectStore implements IObjectStore {
     this.password = password;
   }
 
+  @Override
   public void refreshSUserContext() throws RepositoryLoginException {
     connection.getUserContext().authenticate(login, password);
   }
 
+  @Override
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException {
     try {
@@ -58,6 +74,7 @@ public class FnObjectStore implements IObjectStore {
     }
   }
 
+  @Override
   public IBaseObject fetchObject(String type, String id, PropertyFilter filter)
           throws RepositoryDocumentException {
     IndependentObject obj = null;
@@ -77,6 +94,7 @@ public class FnObjectStore implements IObjectStore {
     }
   }
 
+  @Override
   public String getName() throws RepositoryException {
     try {
       return this.objectStore.get_Name();
@@ -86,14 +104,17 @@ public class FnObjectStore implements IObjectStore {
     }
   }
 
+  @Override
   public ObjectStore getObjectStore() {
     return objectStore;
   }
 
+  @Override
   public String getSUserLogin() {
     return login;
   }
 
+  @Override
   public String getSUserPassword() {
     return password;
   }
