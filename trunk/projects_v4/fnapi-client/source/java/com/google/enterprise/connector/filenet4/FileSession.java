@@ -150,7 +150,8 @@ public class FileSession implements Session {
   @Override
   public AuthorizationManager getAuthorizationManager()
           throws RepositoryException {
-    return new FileAuthorizationManager(connection, objectStore, checkMarking);
+    return new FileAuthorizationManager(
+        new FileAuthorizationHandler(connection, objectStore, checkMarking));
   }
 
   /**

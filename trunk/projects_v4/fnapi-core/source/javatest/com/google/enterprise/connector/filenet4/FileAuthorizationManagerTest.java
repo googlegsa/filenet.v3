@@ -14,27 +14,30 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.FileAuthorizationManager;
-import com.google.enterprise.connector.filenet4.FileConnector;
-import com.google.enterprise.connector.filenet4.FileSession;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
+import com.google.enterprise.connector.filenet4.filewrap.IUser;
+import com.google.enterprise.connector.filenet4.mock.FileUserMock;
+import com.google.enterprise.connector.spi.AuthenticationIdentity;
+import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
+import com.google.enterprise.connector.spi.Session;
 import com.google.enterprise.connector.spi.SimpleAuthenticationIdentity;
 
-import junit.framework.TestCase;
+import com.filenet.api.security.Group;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class FileAuthorizationManagerTest extends FileNetTestCase {
 
   public void testAuthorizeDocids() throws RepositoryLoginException, RepositoryException {
-
     FileConnector connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -43,11 +46,8 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
     connec.setObject_factory(TestConnection.objectFactory);
     connec.setContent_engine_url(TestConnection.uri);
 
-    FileSession fs = (FileSession)connec.login();
-    FileAuthorizationManager fam = (FileAuthorizationManager) fs.getAuthorizationManager();
-//    FileAuthenticationManager fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
-//    SimpleAuthenticationIdentity fai = new SimpleAuthenticationIdentity(TestConnection.username, TestConnection.password);
-//    AuthenticationResponse ar = fatm.authenticate(fai);
+    Session fs = connec.login();
+    AuthorizationManager fam = fs.getAuthorizationManager();
 
     Map<String, Boolean> expectedResults = new HashMap<String, Boolean>();
     expectedResults.put(TestConnection.docVsId1, Boolean.FALSE);
@@ -55,13 +55,59 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
     expectedResults.put(TestConnection.docVsId3, Boolean.TRUE);
     expectedResults.put(TestConnection.docVsId4, Boolean.TRUE);
 
-    testAuthorization(fam, expectedResults, TestConnection.username, TestConnection.password);
-
+    testAuthorization(fam, expectedResults, TestConnection.username);
   }
 
-  private void testAuthorization(FileAuthorizationManager fam,
-          Map<String, Boolean> expectedResults, 
-          String username, String password) throws RepositoryException {
+  /**
+   * A mock that authorizes any user for all documents. The threads
+   * that are used to authorize the documents are tracked by name.
+   */
+  private static class MockAuthorizationHandler
+      implements AuthorizationHandler {
+    public final Set<String> threads = Sets.newHashSet();
+
+    @Override public void pushSubject() {}
+
+    @Override public void popSubject() {}
+
+    @Override public boolean hasMarkings() { return false; }
+
+    @Override public IUser getUser(AuthenticationIdentity identity) {
+      String username = identity.getUsername();
+      return new FileUserMock(username, username, username, username,
+          ImmutableMap.<String, Group>of());
+    }
+
+    @Override
+    public AuthorizationResponse authorizeDocid(String docid, IUser user,
+        boolean checkMarkings) throws RepositoryException {
+      threads.add(Thread.currentThread().getName());
+      return new AuthorizationResponse(true, docid);
+    }
+  }
+
+  /**
+   * Tests that multiple threads are used for the authorization, and
+   * that every docid is authorized.
+   */
+  public void testMultipleThreads() throws RepositoryException {
+    MockAuthorizationHandler handler = new MockAuthorizationHandler();
+    AuthorizationManager fam = new FileAuthorizationManager(handler);
+
+    Map<String, Boolean> expectedResults = new HashMap<String, Boolean>();
+    for (int i = 0; i < 100; i++) {
+      expectedResults.put(String.valueOf(i), Boolean.TRUE);
+    }
+
+    testAuthorization(fam, expectedResults, TestConnection.username);
+    assertTrue("Expected multiple threads but got " + handler.threads.size()
+        + " with " + Runtime.getRuntime().availableProcessors()
+        + " processors.", handler.threads.size() > 1);
+  }
+
+  private void testAuthorization(AuthorizationManager fam,
+      Map<String, Boolean> expectedResults, String username)
+      throws RepositoryException {
     List<String> docids = new LinkedList<String>(expectedResults.keySet());
 
     Collection<AuthorizationResponse> resultSet = fam.authorizeDocids(docids,
