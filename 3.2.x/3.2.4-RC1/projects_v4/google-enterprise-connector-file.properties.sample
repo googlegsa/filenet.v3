@@ -1,0 +1,55 @@
+##
+# These properties are specific to the individual's development and
+# test environment.  This properties file should be located in your
+# home directory, e.g.: ~/google-enterprise-connector-file.properties
+
+##
+# Build Properties
+
+# The root of the google-enterprise-connector-manager tree
+build.connector.manager.home = ${user.home}/gsa/google-enterprise-connector-manager
+
+# JDK 1.6 bootclasspath.
+build.bootclasspath = /System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Classes/classes.jar:/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Classes/jsse.jar
+
+##
+# Test Properties
+test.batchSize=200
+test.username=<test account's username>
+test.password=<test account's password>
+test.adminUsername=<administrator's username>
+test.adminPassword=<administrator's password>
+test.wrongPassword=incorrectpassword
+test.objectStoreName=<Object Store Name>
+test.wsUri=http://<server>:<port>/wsi/FNCEWS40MTOM
+test.objectFactoryClass=com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory
+test.displayUrl=http://<server>:<port>/WorkplaceXT/getContent
+test.incorrectDisplayUrl=http://<server>:<port>/WorkplaceXT/getContent
+test.waspLocation=wasp.location
+test.wsiPath=E:\\FileNetConnector\\share\\wsi
+test.repeatedSlashContentEngineURL=http://<server>:<port>/wsi/FNCEWS40MTOM/////////////
+test.currentUserContext=cn=administrator,o=sample
+
+##
+# Test Clauses
+test.wrong_additional_where_clause=and Document.this INSUBFOLDER
+test.additional_where_clause=and Document.this INSUBFOLDER '/example'
+test.where_clause_error_message=There was a syntax error
+test.workplace_url__error_message=Invalid URL format. Please verify your URL.
+
+##
+# Test Documents
+test.docId1=8B2D49FA-5D6B-4F99-9A69-652FCADE4D90
+test.docId2=9F35EEE8-14F6-497B-A664-B81EAAA4DE14
+
+##
+# Test Version IDs
+test.docVsId1=FDD5293B-BE11-461D-945B-92EB90AF5A67
+test.docVsId2=F7D3AC94-E6EE-4EC1-94C4-36F348CC25E5
+test.docVsId3=005F5B4E-F1F9-4C24-A24D-FE2593C01941
+test.docVsId4=95103AA1-0A88-48D8-B6CF-D1B3853F717A
+
+##
+# Test Checkpoints
+test.checkpoint1={"uuidToDelete":"","uuid":"8B2D49FA-5D6B-4F99-9A69-652FCADE4D90","lastRemoveDate":"2008-09-15T09:38:58.781","lastModified":"2008-01-16T10:35:00.327"}
+test.checkpoint2={"uuidToDelete":"","uuid":"9F35EEE8-14F6-497B-A664-B81EAAA4DE14","lastRemoveDate":"2008-09-15T09:38:58.781","lastModified":"2008-01-16T10:35:00.327"}
