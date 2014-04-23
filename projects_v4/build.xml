@@ -303,13 +303,8 @@
   <target name="run_code_coverage" depends="run_tests,coverage-report,alternate-coverage-report" description="Compile, instrument ourself, run the tests and generate JUnit and coverage reports."/>
 
   <!-- Zip and Archive -->
-  <target name="init-package" depends="svn.svn-branch">
-    <property name="downloads.prefix" value="connector-file4-${svn.branch}" />
-    <property name="repackage.prefix" value="connector-file4-${version}"/>
-  </target>
-
-  <target name="download-bin-archive" depends="jar,init-package">
-    <property name="bin.archive" value="${downloads.prefix}" />
+  <target name="download-bin-archive" depends="jar">
+    <property name="bin.archive" value="connector-file4-${svn.branch}" />
     <zip destfile="${downloads.dir}/${bin.archive}.zip">
       <zipfileset file="${jarfile}" prefix="${bin.archive}" />
       <zipfileset file="RELEASE_NOTES" prefix="${bin.archive}" />
@@ -326,8 +321,8 @@
     </checksum>
   </target>
 
-  <target name="download-src-archive" depends="init-package">
-    <property name="src.archive" value="${downloads.prefix}-src" />
+  <target name="download-src-archive" depends="svn.svn-branch">
+    <property name="src.archive" value="connector-file4-${svn.branch}-src" />
     <zip destfile="${downloads.dir}/${src.archive}.zip">
       <zipfileset file="Build_ReadMe.txt" prefix="${src.archive}" />
       <zipfileset file="../RELEASE_NOTES" prefix="${src.archive}" />
@@ -344,12 +339,5 @@
         <include name="${src.archive}*" />
       </fileset>
     </checksum>
-  </target>
-
-  <target name="repackage" depends="init-package"
-          description="Repackage release candidate files for release.">
-    <repackage-downloads downloads.dir="${downloads.dir}"
-                         downloads.prefix="${downloads.prefix}"
-                         repackage.prefix="${repackage.prefix}" />
   </target>
 </project>

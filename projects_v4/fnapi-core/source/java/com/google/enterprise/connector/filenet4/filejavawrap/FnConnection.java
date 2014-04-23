@@ -25,28 +25,28 @@ import com.filenet.api.util.UserContext;
 import javax.security.auth.Subject;
 
 public class FnConnection implements IConnection {
-  private final Connection conn;
-  private final Subject subject;
 
-  public FnConnection(String contentEngineUri, String userName,
-      String userPassword) throws RepositoryException {
-    this.conn = Factory.Connection.getConnection(contentEngineUri);
-    this.subject = UserContext.createSubject(this.conn, userName,
-        userPassword, "FileNetP8");
-  }
+    Connection conn;
+    Subject subject;
 
-  @Override
-  public Connection getConnection() {
-    return conn;
-  }
+    public FnConnection(String contentEngineUri, String userName,
+            String userPassword) throws RepositoryException {
+        super();
 
-  @Override
-  public IUserContext getUserContext() {
-    return new FnUserContext(this);
-  }
+        conn = Factory.Connection.getConnection(contentEngineUri);
+        this.subject = UserContext.createSubject(this.conn, userName, userPassword, "FileNetP8");
+    }
 
-  @Override
-  public Subject getSubject() {
-    return subject;
-  }
+    public Connection getConnection() {
+        return conn;
+    }
+
+    public IUserContext getUserContext() {
+        return new FnUserContext(this);
+    }
+
+    public Subject getSubject() {
+        return this.subject;
+    }
+
 }

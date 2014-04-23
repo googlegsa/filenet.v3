@@ -14,12 +14,29 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
+import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
+import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
 
+import com.filenet.api.admin.DocumentClassDefinition;
+import com.filenet.api.admin.PropertyDefinition;
+import com.filenet.api.admin.PropertyDefinitionString;
+import com.filenet.api.collection.PropertyDefinitionList;
+import com.filenet.api.constants.ClassNames;
+import com.filenet.api.constants.GuidConstants;
+import com.filenet.api.core.Factory;
+import com.filenet.api.security.MarkingSet;
+import com.filenet.api.util.UserContext;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -30,6 +47,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.security.auth.Subject;
+
 public class FileAuthorizationManager implements AuthorizationManager {
   private static final Logger logger =
       Logger.getLogger(FileAuthorizationManager.class.getName());
@@ -37,11 +56,29 @@ public class FileAuthorizationManager implements AuthorizationManager {
   private static final int AVG_DOCS_PER_THREAD = 16;
   private static final int AVAILABLE_PROCESSORS =
       Runtime.getRuntime().availableProcessors();
+  
+  private final IConnection conn;
+  private final IObjectStore objectStore;
+  private boolean checkMarkings;
 
-  private final AuthorizationHandler handler;
+  public FileAuthorizationManager(IConnection conn, IObjectStore objectStore,
+          boolean checkMarkings) {
+    this.conn = conn;
+    this.objectStore = objectStore;
+    this.checkMarkings = checkMarkings;
+  }
 
-  public FileAuthorizationManager(AuthorizationHandler handler) {
-    this.handler = handler;
+  private IUser getUser(AuthenticationIdentity id) {
+    // Lookup FileNet user and user's groups
+    IUserContext uc = conn.getUserContext();
+    String username = FileUtil.getUserName(id);
+    try {
+      return uc.lookupUser(username);
+    } catch (RepositoryException e) {
+      logger.log(Level.WARNING, "Failed to lookup user [" + username
+          + "] in FileNet", e);
+      return null;
+    }
   }
 
   /**
@@ -73,16 +110,50 @@ public class FileAuthorizationManager implements AuthorizationManager {
     // each and every AuthZ request.
     // TODO(tdnguyen) Refactor this method to properly handle pushSubject and
     // popSubject
-    handler.pushSubject();
+    Subject subject = conn.getSubject();
+    UserContext.get().pushSubject(subject);
 
-    IUser user = handler.getUser(identity);
+    IUser user = getUser(identity);
     if (user == null) {
-      handler.popSubject();
+      UserContext.get().popSubject();
       return null;
     }
 
-    boolean checkMarkings = handler.hasMarkings();
-    handler.popSubject();
+    // check for the marking sets applied over the document class
+    try {
+      DocumentClassDefinition documentClassDefinition = Factory.DocumentClassDefinition.fetchInstance(this.objectStore.getObjectStore(), GuidConstants.Class_Document, null);
+      PropertyDefinitionList propertyDefinitionList = documentClassDefinition.get_PropertyDefinitions();
+      @SuppressWarnings("unchecked")
+          Iterator<PropertyDefinition> propertyDefinitionIterator =
+          propertyDefinitionList.iterator();
+      boolean hasMarkings = false;
+
+      while (propertyDefinitionIterator.hasNext()) {
+        PropertyDefinition propertyDefinition = propertyDefinitionIterator.next();
+
+        if (propertyDefinition instanceof PropertyDefinitionString) {
+          MarkingSet markingSet = ((PropertyDefinitionString) propertyDefinition).get_MarkingSet();
+          if (markingSet != null) {
+            logger.log(Level.INFO, "Document class has property associated with Markings set");
+            hasMarkings = true;
+            break;
+          }
+        }
+      }
+      if (hasMarkings == true) {
+        if (this.checkMarkings == true) {
+          logger.log(Level.INFO, "Connector is configured to perform marking set's check for authorization");
+        } else {
+          logger.log(Level.INFO, "Connector is not configured to perform marking set's check for authorization");
+        }
+      } else {
+        logger.log(Level.INFO, "Document class does not have properties associated with Markings set hence; Marking set's check is  not required for authorization");
+        this.checkMarkings = false;
+      }
+    } catch (Exception ecp) {
+      logger.log(Level.SEVERE, ecp.getStackTrace().toString());
+    }
+    UserContext.get().popSubject();
 
     // Compute thread pool size
     int poolSize = docids.size() / AVG_DOCS_PER_THREAD;
@@ -102,9 +173,9 @@ public class FileAuthorizationManager implements AuthorizationManager {
     // authorization result to a map of responses.
     Iterator<String> iterator = docids.iterator();
     for (int i = 0; i < poolSize; i++) {
-      AuthorizationTask task = new AuthorizationTask(handler,
+      AuthorizationHandler handler = new AuthorizationHandler(conn, objectStore,
           checkMarkings, iterator, user, responses);
-      threadPool.execute(task);
+      threadPool.execute(handler);
     }
     threadPool.shutdown();
     try {
@@ -123,18 +194,20 @@ public class FileAuthorizationManager implements AuthorizationManager {
     return responses.values();
   }
 
-  private static class AuthorizationTask implements Runnable {
-    private final AuthorizationHandler handler;
+  private static class AuthorizationHandler implements Runnable {
+    private final IConnection conn;
+    private final IObjectStore objectStore;
     private final boolean checkMarkings;
     // Iterator instance is shared among worker threads.
     private final Iterator<String> iterator;
     private final IUser user;
     private final Map<String, AuthorizationResponse> responses;
 
-    public AuthorizationTask(AuthorizationHandler handler,
+    public AuthorizationHandler(IConnection conn, IObjectStore os,
         boolean checkMarkings, Iterator<String> docidsIterator, IUser user,
         Map<String, AuthorizationResponse> responses) {
-      this.handler = handler;
+      this.conn = conn;
+      this.objectStore = os;
       this.checkMarkings = checkMarkings;
       this.iterator = docidsIterator;
       this.user = user;
@@ -143,7 +216,99 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
     private AuthorizationResponse getResponse(String docId)
         throws RepositoryException {
-      return handler.authorizeDocid(docId, user, checkMarkings);
+      AuthorizationResponse authorizationResponse = null;
+      IVersionSeries versionSeries = null;
+      try {
+        logger.config("Getting version series for document DocID: "
+                + docId);
+        versionSeries = (IVersionSeries) objectStore.getObject(ClassNames.VERSION_SERIES, URLDecoder.decode(docId, "UTF-8"));
+      } catch (UnsupportedEncodingException e) {
+        logger.log(Level.WARNING, "Unable to Decode: Encoding is not supported for the document with DocID: "
+                + docId);
+        versionSeries = null;
+      } catch (RepositoryException e) {
+        logger.log(Level.WARNING, "Error : document Version Series Id "
+                + docId + " may no longer exist. Message: "
+                + e.getLocalizedMessage());
+        versionSeries = null;
+      }
+
+      if (versionSeries != null) {
+        logger.config("Authorizing DocID: " + docId + " for user: "
+                + user.getName());
+        // Check whether the search user is authorized to view document
+        // contents or
+        // not.
+        IDocument releasedVersion = versionSeries.getReleasedVersion();
+        if (releasedVersion.getPermissions().authorize(user)) {
+          logger.log(Level.INFO, "As per the ACLS User "
+                  + user.getName()
+                  + " is authorized for document DocID " + docId);
+          authorizationResponse = new AuthorizationResponse(true,
+                  docId);
+
+          if (this.checkMarkings) {
+            logger.log(Level.INFO, "Authorizing DocID: " + docId
+                    + " for user: " + user.getName()
+                    + " for Marking sets ");
+
+            // check whether current document has property values
+            // set for properties associated with marking sets or
+            // not //
+            if (releasedVersion.getActiveMarkings() != null) {
+              logger.log(Level.INFO, "Document has property associated with Markings set");
+
+              // check whether USER is authorized to view the
+              // document as per the Marking set security applied
+              // over it.
+
+              if (releasedVersion.getActiveMarkings().authorize(user)) {
+                logger.log(Level.INFO, "As per the Marking Sets User "
+                        + user.getName()
+                        + " is authorized for document DocID "
+                        + docId);
+                authorizationResponse = new AuthorizationResponse(
+                        true, docId);
+              } else {
+                logger.log(Level.INFO, "As per the Marking Sets User "
+                        + user.getName()
+                        + " is NOT authorized for document DocID "
+                        + docId);
+                authorizationResponse = new AuthorizationResponse(
+                        false, docId);
+              }
+
+            } else {
+              logger.log(Level.INFO, "Document does not have property associated with Marking Sets "
+                      + docId);
+              logger.log(Level.INFO, "User "
+                      + user.getName()
+                      + " is authorized for document DocID "
+                      + docId);
+              authorizationResponse = new AuthorizationResponse(
+                      true, docId);
+            }
+          } else {
+            logger.log(Level.INFO, "Either Document class does not have property associated with Marking Sets or Connector is not configured to check Marking Sets ");
+            logger.log(Level.INFO, "User " + user.getName()
+                    + " is authorized for document DocID " + docId);
+            authorizationResponse = new AuthorizationResponse(true,
+                    docId);
+          }
+        } else {
+          authorizationResponse = new AuthorizationResponse(false,
+                  docId);
+          logger.log(Level.INFO, "As per the ACLS User "
+                  + user.getName()
+                  + " is NOT authorized for document DocID " + docId);
+        }
+      } else {
+        authorizationResponse = new AuthorizationResponse(false, docId);
+        logger.log(Level.INFO, "User " + user.getName()
+                + " is NOT authorized for document DocID " + docId
+                + "version series null");
+      }
+      return authorizationResponse;
     }
 
     private String pollIterator() {
@@ -154,7 +319,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
     @Override
     public void run() {
-      handler.pushSubject();
+      UserContext.get().pushSubject(conn.getSubject());
       try {
         String docId;
         while ((docId = pollIterator()) != null) {
@@ -167,7 +332,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
           }
         }
       } finally {
-        handler.popSubject();
+        UserContext.get().popSubject();
       }
     }
   }

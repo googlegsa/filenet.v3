@@ -40,20 +40,22 @@ import javax.security.auth.Subject;
  * object.
  */
 public class FnObjectFactory implements IObjectFactory {
-  private static final Logger logger =
-      Logger.getLogger(FnObjectFactory.class.getName());
+  private static Logger logger = null;
 
-  public FnObjectFactory() {
+  static {
+    logger = Logger.getLogger(FnObjectFactory.class.getName());
   }
 
-  @Override
+  public FnObjectFactory() {
+    super();
+  }
+
   public IConnection getConnection(String contentEngineUri, String userName,
           String userPassword)
           throws RepositoryException {
     return new FnConnection(contentEngineUri, userName, userPassword);
   }
 
-  @Override
   public IObjectStore getObjectStore(String objectStoreName,
           IConnection conn, String userName, String userPassword)
           throws RepositoryException, RepositoryLoginException {
@@ -78,7 +80,6 @@ public class FnObjectFactory implements IObjectFactory {
     return new FnObjectStore(os, conn, userName, userPassword);
   }
 
-  @Override
   public ISearch getSearch(IObjectStore objectStore)
           throws RepositoryException {
     SearchScope search = new SearchScope(objectStore.getObjectStore());

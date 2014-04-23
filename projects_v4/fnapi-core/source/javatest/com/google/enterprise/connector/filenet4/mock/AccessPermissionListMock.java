@@ -52,13 +52,13 @@ public class AccessPermissionListMock implements AccessPermissionList {
     perms.add(index, (AccessPermission) element);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings("unchecked")
   @Override
   public boolean addAll(Collection c) {
     return perms.addAll(c);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings("unchecked")
   @Override
   public boolean addAll(int index, Collection c) {
     return perms.addAll(index, c);
@@ -74,7 +74,7 @@ public class AccessPermissionListMock implements AccessPermissionList {
     return perms.contains(o);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings("unchecked")
   @Override
   public boolean containsAll(Collection c) {
     return perms.containsAll(c);
@@ -115,13 +115,13 @@ public class AccessPermissionListMock implements AccessPermissionList {
     return perms.remove(index);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings("unchecked")
   @Override
   public boolean removeAll(Collection c) {
     return perms.removeAll(c);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings("unchecked")
   @Override
   public boolean retainAll(Collection c) {
     return perms.retainAll(c);

@@ -136,12 +136,10 @@ public class FileTraversalManager implements TraversalManager {
     this.globalNamespace = globalNamespace;
   }
 
-  @Override
   public DocumentList startTraversal() throws RepositoryException {
     return resumeTraversal(null);
   }
 
-  @Override
   public DocumentList resumeTraversal(String checkPoint)
           throws RepositoryException {
     LOGGER.info((checkPoint == null) ? "Starting traversal..."
@@ -254,6 +252,7 @@ public class FileTraversalManager implements TraversalManager {
    * @return Query String
    * @throws RepositoryException
    */
+
   private String buildQueryStringToDeleteDocs(String checkpoint)
           throws RepositoryException {
     StringBuffer query = new StringBuffer("SELECT ");
@@ -372,6 +371,7 @@ public class FileTraversalManager implements TraversalManager {
    * @return Query String
    * @throws JSONException
    */
+
   private String getCheckpointClauseToDeleteDocs(String checkPoint)
           throws RepositoryException {
     JSONObject jo = null;
@@ -400,6 +400,7 @@ public class FileTraversalManager implements TraversalManager {
    * @return Query String
    * @throws JSONException
    */
+
   private String getCheckpointClauseToDelete(String checkPoint)
           throws RepositoryException {
     JSONObject jo = null;
@@ -416,7 +417,9 @@ public class FileTraversalManager implements TraversalManager {
         JsonField.UUID_DELETION_EVENT.toString());
     String c = extractNativeDateFromCheckpoint(jo, checkPoint,
         JsonField.LAST_DELETION_EVENT_TIME.toString());
-    return makeCheckpointQueryStringToDelete(uuid, c);
+    String queryString = makeCheckpointQueryStringToDelete(uuid, c);
+
+    return queryString;
   }
 
   /**
@@ -466,7 +469,6 @@ public class FileTraversalManager implements TraversalManager {
   /**
    * To set BatchHint for traversal.
    */
-  @Override
   public void setBatchHint(int batchHint) throws RepositoryException {
     this.batchint = batchHint;
 
@@ -559,5 +561,6 @@ public class FileTraversalManager implements TraversalManager {
               "XML source string to be parsed not found.", de);
       throw re;
     }
+
   }
 }

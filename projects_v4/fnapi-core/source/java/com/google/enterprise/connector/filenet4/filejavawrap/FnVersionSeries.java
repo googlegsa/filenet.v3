@@ -1,4 +1,4 @@
-// Copyright 2008 Google Inc. All Rights Reserved.
+// Copyright 2007-2010 Google Inc.  All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,12 +38,11 @@ public class FnVersionSeries implements IVersionSeries {
     this.versionSeries = versionSeries;
   }
 
-  @Override
   public String getId() {
     return versionSeries.get_Id().toString();
+
   }
 
-  @Override
   public Date getModifyDate() {
     // TODO(tdnguyen): revisit this method as the modify date could be the
     // versionSeries.get_CurrentVersion().get_DateCheckedIn() date.
@@ -66,13 +65,11 @@ public class FnVersionSeries implements IVersionSeries {
     }
   }
 
-  @Override
   public Date getPropertyDateValueDelete(String name)
       throws RepositoryDocumentException {
     return new Date();
   }
 
-  @Override
   public String getVersionSeriesId() throws RepositoryDocumentException {
     String strId;
     try {
@@ -94,15 +91,14 @@ public class FnVersionSeries implements IVersionSeries {
     return strId;
   }
 
-  @Override
   public IDocument getCurrentVersion() throws RepositoryException {
     return new FnDocument(
         (Document) this.versionSeries.get_CurrentVersion());
   }
 
-  @Override
   public IDocument getReleasedVersion() throws RepositoryException {
     return new FnDocument(
         (Document) this.versionSeries.get_ReleasedVersion());
   }
+
 }

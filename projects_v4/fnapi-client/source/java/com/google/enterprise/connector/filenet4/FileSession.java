@@ -103,6 +103,7 @@ public class FileSession implements Session {
    */
   private void setFileObjectFactory(String objectFactory)
           throws RepositoryException {
+
     try {
       fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
     } catch (InstantiationException e) {
@@ -121,37 +122,41 @@ public class FileSession implements Session {
               "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",
               e);
     }
+
   }
 
   /**
    * To return the TraversalManager class object
    */
-  @Override
   public TraversalManager getTraversalManager() throws RepositoryException {
-    return new FileTraversalManager(
+    // logger.info("getTraversalManager");
+    FileTraversalManager fileQTM = new FileTraversalManager(
             fileObjectFactory, objectStore, this.isPublic,
             this.useIDForChangeDetection, this.displayUrl,
             this.additionalWhereClause, this.deleteadditionalWhereClause,
             this.included_meta, this.excluded_meta, globalNamespace);
+    return fileQTM;
   }
 
   /**
    * To return the AuthenticationManager class object.
    */
-  @Override
   public AuthenticationManager getAuthenticationManager()
           throws RepositoryException {
-    return new FileAuthenticationManager(connection, globalNamespace);
+    FileAuthenticationManager fileAm = new FileAuthenticationManager(
+        connection, globalNamespace);
+    return fileAm;
   }
 
   /**
    * To returns the AuthorizationManager class object.
    */
-  @Override
   public AuthorizationManager getAuthorizationManager()
           throws RepositoryException {
-    return new FileAuthorizationManager(
-        new FileAuthorizationHandler(connection, objectStore, checkMarking));
+
+    FileAuthorizationManager fileAzm = new FileAuthorizationManager(
+            connection, objectStore, checkMarking);
+    return fileAzm;
   }
 
   /**
@@ -160,7 +165,10 @@ public class FileSession implements Session {
    * @return
    * @throws RepositoryException
    */
+
   public ISearch getSearch() throws RepositoryException {
-    return fileObjectFactory.getSearch(objectStore);
+    ISearch search = fileObjectFactory.getSearch(objectStore);
+    return search;
   }
+
 }

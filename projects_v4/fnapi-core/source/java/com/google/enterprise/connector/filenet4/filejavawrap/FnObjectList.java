@@ -27,12 +27,10 @@ public class FnObjectList implements IObjectSet {
     this.objectList = objectList;
   }
 
-  @Override
   public int getSize() {
     return objectList.size();
   }
 
-  @Override
   public Iterator<? extends IBaseObject> getIterator() {
     return objectList.iterator();
   }

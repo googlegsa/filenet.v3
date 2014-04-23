@@ -99,7 +99,6 @@ public class FileDocument implements Document {
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
-  @Override
   public Property findProperty(String name) throws RepositoryException {
     LinkedList<Value> list = new LinkedList<Value>();
 
@@ -134,18 +133,19 @@ public class FileDocument implements Document {
         logger.fine("Getting Property " + name + " : "
                 + action.toString());
         return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
-        addPrincipals(list, name, document.getPermissions().getAllowUsers());
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
-        addPrincipals(list, name, document.getPermissions().getDenyUsers());
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
-        addPrincipals(list, name, document.getPermissions().getAllowGroups());
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
-        addPrincipals(list, name, document.getPermissions().getDenyGroups());
-        return new SimpleProperty(list);
+      // Disable ACLs for the 3.2.4 release
+      // } else if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
+      //   addPrincipals(list, name, document.getPermissions().getAllowUsers());
+      //   return new SimpleProperty(list);
+      // } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
+      //   addPrincipals(list, name, document.getPermissions().getDenyUsers());
+      //   return new SimpleProperty(list);
+      // } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
+      //   addPrincipals(list, name, document.getPermissions().getAllowGroups());
+      //        return new SimpleProperty(list);
+      // } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
+      //   addPrincipals(list, name, document.getPermissions().getDenyGroups());
+      //   return new SimpleProperty(list);
       } else if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
         return null;
       } else {
@@ -183,17 +183,17 @@ public class FileDocument implements Document {
         new Object[] { propName, names});
   }
 
-  @Override
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
     Set<String> properties = new HashSet<String>();
     if (SpiConstants.ActionType.DELETE.equals(action)) {
       // return empty set of property names
       return properties;
     }
-    properties.add(SpiConstants.PROPNAME_ACLUSERS);
-    properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
-    properties.add(SpiConstants.PROPNAME_ACLGROUPS);
-    properties.add(SpiConstants.PROPNAME_ACLDENYGROUPS);
+    // Disable ACLs for the 3.2.4 release
+    // properties.add(SpiConstants.PROPNAME_ACLUSERS);
+    // properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
+    // properties.add(SpiConstants.PROPNAME_ACLGROUPS);
+    // properties.add(SpiConstants.PROPNAME_ACLDENYGROUPS);
 
     fetch();
     Set<String> documentProperties = document.getPropertyNames();

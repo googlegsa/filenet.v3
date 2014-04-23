@@ -19,7 +19,6 @@ import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -207,8 +206,8 @@ public class FileDocumentList implements DocumentList {
    *
    * @return com.google.enterprise.connector.spi.Document
    */
-  @Override
-  public Document nextDocument() throws RepositoryDocumentException {
+  public com.google.enterprise.connector.spi.Document nextDocument()
+          throws RepositoryDocumentException {
     logger.entering("FileDocumentList", "nextDocument()");
 
     fileDocument = null;
@@ -293,7 +292,6 @@ public class FileDocumentList implements DocumentList {
    * @return String checkPoint - information that allows the resumeTraversal
    *         method to resume on the document
    */
-  @Override
   public String checkpoint() throws RepositoryException {
     logger.log(Level.FINEST, "Last checkpoint: {0}", lastCheckPoint);
 
