@@ -236,6 +236,7 @@
       <sysproperty key="net.sourceforge.cobertura.datafile"
                    file="${basedir}/cobertura.ser" />
       <classpath>
+        <pathelement location="${instrumented.dir}" />
         <pathelement location="${file.jarfile}" />
         <pathelement location="${spi.jarfile}" />
         <fileset dir="${thirdparty.jar.dir}">
@@ -243,10 +244,8 @@
           <include name="tests/*.jar" />
         </fileset>
         <pathelement location="${jarfile}" />
+        <pathelement location="${classes-test}" />
       </classpath>
-      <classpath location="${instrumented.dir}" />
-      <classpath location="${classes-core}" />
-      <classpath location="${classes-test}" />
 
       <!--
           The instrumented classes reference classes used by the
