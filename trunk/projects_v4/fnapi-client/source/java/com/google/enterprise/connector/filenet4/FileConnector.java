@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.spi.Connector;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
@@ -28,7 +29,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
 public class FileConnector implements Connector {
-  private static Logger LOGGER =
+  private static final Logger LOGGER =
       Logger.getLogger(FileConnector.class.getName());
 
   private String object_factory;
@@ -45,6 +46,7 @@ public class FileConnector implements Connector {
   private Set<String> included_meta;
   private Set<String> excluded_meta;
   private String globalNamespace;
+  private String displayUrl;
 
   // The db_timezone property is deprecated; however, its setter remains here
   // for backward compatibility.
@@ -73,21 +75,13 @@ public class FileConnector implements Connector {
           return true; } };
     HttpsURLConnection.setDefaultHostnameVerifier(aa);
 
-    Session sess = null;
     if (!(object_factory == null || username == null || password == null
             || object_store == null || workplace_display_url == null || content_engine_url == null)) {
-
-      // TODO(tdnguyen) Refactor to pass FileConnector object down
+      this.displayUrl = getDisplayUrl(workplace_display_url);
       LOGGER.info("Creating fileSession object...");
-      sess = new FileSession(object_factory, username, password,
-              object_store, workplace_display_url, content_engine_url,
-              is_public.equals("true"), check_marking.equals("on"),
-              useIDForChangeDetection.equals("true"),
-              additional_where_clause, delete_additional_where_clause,
-              included_meta, excluded_meta, globalNamespace);
+      return new FileSession(this);
     }
-    return sess;
-
+    return null;
   }
 
   public String getPassword() {
@@ -99,7 +93,7 @@ public class FileConnector implements Connector {
     LOGGER.config("Set Password");
   }
 
-  public String getObject_factory() {
+  public String getObjectFactory() {
     return object_factory;
   }
 
@@ -108,7 +102,7 @@ public class FileConnector implements Connector {
     LOGGER.config("Set Object Factory to " + this.object_factory);
   }
 
-  public String getObject_store() {
+  public String getObjectStore() {
     return object_store;
   }
 
@@ -117,18 +111,29 @@ public class FileConnector implements Connector {
     LOGGER.config("Set Object Store to " + this.object_store);
   }
 
-  public String getWorkplace_display_url() {
-    return workplace_display_url;
-  }
-
   public void setWorkplace_display_url(String displayUrl) {
     this.workplace_display_url = displayUrl;
-    LOGGER.config("Set Workplace Display URL to "
-            + this.workplace_display_url);
+    LOGGER.config("Set Workplace Display URL to " + workplace_display_url);
   }
 
-  public String getIs_public() {
-    return is_public;
+  private String getDisplayUrl(String url) {
+    String workplaceUrl = url;
+    if (workplaceUrl.endsWith("/getContent/")) {
+      workplaceUrl = workplaceUrl.substring(0, workplaceUrl.length() - 1);
+    }
+    if (workplaceUrl.contains("/getContent")
+            && workplaceUrl.endsWith("/getContent")) {
+      return workplaceUrl + "?objectStoreName=" + object_store
+              + "&objectType=document&versionStatus=1&vsId=";
+    } else {
+      return workplaceUrl + "/getContent?objectStoreName="
+              + object_store
+              + "&objectType=document&versionStatus=1&vsId=";
+    }
+  }
+
+  public String getWorkplaceDisplayUrl() {
+    return displayUrl;
   }
 
   public void setIs_public(String isPublic) {
@@ -136,8 +141,8 @@ public class FileConnector implements Connector {
     LOGGER.config("Set IsPublic to " + this.is_public);
   }
 
-  public String getCheck_marking() {
-    return check_marking;
+  public boolean isPublic() {
+    return "true".equalsIgnoreCase(is_public);
   }
 
   public void setCheck_marking(String checkMarking) {
@@ -145,7 +150,11 @@ public class FileConnector implements Connector {
     LOGGER.config("Set CheckMarking to " + this.check_marking);
   }
 
-  public String getAdditional_where_clause() {
+  public boolean checkMarking() {
+    return "on".equalsIgnoreCase(check_marking);
+  }
+
+  public String getAdditionalWhereClause() {
     return additional_where_clause;
   }
 
@@ -155,7 +164,7 @@ public class FileConnector implements Connector {
             + this.additional_where_clause);
   }
 
-  public String getDelete_additional_where_clause() {
+  public String getDeleteAdditionalWhereClause() {
     return delete_additional_where_clause;
   }
 
@@ -174,8 +183,12 @@ public class FileConnector implements Connector {
     this.globalNamespace = globalNamespace;
   }
 
-  public Set<String> getExcluded_meta() {
-    return excluded_meta;
+  public Set<String> getExcludedMeta() {
+    if (excluded_meta == null) {
+      return ImmutableSet.of();
+    } else {
+      return excluded_meta;
+    }
   }
 
   public void setExcluded_meta(Set<String> excluded_meta) {
@@ -183,8 +196,12 @@ public class FileConnector implements Connector {
     LOGGER.config("Setting excluded_meta to " + excluded_meta);
   }
 
-  public Set<String> getIncluded_meta() {
-    return included_meta;
+  public Set<String> getIncludedMeta() {
+    if (included_meta == null) {
+      return ImmutableSet.of();
+    } else {
+      return included_meta;
+    }
   }
 
   public void setIncluded_meta(Set<String> included_meta) {
@@ -192,7 +209,7 @@ public class FileConnector implements Connector {
     LOGGER.config("Setting included_meta to " + included_meta);
   }
 
-  public String getContent_engine_url() {
+  public String getContentEngineUrl() {
     return content_engine_url;
   }
 
@@ -210,14 +227,13 @@ public class FileConnector implements Connector {
     LOGGER.config("Set UserName to " + this.username);
   }
 
-  public String getUseIDForChangeDetection() {
-    return useIDForChangeDetection;
-  }
-
   public void setUseIDForChangeDetection(String useIDForChangeDetection) {
     this.useIDForChangeDetection = useIDForChangeDetection;
     LOGGER.config("Set useIDForChangeDetection to "
             + this.useIDForChangeDetection);
   }
 
+  public boolean useIDForChangeDetection() {
+    return "true".equalsIgnoreCase(useIDForChangeDetection);
+  }
 }

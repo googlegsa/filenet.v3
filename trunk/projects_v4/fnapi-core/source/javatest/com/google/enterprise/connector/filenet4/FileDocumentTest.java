@@ -23,7 +23,6 @@ import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
-import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Factory;
@@ -33,23 +32,24 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class FileDocumentTest extends FileNetTestCase {
-
+  FileConnector connec;
   FileSession fs;
   IObjectStore ios;
-  IConnection conn;
   UserContext uc;
   IObjectFactory iof;
   IUser adminUser;
 
   protected void setUp() throws Exception {
-
-    FileConnector connec = new FileConnector();
+    connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
     connec.setObject_store(TestConnection.objectStore);
     connec.setWorkplace_display_url(TestConnection.displayURL);
     connec.setObject_factory(TestConnection.objectFactory);
     connec.setContent_engine_url(TestConnection.uri);
+    connec.setIncluded_meta(TestConnection.included_meta);
+    connec.setExcluded_meta(TestConnection.excluded_meta);
+    connec.setIs_public("true");
 
     fs = (FileSession) connec.login();
 
@@ -66,9 +66,8 @@ public class FileDocumentTest extends FileNetTestCase {
    */
   public void testFindProperty() throws RepositoryException {
 
-    FileDocument fd = new FileDocument(TestConnection.docId1, null, ios,
-            false, TestConnection.displayURL, TestConnection.included_meta,
-            TestConnection.excluded_meta, ActionType.ADD);
+    FileDocument fd =
+        new FileDocument(TestConnection.docId1, null, ios, connec);
 
     Property prop = fd.findProperty("Id");
     assertEquals(TestConnection.docId1, prop.nextValue().toString());
@@ -94,9 +93,8 @@ public class FileDocumentTest extends FileNetTestCase {
    */
   public void testGetPropertyNames() throws RepositoryException {
 
-    FileDocument fd = new FileDocument(TestConnection.docId2, null, ios,
-            false, TestConnection.displayURL, TestConnection.included_meta,
-            TestConnection.excluded_meta, ActionType.ADD);
+    FileDocument fd =
+        new FileDocument(TestConnection.docId2, null, ios, connec);
     Iterator<String> properties = fd.getPropertyNames().iterator();
 
     int counter = 0;

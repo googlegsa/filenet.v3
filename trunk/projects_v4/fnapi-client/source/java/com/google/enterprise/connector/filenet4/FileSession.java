@@ -25,101 +25,54 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.Session;
 import com.google.enterprise.connector.spi.TraversalManager;
 
-import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileSession implements Session {
-  private static Logger LOGGER = Logger.getLogger(FileSession.class.getName());
+  private static final Logger LOGGER =
+      Logger.getLogger(FileSession.class.getName());
 
-  private IObjectFactory fileObjectFactory;
-  private IObjectStore objectStore;
-  private IConnection connection;
-  private String displayUrl;
-  private boolean isPublic;
-  private boolean checkMarking;
-  private boolean useIDForChangeDetection;
-  private String additionalWhereClause;
-  private String deleteadditionalWhereClause;
-  private Set<String> included_meta;
-  private Set<String> excluded_meta;
-  private final String globalNamespace;
+  private final FileConnector connector;
+  private final IObjectFactory fileObjectFactory;
+  private final IObjectStore objectStore;
+  private final IConnection connection;
 
-  public FileSession(String iObjectFactory, String userName,
-      String userPassword, String objectStoreName, String displayUrl,
-      String contentEngineUri, boolean isPublic, boolean checkMarking,
-      boolean useIDForChangeDetection, String additionalWhereClause,
-      String deleteadditionalWhereClause, Set<String> included_meta,
-      Set<String> excluded_meta, String globalNamespace)
-      throws RepositoryException, RepositoryLoginException {
+  public FileSession(FileConnector fileConnector)
+      throws RepositoryLoginException, RepositoryException {
+    this.connector = fileConnector;
 
-    setFileObjectFactory(iObjectFactory);
+    LOGGER.info("Initializing new object factory: "
+        + connector.getObjectFactory());
+    this.fileObjectFactory =
+        getFileObjectFactory(connector.getObjectFactory());
 
     LOGGER.info("Getting connection for content engine: "
-            + contentEngineUri);
-    connection = fileObjectFactory.getConnection(contentEngineUri, userName, userPassword);
+        + connector.getContentEngineUrl());
+    this.connection =
+        fileObjectFactory.getConnection(connector.getContentEngineUrl(),
+            connector.getUsername(), connector.getPassword());
 
-    LOGGER.info("Trying to access object store: " + objectStoreName
-            + " for user: " + userName);
-    objectStore = fileObjectFactory.getObjectStore(objectStoreName, connection, userName, userPassword);
-
-    this.displayUrl = getDisplayURL(displayUrl, objectStoreName);
-    this.isPublic = isPublic;
-    this.useIDForChangeDetection = useIDForChangeDetection;
-    this.checkMarking = checkMarking;
-    this.additionalWhereClause = additionalWhereClause;
-    this.deleteadditionalWhereClause = deleteadditionalWhereClause;
-    this.included_meta = included_meta;
-    this.excluded_meta = excluded_meta;
-    this.globalNamespace = globalNamespace;
+    LOGGER.info("Connecting to object store " + connector.getObjectStore()
+        + " using account: " + connector.getUsername());
+    this.objectStore =
+        fileObjectFactory.getObjectStore(connector.getObjectStore(),
+            connection, connector.getUsername(), connector.getPassword());
   }
 
   /**
-   * To return display url associated with the specific document
-   *
-   * @param displayUrl
-   * @param objectStoreName
+   * Gets FileNet objectFactory.
    */
-  private String getDisplayURL(String displayUrl, String objectStoreName) {
-    if (displayUrl.endsWith("/getContent/")) {
-      displayUrl = displayUrl.substring(0, displayUrl.length() - 1);
-    }
-    if (displayUrl.contains("/getContent")
-            && displayUrl.endsWith("/getContent")) {
-      return displayUrl + "?objectStoreName=" + objectStoreName
-              + "&objectType=document&versionStatus=1&vsId=";
-    } else {
-      return displayUrl + "/getContent?objectStoreName="
-              + objectStoreName
-              + "&objectType=document&versionStatus=1&vsId=";
-    }
-  }
-
-  /**
-   * To set FileNet objectFactory
-   *
-   * @param objectFactory
-   * @throws RepositoryException
-   */
-  private void setFileObjectFactory(String objectFactory)
-          throws RepositoryException {
+  private IObjectFactory getFileObjectFactory(String objectFactoryName)
+      throws RepositoryException {
     try {
-      fileObjectFactory = (IObjectFactory) Class.forName(objectFactory).newInstance();
+      return (IObjectFactory) Class.forName(objectFactoryName).newInstance();
     } catch (InstantiationException e) {
-      LOGGER.log(Level.WARNING, "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
-      throw new RepositoryException(
-              "Unable to instantiate the class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
-              e);
+      throw new RepositoryException("Unable to instantiate object factory: "
+          + objectFactoryName, e);
     } catch (IllegalAccessException e) {
-      LOGGER.log(Level.WARNING, "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ");
-      throw new RepositoryException(
-              "Access denied to class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory ",
-              e);
+      throw new RepositoryException("Access denied to object factory class: "
+          + objectFactoryName, e);
     } catch (ClassNotFoundException e) {
-      LOGGER.log(Level.WARNING, "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found");
-      throw new RepositoryException(
-              "The class com.google.enterprise.connector.file.filejavawrap.FnObjectFactory not found",
-              e);
+      throw new RepositoryException("Class not found: " + objectFactoryName, e);
     }
   }
 
@@ -128,11 +81,7 @@ public class FileSession implements Session {
    */
   @Override
   public TraversalManager getTraversalManager() throws RepositoryException {
-    return new FileTraversalManager(
-            fileObjectFactory, objectStore, this.isPublic,
-            this.useIDForChangeDetection, this.displayUrl,
-            this.additionalWhereClause, this.deleteadditionalWhereClause,
-            this.included_meta, this.excluded_meta, globalNamespace);
+    return new FileTraversalManager(fileObjectFactory, objectStore, connector);
   }
 
   /**
@@ -141,7 +90,8 @@ public class FileSession implements Session {
   @Override
   public AuthenticationManager getAuthenticationManager()
           throws RepositoryException {
-    return new FileAuthenticationManager(connection, globalNamespace);
+    return new FileAuthenticationManager(connection,
+        connector.getGoogleGlobalNamespace());
   }
 
   /**
@@ -151,7 +101,8 @@ public class FileSession implements Session {
   public AuthorizationManager getAuthorizationManager()
           throws RepositoryException {
     return new FileAuthorizationManager(
-        new FileAuthorizationHandler(connection, objectStore, checkMarking));
+        new FileAuthorizationHandler(connection, objectStore,
+            connector.checkMarking()));
   }
 
   /**
