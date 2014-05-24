@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterators;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
@@ -24,7 +25,6 @@ import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SkippedDocumentException;
-import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.DatabaseType;
@@ -40,7 +40,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,38 +47,37 @@ public class FileDocumentList implements DocumentList {
   private static final Logger logger = 
       Logger.getLogger(FileDocumentList.class.getName());
 
+  private static class EmptyObjectSet implements IObjectSet {
+    @Override public int getSize() { return 0; }
+
+    @Override public Iterator<? extends IBaseObject> getIterator() {
+      return Iterators.emptyIterator();
+    }
+  }
+
   private static final long serialVersionUID = 1L;
   private final IObjectStore objectStore;
   private final DatabaseType databaseType;
   private final Iterator<? extends IBaseObject> objects;
+  private final FileConnector connector;
   private FileDocument fileDocument;
   private Date fileDocumentDate;
   private Date fileDocumentToDeleteDate;
   private Date fileDocumentToDeleteDocsDate;
   private String docId = "";
-  private String displayUrl;
   private String lastCheckPoint;
   private String dateFirstPush;
   private String docIdToDelete = "";
   private String docIdToDeleteDocs = "";
-  private boolean isPublic;
-  private Set<String> included_meta;
-  private Set<String> excluded_meta;
-  private final String globalNamespace;
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
-      IObjectStore objectStore, boolean isPublic, String displayUrl,
-      Set<String> included_meta, Set<String> excluded_meta,
-      String dateFirstPush, String checkPoint, String globalNamespace) {
+      IObjectStore objectStore, FileConnector connector,
+      String dateFirstPush, String checkPoint) {
     this.objectStore = objectStore;
-    this.isPublic = isPublic;
-    this.displayUrl = displayUrl;
-    this.included_meta = included_meta;
-    this.excluded_meta = excluded_meta;
+    this.connector = connector;
     this.dateFirstPush = dateFirstPush;
     this.lastCheckPoint = checkPoint;
-    this.globalNamespace = globalNamespace;
 
     this.databaseType = getDatabaseType(objectStore);
     this.objects = mergeAndSortObjects(objectSet, objectSetToDelete,
@@ -101,29 +99,10 @@ public class FileDocumentList implements DocumentList {
   }
 
   public FileDocumentList(IObjectSet objectSet, IObjectSet objectSetToDelete,
-      IObjectStore objectStore, boolean isPublic, String displayUrl,
-      Set<String> included_meta, Set<String> excluded_meta,
-      String dateFirstPush, String checkPoint, String globalNamespace) {
-    this.objectStore = objectStore;
-    this.isPublic = isPublic;
-    this.displayUrl = displayUrl;
-    this.included_meta = included_meta;
-    this.excluded_meta = excluded_meta;
-    this.dateFirstPush = dateFirstPush;
-    this.lastCheckPoint = checkPoint;
-    this.globalNamespace = globalNamespace;
-
-    this.databaseType = getDatabaseType(objectStore);
-    this.objects = mergeAndSortObjects(objectSet, objectSetToDelete, null);
-
-    // Docs to Add
-    logger.log(Level.INFO, "Number of new documents discovered: "
-            + objectSet.getSize());
-
-    // Docs to Delete
-    logger.log(Level.INFO, "Number of new documents to be removed: (Documents deleted from repository) "
-            + objectSetToDelete.getSize());
-
+      IObjectStore objectStore, FileConnector connector, String dateFirstPush,
+      String checkPoint) {
+    this(objectSet, new EmptyObjectSet(), objectSetToDelete, objectStore,
+        connector, dateFirstPush, checkPoint);
   }
 
   private Iterator<? extends IBaseObject> mergeAndSortObjects(
@@ -250,9 +229,8 @@ public class FileDocumentList implements DocumentList {
     String id = object.getId();
     if (!Strings.isNullOrEmpty(id)) {
       logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-      return new FileDocument(id, object.getModifyDate(), objectStore, isPublic,
-          displayUrl, included_meta, excluded_meta,
-          SpiConstants.ActionType.ADD);
+      return new FileDocument(id, object.getModifyDate(), objectStore,
+          connector);
     } else {
       logger.log(Level.FINEST, "Failed to add document due to missing info"
           + "[ID: {0}, Last modified time: {1}]",
@@ -273,8 +251,7 @@ public class FileDocumentList implements DocumentList {
           "Delete document [ID: {0}, VersionSeriesID: {1}]",
           new Object[] {id, versionSeriesId});
       return new FileDocument(id, versionSeriesId, object.getModifyDate(),
-          objectStore, isPublic, displayUrl, included_meta, excluded_meta,
-          SpiConstants.ActionType.DELETE, globalNamespace);
+          objectStore, connector);
     } else {
       logger.log(Level.FINEST, "Failed to delete document due to missing info"
           + "[ID: {0}, Last modified time: {1}]",

@@ -59,9 +59,10 @@ public class FileDocumentListTest extends FileNetTestCase {
 
   FileSession fs;
   FileTraversalManager ftm;
+  FileConnector connec;
 
   protected void setUp() throws Exception {
-    FileConnector connec = new FileConnector();
+    connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
     connec.setObject_store(TestConnection.objectStore);
@@ -369,9 +370,7 @@ public class FileDocumentListTest extends FileNetTestCase {
       IObjectSet customDeletionSet, IObjectSet deletionEventSet) {
     Calendar cal = Calendar.getInstance();
     return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
-        os, true, TestConnection.displayURL, TestConnection.included_meta,
-        TestConnection.excluded_meta, getDateFirstPush(cal),
-        TestConnection.checkpoint1, null);
+        os, connec, getDateFirstPush(cal), TestConnection.checkpoint1);
   }
 
   private boolean checkpointContains(String checkpoint, Property lastModified,

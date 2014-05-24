@@ -44,48 +44,33 @@ public class FileDocument implements Document {
   private static final Logger logger =
       Logger.getLogger(FileDocument.class.getName());
 
-  private String docId;
-  private IObjectStore objectStore;
+  private final String docId;
+  private final IObjectStore objectStore;
+  private final FileConnector connector;
+
   private IDocument document = null;
-  private boolean isPublic = false;
-  private String displayUrl;
   private String versionId;
   private Date timeStamp;
   private String vsDocId;
-  private Set<String> included_meta = null;
-  private Set<String> excluded_meta = null;
-
   private SpiConstants.ActionType action;
-  private final String globalNamespace;
 
   public FileDocument(String docId, Date timeStamp, IObjectStore objectStore,
-          boolean isPublic, String displayUrl, Set<String> included_meta,
-          Set<String> excluded_meta, SpiConstants.ActionType action) {
+      FileConnector connector) {
     this.docId = docId;
     this.timeStamp = timeStamp;
     this.objectStore = objectStore;
-    this.isPublic = isPublic;
-    this.displayUrl = displayUrl;
-    this.included_meta = included_meta;
-    this.excluded_meta = excluded_meta;
-    this.action = action;
-    this.globalNamespace = null;
+    this.connector = connector;
+    this.action = SpiConstants.ActionType.ADD;
   }
 
   public FileDocument(String docId, String commonVersionId, Date timeStamp,
-          IObjectStore objectStore, boolean isPublic, String displayUrl,
-          Set<String> included_meta, Set<String> excluded_meta,
-          SpiConstants.ActionType action, String globalNamespace) {
+      IObjectStore objectStore, FileConnector connector) {
     this.docId = docId;
     this.versionId = commonVersionId;
     this.timeStamp = timeStamp;
     this.objectStore = objectStore;
-    this.isPublic = isPublic;
-    this.displayUrl = displayUrl;
-    this.included_meta = included_meta;
-    this.excluded_meta = excluded_meta;
-    this.action = action;
-    this.globalNamespace = globalNamespace;
+    this.connector = connector;
+    this.action = SpiConstants.ActionType.DELETE;
   }
 
   private void fetch() throws RepositoryDocumentException {
@@ -93,7 +78,7 @@ public class FileDocument implements Document {
       return;
     }
     document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
-        FileUtil.getDocumentPropertyFilter(included_meta));
+        FileUtil.getDocumentPropertyFilter(connector.getIncludedMeta()));
     logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
     vsDocId = document.getVersionSeries().getId();
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
@@ -111,11 +96,12 @@ public class FileDocument implements Document {
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(this.displayUrl + vsDocId));
+        list.add(Value.getStringValue(connector.getWorkplaceDisplayUrl()
+            + vsDocId));
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getBooleanValue(this.isPublic));
+        list.add(Value.getBooleanValue(connector.isPublic()));
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
@@ -177,7 +163,8 @@ public class FileDocument implements Document {
    */
   private void addPrincipals(List<Value> list, String propName,
       Set<String> names) {
-    FileUtil.addPrincipals(list, PrincipalType.UNKNOWN, globalNamespace, names,
+    FileUtil.addPrincipals(list, PrincipalType.UNKNOWN,
+        connector.getGoogleGlobalNamespace(), names,
         CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
     logger.log(Level.FINEST, "Getting {0}: {1}",
         new Object[] { propName, names});
@@ -199,14 +186,15 @@ public class FileDocument implements Document {
     Set<String> documentProperties = document.getPropertyNames();
     for (String property : documentProperties) {
       if (property != null) {
-        if (included_meta.size() != 0) {
+        if (connector.getIncludedMeta().size() != 0) {
           // includeMeta - excludeMeta
-          if ((!excluded_meta.contains(property) && included_meta.contains(property))) {
+          if ((!connector.getExcludedMeta().contains(property)
+              && connector.getIncludedMeta().contains(property))) {
             properties.add(property);
           }
         } else {
           // superSet - excludeMeta
-          if ((!excluded_meta.contains(property) || included_meta.contains(property))) {
+          if ((!connector.getExcludedMeta().contains(property))) {
             properties.add(property);
           }
         }
