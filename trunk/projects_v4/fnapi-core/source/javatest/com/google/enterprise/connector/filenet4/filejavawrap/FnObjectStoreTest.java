@@ -72,22 +72,11 @@ public class FnObjectStoreTest extends TestCase {
     assertEquals("{" + TestConnection.docId1 + "}", fd.getId());
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getName()'
-   */
   public void testGetName() throws RepositoryException {
-    assertEquals(TestConnection.objectStore, ios.getName());
-
+    assertEquals(TestConnection.objectStore, ios.get_Name());
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getObjectStore()'
-   */
   public void testGetObjectStore() throws RepositoryException {
-    assertNotNull(ios.getObjectStore());
-
+    assertNotNull(((FnObjectStore) ios).getObjectStore());
   }
-
 }

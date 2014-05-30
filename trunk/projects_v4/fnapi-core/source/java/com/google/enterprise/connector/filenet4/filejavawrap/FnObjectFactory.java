@@ -81,7 +81,8 @@ public class FnObjectFactory implements IObjectFactory {
   @Override
   public ISearch getSearch(IObjectStore objectStore)
           throws RepositoryException {
-    SearchScope search = new SearchScope(objectStore.getObjectStore());
+    SearchScope search =
+        new SearchScope(((FnObjectStore) objectStore).getObjectStore());
 
     return new FnSearch(search);
   }

@@ -199,18 +199,14 @@ public class FileConnectorType implements ConnectorType {
     for (Iterator<String> i = keys.iterator(); i.hasNext();) {
       String key = i.next();
       String val = configData.get(key);
-      // TODO remove unrelevant FILEURI
-
       if (!key.equals(FNCLASS)
               && !key.equals(AUTHENTICATIONTYPE)
               && !key.equals(WHERECLAUSE)
-              && !key.equals(DELETEWHERECLAUSE)// && !key.equals(FILEURI)
+              && !key.equals(DELETEWHERECLAUSE)
               && !key.equals(CHECKMARKING)
               && (val == null || val.length() == 0)) {
-
         return key;
       }
-
     }
     return "";
   }
@@ -582,7 +578,6 @@ public class FileConnectorType implements ConnectorType {
           try {
             XmlUtils.xmlAppendAttrValue(value, buf);
           } catch (IOException e) {
-            // TODO Auto-generated catch block
             LOGGER.severe("SEVERE" + e.getStackTrace());
           }
 
