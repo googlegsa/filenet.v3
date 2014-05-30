@@ -20,11 +20,13 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
+import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.DatabaseType;
-import com.filenet.api.core.ObjectStore;
 import com.filenet.api.property.PropertyFilter;
+import com.filenet.api.util.Id;
 
+import java.util.Iterator;
 import java.util.Map;
 
 public class MockObjectStore implements IObjectStore {
@@ -59,13 +61,14 @@ public class MockObjectStore implements IObjectStore {
   }
 
   @Override
-  public String getName() throws RepositoryException {
+  public String get_Name() throws RepositoryException {
     return this.name;
   }
 
   @Override
-  public ObjectStore getObjectStore() throws RepositoryException {
-    throw new RepositoryException("FileNet's object store is unavailable");
+  public Iterator<PropertyDefinition> getPropertyDefinitions(Id objectId,
+      PropertyFilter filter) throws RepositoryException {
+    return null;
   }
 
   @Override

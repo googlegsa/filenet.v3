@@ -80,7 +80,7 @@ public class FnObjectFactoryTest extends TestCase {
   public void testGetObjectStore() throws RepositoryLoginException,
           RepositoryException {
     assertNotNull(ios);
-    assertEquals(TestConnection.objectStore, ios.getName());
+    assertEquals(TestConnection.objectStore, ios.get_Name());
   }
 
   /*

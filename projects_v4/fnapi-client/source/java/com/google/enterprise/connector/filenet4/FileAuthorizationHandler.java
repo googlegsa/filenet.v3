@@ -24,13 +24,10 @@ import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
 
-import com.filenet.api.admin.DocumentClassDefinition;
 import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.admin.PropertyDefinitionString;
-import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
-import com.filenet.api.core.Factory;
 import com.filenet.api.security.MarkingSet;
 import com.filenet.api.util.UserContext;
 
@@ -83,11 +80,9 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
   public boolean hasMarkings() {
     // check for the marking sets applied over the document class
     try {
-      DocumentClassDefinition documentClassDefinition = Factory.DocumentClassDefinition.fetchInstance(this.objectStore.getObjectStore(), GuidConstants.Class_Document, null);
-      PropertyDefinitionList propertyDefinitionList = documentClassDefinition.get_PropertyDefinitions();
-      @SuppressWarnings("unchecked")
-          Iterator<PropertyDefinition> propertyDefinitionIterator =
-          propertyDefinitionList.iterator();
+      Iterator<PropertyDefinition> propertyDefinitionIterator =
+          objectStore.getPropertyDefinitions(GuidConstants.Class_Document,
+              null);
       boolean hasMarkings = false;
 
       while (propertyDefinitionIterator.hasNext()) {

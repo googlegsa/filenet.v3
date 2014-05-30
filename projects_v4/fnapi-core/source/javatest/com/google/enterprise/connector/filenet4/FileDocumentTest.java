@@ -14,21 +14,24 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filejavawrap.FnPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.Value;
 
-import com.filenet.api.core.Document;
-import com.filenet.api.core.Factory;
+import com.filenet.api.constants.ClassNames;
 import com.filenet.api.util.UserContext;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class FileDocumentTest extends FileNetTestCase {
@@ -118,14 +121,12 @@ public class FileDocumentTest extends FileNetTestCase {
    * be present in the ACL with AccessLevel.VIEW_AS_INT access or above.
    */
   public void testCreatorOwnerPermissions() throws RepositoryException {
-    Document doc = Factory.Document.fetchInstance(ios.getObjectStore(),
+    IDocument doc = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
         TestConnection.docId4, null);
-    FnPermissions perms = new FnPermissions(doc.get_Permissions(),
-        doc.get_Owner());
-    assertEquals(doc.get_Owner(), adminUser.getName());
+    List<Value> ownerValue = new ArrayList<Value>();
+    doc.getPropertyStringValue("Owner", ownerValue);
+    assertEquals(adminUser.getName(), ownerValue.get(0).toString());
+    IPermissions perms = doc.getPermissions();
     assertTrue(perms.authorize(adminUser));
-
-    FnPermissions perms2 = new FnPermissions(doc.get_Permissions(), null);
-    assertFalse(perms2.authorize(adminUser));
   }
 }
