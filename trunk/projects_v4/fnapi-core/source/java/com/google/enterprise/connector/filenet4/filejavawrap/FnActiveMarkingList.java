@@ -63,8 +63,8 @@ public class FnActiveMarkingList implements IActiveMarkingList {
       if (!(currentMarking.authorize(user))) {
         LOGGER.log(Level.FINER,
             "User {0} is not authorized for Marking value: {1}",
-            new Object[] {user.getName(), currentMarking.getActiveMarking()
-                .get_Marking().get_MarkingValue()});
+            new Object[] {user.getName(), currentMarking.get_Marking()
+                .get_MarkingValue()});
         return false;
       }
     }
