@@ -19,11 +19,13 @@ import com.google.enterprise.connector.filenet4.FileNetTestCase;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.filenet4.TestConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
+import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
@@ -52,6 +54,7 @@ public class FnDocumentTest extends FileNetTestCase {
   IDocument fd, fd2;
   IVersionSeries vs;
   IUserContext uc;
+  IUser user;
 
   protected void setUp() throws RepositoryLoginException,
           RepositoryException, InstantiationException,
@@ -76,7 +79,7 @@ public class FnDocumentTest extends FileNetTestCase {
         FileUtil.getDocumentPropertyFilter(TestConnection.included_meta));
 
     uc = new FnUserContext(conn);
-    uc.authenticate(TestConnection.username, TestConnection.password);
+    user = uc.authenticate(TestConnection.username, TestConnection.password);
     vs = fd.getVersionSeries();
     fd2 = vs.getReleasedVersion();
   }
@@ -146,6 +149,17 @@ public class FnDocumentTest extends FileNetTestCase {
     assertNotNull(perms);
     boolean authorized = perms.authorize(MockUtil.createAdministratorUser());
     assertTrue("User is not authorized", authorized);
+  }
+
+  public void testMarkingPermissions() throws RepositoryException {
+    IVersionSeries versionSeries =
+        (IVersionSeries) ios.getObject(ClassNames.VERSION_SERIES,
+            TestConnection.docVsId1);
+    IDocument doc = versionSeries.getReleasedVersion();
+    IActiveMarkingList activeMarkingList = doc.getActiveMarkings();
+    assertNotNull("Active marking is null", activeMarkingList);
+    assertTrue(user.getName() + " is not authorized by document's marking",
+        activeMarkingList.authorize(user));
   }
 
   /*
