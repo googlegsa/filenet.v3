@@ -75,7 +75,8 @@ public class FnDocumentTest extends FileNetTestCase {
     // null);
     ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.adminUsername, TestConnection.adminPassword);
 
-    fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT, TestConnection.docId1,
+    fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
+        new FnId(TestConnection.docId1),
         FileUtil.getDocumentPropertyFilter(TestConnection.included_meta));
 
     uc = new FnUserContext(conn);
@@ -137,11 +138,11 @@ public class FnDocumentTest extends FileNetTestCase {
 
   public void testGetVersionSeries() throws RepositoryException {
     IVersionSeries vs = fd.getVersionSeries();
-    assertEquals("{" + TestConnection.docVsId1 + "}", vs.getId());
+    assertEquals("{" + TestConnection.docVsId1 + "}", vs.getId().toString());
   }
 
   public void testGetId() throws RepositoryException {
-    assertEquals("{" + TestConnection.docId1 + "}", fd.getId());
+    assertEquals("{" + TestConnection.docId1 + "}", fd.getId().toString());
   }
 
   public void testGetPermissions() throws RepositoryException {

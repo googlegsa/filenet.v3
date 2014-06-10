@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
@@ -70,7 +71,7 @@ public class FileDocumentTest extends FileNetTestCase {
   public void testFindProperty() throws RepositoryException {
 
     FileDocument fd =
-        new FileDocument(TestConnection.docId1, null, ios, connec);
+        new FileDocument(new FnId(TestConnection.docId1), null, ios, connec);
 
     Property prop = fd.findProperty("Id");
     assertEquals(TestConnection.docId1, prop.nextValue().toString());
@@ -95,9 +96,8 @@ public class FileDocumentTest extends FileNetTestCase {
    * 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
    */
   public void testGetPropertyNames() throws RepositoryException {
-
     FileDocument fd =
-        new FileDocument(TestConnection.docId2, null, ios, connec);
+        new FileDocument(new FnId(TestConnection.docId2), null, ios, connec);
     Iterator<String> properties = fd.getPropertyNames().iterator();
 
     int counter = 0;
@@ -122,7 +122,7 @@ public class FileDocumentTest extends FileNetTestCase {
    */
   public void testCreatorOwnerPermissions() throws RepositoryException {
     IDocument doc = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
-        TestConnection.docId4, null);
+        new FnId(TestConnection.docId4), null);
     List<Value> ownerValue = new ArrayList<Value>();
     doc.getPropertyStringValue("Owner", ownerValue);
     assertEquals(adminUser.getName(), ownerValue.get(0).toString());

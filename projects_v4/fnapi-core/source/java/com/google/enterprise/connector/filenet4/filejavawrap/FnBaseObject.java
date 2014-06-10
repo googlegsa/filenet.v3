@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import com.filenet.api.constants.VersionStatus;
@@ -84,22 +85,12 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public String getId() throws RepositoryDocumentException {
-    String id;
-    try {
-
-      if (object instanceof DeletionEvent) {
-        id = ((DeletionEvent) this.object).get_Id().toString();
-      } else {
-        id = ((Document) this.object).get_Id().toString();
-      }
-
-      id = id.substring(1, id.length() - 1);
-    } catch (Exception e) {
-      logger.warning("Unable to get ID");
-      throw new RepositoryDocumentException(e);
+  public IId getId() throws RepositoryDocumentException {
+    if (object instanceof DeletionEvent) {
+      return new FnId(((DeletionEvent) object).get_Id());
+    } else {
+      return new FnId(((Document) object).get_Id());
     }
-    return id;
   }
 
   @Override
@@ -141,23 +132,14 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public String getVersionSeriesId() throws RepositoryDocumentException {
-    String strId;
-    try {
-      if (object instanceof DeletionEvent) {
-        // Version series Id is always enclosed with curly braces {versionId}.
-        Id id = ((DeletionEvent) this.object).get_VersionSeriesId();
-        strId = id.toString();
-      } else {
-        // Return version series ID with curly braces
-        Id id = ((Document) this.object).get_ReleasedVersion()
-            .get_VersionSeries().get_Id();
-        strId = id.toString();
-      }
-    } catch (Exception e) {
-      throw new RepositoryDocumentException("Unable to get Version Series ID",
-          e);
+  public IId getVersionSeriesId() throws RepositoryDocumentException {
+    if (object instanceof DeletionEvent) {
+      Id id = ((DeletionEvent) this.object).get_VersionSeriesId();
+      return new FnId(id);
+    } else {
+      Id id = ((Document) this.object).get_ReleasedVersion()
+          .get_VersionSeries().get_Id();
+      return new FnId(id);
     }
-    return strId;
   }
 }

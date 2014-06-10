@@ -16,8 +16,10 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnObjectList;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.mockjavawrap.MockBaseObject;
@@ -33,6 +35,7 @@ import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.DatabaseType;
+import com.filenet.api.util.Id;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -128,8 +131,8 @@ public class FileDocumentListTest extends FileNetTestCase {
         {"DDDDDDDD-0000-0000-0000-000000000000", "2014-02-11T07:14:30.329"},
         {"EEEEEEEE-0000-0000-0000-000000000000", "2014-02-11T07:15:30.329"},
         {"FFFFFFFF-0000-0000-0000-000000000000", "2014-02-10T08:15:30.329"},
-        {"GGGGGGGG-0000-0000-0000-000000000000", "2014-01-11T08:15:30.329"},
-        {"HHHHHHHH-0000-0000-0000-000000000000", "2013-02-11T08:15:30.329"}
+        {"FFFFFFFF-AAAA-0000-0000-000000000000", "2014-01-11T08:15:30.329"},
+        {"FFFFFFFF-BBBB-0000-0000-000000000000", "2013-02-11T08:15:30.329"}
     };
     testSorting(new int[] {8, 7, 6, 4, 5, 3, 0, 2, 1}, entries,
         DatabaseType.ORACLE);
@@ -164,7 +167,7 @@ public class FileDocumentListTest extends FileNetTestCase {
       Document doc = docList.nextDocument();
       Property fid = doc.findProperty(SpiConstants.PROPNAME_DOCID);
       assertEquals("[" + dbType + "] Incorrect id sorting order",
-          entries[index][0], fid.nextValue().toString());
+          "{" + entries[index][0] + "}", fid.nextValue().toString());
     }
   }
 
@@ -224,17 +227,17 @@ public class FileDocumentListTest extends FileNetTestCase {
   }
 
   private void testUnreleasedNextDocument(String[][] docEntries,
-      Map<String, IBaseObject> unreleasedEntries,
+      Map<IId, IBaseObject> unreleasedEntries,
       SkipPosition expectedPosition) throws Exception {
-    String unreleasedGuid = unreleasedEntries.keySet().iterator().next();
-    Map<String, IBaseObject> entries =
+    IId unreleasedGuid = unreleasedEntries.keySet().iterator().next();
+    Map<IId, IBaseObject> entries =
         generateObjectMap(docEntries, false, true);
     entries.putAll(unreleasedEntries);
     testUnreleasedNextDocument(entries, unreleasedGuid, expectedPosition);
   }
 
-  private void testUnreleasedNextDocument(Map<String, IBaseObject> entries,
-      String unreleasedGuid, SkipPosition expectedPosition) throws Exception {
+  private void testUnreleasedNextDocument(Map<IId, IBaseObject> entries,
+      IId unreleasedGuid, SkipPosition expectedPosition) throws Exception {
     // Setup object store
     @SuppressWarnings("unchecked")
     MockObjectStore os =
@@ -252,7 +255,7 @@ public class FileDocumentListTest extends FileNetTestCase {
       }
       fail("Expect SkippedDocumentException");
     } catch (SkippedDocumentException expected) {
-      if (!expected.getMessage().contains(unreleasedGuid)) {
+      if (!expected.getMessage().contains(unreleasedGuid.toString())) {
         throw expected;
       }
       if (docList.nextDocument() == null) {
@@ -335,10 +338,7 @@ public class FileDocumentListTest extends FileNetTestCase {
             JsonField.LAST_MODIFIED_TIME));
         isAddTested = true;
       } else if (ActionType.DELETE.equals(actionType)) {
-        // TODO(tdnguyen): revisit this logic to trim the curly braces when
-        // making changes to version series ID.
-        IBaseObject object =
-            os.getObject(null, id.substring(1, id.length() - 1));
+        IBaseObject object = os.getObject(null, id);
         if (object.isDeletionEvent()) {
           assertTrue(checkpointContains(docList.checkpoint(),
               doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
@@ -358,9 +358,9 @@ public class FileDocumentListTest extends FileNetTestCase {
   }
 
   private MockObjectStore newObjectStore(String name, DatabaseType dbType,
-      Map<String, IBaseObject>... objectMaps) {
-    Map<String, IBaseObject> data = new HashMap<String, IBaseObject>();
-    for (Map<String, IBaseObject> objectMap : objectMaps) {
+      Map<IId, IBaseObject>... objectMaps) {
+    Map<IId, IBaseObject> data = new HashMap<IId, IBaseObject>();
+    for (Map<IId, IBaseObject> objectMap : objectMaps) {
       data.putAll(objectMap);
     }
     return new MockObjectStore(name, dbType, data);
@@ -389,9 +389,10 @@ public class FileDocumentListTest extends FileNetTestCase {
   // Helper method to create object
   private IBaseObject createObject(String guid, String timeStr,
       boolean isDeletionEvent, boolean isReleasedVersion)
-          throws ParseException {
+          throws ParseException, RepositoryDocumentException {
     Date createdTime = dateFormatter.parse(timeStr);
-    return new MockBaseObject(guid, "{" + guid + "}",
+    Id id = new Id(guid);
+    return new MockBaseObject(new FnId(id), new FnId(id),
         createdTime, isDeletionEvent, isReleasedVersion);
   }
 
@@ -404,26 +405,28 @@ public class FileDocumentListTest extends FileNetTestCase {
    * @param cal - setting object's creation time.  The creation time will be
    *              incremented by timeIncrement before setting the object.
    * @param timeIncrement - time increment between objects in milliseconds.
-   * @return Map<String, IBaseObject>
+   * @return Map<IId, IBaseObject>
    * @throws ParseException 
    */
-  private Map<String, IBaseObject> generateObjectMap(String[][] entries,
-      boolean isDeleteEvent, boolean releasedVersion) throws ParseException {
-    Map<String, IBaseObject> objectMap = new HashMap<String, IBaseObject>();
+  private Map<IId, IBaseObject> generateObjectMap(String[][] entries,
+      boolean isDeleteEvent, boolean releasedVersion)
+          throws ParseException, RepositoryDocumentException {
+    Map<IId, IBaseObject> objectMap = new HashMap<IId, IBaseObject>();
     for (String[] line : entries) {
-      objectMap.put(line[0], createObject(line[0], line[1], isDeleteEvent,
-          releasedVersion));
+      objectMap.put(new FnId(line[0]), createObject(line[0], line[1],
+          isDeleteEvent, releasedVersion));
     }
     return objectMap;
   }
 
-  private Map<String, IBaseObject> generateObjectMap(String[] entries,
-      boolean isDeleteEvent, boolean releasedVersion) throws ParseException {
-    Map<String, IBaseObject> objectMap = new HashMap<String, IBaseObject>();
+  private Map<IId, IBaseObject> generateObjectMap(String[] entries,
+      boolean isDeleteEvent, boolean releasedVersion)
+          throws ParseException, RepositoryDocumentException {
+    Map<IId, IBaseObject> objectMap = new HashMap<IId, IBaseObject>();
     Calendar cal = Calendar.getInstance();
     for (String entry : entries) {
-      objectMap.put(entry, createObject(entry, Value.calendarToIso8601(cal),
-          isDeleteEvent, releasedVersion));
+      objectMap.put(new FnId(entry), createObject(entry,
+          Value.calendarToIso8601(cal), isDeleteEvent, releasedVersion));
     }
     return objectMap;
   }
@@ -443,25 +446,27 @@ public class FileDocumentListTest extends FileNetTestCase {
    * @return Map<String, IBaseObject>
    * @throws ParseException 
    */
-  private Map<String, IBaseObject> generateCustomDeletion(
-      String[] entries, boolean releasedVersion) throws ParseException {
-    Map<String, IBaseObject> objectMap = new HashMap<String, IBaseObject>();
+  private Map<IId, IBaseObject> generateCustomDeletion(
+      String[] entries, boolean releasedVersion)
+          throws ParseException, RepositoryDocumentException {
+    Map<IId, IBaseObject> objectMap = new HashMap<IId, IBaseObject>();
     Calendar cal = Calendar.getInstance();
     for (String entry : entries) {
       IBaseObject object = createObject(entry, Value.calendarToIso8601(cal),
           false, releasedVersion);
-      objectMap.put(entry, new FileDeletionObject(object));
+      objectMap.put(new FnId(entry), new FileDeletionObject(object));
     }
     return objectMap;
   }
 
-  private Map<String, IBaseObject> generateCustomDeletion(String[][] entries,
-      boolean releasedVersion) throws ParseException {
-    Map<String, IBaseObject> objectMap = new HashMap<String, IBaseObject>();
+  private Map<IId, IBaseObject> generateCustomDeletion(String[][] entries,
+      boolean releasedVersion)
+          throws ParseException, RepositoryDocumentException {
+    Map<IId, IBaseObject> objectMap = new HashMap<IId, IBaseObject>();
     for (String[] line : entries) {
       IBaseObject object =
           createObject(line[0], line[1], false, releasedVersion);
-      objectMap.put(line[0], new FileDeletionObject(object));
+      objectMap.put(new FnId(line[0]), new FileDeletionObject(object));
     }
     return objectMap;
   }
@@ -470,7 +475,7 @@ public class FileDocumentListTest extends FileNetTestCase {
     return dateFormatter.format(cal.getTime());
   }
 
-  private IObjectSet getDocuments(Map<String, IBaseObject> objects)
+  private IObjectSet getDocuments(Map<IId, IBaseObject> objects)
       throws RepositoryDocumentException {
     List<IBaseObject> objectList = new ArrayList<IBaseObject>(objects.size());
     for (IBaseObject obj : objects.values()) {
@@ -481,7 +486,7 @@ public class FileDocumentListTest extends FileNetTestCase {
     return new FnObjectList(objectList);
   }
 
-  private IObjectSet getDeletionEvents(Map<String, IBaseObject> objects)
+  private IObjectSet getDeletionEvents(Map<IId, IBaseObject> objects)
       throws RepositoryDocumentException {
     List<IBaseObject> objectList = new ArrayList<IBaseObject>();
     for (IBaseObject obj : objects.values()) {
@@ -492,7 +497,7 @@ public class FileDocumentListTest extends FileNetTestCase {
     return new FnObjectList(objectList);
   }
 
-  private IObjectSet getCustomDeletion(Map<String, IBaseObject> objects)
+  private IObjectSet getCustomDeletion(Map<IId, IBaseObject> objects)
       throws RepositoryDocumentException {
     List<IBaseObject> objectList = new ArrayList<IBaseObject>();
     for (IBaseObject obj : objects.values()) {

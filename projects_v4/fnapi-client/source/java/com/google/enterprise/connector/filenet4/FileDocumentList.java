@@ -14,10 +14,10 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.common.base.Strings;
 import com.google.common.collect.Iterators;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
@@ -28,7 +28,6 @@ import com.google.enterprise.connector.spi.SkippedDocumentException;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.DatabaseType;
-import com.filenet.api.util.Id;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,11 +63,11 @@ public class FileDocumentList implements DocumentList {
   private Date fileDocumentDate;
   private Date fileDocumentToDeleteDate;
   private Date fileDocumentToDeleteDocsDate;
-  private String docId = "";
+  private IId docId;
   private String lastCheckPoint;
   private String dateFirstPush;
-  private String docIdToDelete = "";
-  private String docIdToDeleteDocs = "";
+  private IId docIdToDelete;
+  private IId docIdToDeleteDocs;
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
@@ -125,11 +124,7 @@ public class FileDocumentList implements DocumentList {
           try {
             int val = obj0.getModifyDate().compareTo(obj1.getModifyDate());
             if (val == 0) {
-              // TODO(tdnguyen): Refactor IBaseObject.getId() to return IId
-              // interface instead of a string.
-              Id id0 = new Id(obj0.getId());
-              Id id1 = new Id(obj1.getId());
-              val = id0.compareTo(id1, databaseType);
+              val = obj0.getId().compareTo(obj1.getId(), databaseType);
             }
             return val;
           } catch (RepositoryDocumentException e) {
@@ -226,17 +221,10 @@ public class FileDocumentList implements DocumentList {
    */
   private FileDocument createAddDocument(IBaseObject object)
       throws RepositoryDocumentException {
-    String id = object.getId();
-    if (!Strings.isNullOrEmpty(id)) {
-      logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-      return new FileDocument(id, object.getModifyDate(), objectStore,
-          connector);
-    } else {
-      logger.log(Level.FINEST, "Failed to add document due to missing info"
-          + "[ID: {0}, Last modified time: {1}]",
-          new Object[] {id, object.getModifyDate()});
-      return null;
-    }
+    IId id = object.getId();
+    logger.log(Level.FINEST, "Add document [ID: {0}]", id);
+    return new FileDocument(id, object.getModifyDate(), objectStore,
+        connector);
   }
 
   /*
@@ -244,20 +232,12 @@ public class FileDocumentList implements DocumentList {
    */
   private FileDocument createDeleteDocument(IBaseObject object)
       throws RepositoryDocumentException {
-    String id = object.getId();
-    String versionSeriesId = object.getVersionSeriesId();
-    if (!Strings.isNullOrEmpty(id) && !Strings.isNullOrEmpty(versionSeriesId)) {
-      logger.log(Level.FINEST,
-          "Delete document [ID: {0}, VersionSeriesID: {1}]",
-          new Object[] {id, versionSeriesId});
-      return new FileDocument(id, versionSeriesId, object.getModifyDate(),
-          objectStore, connector);
-    } else {
-      logger.log(Level.FINEST, "Failed to delete document due to missing info"
-          + "[ID: {0}, Last modified time: {1}]",
-          new Object[] {id, object.getModifyDate()});
-      return null;
-    }
+    IId id = object.getId();
+    IId versionSeriesId = object.getVersionSeriesId();
+    logger.log(Level.FINEST, "Delete document [ID: {0}, VersionSeriesID: {1}]",
+        new Object[] {id, versionSeriesId});
+    return new FileDocument(id, versionSeriesId, object.getModifyDate(),
+        objectStore, connector);
   }
 
   /***
@@ -300,7 +280,7 @@ public class FileDocumentList implements DocumentList {
    * Helper method to compute the checkpoint date and UUID value.
    */
   private void setCheckpointTimeAndUuid(JsonField jsonDateField,
-      Date nextCheckpointDate, String uuid, JsonField jsonUuidField,
+      Date nextCheckpointDate, IId uuid, JsonField jsonUuidField,
       JSONObject jo) throws RepositoryException {
     Calendar cal = Calendar.getInstance();
     String dateString;
@@ -315,10 +295,17 @@ public class FileDocumentList implements DocumentList {
         cal.setTime(nextCheckpointDate);
         dateString = Value.calendarToIso8601(cal);
       }
-      if (uuid == null && !jo.isNull(jsonUuidField.name())) {
-        uuid = jo.getString(jsonUuidField.name());
+      String guid;
+      if (uuid == null) {
+        if (jo.isNull(jsonUuidField.name())) {
+          guid = "";
+        } else {
+          guid = jo.getString(jsonUuidField.name());
+        }
+      } else {
+        guid = uuid.toString();
       }
-      jo.put(jsonUuidField.toString(), uuid);
+      jo.put(jsonUuidField.toString(), guid);
       jo.put(jsonDateField.toString(), dateString);
       logger.log(Level.FINE, "Set new checkpoint for {0} field to {1}, "
           + "{2} field to {3}", new Object[] {

@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
@@ -44,17 +45,17 @@ public class FileDocument implements Document {
   private static final Logger logger =
       Logger.getLogger(FileDocument.class.getName());
 
-  private final String docId;
+  private final IId docId;
   private final IObjectStore objectStore;
   private final FileConnector connector;
 
   private IDocument document = null;
-  private String versionId;
+  private IId versionId;
   private Date timeStamp;
   private String vsDocId;
   private SpiConstants.ActionType action;
 
-  public FileDocument(String docId, Date timeStamp, IObjectStore objectStore,
+  public FileDocument(IId docId, Date timeStamp, IObjectStore objectStore,
       FileConnector connector) {
     this.docId = docId;
     this.timeStamp = timeStamp;
@@ -63,7 +64,7 @@ public class FileDocument implements Document {
     this.action = SpiConstants.ActionType.ADD;
   }
 
-  public FileDocument(String docId, String commonVersionId, Date timeStamp,
+  public FileDocument(IId docId, IId commonVersionId, Date timeStamp,
       IObjectStore objectStore, FileConnector connector) {
     this.docId = docId;
     this.versionId = commonVersionId;
@@ -80,7 +81,7 @@ public class FileDocument implements Document {
     document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
         FileUtil.getDocumentPropertyFilter(connector.getIncludedMeta()));
     logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
-    vsDocId = document.getVersionSeries().getId();
+    vsDocId = document.getVersionSeries().getId().toString();
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
@@ -150,7 +151,7 @@ public class FileDocument implements Document {
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(versionId));
+        list.add(Value.getStringValue(versionId.toString()));
         return new SimpleProperty(list);
       }
     }

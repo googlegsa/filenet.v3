@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -23,7 +24,6 @@ import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.VersionSeries;
 import com.filenet.api.events.DeletionEvent;
-import com.filenet.api.util.Id;
 
 import java.util.Date;
 import java.util.logging.Logger;
@@ -39,21 +39,23 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public String getId() {
-    return versionSeries.get_Id().toString();
+  public IId getId() throws RepositoryDocumentException {
+    return new FnId(versionSeries.get_Id());
   }
 
   @Override
-  public Date getModifyDate() {
-    // TODO(tdnguyen): revisit this method as the modify date could be the
-    // versionSeries.get_CurrentVersion().get_DateCheckedIn() date.
-    return new Date();
+  public Date getModifyDate() throws RepositoryDocumentException {
+    try {
+      return versionSeries.get_CurrentVersion().get_DateCheckedIn();
+    } catch (Exception e) {
+      throw new RepositoryDocumentException(
+          "Failed to retrieve the last modified or checked-in date.", e);
+    }
   }
 
   @Override
   public boolean isDeletionEvent() throws RepositoryDocumentException {
-    // TODO(tdnguyen): refactor this method.
-    return (versionSeries instanceof DeletionEvent);
+    return false;
   }
 
   @Override
@@ -73,25 +75,8 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public String getVersionSeriesId() throws RepositoryDocumentException {
-    String strId;
-    try {
-      if (versionSeries instanceof DeletionEvent) {
-        // Version series Id is always enclosed with curly braces {versionId}.
-        Id id = ((DeletionEvent) versionSeries).get_VersionSeriesId();
-        strId = id.toString();
-      } else {
-        // Remove curly braces surrounding document id.
-        Id id = ((Document) versionSeries).get_ReleasedVersion()
-            .get_VersionSeries().get_Id();
-        strId = id.toString();
-        strId = strId.substring(1, strId.length() - 1);
-      }
-    } catch (Exception e) {
-      throw new RepositoryDocumentException("Unable to get the VersionSeriesId",
-          e);
-    }
-    return strId;
+  public IId getVersionSeriesId() throws RepositoryDocumentException {
+    return getId();
   }
 
   @Override
