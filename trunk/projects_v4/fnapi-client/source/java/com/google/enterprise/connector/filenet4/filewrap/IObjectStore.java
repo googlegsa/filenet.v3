@@ -16,7 +16,10 @@ public interface IObjectStore {
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException;
 
-  public IBaseObject fetchObject(String type, String id,
+  public IBaseObject getObject(String type, IId id)
+      throws RepositoryDocumentException;
+
+  public IBaseObject fetchObject(String type, IId id,
       PropertyFilter filter) throws RepositoryDocumentException;
 
   String get_Name() throws RepositoryException;

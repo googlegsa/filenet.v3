@@ -14,7 +14,9 @@
 
 package com.google.enterprise.connector.filenet4.mockjavawrap;
 
+import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -30,12 +32,12 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class MockObjectStore implements IObjectStore {
-  private final Map<String, IBaseObject> objects;
+  private final Map<IId, IBaseObject> objects;
   private final String name;
   private final DatabaseType dbType;
 
   public MockObjectStore(String name, DatabaseType databaseType,
-      Map<String, IBaseObject> objects) {
+      Map<IId, IBaseObject> objects) {
     this.name = name;
     this.objects = objects;
     this.dbType = databaseType;
@@ -44,11 +46,17 @@ public class MockObjectStore implements IObjectStore {
   @Override
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException {
+    return getObject(type, new FnId(id));
+  }
+
+  @Override
+  public IBaseObject getObject(String type, IId id)
+      throws RepositoryDocumentException {
     return objects.get(id);
   }
 
   @Override
-  public IBaseObject fetchObject(String type, String id, PropertyFilter filter)
+  public IBaseObject fetchObject(String type, IId id, PropertyFilter filter)
           throws RepositoryDocumentException {
     IBaseObject obj = objects.get(id);
     if (ClassNames.DOCUMENT.equals(type)) {
@@ -91,7 +99,7 @@ public class MockObjectStore implements IObjectStore {
     return null;
   }
 
-  public Map<String, IBaseObject> getObjects() {
+  public Map<IId, IBaseObject> getObjects() {
     return objects;
   }
 }

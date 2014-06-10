@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -45,7 +46,7 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public String getId() throws RepositoryDocumentException {
+  public IId getId() throws RepositoryDocumentException {
     return doc.getId();
   }
 
@@ -55,7 +56,7 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public String getVersionSeriesId() throws RepositoryDocumentException {
+  public IId getVersionSeriesId() throws RepositoryDocumentException {
     return doc.getVersionSeriesId();
   }
 

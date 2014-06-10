@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import java.util.Date;
@@ -33,7 +34,7 @@ public class FileDeletionObject implements IBaseObject {
   }
 
   @Override
-  public String getId() throws RepositoryDocumentException {
+  public IId getId() throws RepositoryDocumentException {
     return baseObject.getId();
   }
 
@@ -43,7 +44,7 @@ public class FileDeletionObject implements IBaseObject {
   }
 
   @Override
-  public String getVersionSeriesId() throws RepositoryDocumentException {
+  public IId getVersionSeriesId() throws RepositoryDocumentException {
     return baseObject.getVersionSeriesId();
   }
 

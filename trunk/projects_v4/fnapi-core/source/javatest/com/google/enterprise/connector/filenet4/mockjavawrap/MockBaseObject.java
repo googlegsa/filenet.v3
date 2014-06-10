@@ -15,18 +15,19 @@
 package com.google.enterprise.connector.filenet4.mockjavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import java.util.Date;
 
 public class MockBaseObject implements IBaseObject {
-  private final String id;
-  private final String versionSeriesId;
+  private final IId id;
+  private final IId versionSeriesId;
   private final Date lastModified;
   private final boolean isDeleteEvent;
   private final boolean releasedVersion;
 
-  public MockBaseObject(String id, String versionSeriesId, Date lastModified,
+  public MockBaseObject(IId id, IId versionSeriesId, Date lastModified,
      boolean isDeletionEvent, boolean releasedVersion) {
     this.id = id;
     this.versionSeriesId = versionSeriesId;
@@ -34,9 +35,9 @@ public class MockBaseObject implements IBaseObject {
     this.isDeleteEvent = isDeletionEvent;
     this.releasedVersion = releasedVersion;
   }
-  
+
   @Override
-  public String getId() throws RepositoryDocumentException {
+  public IId getId() throws RepositoryDocumentException {
     return id;
   }
 
@@ -46,7 +47,7 @@ public class MockBaseObject implements IBaseObject {
   }
 
   @Override
-  public String getVersionSeriesId() throws RepositoryDocumentException {
+  public IId getVersionSeriesId() throws RepositoryDocumentException {
     return versionSeriesId;
   }
 

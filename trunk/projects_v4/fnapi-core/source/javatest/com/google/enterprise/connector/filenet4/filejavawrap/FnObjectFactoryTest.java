@@ -98,7 +98,7 @@ public class FnObjectFactoryTest extends TestCase {
     Iterator<? extends IBaseObject> it = test.getIterator();
     while (it.hasNext()) {
       IBaseObject ibo = it.next();
-      assertEquals(TestConnection.docId1, ibo.getId());
+      assertEquals("{" + TestConnection.docId1 + "}", ibo.getId().toString());
     }
   }
 
