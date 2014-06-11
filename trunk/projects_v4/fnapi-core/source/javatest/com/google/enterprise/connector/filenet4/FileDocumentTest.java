@@ -69,9 +69,8 @@ public class FileDocumentTest extends FileNetTestCase {
    * 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
    */
   public void testFindProperty() throws RepositoryException {
-
     FileDocument fd =
-        new FileDocument(new FnId(TestConnection.docId1), null, ios, connec);
+        new FileDocument(new FnId(TestConnection.docId1), ios, connec);
 
     Property prop = fd.findProperty("Id");
     assertEquals(TestConnection.docId1, prop.nextValue().toString());
@@ -97,7 +96,7 @@ public class FileDocumentTest extends FileNetTestCase {
    */
   public void testGetPropertyNames() throws RepositoryException {
     FileDocument fd =
-        new FileDocument(new FnId(TestConnection.docId2), null, ios, connec);
+        new FileDocument(new FnId(TestConnection.docId2), ios, connec);
     Iterator<String> properties = fd.getPropertyNames().iterator();
 
     int counter = 0;

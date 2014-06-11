@@ -59,23 +59,20 @@ public class FileDocumentList implements DocumentList {
   private final DatabaseType databaseType;
   private final Iterator<? extends IBaseObject> objects;
   private final FileConnector connector;
-  private FileDocument fileDocument;
+  private Document fileDocument;
   private Date fileDocumentDate;
   private Date fileDocumentToDeleteDate;
   private Date fileDocumentToDeleteDocsDate;
   private IId docId;
   private String lastCheckPoint;
-  private String dateFirstPush;
   private IId docIdToDelete;
   private IId docIdToDeleteDocs;
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
-      IObjectStore objectStore, FileConnector connector,
-      String dateFirstPush, String checkPoint) {
+      IObjectStore objectStore, FileConnector connector, String checkPoint) {
     this.objectStore = objectStore;
     this.connector = connector;
-    this.dateFirstPush = dateFirstPush;
     this.lastCheckPoint = checkPoint;
 
     this.databaseType = getDatabaseType(objectStore);
@@ -98,10 +95,9 @@ public class FileDocumentList implements DocumentList {
   }
 
   public FileDocumentList(IObjectSet objectSet, IObjectSet objectSetToDelete,
-      IObjectStore objectStore, FileConnector connector, String dateFirstPush,
-      String checkPoint) {
+      IObjectStore objectStore, FileConnector connector, String checkPoint) {
     this(objectSet, new EmptyObjectSet(), objectSetToDelete, objectStore,
-        connector, dateFirstPush, checkPoint);
+        connector, checkPoint);
   }
 
   private Iterator<? extends IBaseObject> mergeAndSortObjects(
@@ -219,25 +215,23 @@ public class FileDocumentList implements DocumentList {
   /*
    * Helper method to create add document.
    */
-  private FileDocument createAddDocument(IBaseObject object)
+  private Document createAddDocument(IBaseObject object)
       throws RepositoryDocumentException {
     IId id = object.getId();
     logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-    return new FileDocument(id, object.getModifyDate(), objectStore,
-        connector);
+    return new FileDocument(id, objectStore, connector);
   }
 
   /*
    * Helper method to create delete document.
    */
-  private FileDocument createDeleteDocument(IBaseObject object)
+  private Document createDeleteDocument(IBaseObject object)
       throws RepositoryDocumentException {
     IId id = object.getId();
     IId versionSeriesId = object.getVersionSeriesId();
     logger.log(Level.FINEST, "Delete document [ID: {0}, VersionSeriesID: {1}]",
         new Object[] {id, versionSeriesId});
-    return new FileDocument(id, versionSeriesId, object.getModifyDate(),
-        objectStore, connector);
+    return new FileDeleteDocument(versionSeriesId, object.getModifyDate());
   }
 
   /***

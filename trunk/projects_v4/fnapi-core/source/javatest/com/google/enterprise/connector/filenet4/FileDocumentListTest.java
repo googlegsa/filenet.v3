@@ -370,7 +370,7 @@ public class FileDocumentListTest extends FileNetTestCase {
       IObjectSet customDeletionSet, IObjectSet deletionEventSet) {
     Calendar cal = Calendar.getInstance();
     return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
-        os, connec, getDateFirstPush(cal), TestConnection.checkpoint1);
+        os, connec, TestConnection.checkpoint1);
   }
 
   private boolean checkpointContains(String checkpoint, Property lastModified,
@@ -469,10 +469,6 @@ public class FileDocumentListTest extends FileNetTestCase {
       objectMap.put(new FnId(line[0]), new FileDeletionObject(object));
     }
     return objectMap;
-  }
-
-  private String getDateFirstPush(Calendar cal) {
-    return dateFormatter.format(cal.getTime());
   }
 
   private IObjectSet getDocuments(Map<IId, IBaseObject> objects)

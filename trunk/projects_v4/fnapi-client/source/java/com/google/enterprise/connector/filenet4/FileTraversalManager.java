@@ -59,7 +59,6 @@ public class FileTraversalManager implements TraversalManager {
   private static final Logger LOGGER =
       Logger.getLogger(FileTraversalManager.class.getName());
 
-  private static String dateFirstPush;
   private final IObjectFactory fileObjectFactory;
   private final IObjectStore objectStore;
   private final FileConnector connector;
@@ -109,7 +108,7 @@ public class FileTraversalManager implements TraversalManager {
             : "Resuming traversal...");
     DocumentList resultSet = null;
     objectStore.refreshSUserContext();
-    setdateFirstPush();
+
     // to add
     String query = buildQueryString(checkPoint);
 
@@ -138,13 +137,12 @@ public class FileTraversalManager implements TraversalManager {
               || (objectSetToDeleteDocs.getSize() > 0)
               || (objectSetToDelete.getSize() > 0)) {
         resultSet = new FileDocumentList(objectSet, objectSetToDeleteDocs,
-            objectSetToDelete, objectStore, connector, dateFirstPush,
-            checkPoint);
+            objectSetToDelete, objectStore, connector, checkPoint);
       }
     } else {
       if ((objectSet.getSize() > 0) || (objectSetToDelete.getSize() > 0)) {
         resultSet = new FileDocumentList(objectSet, objectSetToDelete,
-            objectStore, connector, dateFirstPush, checkPoint);
+            objectStore, connector, checkPoint);
       }
       LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
       LOGGER.log(Level.INFO, "Number of documents sent to GSA: "
@@ -268,18 +266,6 @@ public class FileTraversalManager implements TraversalManager {
     }
     query.append(orderByToDelete);
     return query.toString();
-  }
-
-  /**
-   * Sets Date and Time of First Push.
-   */
-  private void setdateFirstPush() {
-    LOGGER.fine("Checkpoint is null");
-    Calendar cal = Calendar.getInstance();
-    DateFormat dateStandard = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss.SSS");
-    dateStandard.setTimeZone(TimeZone.getTimeZone("UTC"));
-    dateFirstPush = dateStandard.format(cal.getTime());
   }
 
   /**

@@ -29,7 +29,6 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -50,28 +49,13 @@ public class FileDocument implements Document {
   private final FileConnector connector;
 
   private IDocument document = null;
-  private IId versionId;
-  private Date timeStamp;
   private String vsDocId;
-  private SpiConstants.ActionType action;
 
-  public FileDocument(IId docId, Date timeStamp, IObjectStore objectStore,
+  public FileDocument(IId docId, IObjectStore objectStore,
       FileConnector connector) {
     this.docId = docId;
-    this.timeStamp = timeStamp;
     this.objectStore = objectStore;
     this.connector = connector;
-    this.action = SpiConstants.ActionType.ADD;
-  }
-
-  public FileDocument(IId docId, IId commonVersionId, Date timeStamp,
-      IObjectStore objectStore, FileConnector connector) {
-    this.docId = docId;
-    this.versionId = commonVersionId;
-    this.timeStamp = timeStamp;
-    this.objectStore = objectStore;
-    this.connector = connector;
-    this.action = SpiConstants.ActionType.DELETE;
   }
 
   private void fetch() throws RepositoryDocumentException {
@@ -89,73 +73,55 @@ public class FileDocument implements Document {
   public Property findProperty(String name) throws RepositoryException {
     LinkedList<Value> list = new LinkedList<Value>();
 
-    if (SpiConstants.ActionType.ADD.equals(action)) {
-      fetch();
-      if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getBinaryValue(document.getContent()));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(connector.getWorkplaceDisplayUrl()
-            + vsDocId));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getBooleanValue(connector.isPublic()));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        this.document.getPropertyDateValue("DateLastModified", list);
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
-        document.getPropertyStringValue("MimeType", list);
-        logger.log(Level.FINEST, "Getting property: " + name);
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(vsDocId));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
-        list.add(Value.getStringValue(action.toString()));
-        logger.fine("Getting Property " + name + " : "
-                + action.toString());
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
-        addPrincipals(list, name, document.getPermissions().getAllowUsers());
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
-        addPrincipals(list, name, document.getPermissions().getDenyUsers());
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
-        addPrincipals(list, name, document.getPermissions().getAllowGroups());
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
-        addPrincipals(list, name, document.getPermissions().getDenyGroups());
-        return new SimpleProperty(list);
-      } else if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
-        return null;
-      } else {
-        document.getProperty(name, list);
-      }
+    fetch();
+    if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
+      logger.log(Level.FINEST, "Getting property: " + name);
+      list.add(Value.getBinaryValue(document.getContent()));
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
+      logger.log(Level.FINEST, "Getting property: " + name);
+      list.add(Value.getStringValue(connector.getWorkplaceDisplayUrl()
+              + vsDocId));
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
+      logger.log(Level.FINEST, "Getting property: " + name);
+      list.add(Value.getBooleanValue(connector.isPublic()));
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
+      logger.log(Level.FINEST, "Getting property: " + name);
+      this.document.getPropertyDateValue("DateLastModified", list);
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
+      document.getPropertyStringValue("MimeType", list);
+      logger.log(Level.FINEST, "Getting property: " + name);
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
+      logger.log(Level.FINEST, "Getting property: " + name);
+      list.add(Value.getStringValue(vsDocId));
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
+      list.add(Value.getStringValue(SpiConstants.ActionType.ADD.toString()));
+      logger.fine("Getting Property " + name + " : "
+          + SpiConstants.ActionType.ADD.toString());
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
+      addPrincipals(list, name, document.getPermissions().getAllowUsers());
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
+      addPrincipals(list, name, document.getPermissions().getDenyUsers());
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
+      addPrincipals(list, name, document.getPermissions().getAllowGroups());
+      return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
+      addPrincipals(list, name, document.getPermissions().getDenyGroups());
+      return new SimpleProperty(list);
+    } else if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
+      return null;
     } else {
-      if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        Calendar tmpCal = Calendar.getInstance();
-        tmpCal.setTime(timeStamp);
-        list.add(Value.getDateValue(tmpCal));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(action.toString()));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(versionId.toString()));
-        return new SimpleProperty(list);
-      }
+      document.getProperty(name, list);
+      return new SimpleProperty(list);
     }
-    return new SimpleProperty(list);
   }
 
   /*
@@ -174,10 +140,7 @@ public class FileDocument implements Document {
   @Override
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
     Set<String> properties = new HashSet<String>();
-    if (SpiConstants.ActionType.DELETE.equals(action)) {
-      // return empty set of property names
-      return properties;
-    }
+
     properties.add(SpiConstants.PROPNAME_ACLUSERS);
     properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
     properties.add(SpiConstants.PROPNAME_ACLGROUPS);
