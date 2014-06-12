@@ -68,8 +68,7 @@ public class TestConnection {
   // docVsId1
   public static final String docVsId4;
 
-  // CHeckpoint of the last modified document TestAuthentication.pdf
-  public static final String checkpoint1;
+  // Checkpoint of the last modified document TestAuthentication.pdf
   public static final String checkpoint2;
 
   static {
@@ -110,7 +109,6 @@ public class TestConnection {
     docVsId2 = props.getProperty("docVsId2");
     docVsId3 = props.getProperty("docVsId3");
     docVsId4 = props.getProperty("docVsId4");
-    checkpoint1 = props.getProperty("checkpoint1");
     checkpoint2 = props.getProperty("checkpoint2");
   }
   
