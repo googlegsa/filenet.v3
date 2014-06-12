@@ -280,10 +280,10 @@ public class FileDocumentList implements DocumentList {
     String dateString;
     try {
       if (nextCheckpointDate == null) {
-        if (jo.isNull(jsonDateField.name())) {
+        if (jo.isNull(jsonDateField.toString())) {
           dateString = Value.calendarToIso8601(cal);
         } else {
-          dateString = jo.getString(jsonDateField.name());
+          dateString = jo.getString(jsonDateField.toString());
         }
       } else {
         cal.setTime(nextCheckpointDate);
@@ -291,10 +291,10 @@ public class FileDocumentList implements DocumentList {
       }
       String guid;
       if (uuid == null) {
-        if (jo.isNull(jsonUuidField.name())) {
+        if (jo.isNull(jsonUuidField.toString())) {
           guid = "";
         } else {
-          guid = jo.getString(jsonUuidField.name());
+          guid = jo.getString(jsonUuidField.toString());
         }
       } else {
         guid = uuid.toString();
