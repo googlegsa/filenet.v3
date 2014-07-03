@@ -14,42 +14,46 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filejavawrap.FnPermissions;
+import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
+import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
+import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
-import com.google.enterprise.connector.spi.SpiConstants.ActionType;
+import com.google.enterprise.connector.spi.Value;
 
-import com.filenet.api.core.Document;
-import com.filenet.api.core.Factory;
+import com.filenet.api.constants.ClassNames;
 import com.filenet.api.util.UserContext;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class FileDocumentTest extends FileNetTestCase {
-
+  FileConnector connec;
   FileSession fs;
   IObjectStore ios;
-  IConnection conn;
   UserContext uc;
   IObjectFactory iof;
   IUser adminUser;
 
   protected void setUp() throws Exception {
-
-    FileConnector connec = new FileConnector();
+    connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
     connec.setObject_store(TestConnection.objectStore);
     connec.setWorkplace_display_url(TestConnection.displayURL);
     connec.setObject_factory(TestConnection.objectFactory);
     connec.setContent_engine_url(TestConnection.uri);
+    connec.setIncluded_meta(TestConnection.included_meta);
+    connec.setExcluded_meta(TestConnection.excluded_meta);
+    connec.setIs_public("true");
 
     fs = (FileSession) connec.login();
 
@@ -65,10 +69,8 @@ public class FileDocumentTest extends FileNetTestCase {
    * 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
    */
   public void testFindProperty() throws RepositoryException {
-
-    FileDocument fd = new FileDocument(TestConnection.docId1, null, ios,
-            false, TestConnection.displayURL, TestConnection.included_meta,
-            TestConnection.excluded_meta, ActionType.ADD);
+    FileDocument fd =
+        new FileDocument(new FnId(TestConnection.docId1), ios, connec);
 
     Property prop = fd.findProperty("Id");
     assertEquals(TestConnection.docId1, prop.nextValue().toString());
@@ -93,10 +95,8 @@ public class FileDocumentTest extends FileNetTestCase {
    * 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
    */
   public void testGetPropertyNames() throws RepositoryException {
-
-    FileDocument fd = new FileDocument(TestConnection.docId2, null, ios,
-            false, TestConnection.displayURL, TestConnection.included_meta,
-            TestConnection.excluded_meta, ActionType.ADD);
+    FileDocument fd =
+        new FileDocument(new FnId(TestConnection.docId2), ios, connec);
     Iterator<String> properties = fd.getPropertyNames().iterator();
 
     int counter = 0;
@@ -120,14 +120,12 @@ public class FileDocumentTest extends FileNetTestCase {
    * be present in the ACL with AccessLevel.VIEW_AS_INT access or above.
    */
   public void testCreatorOwnerPermissions() throws RepositoryException {
-    Document doc = Factory.Document.fetchInstance(ios.getObjectStore(),
-        TestConnection.docId4, null);
-    FnPermissions perms = new FnPermissions(doc.get_Permissions(),
-        doc.get_Owner());
-    assertEquals(doc.get_Owner(), adminUser.getName());
+    IDocument doc = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
+        new FnId(TestConnection.docId4), null);
+    List<Value> ownerValue = new ArrayList<Value>();
+    doc.getPropertyStringValue("Owner", ownerValue);
+    assertEquals(adminUser.getName(), ownerValue.get(0).toString());
+    IPermissions perms = doc.getPermissions();
     assertTrue(perms.authorize(adminUser));
-
-    FnPermissions perms2 = new FnPermissions(doc.get_Permissions(), null);
-    assertFalse(perms2.authorize(adminUser));
   }
 }

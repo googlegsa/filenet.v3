@@ -21,6 +21,7 @@ import com.google.enterprise.connector.filenet4.mock.AccessPermissionMock;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 
 import com.filenet.api.constants.AccessLevel;
+import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.SecurityPrincipalType;
@@ -31,6 +32,9 @@ import junit.framework.TestCase;
 import java.util.Set;
 
 public class FnPermissionsTest extends TestCase {
+  private static int VIEW_ACCESS_RIGHTS =
+      AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT;
+
   private AccessPermissionListMock perms;
   private IUser user;
   
@@ -50,151 +54,195 @@ public class FnPermissionsTest extends TestCase {
     }
   }
 
-  public void testCreatorOwner() {
-    AccessPermissionMock creatorOwnerPerm =
+  public void testAllowCreatorOwnerWithViewLevel() {
+    testCreatorOwnerAccess(AccessType.ALLOW, AccessLevel.VIEW_AS_INT, true);
+  }
+
+  public void testAllowCreatorOwnerWithViewAccessRights() {
+    testCreatorOwnerAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, true);
+  }
+
+  public void testDenyCreatorOwner() {
+    testCreatorOwnerAccess(AccessType.DENY, VIEW_ACCESS_RIGHTS, false);
+  }
+
+  public void testDenyCreatorOwnerWithoutViewContentRight() {
+    testCreatorOwnerAccess(AccessType.DENY, AccessRight.READ_AS_INT, false);
+  }
+
+  public void testDenyCreatorOwnerWithoutReadRight() {
+    testCreatorOwnerAccess(AccessType.DENY, AccessRight.VIEW_CONTENT_AS_INT,
+        false);
+  }
+
+  private void testCreatorOwnerAccess(AccessType accessType, int accessRights,
+      boolean expectedResult) {
+    AccessPermissionMock perm =
         new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    creatorOwnerPerm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    creatorOwnerPerm.set_GranteeType(SecurityPrincipalType.USER);
-    creatorOwnerPerm.set_GranteeName("#CREATOR-OWNER");
-    perms.add(creatorOwnerPerm);
+    perm.set_AccessType(accessType);
+    perm.set_AccessMask(accessRights);
+    perm.set_GranteeType(SecurityPrincipalType.USER);
+    perm.set_GranteeName("#CREATOR-OWNER");
+    perms.add(perm);
+      
+    FnPermissions testPerms = new FnPermissions(perms, user.getName());
+    assertEquals(expectedResult, testPerms.authorize(user));
+  }
+
+  public void testCreatorOwnerWithBothAllowAndDeny() {
+    AccessPermissionMock creatorOwnerPermDeny =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    creatorOwnerPermDeny.set_AccessType(AccessType.DENY);
+    creatorOwnerPermDeny.set_AccessMask(AccessRight.DELETE_AS_INT);
+    creatorOwnerPermDeny.set_GranteeType(SecurityPrincipalType.USER);
+    creatorOwnerPermDeny.set_GranteeName(user.getName());
+    perms.add(creatorOwnerPermDeny);
+
+    AccessPermissionMock creatorOwnerPermAllow =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    creatorOwnerPermAllow.set_AccessType(AccessType.ALLOW);
+    creatorOwnerPermAllow.set_AccessMask(VIEW_ACCESS_RIGHTS);
+    creatorOwnerPermAllow.set_GranteeType(SecurityPrincipalType.USER);
+    creatorOwnerPermAllow.set_GranteeName(user.getName());
+    perms.add(creatorOwnerPermAllow);
 
     FnPermissions testPerms = new FnPermissions(perms, user.getName());
     assertTrue(testPerms.authorize(user));
   }
 
-  public void testUserName() {
+  public void testAllowUserWithoutViewContentRight() {
+    testUserAccess(AccessType.ALLOW, AccessRight.READ_AS_INT, user, false);
+  }
+
+  public void testAllowUserWithoutReadRight() {
+    testUserAccess(AccessType.ALLOW, AccessRight.VIEW_CONTENT_AS_INT, user,
+        false);
+  }
+
+  public void testAllowUserWithoutViewRights() {
+    int accessRights = AccessRight.WRITE_OWNER_AS_INT
+        | AccessRight.WRITE_ACL_AS_INT | AccessRight.DELETE_AS_INT;
+    testUserAccess(AccessType.ALLOW, accessRights, user, false);
+  }
+
+  public void testDenyUserWithoutViewRights() {
+    int accessRights = AccessRight.WRITE_OWNER_AS_INT
+        | AccessRight.WRITE_ACL_AS_INT | AccessRight.DELETE_AS_INT;
+    testUserAccess(AccessType.DENY, accessRights, user, false);
+  }
+
+  private void testUserAccess(AccessType accessType, int accessRights,
+      IUser testUser, boolean expectedResult) {
+    testUserAccess(accessType, accessRights, testUser.getName(), testUser,
+        expectedResult);
+  }
+
+  private void testUserAccess(AccessType accessType, int accessRights,
+      String granteeName, IUser testUser, boolean expectedResult) {
+    testAccess(accessType, accessRights, SecurityPrincipalType.USER,
+        granteeName, testUser, expectedResult);
+  }
+
+  private void testGroupAccess(AccessType accessType, int accessRights,
+      String granteeName, IUser testUser, boolean expectedResult) {
+    testAccess(accessType, accessRights, SecurityPrincipalType.GROUP,
+        granteeName, testUser, expectedResult);
+  }
+
+  private void testAccess(AccessType accessType, int accessRights,
+      SecurityPrincipalType granteeType, String granteeName, IUser testUser,
+      boolean expectedResult) {
     AccessPermissionMock perm =
         new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.USER);
-    perm.set_GranteeName(user.getName());
+    perm.set_AccessType(accessType);
+    perm.set_AccessMask(accessRights);
+    perm.set_GranteeType(granteeType);
+    perm.set_GranteeName(granteeName);
     perms.add(perm);
 
-    // Test internet name
     FnPermissions testPerms = new FnPermissions(perms);
-    assertTrue(testPerms.authorize(user));
+    assertEquals(expectedResult, testPerms.authorize(testUser));
   }
 
   public void testShortName() {
-    AccessPermissionMock perm =
-        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.USER);
-    perm.set_GranteeName("jsmith@example.com");
-    perms.add(perm);
-
-    // Short name should not be authorized
-    FnPermissions testPerms = new FnPermissions(perms);
     IUser jsmith = MockUtil.createUserWithShortName("jsmith");
-    assertFalse(testPerms.authorize(jsmith));
+    testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, jsmith, true);
+  }
+
+  public void testShortNameWithDifferentDomain() {
+    IUser jsmith = MockUtil.createUserWithShortName("jsmith");
+    testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, "jsmith@example.com",
+        jsmith, false);
   }
 
   public void testDistinguishedName() {
-    AccessPermissionMock perm =
-        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.USER);
-    perm.set_GranteeName(user.getDistinguishedName());
-    perms.add(perm);
-
-    // Test distinguished name
-    FnPermissions testPerms = new FnPermissions(perms);
-    assertTrue(testPerms.authorize(user));
+    testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
+        user.getDistinguishedName(), user, true);
   }
 
   public void testInvalidUser() {
-    AccessPermissionMock perm =
-        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.USER);
-    perm.set_GranteeName(user.getName());
-    perms.add(perm);
-
-    // Test invalid user
-    FnPermissions testPerms = new FnPermissions(perms);
     IUser invalidUser = MockUtil.createBlankUser();
-    assertFalse(testPerms.authorize(invalidUser));
+    testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, user.getName(),
+        invalidUser, false);
   }
 
   public void testAuthenticatedUsers() {
-    AccessPermissionMock perm =
-        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.GROUP);
-    perm.set_GranteeName("#AUTHENTICATED-USERS");
-    perms.add(perm);
-
-    // Test #AUTHENTICATED-USERS
-    FnPermissions testPerms = new FnPermissions(perms);
-    assertTrue(testPerms.authorize(user));
+    testAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
+        SecurityPrincipalType.GROUP, "#AUTHENTICATED-USERS", user, true);
   }
 
-  public void testUserGroupAccess() {
+  public void testUserGroupAccess_WithDomainName() {
     Set<String> userGroups = user.getGroupNames();
     assertTrue(userGroups.contains("administrators@" + TestConnection.domain));
-    
-    AccessPermissionMock perm =
-        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.GROUP);
-    perm.set_GranteeName("administrators@" + TestConnection.domain);
-    perms.add(perm);
-
-    // Test user's member of group access
-    FnPermissions testPerms = new FnPermissions(perms);
-    assertTrue(testPerms.authorize(user));
+    testGroupAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
+        "administrators@" + TestConnection.domain, user, true);
   }
 
-  public void testUserGroupAccessWithShortName() {
+  public void testUserGroupAccess_WithShortName() {
     Group everyone = MockUtil.createEveryoneGroup();
     assertEquals(everyone.get_ShortName(), "everyone");
-    
-    AccessPermissionMock perm =
-        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.GROUP);
-    perm.set_GranteeName(everyone.get_ShortName());
-    perms.add(perm);
 
-    // Test user group access where grantee is a group with shortname.
-    FnPermissions testPerms = new FnPermissions(perms);
     IUser jsmith = MockUtil.createUserWithShortName("jsmith");
     assertTrue(jsmith.getGroupNames().contains(everyone.get_Name()));
-    assertFalse(testPerms.authorize(jsmith));
+
+    testGroupAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
+        everyone.get_ShortName(), jsmith, false);
   }
 
-  public void testUserGroupAccessWithDistinguishedName() {
+  public void testUserGroupAccess_WithDistinguishedName() {
     Group everyone = MockUtil.createEveryoneGroup();
     assertEquals(everyone.get_DistinguishedName(),
         MockUtil.getDistinguishedName("everyone@" + TestConnection.domain));
-    
-    AccessPermissionMock perm =
-        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.GROUP);
-    perm.set_GranteeName(everyone.get_DistinguishedName());
-    perms.add(perm);
 
-    // Test user group access where grantee is a group with distinguished name
-    FnPermissions testPerms = new FnPermissions(perms);
     IUser jsmith = MockUtil.createUserWithShortName("jsmith");
     assertTrue(jsmith.getGroupNames().contains(everyone.get_Name()));
-    assertTrue(testPerms.authorize(jsmith));
+
+    testGroupAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
+        everyone.get_DistinguishedName(), jsmith, true);
   }
 
-  public void testUsernameWithDomain() {
-    AccessPermissionMock perm =
-        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
-    perm.set_AccessMask(AccessLevel.VIEW_AS_INT);
-    perm.set_GranteeType(SecurityPrincipalType.USER);
-    perm.set_GranteeName("user@foo.example.com");
-    perms.add(perm);
+  public void testUserGroupAccess_HavingBothAllowAndDeny() {
+    Set<String> userGroups = user.getGroupNames();
+    assertTrue(userGroups.contains("administrators@" + TestConnection.domain));
 
-    // Test invalid user
-    FnPermissions testPerms = new FnPermissions(perms);
-    IUser invalidUser = MockUtil.createUserWithDomain("user",
-        "bar.example.com");
-    assertFalse(testPerms.authorize(invalidUser));
+    AccessPermissionMock permAllow =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    permAllow.set_AccessType(AccessType.ALLOW);
+    permAllow.set_AccessMask(VIEW_ACCESS_RIGHTS);
+    permAllow.set_GranteeType(SecurityPrincipalType.USER);
+    permAllow.set_GranteeName(user.getName());
+    perms.add(permAllow);
+
+    AccessPermissionMock permDeny =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    permDeny.set_AccessType(AccessType.DENY);
+    permDeny.set_AccessMask(VIEW_ACCESS_RIGHTS);
+    permDeny.set_GranteeType(SecurityPrincipalType.GROUP);
+    permDeny.set_GranteeName("administrators@" + TestConnection.domain);
+    perms.add(permDeny);
+
+    FnPermissions testPermsDenyGroup = new FnPermissions(perms);
+    assertFalse(testPermsDenyGroup.authorize(user));
   }
 
   public void testEmptyPermissionList() {
@@ -403,4 +451,171 @@ public class FnPermissionsTest extends TestCase {
         PermissionSource.SOURCE_PARENT.toString() + " deny group ", 5);
   }
 
+  // Calculate constraint mask for rights that are unchecked in the marking.
+  private int constraintMask(AccessRight... allowRights) {
+    int mask = 0;
+    for (AccessRight right : allowRights) {
+      mask |= right.getValue();
+    }
+    return constraintMask(mask);
+  }
+
+  private int constraintMask(int allowRights) {
+    return AccessLevel.FULL_CONTROL_AS_INT & ~allowRights;
+  }
+
+  private void testUserMarking(AccessType accessType, int accessMask,
+      boolean expectedResult, AccessRight... allowRights) {
+    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+    testMarking(accessType, accessMask, SecurityPrincipalType.USER,
+        user1.getName(), user1, expectedResult, allowRights);
+  }
+
+  private void testMarking(AccessType accessType, int accessMask,
+      SecurityPrincipalType secType, String granteeName, IUser testUser,
+      boolean expectedResult, AccessRight... allowRights) {
+    testMarking(accessType, accessMask, secType, granteeName, testUser,
+        expectedResult, constraintMask(allowRights));
+  }
+
+  private void testMarking(AccessType accessType, int accessMask,
+      SecurityPrincipalType secType, String granteeName, IUser testUser,
+      boolean expectedResult, int constraintMask) {
+    AccessPermissionMock perm1 =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    perm1.set_AccessType(accessType);
+    perm1.set_AccessMask(accessMask);
+    perm1.set_GranteeType(secType);
+    perm1.set_GranteeName(granteeName);
+    perms.add(perm1);
+
+    FnPermissions testPerms = new FnPermissions(perms);
+    assertEquals(expectedResult, testPerms.authorizeMarking(testUser,
+        constraintMask));
+  }
+
+  public void testMarking_WithUseRight_AllowAce() {
+      testUserMarking(AccessType.ALLOW, AccessRight.USE_MARKING_AS_INT, true,
+    AccessRight.VIEW_CONTENT, AccessRight.READ);
+    testUserMarking(AccessType.ALLOW, AccessRight.USE_MARKING_AS_INT, true,
+        AccessRight.NONE);
+  }
+
+  public void testMarking_WithUseRight_DenyAce() {
+    testUserMarking(AccessType.DENY, AccessRight.USE_MARKING_AS_INT, true,
+        AccessRight.VIEW_CONTENT, AccessRight.READ);
+    testUserMarking(AccessType.DENY, AccessRight.USE_MARKING_AS_INT, false,
+        AccessRight.VIEW_CONTENT);
+    testUserMarking(AccessType.DENY, AccessRight.USE_MARKING_AS_INT, false,
+        AccessRight.READ);
+  }
+
+  public void testMarking_NoUseRight_ViewLevelConstraint() {
+    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+    testMarking(AccessType.ALLOW, AccessRight.NONE_AS_INT,
+        SecurityPrincipalType.USER, user1.getName(), user1, true,
+        constraintMask(AccessLevel.VIEW_AS_INT));
+    testMarking(AccessType.DENY, AccessRight.NONE_AS_INT,
+        SecurityPrincipalType.USER, user1.getName(), user1, true,
+        constraintMask(AccessLevel.VIEW_AS_INT));
+  }
+
+  public void testMarking_NoUseRight_AllowReadViewContentRights() {
+    testUserMarking(AccessType.ALLOW, AccessRight.NONE_AS_INT, true,
+        AccessRight.VIEW_CONTENT, AccessRight.READ);
+    testUserMarking(AccessType.ALLOW, AccessRight.NONE_AS_INT, true,
+        AccessRight.VIEW_CONTENT, AccessRight.READ, AccessRight.DELETE);
+  }
+
+  public void testMarking_NoUseRight_MissingAllowReadViewContentRights() {
+    testUserMarking(AccessType.ALLOW, AccessRight.NONE_AS_INT, false,
+        AccessRight.VIEW_CONTENT);
+    testUserMarking(AccessType.ALLOW, AccessRight.NONE_AS_INT, false,
+        AccessRight.READ);
+  }
+
+  public void testMarking_NoUseRight_DenyReadViewContentRights() {
+    // Under live test, the DENY access type does not have any effects or
+    // behaves the same as ALLOW; only constraint mask matters.
+    // Testing constraint mask of read or view content rights.
+    testUserMarking(AccessType.DENY, AccessRight.NONE_AS_INT, false,
+        AccessRight.VIEW_CONTENT);
+    testUserMarking(AccessType.DENY, AccessRight.NONE_AS_INT, false,
+        AccessRight.READ);
+
+    // Testing constraint mask of both read and view content rights.
+    testUserMarking(AccessType.DENY, AccessRight.NONE_AS_INT, true,
+        AccessRight.VIEW_CONTENT, AccessRight.READ);
+  }
+
+  public void testMarking_NoUseRight_DenyOtherRights() {
+    testUserMarking(AccessType.DENY, AccessRight.NONE_AS_INT, false,
+        AccessRight.DELETE);
+    testUserMarking(AccessType.DENY, AccessRight.NONE_AS_INT, false,
+        AccessRight.WRITE);
+    testUserMarking(AccessType.DENY, AccessRight.NONE_AS_INT, false,
+        AccessRight.DELETE, AccessRight.WRITE, AccessRight.WRITE_ACL);
+  }
+
+  public void testMarking_NoUseRight_HavingBothAllowAndDeny() {
+    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+
+    AccessPermissionMock perm1 =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    perm1.set_AccessType(AccessType.ALLOW);
+    perm1.set_AccessMask(AccessRight.NONE_AS_INT);
+    perm1.set_GranteeType(SecurityPrincipalType.USER);
+    perm1.set_GranteeName(user1.getName());
+    perms.add(perm1);
+
+    // The access mask can be set to any value for DENY as it does not have any
+    // effects.
+    AccessPermissionMock perm2 =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    perm2.set_AccessType(AccessType.DENY);
+    perm2.set_AccessMask(VIEW_ACCESS_RIGHTS);
+    perm2.set_GranteeType(SecurityPrincipalType.USER);
+    perm2.set_GranteeName(user1.getName());
+    perms.add(perm2);
+
+    FnPermissions testPerms = new FnPermissions(perms);
+    assertEquals(true, testPerms.authorizeMarking(user1,
+        constraintMask(AccessRight.VIEW_CONTENT, AccessRight.READ)));
+  }
+
+  public void testMarking_HavingBothAllowAndDenyUseRights() {
+    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+
+    AccessPermissionMock allowUse =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    allowUse.set_AccessType(AccessType.ALLOW);
+    allowUse.set_AccessMask(AccessRight.USE_MARKING_AS_INT);
+    allowUse.set_GranteeType(SecurityPrincipalType.USER);
+    allowUse.set_GranteeName(user1.getName());
+    perms.add(allowUse);
+
+    AccessPermissionMock denyUse =
+        new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
+    denyUse.set_AccessType(AccessType.DENY);
+    denyUse.set_AccessMask(AccessRight.USE_MARKING_AS_INT);
+    denyUse.set_GranteeType(SecurityPrincipalType.USER);
+    denyUse.set_GranteeName(user1.getName());
+    perms.add(denyUse);
+
+    FnPermissions testPerms = new FnPermissions(perms);
+    assertEquals(false, testPerms.authorizeMarking(user1,
+        constraintMask(AccessRight.NONE_AS_INT)));
+    assertEquals(true, testPerms.authorizeMarking(user1,
+        constraintMask(AccessRight.VIEW_CONTENT, AccessRight.READ)));
+  }
+
+  public void testMarking_UserNotMatchingAnyAces() {
+    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+    testMarking(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
+        SecurityPrincipalType.USER, "user2@bar.example.com", user1, true,
+        AccessRight.READ, AccessRight.VIEW_CONTENT);
+    testMarking(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
+        SecurityPrincipalType.USER, "user2@bar.example.com", user1, false,
+        AccessRight.NONE);
+  }
 }

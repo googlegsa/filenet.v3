@@ -4,23 +4,28 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
+import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.constants.DatabaseType;
-import com.filenet.api.core.ObjectStore;
 import com.filenet.api.property.PropertyFilter;
+import com.filenet.api.util.Id;
+
+import java.util.Iterator;
 
 public interface IObjectStore {
 
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException;
 
-  public IBaseObject fetchObject(String type, String id,
+  public IBaseObject getObject(String type, IId id)
+      throws RepositoryDocumentException;
+
+  public IBaseObject fetchObject(String type, IId id,
       PropertyFilter filter) throws RepositoryDocumentException;
 
-  // TODO(tdnguyen): Rename method getName to get_Name
-  public String getName() throws RepositoryException;
+  String get_Name() throws RepositoryException;
 
-  // TODO(tdnguyen): Remove the getObjectStore method.
-  public ObjectStore getObjectStore() throws RepositoryException;
+  Iterator<PropertyDefinition> getPropertyDefinitions(Id objectId,
+      PropertyFilter filter) throws RepositoryException;
 
   public DatabaseType get_DatabaseType() throws RepositoryException;
 

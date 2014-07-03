@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
@@ -28,7 +29,6 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -44,48 +44,18 @@ public class FileDocument implements Document {
   private static final Logger logger =
       Logger.getLogger(FileDocument.class.getName());
 
-  private String docId;
-  private IObjectStore objectStore;
+  private final IId docId;
+  private final IObjectStore objectStore;
+  private final FileConnector connector;
+
   private IDocument document = null;
-  private boolean isPublic = false;
-  private String displayUrl;
-  private String versionId;
-  private Date timeStamp;
   private String vsDocId;
-  private Set<String> included_meta = null;
-  private Set<String> excluded_meta = null;
 
-  private SpiConstants.ActionType action;
-  private final String globalNamespace;
-
-  public FileDocument(String docId, Date timeStamp, IObjectStore objectStore,
-          boolean isPublic, String displayUrl, Set<String> included_meta,
-          Set<String> excluded_meta, SpiConstants.ActionType action) {
+  public FileDocument(IId docId, IObjectStore objectStore,
+      FileConnector connector) {
     this.docId = docId;
-    this.timeStamp = timeStamp;
     this.objectStore = objectStore;
-    this.isPublic = isPublic;
-    this.displayUrl = displayUrl;
-    this.included_meta = included_meta;
-    this.excluded_meta = excluded_meta;
-    this.action = action;
-    this.globalNamespace = null;
-  }
-
-  public FileDocument(String docId, String commonVersionId, Date timeStamp,
-          IObjectStore objectStore, boolean isPublic, String displayUrl,
-          Set<String> included_meta, Set<String> excluded_meta,
-          SpiConstants.ActionType action, String globalNamespace) {
-    this.docId = docId;
-    this.versionId = commonVersionId;
-    this.timeStamp = timeStamp;
-    this.objectStore = objectStore;
-    this.isPublic = isPublic;
-    this.displayUrl = displayUrl;
-    this.included_meta = included_meta;
-    this.excluded_meta = excluded_meta;
-    this.action = action;
-    this.globalNamespace = globalNamespace;
+    this.connector = connector;
   }
 
   private void fetch() throws RepositoryDocumentException {
@@ -93,12 +63,13 @@ public class FileDocument implements Document {
       return;
     }
     document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
-        FileUtil.getDocumentPropertyFilter(included_meta));
+        FileUtil.getDocumentPropertyFilter(connector.getIncludedMeta()));
     logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
-    vsDocId = document.getVersionSeries().getId();
+    vsDocId = document.getVersionSeries().getId().toString();
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
+  @Override
   public Property findProperty(String name) throws RepositoryException {
     LinkedList<Value> list = new LinkedList<Value>();
 
@@ -152,23 +123,9 @@ public class FileDocument implements Document {
         document.getProperty(name, list);
       }
     } else {
-      if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        Calendar tmpCal = Calendar.getInstance();
-        tmpCal.setTime(timeStamp);
-        list.add(Value.getDateValue(tmpCal));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(action.toString()));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(versionId));
-        return new SimpleProperty(list);
-      }
+      document.getProperty(name, list);
+      return new SimpleProperty(list);
     }
-    return new SimpleProperty(list);
   }
 
   /*
@@ -177,18 +134,17 @@ public class FileDocument implements Document {
    */
   private void addPrincipals(List<Value> list, String propName,
       Set<String> names) {
-    FileUtil.addPrincipals(list, PrincipalType.UNKNOWN, globalNamespace, names,
+    FileUtil.addPrincipals(list, PrincipalType.UNKNOWN,
+        connector.getGoogleGlobalNamespace(), names,
         CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
     logger.log(Level.FINEST, "Getting {0}: {1}",
         new Object[] { propName, names});
   }
 
+  @Override
   public Set<String> getPropertyNames() throws RepositoryDocumentException {
     Set<String> properties = new HashSet<String>();
-    if (SpiConstants.ActionType.DELETE.equals(action)) {
-      // return empty set of property names
-      return properties;
-    }
+
     // Disable ACLs for the 3.2.4 release
     // properties.add(SpiConstants.PROPNAME_ACLUSERS);
     // properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
@@ -199,14 +155,15 @@ public class FileDocument implements Document {
     Set<String> documentProperties = document.getPropertyNames();
     for (String property : documentProperties) {
       if (property != null) {
-        if (included_meta.size() != 0) {
+        if (connector.getIncludedMeta().size() != 0) {
           // includeMeta - excludeMeta
-          if ((!excluded_meta.contains(property) && included_meta.contains(property))) {
+          if ((!connector.getExcludedMeta().contains(property)
+              && connector.getIncludedMeta().contains(property))) {
             properties.add(property);
           }
         } else {
           // superSet - excludeMeta
-          if ((!excluded_meta.contains(property) || included_meta.contains(property))) {
+          if ((!connector.getExcludedMeta().contains(property))) {
             properties.add(property);
           }
         }

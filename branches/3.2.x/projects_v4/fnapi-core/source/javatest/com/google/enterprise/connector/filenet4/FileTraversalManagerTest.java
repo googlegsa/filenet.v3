@@ -29,14 +29,13 @@ import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 public class FileTraversalManagerTest extends FileNetTestCase {
-
   FileSession fs;
-
   FileTraversalManager ftm;
+  FileConnector connec;
   String checkpoint;
 
   protected void setUp() throws RepositoryException {
-    FileConnector connec = new FileConnector();
+    connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
     connec.setObject_store(TestConnection.objectStore);
@@ -108,14 +107,11 @@ public class FileTraversalManagerTest extends FileNetTestCase {
     IObjectFactory factory = createMock(IObjectFactory.class);
     ISearch search = createMock(ISearch.class);
     expect(factory.getSearch(os)).andReturn(search);
-    expect(search.execute(isA(String.class))).andReturn(objectSet).times(3);
+    expect(search.execute(isA(String.class))).andReturn(objectSet).times(2);
     replay(os, factory, search, objectSet);
 
     FileTraversalManager traversalMgr =
-        new FileTraversalManager(factory, os, false, false,
-            TestConnection.displayURL, TestConnection.additional_where_clause,
-            TestConnection.additional_delete_where_clause,
-            TestConnection.included_meta, TestConnection.excluded_meta, null);
+        new FileTraversalManager(factory, os, connec);
     DocumentList docList = traversalMgr.startTraversal();
     assertNull(docList);
     verify(os, factory, search, objectSet);

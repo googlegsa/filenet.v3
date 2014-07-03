@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,8 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarking;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
 
-import com.filenet.api.constants.AccessRight;
 import com.filenet.api.security.ActiveMarking;
+import com.filenet.api.security.Marking;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,79 +32,32 @@ import java.util.logging.Logger;
  */
 
 public class FnActiveMarking implements IActiveMarking {
-  private ActiveMarking marking;
-  private static Logger LOGGER = Logger.getLogger(FnDocument.class.getName());
-  private int VIEW_CONTENT_MASK_LEVEL = AccessRight.VIEW_CONTENT_AS_INT;
-  private int VIEW_PROPERTIES_MASK_LEVEL = AccessRight.READ_AS_INT;
-  private int MODIFY_OWNER_MASK_LEVEL = AccessRight.WRITE_OWNER_AS_INT;
+  private static final Logger LOGGER =
+      Logger.getLogger(FnActiveMarking.class.getName());
+
+  private final Marking marking;
 
   public FnActiveMarking(ActiveMarking marking) {
-    this.marking = marking;
+    this.marking = marking.get_Marking();
   }
 
-  public ActiveMarking getActiveMarking() {
+  public Marking get_Marking() {
     return this.marking;
   }
 
   /**
-   * To authorize a given user against the specific marking value's Access
-   * Control Entries for all the permission of the target document.
+   * Authorize user's access against the active marking of the target document.
    *
-   * @param Username which needs to be authorized.
-   * @return True or False, depending on the success or failure of
-   *         authorization.
+   * @param user which needs to be authorized.
+   * @return True or False.
    */
   public boolean authorize(IUser user) {
-    boolean hasAccess = false;
-    LOGGER.log(Level.INFO, "Authorizing user:[" + user.getName()
-        + "] For marking set value : "
-        + this.marking.get_Marking().get_MarkingValue());
+    LOGGER.log(Level.FINEST,
+        "Authorizing user: {0} [Marking: {1}, Constraint Mask: {2}]",
+        new Object[] {user.getName(), marking.get_MarkingValue(),
+            marking.get_ConstraintMask()});
 
-    hasAccess = ((new FnPermissions(
-        marking.get_Marking().get_Permissions())).authorizeMarking(user));
-
-    // Check whether the user has USE rights over the document or not.
-    // If user does not have USE rights then ConstraintMask check is
-    // required.
-
-    if (hasAccess) {
-      LOGGER.log(Level.FINER, "User: [{0}] has USE right and is authorized"
-          + " to view the document.  Marking: {1}",
-          new Object[] {user.getName(),
-              marking.get_Marking().get_MarkingValue()});
-    } else {
-      LOGGER.log(Level.FINER, "User: [{0}] does not have USE right or is not "
-          + "authorized by the constraint mask: {1}",
-          new Object[] {user.getName(),
-              marking.get_Marking().get_MarkingValue()});
-      hasAccess = checkConstraintMask();
-    }
-    return hasAccess;
-  }
-
-  /**
-   * To check the access rights for 'View_Content' or above level of access
-   * control, for the specific marking value of the target document.
-   *
-   * @param Username which needs to be authorized.
-   * @return True or False, depending on the access control level applied for
-   *         the marking value.
-   */
-
-  private boolean checkConstraintMask() {
-
-    // Check whether the user has atleast 'View Content' right over the
-    // document or not.
-    // if (!(((this.marking.get_Marking().get_ConstraintMask()) &
-    // ACCESS_LEVEL) == ACCESS_LEVEL)) {
-    if ((!(((this.marking.get_Marking().get_ConstraintMask()) & VIEW_CONTENT_MASK_LEVEL) == VIEW_CONTENT_MASK_LEVEL))
-            && ((!(((this.marking.get_Marking().get_ConstraintMask()) & VIEW_PROPERTIES_MASK_LEVEL) == VIEW_PROPERTIES_MASK_LEVEL)) || (!(((this.marking.get_Marking().get_ConstraintMask()) & MODIFY_OWNER_MASK_LEVEL) == MODIFY_OWNER_MASK_LEVEL)))) {
-      LOGGER.log(Level.INFO, "Authorization is Successful for Constraint mask with marking value : "
-              + this.marking.get_Marking().get_MarkingValue());
-      return true;
-    } else {
-      LOGGER.log(Level.WARNING, "Authorization FAILED due to insufficient Access Security Levels. Minimum expected Access Security Level is \"View Content\"");
-      return false;
-    }
+    FnPermissions perms = new FnPermissions(marking.get_Permissions());
+    return perms.authorizeMarking(user, marking.get_ConstraintMask());
   }
 }

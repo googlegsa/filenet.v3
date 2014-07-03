@@ -60,34 +60,25 @@ public class FnObjectStoreTest extends TestCase {
 
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getObject(String,
-   * String)'
-   */
   public void testGetObject() throws RepositoryException {
-    fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT, TestConnection.docId1,
+    fd = (IDocument) ios.getObject(ClassNames.DOCUMENT, TestConnection.docId1);
+    assertNotNull(fd);
+    assertEquals("{" + TestConnection.docId1 + "}", fd.getId().toString());
+  }
+
+  public void testFetchObject() throws RepositoryException {
+    fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
+        new FnId(TestConnection.docId1),
         FileUtil.getDocumentPropertyFilter(TestConnection.included_meta));
     assertNotNull(fd);
-    assertEquals("{" + TestConnection.docId1 + "}", fd.getId());
+    assertEquals("{" + TestConnection.docId1 + "}", fd.getId().toString());
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getName()'
-   */
   public void testGetName() throws RepositoryException {
-    assertEquals(TestConnection.objectStore, ios.getName());
-
+    assertEquals(TestConnection.objectStore, ios.get_Name());
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnObjectStore.getObjectStore()'
-   */
   public void testGetObjectStore() throws RepositoryException {
-    assertNotNull(ios.getObjectStore());
-
+    assertNotNull(((FnObjectStore) ios).getObjectStore());
   }
-
 }

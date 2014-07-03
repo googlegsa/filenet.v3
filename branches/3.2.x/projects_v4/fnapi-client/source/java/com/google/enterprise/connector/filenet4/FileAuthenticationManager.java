@@ -51,6 +51,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
    * authenticates the user
    * @param authenticationIdentity: contains user credentials
    * */
+  @Override
   public AuthenticationResponse authenticate(AuthenticationIdentity id)
       throws RepositoryException {
     IUserContext uc = conn.getUserContext();
