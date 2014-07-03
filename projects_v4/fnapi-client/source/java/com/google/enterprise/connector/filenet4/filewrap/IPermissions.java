@@ -29,7 +29,7 @@ public interface IPermissions {
 
   boolean authorize(IUser user);
 
-  boolean authorizeMarking(IUser user);
+  boolean authorizeMarking(IUser user, Integer constraintMask);
 
   Set<String> getAllowUsers();
   Set<String> getAllowUsers(PermissionSource permSrc);

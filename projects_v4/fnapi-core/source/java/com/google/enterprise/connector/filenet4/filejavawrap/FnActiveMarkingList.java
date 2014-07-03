@@ -31,7 +31,6 @@ import java.util.logging.Logger;
  *
  * @author Dhanashri_Deshpande
  */
-
 public class FnActiveMarkingList implements IActiveMarkingList {
   private static final Logger LOGGER =
       Logger.getLogger(FnActiveMarkingList.class.getName());
@@ -50,7 +49,7 @@ public class FnActiveMarkingList implements IActiveMarkingList {
    * @return True or False, depending on the success or failure of
    *         authorization.
    */
-
+  @Override
   public boolean authorize(IUser user) {
     @SuppressWarnings("unchecked") Iterator<ActiveMarking> markings =
         this.markings.iterator();
@@ -64,8 +63,8 @@ public class FnActiveMarkingList implements IActiveMarkingList {
       if (!(currentMarking.authorize(user))) {
         LOGGER.log(Level.FINER,
             "User {0} is not authorized for Marking value: {1}",
-            new Object[] {user.getName(), currentMarking.getActiveMarking()
-                .get_Marking().get_MarkingValue()});
+            new Object[] {user.getName(), currentMarking.get_Marking()
+                .get_MarkingValue()});
         return false;
       }
     }

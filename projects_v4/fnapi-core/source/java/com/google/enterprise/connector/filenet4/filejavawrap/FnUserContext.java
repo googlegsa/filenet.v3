@@ -44,15 +44,16 @@ public class FnUserContext implements IUserContext {
     this.conn = conn;
   }
 
+  @Override
   public String getName() throws RepositoryException {
     User user = Factory.User.fetchCurrent(conn.getConnection(), null);
     logger.config("User name from connection: " + user.get_Name());
     return user.get_Name();
   }
 
+  @Override
   public IUser authenticate(String username, String password)
           throws RepositoryLoginException {
-
     if (FnCredentialMap.isNull()) {
       logger.info("Initializing the FileNet credentials...");
       FnCredentialMap.init();

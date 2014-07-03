@@ -51,5 +51,4 @@ test.docVsId4=95103AA1-0A88-48D8-B6CF-D1B3853F717A
 
 ##
 # Test Checkpoints
-test.checkpoint1={"uuidToDelete":"","uuid":"8B2D49FA-5D6B-4F99-9A69-652FCADE4D90","lastRemoveDate":"2008-09-15T09:38:58.781","lastModified":"2008-01-16T10:35:00.327"}
 test.checkpoint2={"uuidToDelete":"","uuid":"9F35EEE8-14F6-497B-A664-B81EAAA4DE14","lastRemoveDate":"2008-09-15T09:38:58.781","lastModified":"2008-01-16T10:35:00.327"}

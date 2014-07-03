@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -87,10 +88,12 @@ public class FnDocument implements IDocument {
     return propMap;
   }
 
+  @Override
   public Set<String> getPropertyNames() {
     return metas.keySet();
   }
 
+  @Override
   public void getProperty(String name, List<Value> list)
       throws RepositoryDocumentException {
     Property prop = metas.get(name);
@@ -132,14 +135,17 @@ public class FnDocument implements IDocument {
     }
   }
 
+  @Override
   public IVersionSeries getVersionSeries() {
     return new FnVersionSeries(doc.get_VersionSeries());
   }
 
-  public String getId() {
-    return doc.get_Id().toString();
+  @Override
+  public IId getId() throws RepositoryDocumentException {
+    return new FnId(doc.get_Id());
   }
 
+  @Override
   public Date getModifyDate() throws RepositoryDocumentException {
     Date modifiedDate;
     try {
@@ -174,27 +180,21 @@ public class FnDocument implements IDocument {
     }
   }
 
-  public String getVersionSeriesId() throws RepositoryDocumentException {
-    String strId;
-    try {
-      if (doc instanceof DeletionEvent) {
-        Id id = ((DeletionEvent) doc).get_VersionSeriesId();
-        strId = id.toString();
-      } else {
-        Id id = doc.get_VersionSeries().get_Id();
-        strId = id.toString();
-        strId = strId.substring(1, strId.length() - 1);
-      }
-    } catch (Exception e) {
-      throw new RepositoryDocumentException(e);
+  @Override
+  public IId getVersionSeriesId() throws RepositoryDocumentException {
+    if (doc instanceof DeletionEvent) {
+      return new FnId(((DeletionEvent) doc).get_VersionSeriesId());
+    } else {
+      return new FnId(doc.get_VersionSeries().get_Id());
     }
-    return strId;
   }
 
+  @Override
   public IPermissions getPermissions() {
     return new FnPermissions(doc.get_Permissions(), doc.get_Owner());
   }
 
+  @Override
   public InputStream getContent() {
     InputStream ip = null;
     try {
@@ -214,6 +214,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
+  @Override
   public void getPropertyStringValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
@@ -254,6 +255,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
+  @Override
   public void getPropertyGuidValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
@@ -301,6 +303,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
+  @Override
   public void getPropertyLongValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
@@ -342,6 +345,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
+  @Override
   public void getPropertyDoubleValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
@@ -376,6 +380,7 @@ public class FnDocument implements IDocument {
     }
   }
 
+  @Override
   public Date getPropertyDateValueDelete(String name)
       throws RepositoryDocumentException {
     // Currently the dummy Date instance is returned. If required then
@@ -392,6 +397,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
+  @Override
   public void getPropertyDateValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
@@ -437,6 +443,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
+  @Override
   public void getPropertyBooleanValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
@@ -477,6 +484,7 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
+  @Override
   public void getPropertyBinaryValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
@@ -501,6 +509,7 @@ public class FnDocument implements IDocument {
     }
   }
 
+  @Override
   public IActiveMarkingList getActiveMarkings() {
     if (doc.get_ActiveMarkings().isEmpty()) {
       return null;

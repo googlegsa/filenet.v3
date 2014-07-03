@@ -1,6 +1,21 @@
+// Copyright 2008 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import com.filenet.api.constants.VersionStatus;
@@ -69,24 +84,16 @@ public class FnBaseObject implements IBaseObject {
     }
   }
 
-  public String getId() throws RepositoryDocumentException {
-    String id;
-    try {
-
-      if (object instanceof DeletionEvent) {
-        id = ((DeletionEvent) this.object).get_Id().toString();
-      } else {
-        id = ((Document) this.object).get_Id().toString();
-      }
-
-      id = id.substring(1, id.length() - 1);
-    } catch (Exception e) {
-      logger.warning("Unable to get ID");
-      throw new RepositoryDocumentException(e);
+  @Override
+  public IId getId() throws RepositoryDocumentException {
+    if (object instanceof DeletionEvent) {
+      return new FnId(((DeletionEvent) object).get_Id());
+    } else {
+      return new FnId(((Document) object).get_Id());
     }
-    return id;
   }
 
+  @Override
   public Date getModifyDate() throws RepositoryDocumentException {
     Date modifiedDate;
     if (object instanceof DeletionEvent) {
@@ -99,9 +106,9 @@ public class FnBaseObject implements IBaseObject {
     return modifiedDate;
   }
 
+  @Override
   public Date getPropertyDateValueDelete(String name)
       throws RepositoryDocumentException {
-
     try {
       Properties props = ((DeletionEvent) this.object).getProperties();
       Iterator it = props.iterator();
@@ -124,23 +131,15 @@ public class FnBaseObject implements IBaseObject {
     return null;
   }
 
-  public String getVersionSeriesId() throws RepositoryDocumentException {
-    String strId;
-    try {
-      if (object instanceof DeletionEvent) {
-        // Version series Id is always enclosed with curly braces {versionId}.
-        Id id = ((DeletionEvent) this.object).get_VersionSeriesId();
-        strId = id.toString();
-      } else {
-        // Return version series ID with curly braces
-        Id id = ((Document) this.object).get_ReleasedVersion()
-            .get_VersionSeries().get_Id();
-        strId = id.toString();
-      }
-    } catch (Exception e) {
-      throw new RepositoryDocumentException("Unable to get Version Series ID",
-          e);
+  @Override
+  public IId getVersionSeriesId() throws RepositoryDocumentException {
+    if (object instanceof DeletionEvent) {
+      Id id = ((DeletionEvent) this.object).get_VersionSeriesId();
+      return new FnId(id);
+    } else {
+      Id id = ((Document) this.object).get_ReleasedVersion()
+          .get_VersionSeries().get_Id();
+      return new FnId(id);
     }
-    return strId;
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2007-2008 Google Inc. All Rights Reserved.
+// Copyright 2014 Google Inc.  All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,22 +14,15 @@
 
 package com.google.enterprise.connector.filenet4.filewrap;
 
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
+import com.filenet.api.constants.DatabaseType;
 
-import java.util.Date;
+/**
+ * Wrapper for com.filenet.api.util.Id.
+ */
+public interface IId {
 
-public interface IBaseObject {
+  int compareTo(IId otherId, DatabaseType dbType);
 
-  IId getId() throws RepositoryDocumentException;
-
-  Date getModifyDate() throws RepositoryDocumentException;
-
-  IId getVersionSeriesId() throws RepositoryDocumentException;
-
-  Date getPropertyDateValueDelete(String name)
-      throws RepositoryDocumentException;
-
-  boolean isDeletionEvent() throws RepositoryDocumentException;
-
-  boolean isReleasedVersion() throws RepositoryDocumentException;
+  @Override
+  String toString();
 }
