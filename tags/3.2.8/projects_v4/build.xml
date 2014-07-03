@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="connector-fileV4" default="connector-fileV4" basedir=".">
+
+  <!-- ========================= PROPERTIES ============================= -->
+  <property file="${user.home}/google-enterprise-connector-file.properties" />
+  <property file="google-enterprise-connector-file.properties" />
+  <property file="version.properties" />
+
+  <property name="COMPILE_DEBUG_FLAG" value="true" />
+  <property name="COMPILE_DEBUG_LEVEL" value="source,lines,vars" />
+  <property name="COMPILE_TARGET" value="1.6" />
+  <property name="COMPILE_BOOTCLASSPATH" value="${build.bootclasspath}" />
+
+  <!-- Define Directories. -->
+  <property name="build" value="build" />
+  <property name="dist" value="dist" />
+  <property name="config" value="fnapi-client/config" />
+  <property name="downloads.dir" value="downloads" />
+
+  <property name="build-client" value="fnapi-client/build" />
+  <property name="src-client" value="fnapi-client/source/java" />
+  <property name="classes-client" value="${build-client}/classes" />
+
+  <property name="build-core" value="fnapi-core/build" />
+  <property name="src-core" value="fnapi-core/source/java" />
+  <property name="classes-core" value="${build-core}/classes" />
+
+  <property name="src-test" value="fnapi-core/source/javatest" />
+  <property name="classes-test" value="${build-core}/test" />
+
+  <property name="jar.dir"  value="${dist}/jar" />
+  <property name="jarfile"  value="${jar.dir}/connector-file4.jar" />
+
+  <property name="file.jarfile" location="third_party/lib/Jace.jar" />
+
+  <property name="connector-manager-projects.dir"
+            location="${build.connector.manager.home}/projects" />
+  <property name="connector-manager.dir"
+            location="${connector-manager-projects.dir}/connector-manager" />
+  <property name="thirdparty.jar.dir"
+            location="${connector-manager.dir}/third-party" />
+  <property name="spi.jar.dir" value="${connector-manager.dir}/dist/jarfile" />
+  <property name="spi.jarfile" value="${spi.jar.dir}/connector-spi.jar" />
+
+  <propertyset id="javatest.properties">
+    <propertyref prefix="test."/>
+    <mapper type="glob" from="test.*" to="*"/>
+  </propertyset>
+
+  <property file="${config}/build_code_coverage.properties"/>
+  <path id="cobertura.classpath">
+    <fileset dir="${thirdparty.jar.dir}/cobertura">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <!-- =========================== TASKS =============================== -->
+  <include file="${connector-manager-projects.dir}/svnbuild.xml" as="svn"/>
+
+  <target name="connector-fileV4" depends="clean,init,compile-client,compile-core,jar">
+  </target>
+
+  <target name="init">
+    <mkdir dir="${build}" />
+    <mkdir dir="${dist}" />
+    <mkdir dir="${build-core}" />
+    <mkdir dir="${build-client}" />
+    <mkdir dir="${classes-core}" />
+    <mkdir dir="${classes-client}" />
+    <mkdir dir="${classes-test}" />
+    <mkdir dir="${jar.dir}" />
+    <mkdir dir="${downloads.dir}" />
+  </target>
+
+  <target name="compile-core" depends="compile-client">
+    <!-- compile java source files -->
+    <javac srcdir="${src-core}" destdir="${classes-core}"
+           includeantruntime="false"
+           debug="${COMPILE_DEBUG_FLAG}" debuglevel="${COMPILE_DEBUG_LEVEL}"
+           target="${COMPILE_TARGET}" source="${COMPILE_TARGET}">
+      <!-- CM, GData, and P8 JAR Class-Path references are not available. -->
+      <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
+      <bootclasspath path="${COMPILE_BOOTCLASSPATH}"/>
+      <classpath>
+        <pathelement location="${file.jarfile}" />
+        <pathelement location="${spi.jarfile}" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="prod/*.jar" />
+        </fileset>
+        <pathelement location="${classes-client}" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="compile-client" depends="init">
+    <!-- compile java source files for tests -->
+    <javac srcdir="${src-client}" destdir="${classes-client}"
+           includeantruntime="false"
+           debug="${COMPILE_DEBUG_FLAG}" debuglevel="${COMPILE_DEBUG_LEVEL}"
+           target="${COMPILE_TARGET}" source="${COMPILE_TARGET}">
+      <!-- CM, GData, and P8 JAR Class-Path references are not available. -->
+      <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
+      <bootclasspath path="${COMPILE_BOOTCLASSPATH}"/>
+      <classpath>
+        <pathelement location="${file.jarfile}" />
+        <pathelement location="${spi.jarfile}" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="prod/*.jar" />
+        </fileset>
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="compile-test" depends="jar">
+    <!-- compile java source files for tests -->
+    <javac srcdir="${src-test}" destdir="${classes-test}"
+           includeantruntime="false"
+           debug="${COMPILE_DEBUG_FLAG}" debuglevel="${COMPILE_DEBUG_LEVEL}"
+           target="${COMPILE_TARGET}" source="${COMPILE_TARGET}">
+      <!-- CM, GData, and P8 JAR Class-Path references are not available. -->
+      <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
+      <bootclasspath path="${COMPILE_BOOTCLASSPATH}"/>
+      <classpath>
+        <pathelement location="${file.jarfile}" />
+        <pathelement location="${spi.jarfile}" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="prod/*.jar" />
+          <include name="tests/*.jar" />
+        </fileset>
+        <pathelement location="${jarfile}" />
+      </classpath>
+    </javac>
+  </target>
+
+  <target name="jar" description="connector-file"
+          depends="compile-core,svn.svn-branch-version">
+    <tstamp />
+    <jar jarfile="${jarfile}">
+      <fileset dir="${config}">
+          <include name="**/*.xml"/>
+          <exclude name="**/logging.properties"/>
+          <include name="**/*.properties"/>
+      </fileset>
+      <fileset dir="${classes-client}"/>
+      <fileset dir="${classes-core}"/>
+      <fileset file="jaas.conf"/>
+
+      <!--creation of manifest file-->
+      <manifest>
+        <attribute name="Implementation-Title"
+                   value="Google Search Appliance Connector for FileNet"/>
+        <attribute name="Implementation-Version"
+                   value="${version} (build ${svn.branch.version} ${TODAY})"/>
+        <attribute name="Implementation-Vendor" value="Google Inc."/>
+        <attribute name="Specification-Title" value="Connector Manager SPI"/>
+        <attribute name="Specification-Version" value="${version.spi}"/>
+        <attribute name="Specification-Vendor" value="Google Inc."/>
+        <attribute name="Main-Class" value="com.google.enterprise.connector.filenet4.FileMain" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean" description="Deletes all build files.">
+    <delete dir="${build}" />
+    <delete dir="${dist}" />
+    <delete dir="${build-core}" />
+    <delete dir="${build-client}" />
+    <delete dir="${classes-core}" />
+    <delete dir="${classes-client}" />
+    <delete dir="${classes-test}" />
+    <delete dir="${downloads.dir}" />
+  </target>
+
+  <!--Cobertura Report Generation -->
+
+  <taskdef classpathref="cobertura.classpath" resource="tasks.properties" />
+
+  <target name="init_code_coverage">
+    <mkdir dir="${instrumented.dir}" />
+    <mkdir dir="${reports.xml.dir}" />
+    <mkdir dir="${reports.html.dir}" />
+    <mkdir dir="${coverage.xml.dir}" />
+    <mkdir dir="${coverage.summaryxml.dir}" />
+    <mkdir dir="${coverage.html.dir}" />
+  </target>
+
+  <target name="compile_code_coverage"
+          depends="init_code_coverage,compile-core,compile-client"/>
+
+  <target name="instrument" depends="compile_code_coverage">
+    <!--
+        Remove the coverage data file and any old instrumentation.
+    -->
+    <delete file="cobertura.ser"/>
+    <delete dir="${instrumented.dir}" />
+
+    <!--
+        Instrument the application classes, writing the
+        instrumented classes into ${build.instrumented.dir}.
+    -->
+    <cobertura-instrument todir="${instrumented.dir}">
+      <!--
+          The following line causes instrument to ignore any
+          source line containing a reference to log4j, for the
+          purposes of coverage reporting.
+      -->
+      <ignore regex="org.apache.log4j.*" />
+
+      <fileset dir="${classes-core}">
+        <!--
+            Instrument all the application classes, but
+            don't instrument the test classes.
+        -->
+        <include name="**/*.class" />
+        <exclude name="**/*Test.class" />
+      </fileset>
+      <fileset dir="${classes-client}">
+        <!--
+            Instrument all the application classes, but
+            don't instrument the test classes.
+        -->
+        <include name="**/*.class" />
+        <exclude name="**/*Test.class" />
+      </fileset>
+    </cobertura-instrument>
+  </target>
+
+  <target name="run_tests" depends="instrument,compile-test">
+    <property name="test.suite" value="*" />
+    <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
+      <!--
+          Note the classpath order: instrumented classes are before the
+          original (uninstrumented) classes.  This is important.
+      -->
+      <sysproperty key="net.sourceforge.cobertura.datafile"
+                   file="${basedir}/cobertura.ser" />
+      <classpath>
+        <pathelement location="${instrumented.dir}" />
+        <pathelement location="${file.jarfile}" />
+        <pathelement location="${spi.jarfile}" />
+        <fileset dir="${thirdparty.jar.dir}">
+          <include name="prod/*.jar" />
+          <include name="tests/*.jar" />
+        </fileset>
+        <pathelement location="${jarfile}" />
+        <pathelement location="${classes-test}" />
+      </classpath>
+
+      <!--
+          The instrumented classes reference classes used by the
+          Cobertura runtime, so Cobertura and its dependencies
+          must be on your classpath.
+      -->
+      <classpath refid="cobertura.classpath" />
+      <syspropertyset refid="javatest.properties"/>
+      <formatter type="xml" />
+      <batchtest todir="${reports.xml.dir}" unless="testcase">
+        <fileset dir="${src-test}">
+          <include name="**/${test.suite}Test.java" />
+        </fileset>
+      </batchtest>
+    </junit>
+
+    <junitreport todir="${reports.xml.dir}">
+      <fileset dir="${reports.xml.dir}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report format="frames" todir="${reports.html.dir}" />
+    </junitreport>
+
+    <fail if="test.failed" message="Test failure"/>
+  </target>
+
+  <target name="coverage-report">
+    <!--
+        Generate an XML file containing the coverage data using
+        the "srcdir" attribute.
+    -->
+    <cobertura-report srcdir="${src.client.dir}" destdir="${coverage.xml.dir}" format="xml" />
+  </target>
+
+  <target name="alternate-coverage-report">
+    <!--
+        Generate a series of HTML files containing the coverage
+        data in a user-readable form using nested source filesets.
+    -->
+    <cobertura-report destdir="${coverage.html.dir}">
+      <fileset dir="${src.client.dir}">
+        <include name="**/*.java"/>
+      </fileset>
+    </cobertura-report>
+  </target>
+
+  <target name="clean_code_coverage" description="Remove all files created by the build/test process.">
+    <delete dir="${instrumented.dir}" />
+    <delete dir="${reports.dir}" />
+    <delete file="cobertura.log" />
+    <delete file="cobertura.ser" />
+  </target>
+
+  <target name="run_code_coverage" depends="run_tests,coverage-report,alternate-coverage-report" description="Compile, instrument ourself, run the tests and generate JUnit and coverage reports."/>
+
+  <!-- Zip and Archive -->
+  <target name="init-package" depends="svn.svn-branch">
+    <property name="downloads.prefix" value="connector-file4-${svn.branch}" />
+    <property name="repackage.prefix" value="connector-file4-${version}"/>
+  </target>
+
+  <target name="download-bin-archive" depends="jar,init-package">
+    <property name="bin.archive" value="${downloads.prefix}" />
+    <zip destfile="${downloads.dir}/${bin.archive}.zip">
+      <zipfileset file="${jarfile}" prefix="${bin.archive}" />
+      <zipfileset file="RELEASE_NOTES" prefix="${bin.archive}" />
+      <zipfileset file="README.txt" prefix="${bin.archive}" />
+      <zipfileset file="jaas.conf" prefix="${bin.archive}/Config" />
+      <zipfileset dir="../License" prefix="${bin.archive}/License" />
+      <zipfileset file="${config}/config/logging.properties"
+                  prefix="${bin.archive}/Config" />
+    </zip>
+    <checksum algorithm="SHA-1">
+      <fileset dir="${downloads.dir}">
+        <include name="${bin.archive}*" />
+      </fileset>
+    </checksum>
+  </target>
+
+  <target name="download-src-archive" depends="init-package">
+    <property name="src.archive" value="${downloads.prefix}-src" />
+    <zip destfile="${downloads.dir}/${src.archive}.zip">
+      <zipfileset file="Build_ReadMe.txt" prefix="${src.archive}" />
+      <zipfileset file="../RELEASE_NOTES" prefix="${src.archive}" />
+      <zipfileset file="README.txt" prefix="${src.archive}" />
+      <zipfileset dir="../License" prefix="${src.archive}/License" />
+      <zipfileset file="version.properties" prefix="${src.archive}/source" />
+      <zipfileset file="build.xml" prefix="${src.archive}/source" />
+      <zipfileset dir="fnapi-client"
+                  prefix="${src.archive}/source/fnapi-client" />
+      <zipfileset dir="fnapi-core" prefix="${src.archive}/source/fnapi-core" />
+    </zip>
+    <checksum algorithm="SHA-1">
+      <fileset dir="${downloads.dir}">
+        <include name="${src.archive}*" />
+      </fileset>
+    </checksum>
+  </target>
+
+  <target name="repackage" depends="init-package"
+          description="Repackage release candidate files for release.">
+    <repackage-downloads downloads.dir="${downloads.dir}"
+                         downloads.prefix="${downloads.prefix}"
+                         repackage.prefix="${repackage.prefix}" />
+  </target>
+</project>
