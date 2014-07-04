@@ -1,0 +1,1199 @@
+Apr 23, 2010 6:12:12 PM com.google.enterprise.connector.pusher.DocPusher submitFeed
+FINER: Records generated for incremental feed of fpautomation:
+<record url="googleconnector://fpautomation.localhost/doc?docid={DF67565E-F8C1-4F2E-9AF2-181CF4689A89}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={DF67565E-F8C1-4F2E-9AF2-181CF4689A89}" action="add" mimetype="application/msword" last-modified="Tue, 06 Apr 2010 13:35:23 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/msword"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Lion"/>
+<meta name="DateLastModified" content="2010-04-06"/>
+<meta name="DateCreated" content="2010-04-06"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="136704.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Lion"/>
+<meta name="Id" content="3C5C792D-1D30-423C-9947-CCBF3FDE4241"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={540EA952-B222-4F41-B695-D9C3C4E5A577}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={540EA952-B222-4F41-B695-D9C3C4E5A577}" action="add" mimetype="application/msword" last-modified="Tue, 06 Apr 2010 13:35:55 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/msword"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Lotus"/>
+<meta name="DateLastModified" content="2010-04-06"/>
+<meta name="DateCreated" content="2010-04-06"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="150016.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Lotus"/>
+<meta name="Id" content="011B77D5-53C6-41D0-A05C-0CA7E2F05A37"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={A4B18310-4A52-4475-8F14-DB1FF892B331}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={A4B18310-4A52-4475-8F14-DB1FF892B331}" action="add" mimetype="text/plain" last-modified="Tue, 13 Apr 2010 19:24:45 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/plain"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments00.txt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="18099.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments00.txt"/>
+<meta name="Id" content="75D8008C-2FD9-4AC2-92F6-B23CAA9C8A35"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={2789C19C-B45F-43C2-A081-818CC5B20683}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={2789C19C-B45F-43C2-A081-818CC5B20683}" action="add" mimetype="text/plain" last-modified="Tue, 13 Apr 2010 19:24:46 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/plain"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments01.txt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="13122.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments01.txt"/>
+<meta name="Id" content="A1DEF101-CAEC-4166-83D7-A111EA4DFFDA"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={414DBB9B-6F61-4E5C-B66A-38FA1F8334EC}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={414DBB9B-6F61-4E5C-B66A-38FA1F8334EC}" action="add" mimetype="text/plain" last-modified="Tue, 13 Apr 2010 19:24:46 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/plain"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments02.txt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="13247.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments02.txt"/>
+<meta name="Id" content="9B78CE11-2F8C-4A73-B0FB-A8ABA01B61AD"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={71E68127-CA5E-49B2-B9FB-4510506361C9}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={71E68127-CA5E-49B2-B9FB-4510506361C9}" action="add" mimetype="text/plain" last-modified="Tue, 13 Apr 2010 19:24:46 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/plain"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments03.txt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="13482.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments03.txt"/>
+<meta name="Id" content="EE526C9C-3146-4019-A248-1AE01498F944"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={CFAC0456-BD6B-4CDD-91AC-AFADB4A9B24A}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={CFAC0456-BD6B-4CDD-91AC-AFADB4A9B24A}" action="add" mimetype="text/plain" last-modified="Tue, 13 Apr 2010 19:24:47 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/plain"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments04.txt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="15460.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments04.txt"/>
+<meta name="Id" content="CDA58D63-F228-47D2-B7A2-F55324A156FD"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={3B91E2D6-7642-404F-BA7B-55B923BBBA13}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={3B91E2D6-7642-404F-BA7B-55B923BBBA13}" action="add" mimetype="application/msword" last-modified="Tue, 13 Apr 2010 19:24:47 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/msword"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AWordDocuments00.doc"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="22189.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AWordDocuments00.doc"/>
+<meta name="Id" content="09899FE9-56B7-4043-8A14-5599561FF005"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={D937F75C-0426-4537-9607-DADF013FEA4A}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={D937F75C-0426-4537-9607-DADF013FEA4A}" action="add" mimetype="application/msword" last-modified="Tue, 13 Apr 2010 19:24:48 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/msword"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AWordDocuments01.doc"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="23122.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AWordDocuments01.doc"/>
+<meta name="Id" content="87123976-7FC4-4489-8C13-F7249ED79D63"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={EC8D9C34-1A23-49DC-B2DA-6B507B777F8D}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={EC8D9C34-1A23-49DC-B2DA-6B507B777F8D}" action="add" mimetype="application/msword" last-modified="Tue, 13 Apr 2010 19:25:02 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/msword"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AWordDocuments02.doc"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="9465.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AWordDocuments02.doc"/>
+<meta name="Id" content="A34ED74C-DBFF-423F-9948-87BED4788244"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={288495B3-9DE8-4F00-BD90-256D1E83E96D}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={288495B3-9DE8-4F00-BD90-256D1E83E96D}" action="add" mimetype="application/msword" last-modified="Tue, 13 Apr 2010 19:25:03 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/msword"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AWordDocuments03.doc"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="18808.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AWordDocuments03.doc"/>
+<meta name="Id" content="BEDF94DA-9846-43EE-A65A-616D0CA57507"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={9EF548E7-6AAB-4C17-8821-459CD7091B79}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={9EF548E7-6AAB-4C17-8821-459CD7091B79}" action="add" mimetype="application/msword" last-modified="Tue, 13 Apr 2010 19:25:03 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/msword"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AWordDocuments04.doc"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="15747.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AWordDocuments04.doc"/>
+<meta name="Id" content="1F345B9A-08B1-482C-93C5-3841B7087DB1"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={18C861A9-E954-408C-BBD1-7A2516AE3032}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={18C861A9-E954-408C-BBD1-7A2516AE3032}" action="add" mimetype="application/vnd.ms-excel" last-modified="Tue, 13 Apr 2010 19:25:04 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-excel"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AExcel00.xls"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="9370.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AExcel00.xls"/>
+<meta name="Id" content="8A2AA6B4-2593-4C51-8B68-DF4C1CEC2166"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={999059CA-9FDB-4ADE-B3C6-3FF8893C5159}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={999059CA-9FDB-4ADE-B3C6-3FF8893C5159}" action="add" mimetype="application/vnd.ms-excel" last-modified="Tue, 13 Apr 2010 19:25:04 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-excel"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AExcel01.xls"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="24071.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AExcel01.xls"/>
+<meta name="Id" content="65C3612F-A8BF-4AD1-8FFC-C98B747D0025"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={86ED3844-AB12-477C-9774-4029673EADA0}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={86ED3844-AB12-477C-9774-4029673EADA0}" action="add" mimetype="application/vnd.ms-excel" last-modified="Tue, 13 Apr 2010 19:25:32 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-excel"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AExcel02.xls"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="9135.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AExcel02.xls"/>
+<meta name="Id" content="557B20D1-2FC1-4C53-BA1F-A6681D9A6D10"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={B4B7CADE-3CE0-44FA-8185-D4654871D4BD}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={B4B7CADE-3CE0-44FA-8185-D4654871D4BD}" action="add" mimetype="application/vnd.ms-excel" last-modified="Tue, 13 Apr 2010 19:25:41 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-excel"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AExcel03.xls"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="24572.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AExcel03.xls"/>
+<meta name="Id" content="EBD20153-D84C-4C07-9A4A-1B00FE2A7CAA"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={690B24D3-B1F5-473C-9103-E21BA85C1D5B}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={690B24D3-B1F5-473C-9103-E21BA85C1D5B}" action="add" mimetype="application/vnd.ms-excel" last-modified="Tue, 13 Apr 2010 19:25:55 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-excel"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AExcel04.xls"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="26774.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AExcel04.xls"/>
+<meta name="Id" content="C1726C2D-C3CA-4587-99FC-A5A3A89546D2"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={117B2E0B-A173-44B4-9E82-1EB434ACB623}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={117B2E0B-A173-44B4-9E82-1EB434ACB623}" action="add" mimetype="application/vnd.ms-powerpoint" last-modified="Tue, 13 Apr 2010 19:26:23 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-powerpoint"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="APPTDocuments00.ppt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="4347.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="APPTDocuments00.ppt"/>
+<meta name="Id" content="7D5EE7C6-3896-4385-9944-56A144190C6B"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={C08D4606-1E07-4132-9662-7EB6D43E161F}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={C08D4606-1E07-4132-9662-7EB6D43E161F}" action="add" mimetype="application/vnd.ms-powerpoint" last-modified="Tue, 13 Apr 2010 19:26:32 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-powerpoint"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="APPTDocuments01.ppt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="7494.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="APPTDocuments01.ppt"/>
+<meta name="Id" content="98F650A1-7AFB-4576-BE95-8994DC46A2D7"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={812E23EB-F2CE-45D5-87F3-876CD8BDD331}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={812E23EB-F2CE-45D5-87F3-876CD8BDD331}" action="add" mimetype="application/vnd.ms-powerpoint" last-modified="Tue, 13 Apr 2010 19:26:45 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-powerpoint"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="APPTDocuments02.ppt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="10408.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="APPTDocuments02.ppt"/>
+<meta name="Id" content="9DC10F36-187A-495B-B04C-3C7BA8515DB4"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={F6D67179-9FAB-46DD-A187-8DFC6072432E}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={F6D67179-9FAB-46DD-A187-8DFC6072432E}" action="add" mimetype="application/vnd.ms-powerpoint" last-modified="Tue, 13 Apr 2010 19:27:05 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-powerpoint"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="APPTDocuments03.ppt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="4819.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="APPTDocuments03.ppt"/>
+<meta name="Id" content="462823B8-CD93-45A2-A1C4-710A2E4E7E3B"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={34C1206D-03A2-4814-9770-4E06DB756558}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={34C1206D-03A2-4814-9770-4E06DB756558}" action="add" mimetype="application/vnd.ms-powerpoint" last-modified="Tue, 13 Apr 2010 19:27:17 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/vnd.ms-powerpoint"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="APPTDocuments04.ppt"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="4318.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="APPTDocuments04.ppt"/>
+<meta name="Id" content="08934653-912C-4972-9891-E70CBF68BBA5"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={7E4E848E-A0A9-4B8B-A3CA-6F746CE81413}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={7E4E848E-A0A9-4B8B-A3CA-6F746CE81413}" action="add" mimetype="image/jpeg" last-modified="Tue, 13 Apr 2010 19:27:57 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/jpeg"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Blue hills.jpg"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="28521.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Blue hills.jpg"/>
+<meta name="Id" content="0F64ADD5-7D4F-4D8E-814C-3D7B274A838B"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={EAB0782B-6068-4C65-BFE3-B573FB5A2EDD}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={EAB0782B-6068-4C65-BFE3-B573FB5A2EDD}" action="add" mimetype="image/jpeg" last-modified="Tue, 13 Apr 2010 19:28:06 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/jpeg"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Object Error msg on GSA.JPG"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="86796.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Object Error msg on GSA.JPG"/>
+<meta name="Id" content="2CB32230-3C55-4D64-8B86-129FD469BA6A"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={D7F0CB43-8EF3-42E3-8059-B00A30C3E749}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={D7F0CB43-8EF3-42E3-8059-B00A30C3E749}" action="add" mimetype="image/jpeg" last-modified="Tue, 13 Apr 2010 19:28:18 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/jpeg"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="search result.JPG"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="17242.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="search result.JPG"/>
+<meta name="Id" content="3A5447D3-C576-452A-8728-A69C86A5B55A"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={D630EACA-4D53-490A-B390-3B90D08A10CB}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={D630EACA-4D53-490A-B390-3B90D08A10CB}" action="add" mimetype="image/bmp" last-modified="Tue, 13 Apr 2010 19:28:59 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/bmp"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Blue Lace 16.bmp"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="1272.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Blue Lace 16.bmp"/>
+<meta name="Id" content="E7F7D5FF-A2B0-4DA0-A869-EF297B69EC91"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={1EB9FC0C-24A2-41EE-B8D5-2CBAF46C2148}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={1EB9FC0C-24A2-41EE-B8D5-2CBAF46C2148}" action="add" mimetype="image/bmp" last-modified="Tue, 13 Apr 2010 19:29:15 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/bmp"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Coffee Bean.bmp"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="17062.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Coffee Bean.bmp"/>
+<meta name="Id" content="D66DA38B-168A-4D23-8165-6DDAEF80444E"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={6DC120F3-D0D1-4FCE-A5C6-12114A8B169E}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={6DC120F3-D0D1-4FCE-A5C6-12114A8B169E}" action="add" mimetype="text/html" last-modified="Tue, 13 Apr 2010 19:29:35 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/html"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments2200.html"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="4776.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments2200.html"/>
+<meta name="Id" content="7D6816C9-25F4-4D11-A871-A7A221A5C3BF"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={226A9BFD-AB40-4FA2-818D-EA2059C803DF}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={226A9BFD-AB40-4FA2-818D-EA2059C803DF}" action="add" mimetype="text/html" last-modified="Tue, 13 Apr 2010 19:29:45 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/html"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments2201.html"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="4723.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments2201.html"/>
+<meta name="Id" content="4221BF2E-40AC-4743-94DF-A2DB5DC6F009"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={79A269FE-8056-4A03-8F24-E2F98806FE4C}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={79A269FE-8056-4A03-8F24-E2F98806FE4C}" action="add" mimetype="text/html" last-modified="Tue, 13 Apr 2010 19:29:56 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/html"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments2202.html"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="6435.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments2202.html"/>
+<meta name="Id" content="BA7661B4-C162-4EC7-9B08-E84DCBCAA454"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={0F844C00-A46D-47E6-8936-09E04BE7EDF5}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={0F844C00-A46D-47E6-8936-09E04BE7EDF5}" action="add" mimetype="text/html" last-modified="Tue, 13 Apr 2010 19:30:07 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/html"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments2203.html"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="14760.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments2203.html"/>
+<meta name="Id" content="DCF714E3-15B7-490E-ADA3-CCC48C0A493D"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={A3057E6A-274C-4C0D-8E0C-8BDB3FA1DB8D}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={A3057E6A-274C-4C0D-8E0C-8BDB3FA1DB8D}" action="add" mimetype="text/html" last-modified="Tue, 13 Apr 2010 19:30:26 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/html"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="ATextDocuments2204.html"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="11580.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="ATextDocuments2204.html"/>
+<meta name="Id" content="210B154B-CE0A-44C5-8A72-FE3A7F030102"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={BDBE0945-16CB-4D73-80B1-6840A1E969FD}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={BDBE0945-16CB-4D73-80B1-6840A1E969FD}" action="add" mimetype="text/xml" last-modified="Tue, 13 Apr 2010 19:30:57 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/xml"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="AuthnResponse.xml"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="1396.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="AuthnResponse.xml"/>
+<meta name="Id" content="4725FA42-2C0B-46AA-B147-28C01E297A14"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={0F5F5C91-954F-4CB2-9EE0-2D189A7E066B}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={0F5F5C91-954F-4CB2-9EE0-2D189A7E066B}" action="add" mimetype="text/xml" last-modified="Tue, 13 Apr 2010 19:31:05 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/xml"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="connectorDefaults.xml"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="3818.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="connectorDefaults.xml"/>
+<meta name="Id" content="4423F58E-E72D-4592-B069-2934155AE537"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={FBFA4BBA-1A31-45F5-8423-D5C9B95B038E}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={FBFA4BBA-1A31-45F5-8423-D5C9B95B038E}" action="add" mimetype="text/xml" last-modified="Tue, 13 Apr 2010 19:31:18 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/xml"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="connectorInstance.xml"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="2521.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="connectorInstance.xml"/>
+<meta name="Id" content="4B18605A-20EB-4F2B-B627-E8B6DCC0E0FD"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={AE5F8FC7-71F6-40C0-B634-D7E085200047}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={AE5F8FC7-71F6-40C0-B634-D7E085200047}" action="add" mimetype="text/xml" last-modified="Tue, 13 Apr 2010 19:31:25 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/xml"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="context.xml"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="1395.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="context.xml"/>
+<meta name="Id" content="6403D699-87E0-42EA-8327-71AEC801A27A"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={03A7EAD8-F1EB-4E25-873C-CEEE436D0B82}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={03A7EAD8-F1EB-4E25-873C-CEEE436D0B82}" action="add" mimetype="message/rfc822" last-modified="Tue, 13 Apr 2010 19:31:42 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="message/rfc822"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="10.mht"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="466754.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="10.mht"/>
+<meta name="Id" content="8E824FA9-A02B-45B5-8456-07787DBA5058"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={5458A9FA-4022-434A-BA2D-B11BFE52107B}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={5458A9FA-4022-434A-BA2D-B11BFE52107B}" action="add" mimetype="message/rfc822" last-modified="Tue, 13 Apr 2010 19:32:01 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="message/rfc822"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="14.mht"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="473315.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="14.mht"/>
+<meta name="Id" content="8D3800B2-5ECD-4FF9-9FCB-48B0DE7B67C1"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={60F3AFBC-34EB-4F5A-BD52-8ED7046CE847}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={60F3AFBC-34EB-4F5A-BD52-8ED7046CE847}" action="add" mimetype="message/rfc822" last-modified="Tue, 13 Apr 2010 19:32:09 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="message/rfc822"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="3.mht"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="317750.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="3.mht"/>
+<meta name="Id" content="3393E683-FF37-4284-BFA4-B0D602969D83"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={6997FC1A-700E-42B5-9200-17A8FB6DC38B}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={6997FC1A-700E-42B5-9200-17A8FB6DC38B}" action="add" mimetype="message/rfc822" last-modified="Tue, 13 Apr 2010 19:32:27 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="message/rfc822"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="6.mht"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="227665.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="6.mht"/>
+<meta name="Id" content="4041D34B-E585-418A-B4C1-48507D70D173"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={F3FA4293-7863-4B46-B10C-857F25FF6976}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={F3FA4293-7863-4B46-B10C-857F25FF6976}" action="add" mimetype="message/rfc822" last-modified="Tue, 13 Apr 2010 19:32:45 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="message/rfc822"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="9.mht"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="222426.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="9.mht"/>
+<meta name="Id" content="77B2DD9A-A91D-4E85-A966-3212E32E363B"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={353FA856-ACAB-4C7E-9BF0-81732497771E}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={353FA856-ACAB-4C7E-9BF0-81732497771E}" action="add" mimetype="text/xml" last-modified="Tue, 13 Apr 2010 19:32:53 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="text/xml"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="web.xml"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="10286.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="web.xml"/>
+<meta name="Id" content="F3BBD27A-3D6E-4F96-AF15-792B350012F8"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={DEFE0A41-B890-475E-87FF-D3564B4654E0}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={DEFE0A41-B890-475E-87FF-D3564B4654E0}" action="add" mimetype="image/bmp" last-modified="Tue, 13 Apr 2010 19:33:07 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/bmp"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="FeatherTexture.bmp"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="16730.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="FeatherTexture.bmp"/>
+<meta name="Id" content="DE6A518E-659E-492D-BADA-1D906F226765"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={D6E745D6-5C76-443B-AD40-90B28D54CCCE}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={D6E745D6-5C76-443B-AD40-90B28D54CCCE}" action="add" mimetype="image/bmp" last-modified="Tue, 13 Apr 2010 19:33:18 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/bmp"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Gone Fishing.bmp"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="17336.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Gone Fishing.bmp"/>
+<meta name="Id" content="9EDBAAB0-EFFD-436C-8003-7037E3E4616D"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={BDE4837D-F171-479C-95F1-D579AC76C9E8}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={BDE4837D-F171-479C-95F1-D579AC76C9E8}" action="add" mimetype="image/bmp" last-modified="Tue, 13 Apr 2010 19:33:28 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/bmp"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Greenstone.bmp"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="26582.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Greenstone.bmp"/>
+<meta name="Id" content="4D6FB0A1-0225-4E50-9A1F-3ED9950A8265"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={165AACE1-E422-4AF8-9715-D22F7195BB23}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={165AACE1-E422-4AF8-9715-D22F7195BB23}" action="add" mimetype="image/jpeg" last-modified="Tue, 13 Apr 2010 19:33:40 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/jpeg"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Sunset.jpg"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="71189.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Sunset.jpg"/>
+<meta name="Id" content="CBC1A388-480A-4D36-9D61-12AFD78910A3"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={6353884A-FF50-48FC-8FF6-C3D36DA05B7F}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={6353884A-FF50-48FC-8FF6-C3D36DA05B7F}" action="add" mimetype="image/jpeg" last-modified="Tue, 13 Apr 2010 19:34:00 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="image/jpeg"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="Water lilies.jpg"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="83794.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="Water lilies.jpg"/>
+<meta name="Id" content="1B0A8DDD-0797-4063-A542-B8CBCB9E5A73"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={D23AED37-82D3-4ED3-A84D-0764D5E1D65C}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={D23AED37-82D3-4ED3-A84D-0764D5E1D65C}" action="add" mimetype="application/pdf" last-modified="Tue, 13 Apr 2010 19:34:09 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/pdf"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="_www.ajoysingha.info_ISTQB-Question-Paper1.pdf"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="45475.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="_www.ajoysingha.info_ISTQB-Question-Paper1.pdf"/>
+<meta name="Id" content="F07FC322-1DC9-4F26-B499-4467A60B3A02"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={59B4E16F-FA83-40AB-A79C-0FBC0D365C14}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={59B4E16F-FA83-40AB-A79C-0FBC0D365C14}" action="add" mimetype="application/pdf" last-modified="Tue, 13 Apr 2010 19:34:16 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/pdf"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="_www.ajoysingha.info_ISTQB-Question-Paper2.pdf"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="27481.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="_www.ajoysingha.info_ISTQB-Question-Paper2.pdf"/>
+<meta name="Id" content="B98773B8-FFA1-4F8E-A651-CBEB21B4008E"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={648CA3CF-0A6B-4DC5-81FB-A345CA7D5F35}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={648CA3CF-0A6B-4DC5-81FB-A345CA7D5F35}" action="add" mimetype="application/pdf" last-modified="Tue, 13 Apr 2010 19:34:34 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/pdf"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="_www.ajoysingha.info_ISTQB-Question-Paper4.pdf"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="29309.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="_www.ajoysingha.info_ISTQB-Question-Paper4.pdf"/>
+<meta name="Id" content="C2A01E3A-4EDD-4EAE-9C92-7DBAD21E8565"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={3722E427-61B3-40BD-A4D9-CB01B9395E1B}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={3722E427-61B3-40BD-A4D9-CB01B9395E1B}" action="add" mimetype="application/pdf" last-modified="Tue, 13 Apr 2010 19:34:46 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/pdf"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="_www.ajoysingha.info_ISTQB-Question-Paper5.pdf"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="39394.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="_www.ajoysingha.info_ISTQB-Question-Paper5.pdf"/>
+<meta name="Id" content="CE616EBC-592E-49F3-8EB3-CF2E0814CAD6"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+<record url="googleconnector://fpautomation.localhost/doc?docid={8A3D6765-4BDE-443E-A9FB-6E123008D99B}" displayurl="http://<MyHost>:<port>/Workplace/getContent?objectStoreName=<Object_Store>&amp;objectType=document&amp;versionStatus=1&amp;vsId={8A3D6765-4BDE-443E-A9FB-6E123008D99B}" action="add" mimetype="application/pdf" last-modified="Tue, 13 Apr 2010 19:35:01 +0530">
+<metadata>
+<meta name="MinorVersionNumber" content="0"/>
+<meta name="Owner" content="<Owner>"/>
+<meta name="MimeType" content="application/pdf"/>
+<meta name="IsCurrentVersion" content="true"/>
+<meta name="DocumentTitle" content="_www.ajoysingha.info_ISTQB-Question-Paper7.pdf"/>
+<meta name="DateLastModified" content="2010-04-13"/>
+<meta name="DateCreated" content="2010-04-13"/>
+<meta name="IsReserved" content="false"/>
+<meta name="LastModifier" content="FNCE_gsc06"/>
+<meta name="ContentSize" content="30811.0"/>
+<meta name="VersionStatus" content="1"/>
+<meta name="MajorVersionNumber" content="1"/>
+<meta name="ClassificationStatus" content="0"/>
+<meta name="IsFrozenVersion" content="false"/>
+<meta name="Name" content="_www.ajoysingha.info_ISTQB-Question-Paper7.pdf"/>
+<meta name="Id" content="9402E5D3-A369-4E6A-8C92-214F7162FB72"/>
+</metadata>
+<content encoding="base64compressed">
+...content...
+</content>
+</record>
+
