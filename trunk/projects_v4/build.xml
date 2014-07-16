@@ -26,7 +26,7 @@
   <property name="src-core" value="fnapi-core/source/java" />
   <property name="classes-core" value="${build-core}/classes" />
 
-  <property name="src-test" value="fnapi-core/source/javatest" />
+  <property name="src-test" value="fnapi-core/source/javatests" />
   <property name="classes-test" value="${build-core}/test" />
 
   <property name="jar.dir"  value="${dist}/jar" />
@@ -112,7 +112,11 @@
     </javac>
   </target>
 
-  <target name="compile-test" depends="jar">
+  <target name="compile-test" depends="compile-tests">
+    <echo message="compile-test target is deprecated. Use compile-tests." />
+  </target>
+
+  <target name="compile-tests" depends="jar">
     <!-- compile java source files for tests -->
     <javac srcdir="${src-test}" destdir="${classes-test}"
            includeantruntime="false"
