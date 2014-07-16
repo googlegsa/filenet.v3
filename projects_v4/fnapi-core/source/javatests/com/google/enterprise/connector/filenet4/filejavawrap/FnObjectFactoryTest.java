@@ -19,15 +19,12 @@ import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
-import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
-
-import com.filenet.api.util.UserContext;
 
 import junit.framework.TestCase;
 
@@ -38,9 +35,7 @@ public class FnObjectFactoryTest extends TestCase {
   FileSession fs;
   IObjectStore ios;
   IConnection conn;
-  UserContext uc;
   IObjectFactory iof;
-  IDocument fd;
 
   protected void setUp() throws RepositoryLoginException,
           RepositoryException, InstantiationException,
@@ -69,7 +64,8 @@ public class FnObjectFactoryTest extends TestCase {
    */
   public void testGetConnection() throws RepositoryException {
     assertNotNull(conn);
-    assertEquals(TestConnection.uri, conn.getConnection().getURI());
+    assertEquals(TestConnection.uri,
+        ((FnConnection) conn).getConnection().getURI());
   }
 
   /*
@@ -98,7 +94,7 @@ public class FnObjectFactoryTest extends TestCase {
     Iterator<? extends IBaseObject> it = test.getIterator();
     while (it.hasNext()) {
       IBaseObject ibo = it.next();
-      assertEquals("{" + TestConnection.docId1 + "}", ibo.getId().toString());
+      assertEquals("{" + TestConnection.docId1 + "}", ibo.get_Id().toString());
     }
   }
 

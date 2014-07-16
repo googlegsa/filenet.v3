@@ -124,7 +124,7 @@ public class FileDocumentTest extends FileNetTestCase {
         new FnId(TestConnection.docId4), null);
     List<Value> ownerValue = new ArrayList<Value>();
     doc.getPropertyStringValue("Owner", ownerValue);
-    assertEquals(adminUser.getName(), ownerValue.get(0).toString());
+    assertEquals(adminUser.get_Name(), ownerValue.get(0).toString());
     IPermissions perms = doc.getPermissions();
     assertTrue(perms.authorize(adminUser));
   }

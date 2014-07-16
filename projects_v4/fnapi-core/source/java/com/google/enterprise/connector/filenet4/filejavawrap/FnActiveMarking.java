@@ -54,7 +54,7 @@ public class FnActiveMarking implements IActiveMarking {
   public boolean authorize(IUser user) {
     LOGGER.log(Level.FINEST,
         "Authorizing user: {0} [Marking: {1}, Constraint Mask: {2}]",
-        new Object[] {user.getName(), marking.get_MarkingValue(),
+        new Object[] {user.get_Name(), marking.get_MarkingValue(),
             marking.get_ConstraintMask()});
 
     FnPermissions perms = new FnPermissions(marking.get_Permissions());

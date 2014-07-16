@@ -84,8 +84,8 @@ public class FnPermissionsTest extends TestCase {
     perm.set_GranteeType(SecurityPrincipalType.USER);
     perm.set_GranteeName("#CREATOR-OWNER");
     perms.add(perm);
-      
-    FnPermissions testPerms = new FnPermissions(perms, user.getName());
+
+    FnPermissions testPerms = new FnPermissions(perms, user.get_Name());
     assertEquals(expectedResult, testPerms.authorize(user));
   }
 
@@ -95,7 +95,7 @@ public class FnPermissionsTest extends TestCase {
     creatorOwnerPermDeny.set_AccessType(AccessType.DENY);
     creatorOwnerPermDeny.set_AccessMask(AccessRight.DELETE_AS_INT);
     creatorOwnerPermDeny.set_GranteeType(SecurityPrincipalType.USER);
-    creatorOwnerPermDeny.set_GranteeName(user.getName());
+    creatorOwnerPermDeny.set_GranteeName(user.get_Name());
     perms.add(creatorOwnerPermDeny);
 
     AccessPermissionMock creatorOwnerPermAllow =
@@ -103,10 +103,10 @@ public class FnPermissionsTest extends TestCase {
     creatorOwnerPermAllow.set_AccessType(AccessType.ALLOW);
     creatorOwnerPermAllow.set_AccessMask(VIEW_ACCESS_RIGHTS);
     creatorOwnerPermAllow.set_GranteeType(SecurityPrincipalType.USER);
-    creatorOwnerPermAllow.set_GranteeName(user.getName());
+    creatorOwnerPermAllow.set_GranteeName(user.get_Name());
     perms.add(creatorOwnerPermAllow);
 
-    FnPermissions testPerms = new FnPermissions(perms, user.getName());
+    FnPermissions testPerms = new FnPermissions(perms, user.get_Name());
     assertTrue(testPerms.authorize(user));
   }
 
@@ -133,7 +133,7 @@ public class FnPermissionsTest extends TestCase {
 
   private void testUserAccess(AccessType accessType, int accessRights,
       IUser testUser, boolean expectedResult) {
-    testUserAccess(accessType, accessRights, testUser.getName(), testUser,
+    testUserAccess(accessType, accessRights, testUser.get_Name(), testUser,
         expectedResult);
   }
 
@@ -177,12 +177,12 @@ public class FnPermissionsTest extends TestCase {
 
   public void testDistinguishedName() {
     testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
-        user.getDistinguishedName(), user, true);
+        user.get_DistinguishedName(), user, true);
   }
 
   public void testInvalidUser() {
     IUser invalidUser = MockUtil.createBlankUser();
-    testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, user.getName(),
+    testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, user.get_Name(),
         invalidUser, false);
   }
 
@@ -230,7 +230,7 @@ public class FnPermissionsTest extends TestCase {
     permAllow.set_AccessType(AccessType.ALLOW);
     permAllow.set_AccessMask(VIEW_ACCESS_RIGHTS);
     permAllow.set_GranteeType(SecurityPrincipalType.USER);
-    permAllow.set_GranteeName(user.getName());
+    permAllow.set_GranteeName(user.get_Name());
     perms.add(permAllow);
 
     AccessPermissionMock permDeny =
@@ -468,7 +468,7 @@ public class FnPermissionsTest extends TestCase {
       boolean expectedResult, AccessRight... allowRights) {
     IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
     testMarking(accessType, accessMask, SecurityPrincipalType.USER,
-        user1.getName(), user1, expectedResult, allowRights);
+        user1.get_Name(), user1, expectedResult, allowRights);
   }
 
   private void testMarking(AccessType accessType, int accessMask,
@@ -513,10 +513,10 @@ public class FnPermissionsTest extends TestCase {
   public void testMarking_NoUseRight_ViewLevelConstraint() {
     IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
     testMarking(AccessType.ALLOW, AccessRight.NONE_AS_INT,
-        SecurityPrincipalType.USER, user1.getName(), user1, true,
+        SecurityPrincipalType.USER, user1.get_Name(), user1, true,
         constraintMask(AccessLevel.VIEW_AS_INT));
     testMarking(AccessType.DENY, AccessRight.NONE_AS_INT,
-        SecurityPrincipalType.USER, user1.getName(), user1, true,
+        SecurityPrincipalType.USER, user1.get_Name(), user1, true,
         constraintMask(AccessLevel.VIEW_AS_INT));
   }
 
@@ -565,7 +565,7 @@ public class FnPermissionsTest extends TestCase {
     perm1.set_AccessType(AccessType.ALLOW);
     perm1.set_AccessMask(AccessRight.NONE_AS_INT);
     perm1.set_GranteeType(SecurityPrincipalType.USER);
-    perm1.set_GranteeName(user1.getName());
+    perm1.set_GranteeName(user1.get_Name());
     perms.add(perm1);
 
     // The access mask can be set to any value for DENY as it does not have any
@@ -575,7 +575,7 @@ public class FnPermissionsTest extends TestCase {
     perm2.set_AccessType(AccessType.DENY);
     perm2.set_AccessMask(VIEW_ACCESS_RIGHTS);
     perm2.set_GranteeType(SecurityPrincipalType.USER);
-    perm2.set_GranteeName(user1.getName());
+    perm2.set_GranteeName(user1.get_Name());
     perms.add(perm2);
 
     FnPermissions testPerms = new FnPermissions(perms);
@@ -591,7 +591,7 @@ public class FnPermissionsTest extends TestCase {
     allowUse.set_AccessType(AccessType.ALLOW);
     allowUse.set_AccessMask(AccessRight.USE_MARKING_AS_INT);
     allowUse.set_GranteeType(SecurityPrincipalType.USER);
-    allowUse.set_GranteeName(user1.getName());
+    allowUse.set_GranteeName(user1.get_Name());
     perms.add(allowUse);
 
     AccessPermissionMock denyUse =
@@ -599,7 +599,7 @@ public class FnPermissionsTest extends TestCase {
     denyUse.set_AccessType(AccessType.DENY);
     denyUse.set_AccessMask(AccessRight.USE_MARKING_AS_INT);
     denyUse.set_GranteeType(SecurityPrincipalType.USER);
-    denyUse.set_GranteeName(user1.getName());
+    denyUse.set_GranteeName(user1.get_Name());
     perms.add(denyUse);
 
     FnPermissions testPerms = new FnPermissions(perms);

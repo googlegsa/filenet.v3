@@ -120,7 +120,7 @@ public class FileDocumentList implements DocumentList {
           try {
             int val = obj0.getModifyDate().compareTo(obj1.getModifyDate());
             if (val == 0) {
-              val = obj0.getId().compareTo(obj1.getId(), databaseType);
+              val = obj0.get_Id().compareTo(obj1.get_Id(), databaseType);
             }
             return val;
           } catch (RepositoryDocumentException e) {
@@ -186,7 +186,7 @@ public class FileDocumentList implements DocumentList {
       IBaseObject object = objects.next();
       if (object.isDeletionEvent()) {
         fileDocumentToDeleteDate = object.getModifyDate();
-        docIdToDelete = object.getId();
+        docIdToDelete = object.get_Id();
         if (object.isReleasedVersion()) {
           fileDocument = createDeleteDocument(object);
         } else {
@@ -195,7 +195,7 @@ public class FileDocumentList implements DocumentList {
         }
       } else if (object instanceof FileDeletionObject) {
         fileDocumentToDeleteDocsDate = object.getModifyDate();
-        docIdToDeleteDocs = object.getId();
+        docIdToDeleteDocs = object.get_Id();
         if (object.isReleasedVersion()) {
           fileDocument = createDeleteDocument(object);
         } else {
@@ -205,7 +205,7 @@ public class FileDocumentList implements DocumentList {
         }
       } else {
         fileDocumentDate = object.getModifyDate();
-        docId = object.getId();
+        docId = object.get_Id();
         fileDocument = createAddDocument(object);
       }
     }
@@ -217,7 +217,7 @@ public class FileDocumentList implements DocumentList {
    */
   private Document createAddDocument(IBaseObject object)
       throws RepositoryDocumentException {
-    IId id = object.getId();
+    IId id = object.get_Id();
     logger.log(Level.FINEST, "Add document [ID: {0}]", id);
     return new FileDocument(id, objectStore, connector);
   }
@@ -227,7 +227,7 @@ public class FileDocumentList implements DocumentList {
    */
   private Document createDeleteDocument(IBaseObject object)
       throws RepositoryDocumentException {
-    IId id = object.getId();
+    IId id = object.get_Id();
     IId versionSeriesId = object.getVersionSeriesId();
     logger.log(Level.FINEST, "Delete document [ID: {0}, VersionSeriesID: {1}]",
         new Object[] {id, versionSeriesId});

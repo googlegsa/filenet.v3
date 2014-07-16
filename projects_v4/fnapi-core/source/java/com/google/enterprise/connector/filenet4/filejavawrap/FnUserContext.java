@@ -46,7 +46,8 @@ public class FnUserContext implements IUserContext {
 
   @Override
   public String getName() throws RepositoryException {
-    User user = Factory.User.fetchCurrent(conn.getConnection(), null);
+    User user = Factory.User.fetchCurrent(
+        ((FnConnection) conn).getConnection(), null);
     logger.config("User name from connection: " + user.get_Name());
     return user.get_Name();
   }
@@ -72,16 +73,16 @@ public class FnUserContext implements IUserContext {
 
     UserContext uc = UserContext.get();
     try {
-      Subject s = UserContext.createSubject(conn.getConnection(), username, password, "FileNetP8");
+      Subject s = UserContext.createSubject(
+          ((FnConnection) conn).getConnection(), username, password,
+          "FileNetP8");
       uc.pushSubject(s);
-      User u = Factory.User.fetchCurrent(conn.getConnection(), null);
+      User u = Factory.User.fetchCurrent(((FnConnection) conn).getConnection(),
+          null);
       logger.info("User: " + u.get_Name() + " is authenticated");
 
       FnCredentialMap.putUserCred(username, password);
       return new FnUser(u);
-    } catch (RepositoryException e) {
-      logger.log(Level.WARNING, "Unable to GET connection");
-      throw new RepositoryLoginException(e);
     } catch (Throwable e) {
       logger.log(Level.WARNING,
           "Unable to GET connection or user is not authenticated");
@@ -95,8 +96,8 @@ public class FnUserContext implements IUserContext {
   public IUser lookupUser(String username) throws RepositoryException {
     try {
       logger.log(Level.FINE, "Lookup user: {0}", username);
-      User user =
-          Factory.User.fetchInstance(conn.getConnection(), username, null);
+      User user = Factory.User.fetchInstance(
+          ((FnConnection) conn).getConnection(), username, null);
       return new FnUser(user);
     } catch (Exception e) {
       throw new RepositoryException(username + " username is not found", e);

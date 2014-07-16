@@ -35,8 +35,7 @@ public class FnConnection implements IConnection {
         userPassword, "FileNetP8");
   }
 
-  @Override
-  public Connection getConnection() {
+  Connection getConnection() {
     return conn;
   }
 

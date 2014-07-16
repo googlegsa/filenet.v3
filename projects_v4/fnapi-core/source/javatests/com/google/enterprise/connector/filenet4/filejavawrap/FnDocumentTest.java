@@ -82,7 +82,7 @@ public class FnDocumentTest extends FileNetTestCase {
     uc = new FnUserContext(conn);
     user = uc.authenticate(TestConnection.username, TestConnection.password);
     vs = fd.getVersionSeries();
-    fd2 = vs.getReleasedVersion();
+    fd2 = vs.get_ReleasedVersion();
   }
 
   /*
@@ -138,11 +138,11 @@ public class FnDocumentTest extends FileNetTestCase {
 
   public void testGetVersionSeries() throws RepositoryException {
     IVersionSeries vs = fd.getVersionSeries();
-    assertEquals("{" + TestConnection.docVsId1 + "}", vs.getId().toString());
+    assertEquals("{" + TestConnection.docVsId1 + "}", vs.get_Id().toString());
   }
 
   public void testGetId() throws RepositoryException {
-    assertEquals("{" + TestConnection.docId1 + "}", fd.getId().toString());
+    assertEquals("{" + TestConnection.docId1 + "}", fd.get_Id().toString());
   }
 
   public void testGetPermissions() throws RepositoryException {
@@ -156,10 +156,10 @@ public class FnDocumentTest extends FileNetTestCase {
     IVersionSeries versionSeries =
         (IVersionSeries) ios.getObject(ClassNames.VERSION_SERIES,
             TestConnection.docVsId1);
-    IDocument doc = versionSeries.getReleasedVersion();
-    IActiveMarkingList activeMarkingList = doc.getActiveMarkings();
+    IDocument doc = versionSeries.get_ReleasedVersion();
+    IActiveMarkingList activeMarkingList = doc.get_ActiveMarkings();
     assertNotNull("Active marking is null", activeMarkingList);
-    assertTrue(user.getName() + " is not authorized by document's marking",
+    assertTrue(user.get_Name() + " is not authorized by document's marking",
         activeMarkingList.authorize(user));
   }
 

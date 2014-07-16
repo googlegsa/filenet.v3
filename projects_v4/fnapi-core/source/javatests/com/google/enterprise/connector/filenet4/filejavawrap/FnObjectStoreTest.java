@@ -63,7 +63,7 @@ public class FnObjectStoreTest extends TestCase {
   public void testGetObject() throws RepositoryException {
     fd = (IDocument) ios.getObject(ClassNames.DOCUMENT, TestConnection.docId1);
     assertNotNull(fd);
-    assertEquals("{" + TestConnection.docId1 + "}", fd.getId().toString());
+    assertEquals("{" + TestConnection.docId1 + "}", fd.get_Id().toString());
   }
 
   public void testFetchObject() throws RepositoryException {
@@ -71,7 +71,7 @@ public class FnObjectStoreTest extends TestCase {
         new FnId(TestConnection.docId1),
         FileUtil.getDocumentPropertyFilter(TestConnection.included_meta));
     assertNotNull(fd);
-    assertEquals("{" + TestConnection.docId1 + "}", fd.getId().toString());
+    assertEquals("{" + TestConnection.docId1 + "}", fd.get_Id().toString());
   }
 
   public void testGetName() throws RepositoryException {

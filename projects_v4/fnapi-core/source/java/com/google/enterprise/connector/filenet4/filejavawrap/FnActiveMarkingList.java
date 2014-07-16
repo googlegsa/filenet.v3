@@ -54,7 +54,7 @@ public class FnActiveMarkingList implements IActiveMarkingList {
     @SuppressWarnings("unchecked") Iterator<ActiveMarking> markings =
         this.markings.iterator();
 
-    LOGGER.log(Level.FINER, "Authorizing user :[" + user.getName()
+    LOGGER.log(Level.FINER, "Authorizing user :[" + user.get_Name()
         + "] for Marking Sets");
     while (markings.hasNext()) {
       ActiveMarking marking = markings.next();
@@ -63,12 +63,12 @@ public class FnActiveMarkingList implements IActiveMarkingList {
       if (!(currentMarking.authorize(user))) {
         LOGGER.log(Level.FINER,
             "User {0} is not authorized for Marking value: {1}",
-            new Object[] {user.getName(), currentMarking.get_Marking()
+            new Object[] {user.get_Name(), currentMarking.get_Marking()
                 .get_MarkingValue()});
         return false;
       }
     }
-    LOGGER.log(Level.FINER, "User " + user.getName()
+    LOGGER.log(Level.FINER, "User " + user.get_Name()
         + " is authorized to view the document");
     return true;
   }

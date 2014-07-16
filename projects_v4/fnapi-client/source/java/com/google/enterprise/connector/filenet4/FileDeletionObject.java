@@ -34,8 +34,8 @@ public class FileDeletionObject implements IBaseObject {
   }
 
   @Override
-  public IId getId() throws RepositoryDocumentException {
-    return baseObject.getId();
+  public IId get_Id() throws RepositoryDocumentException {
+    return baseObject.get_Id();
   }
 
   @Override

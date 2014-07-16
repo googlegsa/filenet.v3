@@ -31,8 +31,8 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public IId getId() throws RepositoryDocumentException {
-    return object.getId();
+  public IId get_Id() throws RepositoryDocumentException {
+    return object.get_Id();
   }
 
   @Override
@@ -62,12 +62,7 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public IDocument getCurrentVersion() throws RepositoryException {
-    return new MockDocument(object);
-  }
-
-  @Override
-  public IDocument getReleasedVersion() throws RepositoryException {
+  public IDocument get_ReleasedVersion() throws RepositoryException {
     return new MockDocument(object);
   }
 }

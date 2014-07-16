@@ -37,7 +37,7 @@ public class MockBaseObject implements IBaseObject {
   }
 
   @Override
-  public IId getId() throws RepositoryDocumentException {
+  public IId get_Id() throws RepositoryDocumentException {
     return id;
   }
 

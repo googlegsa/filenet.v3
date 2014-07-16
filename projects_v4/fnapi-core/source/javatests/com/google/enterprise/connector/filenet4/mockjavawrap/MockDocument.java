@@ -41,13 +41,13 @@ public class MockDocument implements IDocument {
 
   public MockDocument(IBaseObject object) throws RepositoryDocumentException {
     this.doc = object;
-    this.props = ImmutableMap.of(FN_ID, doc.getId(),
+    this.props = ImmutableMap.of(FN_ID, doc.get_Id(),
         FN_LAST_MODIFIED, doc.getModifyDate());
   }
 
   @Override
-  public IId getId() throws RepositoryDocumentException {
-    return doc.getId();
+  public IId get_Id() throws RepositoryDocumentException {
+    return doc.get_Id();
   }
 
   @Override
@@ -146,6 +146,6 @@ public class MockDocument implements IDocument {
       throws RepositoryDocumentException {}
 
   @Override
-  public IActiveMarkingList getActiveMarkings()
+  public IActiveMarkingList get_ActiveMarkings()
       throws RepositoryDocumentException { return null; }
 }

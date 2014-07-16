@@ -39,7 +39,7 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public IId getId() throws RepositoryDocumentException {
+  public IId get_Id() throws RepositoryDocumentException {
     return new FnId(versionSeries.get_Id());
   }
 
@@ -76,17 +76,11 @@ public class FnVersionSeries implements IVersionSeries {
 
   @Override
   public IId getVersionSeriesId() throws RepositoryDocumentException {
-    return getId();
+    return get_Id();
   }
 
   @Override
-  public IDocument getCurrentVersion() throws RepositoryException {
-    return new FnDocument(
-        (Document) this.versionSeries.get_CurrentVersion());
-  }
-
-  @Override
-  public IDocument getReleasedVersion() throws RepositoryException {
+  public IDocument get_ReleasedVersion() throws RepositoryException {
     return new FnDocument(
         (Document) this.versionSeries.get_ReleasedVersion());
   }
