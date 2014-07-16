@@ -85,7 +85,7 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public IId getId() throws RepositoryDocumentException {
+  public IId get_Id() throws RepositoryDocumentException {
     if (object instanceof DeletionEvent) {
       return new FnId(((DeletionEvent) object).get_Id());
     } else {

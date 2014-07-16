@@ -53,22 +53,22 @@ public class FnUser implements IUser {
   }
 
   @Override
-  public String getShortName() {
+  public String get_ShortName() {
     return shortName;
   }
 
   @Override
-  public String getName() {
+  public String get_Name() {
     return userName;
   }
 
   @Override
-  public String getEmail() {
+  public String get_Email() {
     return email;
   }
 
   @Override
-  public String getDistinguishedName() {
+  public String get_DistinguishedName() {
     return distinguishedName;
   }
 

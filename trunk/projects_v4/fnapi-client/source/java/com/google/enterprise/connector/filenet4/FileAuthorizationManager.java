@@ -162,7 +162,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
             responses.put(docId, getResponse(docId));
           } catch (RepositoryException e) {
             logger.log(Level.WARNING, "Failed to authorize docid " + docId
-                + " for user " + user.getName(), e);
+                + " for user " + user.get_Name(), e);
             responses.put(docId, new AuthorizationResponse(false, docId));
           }
         }

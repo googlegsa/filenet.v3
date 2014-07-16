@@ -20,7 +20,7 @@ import java.util.Date;
 
 public interface IBaseObject {
 
-  IId getId() throws RepositoryDocumentException;
+  IId get_Id() throws RepositoryDocumentException;
 
   Date getModifyDate() throws RepositoryDocumentException;
 

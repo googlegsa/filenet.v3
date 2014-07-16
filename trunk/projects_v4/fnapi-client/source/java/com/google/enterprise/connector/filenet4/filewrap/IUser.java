@@ -21,13 +21,13 @@ import java.util.Set;
 
 public interface IUser {
 
-  String getName();
+  String get_Name();
 
-  String getShortName();
+  String get_ShortName();
 
-  String getDistinguishedName();
+  String get_DistinguishedName();
 
-  String getEmail();
+  String get_Email();
 
   Collection<Group> getGroups();
 

@@ -135,43 +135,43 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
 
     if (versionSeries != null) {
       logger.config("Authorizing DocID: " + docId + " for user: "
-          + user.getName());
+          + user.get_Name());
       // Check whether the search user is authorized to view document
       // contents or
       // not.
-      IDocument releasedVersion = versionSeries.getReleasedVersion();
+      IDocument releasedVersion = versionSeries.get_ReleasedVersion();
       if (releasedVersion.getPermissions().authorize(user)) {
         logger.log(Level.INFO, "As per the ACLS User "
-            + user.getName()
+            + user.get_Name()
             + " is authorized for document DocID " + docId);
         authorizationResponse = new AuthorizationResponse(true,
             docId);
 
         if (checkMarkings) {
           logger.log(Level.INFO, "Authorizing DocID: " + docId
-              + " for user: " + user.getName()
+              + " for user: " + user.get_Name()
               + " for Marking sets ");
 
           // check whether current document has property values
           // set for properties associated with marking sets or
           // not //
-          if (releasedVersion.getActiveMarkings() != null) {
+          if (releasedVersion.get_ActiveMarkings() != null) {
             logger.log(Level.INFO, "Document has property associated with Markings set");
 
             // check whether USER is authorized to view the
             // document as per the Marking set security applied
             // over it.
 
-            if (releasedVersion.getActiveMarkings().authorize(user)) {
+            if (releasedVersion.get_ActiveMarkings().authorize(user)) {
               logger.log(Level.INFO, "As per the Marking Sets User "
-                  + user.getName()
+                  + user.get_Name()
                   + " is authorized for document DocID "
                   + docId);
               authorizationResponse = new AuthorizationResponse(
                   true, docId);
             } else {
               logger.log(Level.INFO, "As per the Marking Sets User "
-                  + user.getName()
+                  + user.get_Name()
                   + " is NOT authorized for document DocID "
                   + docId);
               authorizationResponse = new AuthorizationResponse(
@@ -182,7 +182,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
             logger.log(Level.INFO, "Document does not have property associated with Marking Sets "
                 + docId);
             logger.log(Level.INFO, "User "
-                + user.getName()
+                + user.get_Name()
                 + " is authorized for document DocID "
                 + docId);
             authorizationResponse = new AuthorizationResponse(
@@ -190,7 +190,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
           }
         } else {
           logger.log(Level.INFO, "Either Document class does not have property associated with Marking Sets or Connector is not configured to check Marking Sets ");
-          logger.log(Level.INFO, "User " + user.getName()
+          logger.log(Level.INFO, "User " + user.get_Name()
               + " is authorized for document DocID " + docId);
           authorizationResponse = new AuthorizationResponse(true,
               docId);
@@ -199,12 +199,12 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
         authorizationResponse = new AuthorizationResponse(false,
             docId);
         logger.log(Level.INFO, "As per the ACLS User "
-            + user.getName()
+            + user.get_Name()
             + " is NOT authorized for document DocID " + docId);
       }
     } else {
       authorizationResponse = new AuthorizationResponse(false, docId);
-      logger.log(Level.INFO, "User " + user.getName()
+      logger.log(Level.INFO, "User " + user.get_Name()
           + " is NOT authorized for document DocID " + docId
           + "version series null");
     }

@@ -101,7 +101,7 @@ public class FnPermissions implements IPermissions {
     boolean isAuthorized = false;
     Iterator iter = perms.iterator();
 
-    LOGGER.log(Level.FINE, "Authorizing user:[" + user.getName() + "]");
+    LOGGER.log(Level.FINE, "Authorizing user:[" + user.get_Name() + "]");
 
     while (iter.hasNext()) {
       try {
@@ -116,7 +116,7 @@ public class FnPermissions implements IPermissions {
               && matchesUser(perm, user)) {
             LOGGER.log(Level.FINEST,
                 "Access is denied for user {0} via grantee {1}",
-                new Object[] {user.getName(), perm.get_GranteeName()});
+                new Object[] {user.get_Name(), perm.get_GranteeName()});
             return false;
           }
         } else {
@@ -135,7 +135,7 @@ public class FnPermissions implements IPermissions {
     }
 
     LOGGER.log(Level.FINEST, "User [{0}] is {1}authorized to access document",
-        new Object[] {user.getName(), (isAuthorized) ? "" : "not "});
+        new Object[] {user.get_Name(), (isAuthorized) ? "" : "not "});
     return isAuthorized;
   }
 
@@ -158,7 +158,7 @@ public class FnPermissions implements IPermissions {
         AccessPermission perm = (AccessPermission) iter.next();
         LOGGER.log(Level.FINEST, "Checking access rights for {0} user: "
             + "grantee[{1}], access mask[{2}], constraint mask[{3}]",
-            new Object[] {user.getName(), perm.get_GranteeName(),
+            new Object[] {user.get_Name(), perm.get_GranteeName(),
                 perm.get_AccessMask(), constraintMask});
 
         if ((perm.get_AccessMask() & USE_MARKING) == USE_MARKING) {
@@ -170,7 +170,7 @@ public class FnPermissions implements IPermissions {
               && (AccessLevel.FULL_CONTROL_AS_INT == constraintMask)
               && matchesUser(perm, user)) {
             LOGGER.log(Level.FINE, "User: [{0}] has Deny USE right and Deny "
-                + "all access rights over the document", user.getName());
+                + "all access rights over the document", user.get_Name());
             return false;
           }
         }
@@ -181,13 +181,13 @@ public class FnPermissions implements IPermissions {
     }
     if (hasUseRight) {
       LOGGER.log(Level.FINE, "User [{0}] has USE right over the document",
-          user.getName());
+          user.get_Name());
       return true;
     } else {
       boolean authorizeByConstraints =
           (VIEW_ACCESS_RIGHTS & constraintMask) == 0;
       LOGGER.log(Level.FINE, "User [{0}] is {1}authorized by constraints",
-          new Object[] {user.getName(),
+          new Object[] {user.get_Name(),
               (authorizeByConstraints ? "" : "not ")});
       return authorizeByConstraints;
     }
@@ -222,22 +222,22 @@ public class FnPermissions implements IPermissions {
 
     if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
       if (granteeName.equalsIgnoreCase(CREATOR_OWNER)) {
-        if (owner != null && matchesAnyString(owner, user.getName(),
-            user.getEmail(), user.getDistinguishedName())) {
+        if (owner != null && matchesAnyString(owner, user.get_Name(),
+            user.get_Email(), user.get_DistinguishedName())) {
           LOGGER.log(Level.FINER,
               "Authorization: [{0}] matches the creator owner",
-              user.getName());
+              user.get_Name());
           return true;
         }
         LOGGER.log(Level.FINER, "Authorization [{0}]: [{1}] is not {2} owner",
-            new Object[] {accessType, user.getName(), owner});
+            new Object[] {accessType, user.get_Name(), owner});
         return false;
       }
-      if (matchesAnyString(granteeName, user.getName(), user.getEmail(),
-          user.getDistinguishedName())) {
+      if (matchesAnyString(granteeName, user.get_Name(), user.get_Email(),
+          user.get_DistinguishedName())) {
         LOGGER.log(Level.FINER,
             "Authorization [{0}]: [{1}] grantee matches with search user [{2}]",
-            new Object[] {accessType, granteeName, user.getName()});
+            new Object[] {accessType, granteeName, user.get_Name()});
         return true;
       }
     } else if (perm.get_GranteeType() == SecurityPrincipalType.GROUP) {
@@ -257,7 +257,7 @@ public class FnPermissions implements IPermissions {
         // document contains #AUTHENTICATED-USERS
         // group in its ACL or ACE.
         LOGGER.log(Level.FINER, "Authorization [{0}]: [{1}] user matches {2}",
-            new Object[] {accessType, user.getName(), AUTHENTICATED_USERS});
+            new Object[] {accessType, user.get_Name(), AUTHENTICATED_USERS});
         return true;
       }
       // This is a performance optimization to check grantee name [group]
@@ -265,7 +265,7 @@ public class FnPermissions implements IPermissions {
       if (user.getGroupNames().contains(granteeName.toLowerCase())) {
         LOGGER.log(Level.FINER,
             "Authorization [{0}]: [{1}] user is a member of group {2}",
-            new Object[] {accessType, user.getName(), granteeName});
+            new Object[] {accessType, user.get_Name(), granteeName});
         return true;
       }
       for (Group group : user.getGroups()) {
@@ -273,7 +273,7 @@ public class FnPermissions implements IPermissions {
             group.get_DisplayName())) {
           LOGGER.log(Level.FINER,
               "Authorization [{0}]: [{1}] user is a member of group {2}",
-              new Object[] {accessType, user.getName(), granteeName});
+              new Object[] {accessType, user.get_Name(), granteeName});
           return true;
         }
       }

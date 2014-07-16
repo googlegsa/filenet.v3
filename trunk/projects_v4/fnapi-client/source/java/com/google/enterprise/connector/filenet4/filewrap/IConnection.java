@@ -16,8 +16,6 @@ package com.google.enterprise.connector.filenet4.filewrap;
 
 import com.google.enterprise.connector.spi.RepositoryException;
 
-import com.filenet.api.core.Connection;
-
 import javax.security.auth.Subject;
 
 /**
@@ -25,10 +23,7 @@ import javax.security.auth.Subject;
  */
 public interface IConnection {
 
-  public Connection getConnection() throws RepositoryException;
-
   public IUserContext getUserContext();
 
   public Subject getSubject();
-
 }

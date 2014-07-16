@@ -50,7 +50,7 @@ public class FnConnectionTest extends TestCase {
    * 'com.google.enterprise.connector.file.filejavawrap.FnConnection.getConnection()'
    */
   public void testGetConnection() throws RepositoryException {
-    Connection test = conn.getConnection();
+    Connection test = ((FnConnection) conn).getConnection();
     assertNotNull(test);
     assertEquals(TestConnection.uri, test.getURI());
   }

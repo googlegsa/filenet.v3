@@ -59,6 +59,5 @@ public interface IDocument extends IBaseObject {
   void getPropertyBinaryValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  IActiveMarkingList getActiveMarkings() throws RepositoryDocumentException;
-
+  IActiveMarkingList get_ActiveMarkings() throws RepositoryDocumentException;
 }

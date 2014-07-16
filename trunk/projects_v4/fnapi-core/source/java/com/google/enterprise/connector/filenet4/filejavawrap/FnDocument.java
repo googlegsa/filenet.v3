@@ -141,7 +141,7 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public IId getId() throws RepositoryDocumentException {
+  public IId get_Id() throws RepositoryDocumentException {
     return new FnId(doc.get_Id());
   }
 
@@ -510,7 +510,7 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public IActiveMarkingList getActiveMarkings() {
+  public IActiveMarkingList get_ActiveMarkings() {
     if (doc.get_ActiveMarkings().isEmpty()) {
       return null;
     } else {

@@ -59,8 +59,8 @@ public class FnObjectFactory implements IObjectFactory {
           throws RepositoryException, RepositoryLoginException {
     ObjectStore os = null;
     try {
-      os = getRawObjectStore(userName, userPassword, conn.getConnection(), 
-              objectStoreName);
+      os = getRawObjectStore(userName, userPassword,
+          ((FnConnection) conn).getConnection(), objectStoreName);
     } catch (Throwable e) {
       logger.log(Level.WARNING, "Unable to connect to the Object Store with user: "
               + userName, e);
@@ -68,8 +68,8 @@ public class FnObjectFactory implements IObjectFactory {
       logger.log(Level.INFO, "Trying to connect Object Store with user: "
               + shortName + " in short name format.");
       try {
-        os = getRawObjectStore(shortName, userPassword, conn.getConnection(),
-                objectStoreName);
+        os = getRawObjectStore(shortName, userPassword,
+            ((FnConnection) conn).getConnection(), objectStoreName);
       } catch (Throwable th) {
         logger.log(Level.SEVERE, "Problems while connecting to FileNet object store. Got Exception: ", th);
         throw new RepositoryLoginException(e);

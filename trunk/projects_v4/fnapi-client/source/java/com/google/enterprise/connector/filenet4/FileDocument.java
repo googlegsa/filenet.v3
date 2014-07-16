@@ -65,7 +65,7 @@ public class FileDocument implements Document {
     document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
         FileUtil.getDocumentPropertyFilter(connector.getIncludedMeta()));
     logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
-    vsDocId = document.getVersionSeries().getId().toString();
+    vsDocId = document.getVersionSeries().get_Id().toString();
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
   }
 
