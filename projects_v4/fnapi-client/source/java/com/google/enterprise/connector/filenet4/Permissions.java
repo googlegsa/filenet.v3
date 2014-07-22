@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.enterprise.connector.filenet4.filejavawrap;
+package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
 
 import com.filenet.api.collection.AccessPermissionList;
@@ -24,10 +23,7 @@ import com.filenet.api.constants.AccessLevel;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
-import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.constants.SecurityPrincipalType;
-import com.filenet.api.property.FilterElement;
-import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.security.Group;
 
@@ -43,9 +39,9 @@ import java.util.logging.Logger;
  * of a target document.
  */
 @SuppressWarnings("rawtypes")
-public class FnPermissions implements IPermissions {
+public class Permissions {
   private static final Logger LOGGER =
-      Logger.getLogger(FnPermissions.class.getName());
+      Logger.getLogger(Permissions.class.getName());
 
   private static final String AUTHENTICATED_USERS = "#AUTHENTICATED-USERS";
   private static final String CREATOR_OWNER = "#CREATOR-OWNER";
@@ -56,17 +52,14 @@ public class FnPermissions implements IPermissions {
 
   private final AccessPermissionList perms;
   private final String owner;
-  private final PropertyFilter pf;
   private final SetMultimap<PermissionSource, String> allowUsers;
   private final SetMultimap<PermissionSource, String> allowGroups;
   private final SetMultimap<PermissionSource, String> denyUsers;
   private final SetMultimap<PermissionSource, String> denyGroups;
 
-  public FnPermissions(AccessPermissionList perms, String owner) {
+  public Permissions(AccessPermissionList perms, String owner) {
     this.perms = perms;
     this.owner = owner;
-    this.pf = new PropertyFilter();
-    setPropertyFilter();
     this.allowUsers = HashMultimap.create();
     this.allowGroups = HashMultimap.create();
     this.denyUsers = HashMultimap.create();
@@ -74,19 +67,8 @@ public class FnPermissions implements IPermissions {
     processPermissions();
   }
 
-  public FnPermissions(AccessPermissionList perms) {
+  public Permissions(AccessPermissionList perms) {
     this(perms, null);
-  }
-
-  private void setPropertyFilter() {
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-            PropertyNames.EMAIL, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-            PropertyNames.SHORT_NAME, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-            PropertyNames.NAME, null));
-    pf.addIncludeProperty(new FilterElement(null, null, null,
-            PropertyNames.DISTINGUISHED_NAME, null));
   }
 
   /**
@@ -148,7 +130,6 @@ public class FnPermissions implements IPermissions {
    *         USE right.
    * @see com.google.enterprise.connector.filenet4.filewrap.IPermissions#authorizeMarking(java.lang.String)
    */
-
   public boolean authorizeMarking(IUser user, Integer constraintMask) {
     boolean hasUseRight = false;
 
@@ -212,7 +193,6 @@ public class FnPermissions implements IPermissions {
    * @throws Exception
    * @see com.google.enterprise.connector.filenet4.filewrap.IPermissions#checkGranteeName(AccessPermission,java.lang.String)
    */
-
   private boolean matchesUser(AccessPermission perm, IUser user) {
     String granteeName = perm.get_GranteeName();
     String granteeType = perm.get_GranteeType().toString();
@@ -305,42 +285,34 @@ public class FnPermissions implements IPermissions {
     }
   }
 
-  @Override
   public Set<String> getAllowUsers() {
     return new HashSet<String>(allowUsers.values());
   }
 
-  @Override
   public Set<String> getAllowUsers(PermissionSource permSrc) {
     return allowUsers.get(permSrc);
   }
 
-  @Override
   public Set<String> getAllowGroups() {
     return new HashSet<String>(allowGroups.values());
   }
 
-  @Override
   public Set<String> getAllowGroups(PermissionSource permSrc) {
     return allowGroups.get(permSrc);
   }
 
-  @Override
   public Set<String> getDenyUsers() {
     return new HashSet<String>(denyUsers.values());
   }
 
-  @Override
   public Set<String> getDenyUsers(PermissionSource permSrc) {
     return denyUsers.get(permSrc);
   }
 
-  @Override
   public Set<String> getDenyGroups() {
     return new HashSet<String>(denyGroups.values());
   }
 
-  @Override
   public Set<String> getDenyGroups(PermissionSource permSrc) {
     return denyGroups.get(permSrc);
   }

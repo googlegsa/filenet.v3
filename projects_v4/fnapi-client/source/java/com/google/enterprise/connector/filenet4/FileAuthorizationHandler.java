@@ -140,7 +140,9 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
       // contents or
       // not.
       IDocument releasedVersion = versionSeries.get_ReleasedVersion();
-      if (releasedVersion.getPermissions().authorize(user)) {
+      Permissions permissions = new Permissions(
+          releasedVersion.get_Permissions(), releasedVersion.get_Owner());
+      if (permissions.authorize(user)) {
         logger.log(Level.INFO, "As per the ACLS User "
             + user.get_Name()
             + " is authorized for document DocID " + docId);
@@ -161,8 +163,9 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
             // check whether USER is authorized to view the
             // document as per the Marking set security applied
             // over it.
-
-            if (releasedVersion.get_ActiveMarkings().authorize(user)) {
+            MarkingPermissions markingPermissions =
+                new MarkingPermissions(releasedVersion.get_ActiveMarkings());
+            if (markingPermissions.authorize(user)) {
               logger.log(Level.INFO, "As per the Marking Sets User "
                   + user.get_Name()
                   + " is authorized for document DocID "

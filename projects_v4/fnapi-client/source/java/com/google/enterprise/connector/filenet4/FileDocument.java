@@ -19,7 +19,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
@@ -29,7 +28,6 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,6 +48,7 @@ public class FileDocument implements Document {
 
   private IDocument document = null;
   private String vsDocId;
+  private Permissions permissions;
 
   public FileDocument(IId docId, IObjectStore objectStore,
       FileConnector connector) {
@@ -58,7 +57,7 @@ public class FileDocument implements Document {
     this.connector = connector;
   }
 
-  private void fetch() throws RepositoryDocumentException {
+  private void fetch() throws RepositoryException {
     if (document != null) {
       return;
     }
@@ -67,6 +66,8 @@ public class FileDocument implements Document {
     logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
     vsDocId = document.getVersionSeries().get_Id().toString();
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
+    permissions =
+        new Permissions(document.get_Permissions(), document.get_Owner());
   }
 
   @Override
@@ -105,16 +106,16 @@ public class FileDocument implements Document {
           + SpiConstants.ActionType.ADD.toString());
       return new SimpleProperty(list);
     } else if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
-      addPrincipals(list, name, document.getPermissions().getAllowUsers());
+      addPrincipals(list, name, permissions.getAllowUsers());
       return new SimpleProperty(list);
     } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
-      addPrincipals(list, name, document.getPermissions().getDenyUsers());
+      addPrincipals(list, name, permissions.getDenyUsers());
       return new SimpleProperty(list);
     } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
-      addPrincipals(list, name, document.getPermissions().getAllowGroups());
+      addPrincipals(list, name, permissions.getAllowGroups());
       return new SimpleProperty(list);
     } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
-      addPrincipals(list, name, document.getPermissions().getDenyGroups());
+      addPrincipals(list, name, permissions.getDenyGroups());
       return new SimpleProperty(list);
     } else if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
       return null;
@@ -138,7 +139,7 @@ public class FileDocument implements Document {
   }
 
   @Override
-  public Set<String> getPropertyNames() throws RepositoryDocumentException {
+  public Set<String> getPropertyNames() throws RepositoryException {
     Set<String> properties = new HashSet<String>();
 
     properties.add(SpiConstants.PROPNAME_ACLUSERS);

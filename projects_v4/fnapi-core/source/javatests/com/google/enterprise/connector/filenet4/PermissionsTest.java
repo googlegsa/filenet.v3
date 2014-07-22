@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.enterprise.connector.filenet4.filejavawrap;
+package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
@@ -31,7 +31,7 @@ import junit.framework.TestCase;
 
 import java.util.Set;
 
-public class FnPermissionsTest extends TestCase {
+public class PermissionsTest extends TestCase {
   private static int VIEW_ACCESS_RIGHTS =
       AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT;
 
@@ -85,7 +85,7 @@ public class FnPermissionsTest extends TestCase {
     perm.set_GranteeName("#CREATOR-OWNER");
     perms.add(perm);
 
-    FnPermissions testPerms = new FnPermissions(perms, user.get_Name());
+    Permissions testPerms = new Permissions(perms, user.get_Name());
     assertEquals(expectedResult, testPerms.authorize(user));
   }
 
@@ -106,7 +106,7 @@ public class FnPermissionsTest extends TestCase {
     creatorOwnerPermAllow.set_GranteeName(user.get_Name());
     perms.add(creatorOwnerPermAllow);
 
-    FnPermissions testPerms = new FnPermissions(perms, user.get_Name());
+    Permissions testPerms = new Permissions(perms, user.get_Name());
     assertTrue(testPerms.authorize(user));
   }
 
@@ -160,7 +160,7 @@ public class FnPermissionsTest extends TestCase {
     perm.set_GranteeName(granteeName);
     perms.add(perm);
 
-    FnPermissions testPerms = new FnPermissions(perms);
+    Permissions testPerms = new Permissions(perms);
     assertEquals(expectedResult, testPerms.authorize(testUser));
   }
 
@@ -241,13 +241,13 @@ public class FnPermissionsTest extends TestCase {
     permDeny.set_GranteeName("administrators@" + TestConnection.domain);
     perms.add(permDeny);
 
-    FnPermissions testPermsDenyGroup = new FnPermissions(perms);
+    Permissions testPermsDenyGroup = new Permissions(perms);
     assertFalse(testPermsDenyGroup.authorize(user));
   }
 
   public void testEmptyPermissionList() {
     assertEquals("Access permission list is not empty", 0, perms.size());
-    FnPermissions emptyPerms = new FnPermissions(perms);
+    Permissions emptyPerms = new Permissions(perms);
     assertEquals(0, emptyPerms.getAllowUsers().size());
     assertEquals(0, emptyPerms.getAllowGroups().size());
     assertEquals(0, emptyPerms.getDenyUsers().size());
@@ -303,7 +303,7 @@ public class FnPermissionsTest extends TestCase {
 
   public void testEmptyAllowUsers() {
     populateAces(10, false, true, true, true, PermissionSource.SOURCE_DIRECT);
-    FnPermissions testPerms = new FnPermissions(perms);
+    Permissions testPerms = new Permissions(perms);
     assertEquals(0, testPerms.getAllowUsers().size());
     assertEquals(10, testPerms.getDenyUsers().size());
     assertEquals(10, testPerms.getAllowGroups().size());
@@ -312,7 +312,7 @@ public class FnPermissionsTest extends TestCase {
 
   public void testEmptyDenyUsers() {
     populateAces(10, true, false, true, true, PermissionSource.SOURCE_DIRECT);
-    FnPermissions testPerms = new FnPermissions(perms);
+    Permissions testPerms = new Permissions(perms);
     assertEquals(10, testPerms.getAllowUsers().size());
     assertEquals(0, testPerms.getDenyUsers().size());
     assertEquals(10, testPerms.getAllowGroups().size());
@@ -321,7 +321,7 @@ public class FnPermissionsTest extends TestCase {
 
   public void testEmptyAllowGroups() {
     populateAces(10, true, true, false, true, PermissionSource.SOURCE_DIRECT);
-    FnPermissions testPerms = new FnPermissions(perms);
+    Permissions testPerms = new Permissions(perms);
     assertEquals(10, testPerms.getAllowUsers().size());
     assertEquals(10, testPerms.getDenyUsers().size());
     assertEquals(0, testPerms.getAllowGroups().size());
@@ -330,14 +330,14 @@ public class FnPermissionsTest extends TestCase {
 
   public void testEmptyDenyGroups() {
     populateAces(10, true, true, true, false, PermissionSource.SOURCE_DIRECT);
-    FnPermissions testPerms = new FnPermissions(perms);
+    Permissions testPerms = new Permissions(perms);
     assertEquals(10, testPerms.getAllowUsers().size());
     assertEquals(10, testPerms.getAllowGroups().size());
     assertEquals(10, testPerms.getDenyUsers().size());
     assertEquals(0, testPerms.getDenyGroups().size());
   }
 
-  private FnPermissions getObjectUnderTest(int maxAllowUsers,
+  private Permissions getObjectUnderTest(int maxAllowUsers,
       int maxAllowGroups, int maxDenyUsers, int maxDenyGroups,
       PermissionSource... permSrcs) {
     addAces(maxAllowUsers, AccessType.ALLOW, SecurityPrincipalType.USER,
@@ -350,7 +350,7 @@ public class FnPermissionsTest extends TestCase {
         AccessLevel.VIEW_AS_INT, 0, permSrcs);
     perms.shuffle();
 
-    return new FnPermissions(perms);
+    return new Permissions(perms);
   }
 
   private void assertSetContains(Set<String> theSet, String prefix, int size) {
@@ -360,7 +360,7 @@ public class FnPermissionsTest extends TestCase {
   }
 
   public void testGetAllowUsers() {
-    FnPermissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT);
     Set<String> actualAllowUsers = testPerms.getAllowUsers();
     assertEquals(8, actualAllowUsers.size());
@@ -369,7 +369,7 @@ public class FnPermissionsTest extends TestCase {
   }
 
   public void testGetAllowUsersBySource() {
-    FnPermissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT, PermissionSource.SOURCE_DEFAULT);
     Set<String> inheritAllowUsers =
         testPerms.getAllowUsers(PermissionSource.SOURCE_PARENT);
@@ -383,7 +383,7 @@ public class FnPermissionsTest extends TestCase {
   }
 
   public void testGetDenyUsers() {
-    FnPermissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT);
     Set<String> actualDenyUsers = testPerms.getDenyUsers();
     assertEquals(6, actualDenyUsers.size());
@@ -392,7 +392,7 @@ public class FnPermissionsTest extends TestCase {
   }
 
   public void testGetDenyUsersBySource() {
-    FnPermissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_PARENT, PermissionSource.SOURCE_DEFAULT);
     Set<String> directDenyUsers =
         testPerms.getDenyUsers(PermissionSource.SOURCE_DIRECT);
@@ -406,7 +406,7 @@ public class FnPermissionsTest extends TestCase {
   }
 
   public void testGetAllowGroups() {
-    FnPermissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT);
     Set<String> actualAllowGroups = testPerms.getAllowGroups();
     assertEquals(7, actualAllowGroups.size());
@@ -415,7 +415,7 @@ public class FnPermissionsTest extends TestCase {
   }
 
   public void testGetAllowGroupsBySource() {
-    FnPermissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT, PermissionSource.SOURCE_DEFAULT);
     Set<String> inheritAllowGroups =
         testPerms.getAllowGroups(PermissionSource.SOURCE_PARENT);
@@ -429,7 +429,7 @@ public class FnPermissionsTest extends TestCase {
   }
 
   public void testGetDenyGroups() {
-    FnPermissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT);
     Set<String> actualDenyGroups = testPerms.getDenyGroups();
     assertEquals(5, actualDenyGroups.size());
@@ -438,7 +438,7 @@ public class FnPermissionsTest extends TestCase {
   }
 
   public void testGetDenyGroupsBySource() {
-    FnPermissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_PARENT, PermissionSource.SOURCE_DEFAULT);
     Set<String> directDenyGroups =
         testPerms.getDenyGroups(PermissionSource.SOURCE_DIRECT);
@@ -489,7 +489,7 @@ public class FnPermissionsTest extends TestCase {
     perm1.set_GranteeName(granteeName);
     perms.add(perm1);
 
-    FnPermissions testPerms = new FnPermissions(perms);
+    Permissions testPerms = new Permissions(perms);
     assertEquals(expectedResult, testPerms.authorizeMarking(testUser,
         constraintMask));
   }
@@ -578,7 +578,7 @@ public class FnPermissionsTest extends TestCase {
     perm2.set_GranteeName(user1.get_Name());
     perms.add(perm2);
 
-    FnPermissions testPerms = new FnPermissions(perms);
+    Permissions testPerms = new Permissions(perms);
     assertEquals(true, testPerms.authorizeMarking(user1,
         constraintMask(AccessRight.VIEW_CONTENT, AccessRight.READ)));
   }
@@ -602,7 +602,7 @@ public class FnPermissionsTest extends TestCase {
     denyUse.set_GranteeName(user1.get_Name());
     perms.add(denyUse);
 
-    FnPermissions testPerms = new FnPermissions(perms);
+    Permissions testPerms = new Permissions(perms);
     assertEquals(false, testPerms.authorizeMarking(user1,
         constraintMask(AccessRight.NONE_AS_INT)));
     assertEquals(true, testPerms.authorizeMarking(user1,

@@ -90,8 +90,25 @@ public class FnUserContext implements IUserContext {
     }
   }
 
-  // TODO(tdnguyen) This seems to be a strange place to put lookupUser method
-  // here.  Consider moving or refactoring this method.
+  /*
+   * TODO(tdnguyen) This seems to be a strange place to put lookupUser method
+   * here.  Consider moving or refactoring this method.
+   *
+   * TODO(jlacey): r569 moved this code here from FnPermissions, but
+   * left behind a now unused PropertyFilter. We should use this
+   * filter here, or just delete this TODO.
+   *
+   * private final PropertyFilter pf;
+   * pf = new PropertyFilter();
+   * pf.addIncludeProperty(new FilterElement(null, null, null,
+   *     PropertyNames.EMAIL, null));
+   * pf.addIncludeProperty(new FilterElement(null, null, null,
+   *     PropertyNames.SHORT_NAME, null));
+   * pf.addIncludeProperty(new FilterElement(null, null, null,
+   *     PropertyNames.NAME, null));
+   * pf.addIncludeProperty(new FilterElement(null, null, null,
+   *     PropertyNames.DISTINGUISHED_NAME, null));
+   */
   @Override
   public IUser lookupUser(String username) throws RepositoryException {
     try {
