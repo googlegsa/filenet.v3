@@ -19,7 +19,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.Property;
@@ -75,7 +74,7 @@ public class FileDocumentTest extends FileNetTestCase {
     Property prop = fd.findProperty("Id");
     assertEquals(TestConnection.docId1, prop.nextValue().toString());
 
-    // TODO(tdnguyen) Revisit these test cases after fixing FnPermissions
+    // TODO(tdnguyen) Revisit these test cases after fixing Permissions
     // to avoid hard-coding users' names for allow and deny.
     Property allowUsers = fd.findProperty(SpiConstants.PROPNAME_ACLUSERS);
     assertNotNull(allowUsers);
@@ -125,7 +124,7 @@ public class FileDocumentTest extends FileNetTestCase {
     List<Value> ownerValue = new ArrayList<Value>();
     doc.getPropertyStringValue("Owner", ownerValue);
     assertEquals(adminUser.get_Name(), ownerValue.get(0).toString());
-    IPermissions perms = doc.getPermissions();
+    Permissions perms = new Permissions(doc.get_Permissions());
     assertTrue(perms.authorize(adminUser));
   }
 }

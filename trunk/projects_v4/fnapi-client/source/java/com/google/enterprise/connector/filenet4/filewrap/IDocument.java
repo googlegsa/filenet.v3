@@ -18,6 +18,8 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.collection.AccessPermissionList;
+
 import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +29,9 @@ import java.util.Set;
  */
 public interface IDocument extends IBaseObject {
 
-  IPermissions getPermissions() throws RepositoryException;
+  AccessPermissionList get_Permissions() throws RepositoryException;
+
+  String get_Owner() throws RepositoryException;
 
   InputStream getContent() throws RepositoryDocumentException;
 

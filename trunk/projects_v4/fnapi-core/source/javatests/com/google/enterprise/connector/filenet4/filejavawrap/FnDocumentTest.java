@@ -18,13 +18,14 @@ import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileNetTestCase;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.FileUtil;
+import com.google.enterprise.connector.filenet4.MarkingPermissions;
+import com.google.enterprise.connector.filenet4.Permissions;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
@@ -146,7 +147,7 @@ public class FnDocumentTest extends FileNetTestCase {
   }
 
   public void testGetPermissions() throws RepositoryException {
-    IPermissions perms = fd.getPermissions();
+    Permissions perms = new Permissions(fd.get_Permissions());
     assertNotNull(perms);
     boolean authorized = perms.authorize(MockUtil.createAdministratorUser());
     assertTrue("User is not authorized", authorized);
@@ -160,7 +161,7 @@ public class FnDocumentTest extends FileNetTestCase {
     IActiveMarkingList activeMarkingList = doc.get_ActiveMarkings();
     assertNotNull("Active marking is null", activeMarkingList);
     assertTrue(user.get_Name() + " is not authorized by document's marking",
-        activeMarkingList.authorize(user));
+        new MarkingPermissions(activeMarkingList).authorize(user));
   }
 
   /*

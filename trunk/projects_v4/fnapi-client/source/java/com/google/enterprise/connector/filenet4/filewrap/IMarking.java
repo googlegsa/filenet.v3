@@ -1,10 +1,10 @@
-// Copyright 2011 Google Inc.
+// Copyright 2014 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +14,14 @@
 
 package com.google.enterprise.connector.filenet4.filewrap;
 
-/**
- * ActiveMarking interface with the functionality to authorize the Document for
- * specific marking value.
- *
- * @author Dhanashri_Deshpande
- */
-public interface IActiveMarking {
+import com.filenet.api.collection.AccessPermissionList;
 
-  public boolean authorize(IUser user);
+/** Wrapper for com.filenet.api.security.Marking. */
+public interface IMarking {
+
+  String get_MarkingValue();
+
+  int get_ConstraintMask();
+
+  AccessPermissionList get_Permissions();
 }

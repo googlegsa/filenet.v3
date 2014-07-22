@@ -17,11 +17,11 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IId;
-import com.google.enterprise.connector.filenet4.filewrap.IPermissions;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.BooleanList;
 import com.filenet.api.collection.DateTimeList;
 import com.filenet.api.collection.Float64List;
@@ -190,8 +190,13 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public IPermissions getPermissions() {
-    return new FnPermissions(doc.get_Permissions(), doc.get_Owner());
+  public AccessPermissionList get_Permissions() {
+    return doc.get_Permissions();
+  }
+
+  @Override
+  public String get_Owner() {
+    return doc.get_Owner();
   }
 
   @Override

@@ -108,16 +108,17 @@ public class FileUtil {
     filterSet.add(PropertyNames.VERSION_SERIES);
     filterSet.add(PropertyNames.VERSION_SERIES_ID);
     filterSet.add(PropertyNames.RELEASED_VERSION);
+    filterSet.add(PropertyNames.OWNER);
     filterSet.add(PropertyNames.PERMISSIONS);
     filterSet.add(PropertyNames.PERMISSION_TYPE);
     filterSet.add(PropertyNames.PERMISSION_SOURCE);
-    
+
     StringBuilder buf = new StringBuilder();
     for (String filterName : filterSet) {
       buf.append(filterName).append(" ");
     }
     buf.deleteCharAt(buf.length() - 1);
-    
+
     PropertyFilter filter = new PropertyFilter();
     filter.addIncludeProperty(
         new FilterElement(null, null, null, buf.toString(), null));

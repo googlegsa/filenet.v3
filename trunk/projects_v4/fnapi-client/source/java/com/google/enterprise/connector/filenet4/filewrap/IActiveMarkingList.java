@@ -14,13 +14,15 @@
 
 package com.google.enterprise.connector.filenet4.filewrap;
 
+import java.util.Iterator;
+
 /**
- * ActiveMarkingList interface with the functionality to authorize the Document
- * for all the markings applied over it.
- *
- * @author Dhanashri_Deshpande
+ * Wrapper for com.filenet.api.collection.ActiveMarkingList. This
+ * implementation unwraps the contained ActiveMarking objects as
+ * Marking objects, since we don't need the only other method on
+ * ActiveMarking (get_PropertyDisplayName).
  */
 public interface IActiveMarkingList {
 
-  public boolean authorize(IUser user);
+  Iterator<? extends IMarking> iterator();
 }
