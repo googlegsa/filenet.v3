@@ -190,10 +190,8 @@ public class FileConnectorType implements ConnectorType {
   }
 
   /**
-   * Loops on keys and return a key name only if it finds one with a null or
-   * blank value, unless key.equals(FNCLASS) or key.equals(AUTHENTICATIONTYPE)
-   * or key.equals(WHERECLAUSE) or key.equals(FILEURI)or
-   * key.equals(CHECKMARKING)
+   * Loops on keys and return a key name only if it finds a required
+   * key with a null or blank value.
    */
   private String validateConfigMap(Map<String, String> configData) {
     for (Iterator<String> i = keys.iterator(); i.hasNext();) {
