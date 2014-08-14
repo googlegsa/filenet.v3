@@ -14,7 +14,25 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.filewrap.IId;
+import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.Value;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * Represents a mutable checkpoint. This class is not thread-safe, and
+ * must be synchronized externally if thread safety is required.
+ */
 class Checkpoint {
+  private static final Logger logger =
+      Logger.getLogger(Checkpoint.class.getName());
 
   public enum JsonField {
     UUID("uuid"),
@@ -34,5 +52,98 @@ class Checkpoint {
     public String toString() {
       return fieldName;
     }
+  }
+
+  private final JSONObject jo;
+
+  private boolean isEmpty;
+
+  public Checkpoint() {
+    jo = new JSONObject();
+    isEmpty = true;
+  }
+
+  public Checkpoint(String checkpoint) throws RepositoryException {
+    try {
+      jo = new JSONObject(checkpoint);
+    } catch (JSONException e) {
+      throw new RepositoryException(
+          "Unable to initialize a JSON object for the checkpoint", e);
+    }
+    isEmpty = false;
+  }
+
+  /**
+   * Gets whether the checkpoint is uninitialized.
+   *
+   * @return {@code true} if the checkpoint is uninitialized, or
+   *     {@code false} if any checkpoint fields have been set
+   */
+  public boolean isEmpty() {
+    return isEmpty;
+  }
+
+  /*
+   * Helper method to compute the checkpoint date and UUID value.
+   */
+  public void setCheckpointTimeAndUuid(JsonField jsonDateField,
+      Date nextCheckpointDate, IId uuid, JsonField jsonUuidField)
+      throws RepositoryException {
+    Calendar cal = Calendar.getInstance();
+    String dateString;
+    try {
+      if (nextCheckpointDate == null) {
+        if (jo.isNull(jsonDateField.toString())) {
+          dateString = Value.calendarToIso8601(cal);
+        } else {
+          dateString = jo.getString(jsonDateField.toString());
+        }
+      } else {
+        cal.setTime(nextCheckpointDate);
+        dateString = Value.calendarToIso8601(cal);
+      }
+      String guid;
+      if (uuid == null) {
+        if (jo.isNull(jsonUuidField.toString())) {
+          guid = "";
+        } else {
+          guid = jo.getString(jsonUuidField.toString());
+        }
+      } else {
+        guid = uuid.toString();
+      }
+      jo.put(jsonUuidField.toString(), guid);
+      jo.put(jsonDateField.toString(), dateString);
+      isEmpty = false;
+      logger.log(Level.FINE, "Set new checkpoint for {0} field to {1}, "
+          + "{2} field to {3}", new Object[] {
+              jsonDateField.toString(), dateString,
+              jsonUuidField.toString(), uuid});
+    } catch (JSONException e) {
+      throw new RepositoryException("Failed to set JSON values for fields: "
+          + jsonDateField.toString() + " or " + jsonUuidField.toString(), e);
+    }
+  }
+
+  /**
+   * Gets the given field from the checkpoint.
+   *
+   * @return the string value for the field
+   * @throws RepositoryException if the field is uninitialized or the
+   *     value is not a string
+   */
+  public String getString(JsonField jsonField) throws RepositoryException {
+    try {
+      return jo.getString(jsonField.toString());
+    } catch (JSONException e) {
+      throw new RepositoryException("Illegal checkpoint object: could not get "
+          + jsonField + " from checkpoint: " + this);
+
+    }
+  }
+
+  @Override
+  public String toString() {
+    return jo.toString();
   }
 }

@@ -27,9 +27,6 @@ import com.google.enterprise.connector.spi.TraversalManager;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PropertyNames;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,14 +88,19 @@ public class FileTraversalManager implements TraversalManager {
 
   @Override
   public DocumentList startTraversal() throws RepositoryException {
-    return resumeTraversal(null);
+    LOGGER.info("Starting traversal...");
+    return doTraversal(new Checkpoint());
   }
 
   @Override
   public DocumentList resumeTraversal(String checkPoint)
           throws RepositoryException {
-    LOGGER.info((checkPoint == null) ? "Starting traversal..."
-            : "Resuming traversal...");
+    LOGGER.info("Resuming traversal...");
+    return doTraversal(new Checkpoint(checkPoint));
+  }
+
+  private DocumentList doTraversal(Checkpoint checkPoint)
+      throws RepositoryException {
     DocumentList resultSet = null;
     objectStore.refreshSUserContext();
 
@@ -155,7 +157,7 @@ public class FileTraversalManager implements TraversalManager {
    * @return
    * @throws RepositoryException
    */
-  private String buildQueryString(String checkpoint)
+  private String buildQueryString(Checkpoint checkpoint)
           throws RepositoryException {
     StringBuffer query = new StringBuffer("SELECT ");
     if (batchHint > 0) {
@@ -181,7 +183,7 @@ public class FileTraversalManager implements TraversalManager {
         query.append(additionalWhereClause);
       }
     }
-    if (checkpoint != null) {
+    if (!checkpoint.isEmpty()) {
       query.append(getCheckpointClause(checkpoint));
     }
     query.append(order_by);
@@ -192,7 +194,7 @@ public class FileTraversalManager implements TraversalManager {
    * Builds the query to send delete feeds to GSA based on the Additional
    * Delete clause set as Connector Configuration.
    */
-  private String buildQueryStringToDeleteDocs(String checkpoint,
+  private String buildQueryStringToDeleteDocs(Checkpoint checkpoint,
       String deleteadditionalWhereClause) throws RepositoryException {
     StringBuffer query = new StringBuffer("SELECT ");
     if (batchHint > 0) {
@@ -212,7 +214,7 @@ public class FileTraversalManager implements TraversalManager {
     } else {
       query.append(deleteadditionalWhereClause);
     }
-    if (checkpoint != null) {
+    if (!checkpoint.isEmpty()) {
       query.append(getCheckpointClauseToDeleteDocs(checkpoint));
     }
     query.append(order_by);
@@ -230,7 +232,7 @@ public class FileTraversalManager implements TraversalManager {
    * @return
    * @throws RepositoryException
    */
-  private String buildQueryToDelete(String checkpoint)
+  private String buildQueryToDelete(Checkpoint checkpoint)
           throws RepositoryException {
     LOGGER.fine("Build query to get the documents removed from repository: ");
     StringBuffer query = new StringBuffer("SELECT ");
@@ -250,8 +252,7 @@ public class FileTraversalManager implements TraversalManager {
     query.append(PropertyNames.SOURCE_OBJECT_ID);
     query.append(" FROM ");
     query.append(GuidConstants.Class_DeletionEvent);
-    if (checkpoint != null) {
-      LOGGER.fine("Checkpoint is not null");
+    if (!checkpoint.isEmpty()) {
       query.append(getCheckpointClauseToDelete(checkpoint));
     }
     query.append(orderByToDelete);
@@ -264,25 +265,14 @@ public class FileTraversalManager implements TraversalManager {
    *
    * @param checkpoint
    * @return Query String
-   * @throws JSONException
+   * @throws RepositoryException if the checkpoint is uninitialized
    */
-  private String getCheckpointClause(String checkPoint)
+  private String getCheckpointClause(Checkpoint checkPoint)
           throws RepositoryException {
-    JSONObject jo = null;
-    try {
-      jo = new JSONObject(checkPoint);
-    } catch (JSONException e) {
-      LOGGER.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
-              + checkPoint);
-      throw new IllegalArgumentException(
-              "CheckPoint string does not parse as JSON: " + checkPoint);
-    }
-    String uuid = extractDocidFromCheckpoint(jo, checkPoint,
-        JsonField.UUID.toString());
-    String c = extractNativeDateFromCheckpoint(jo, checkPoint,
-        JsonField.LAST_MODIFIED_TIME.toString());
-    String queryString = makeCheckpointQueryString(uuid, c);
-    return queryString;
+    String uuid = checkPoint.getString(JsonField.UUID);
+    String c = FileUtil.getQueryTimeString(
+        checkPoint.getString(JsonField.LAST_MODIFIED_TIME));
+    return makeCheckpointQueryString(uuid, c);
   }
 
   /**
@@ -291,26 +281,14 @@ public class FileTraversalManager implements TraversalManager {
    *
    * @param checkpoint
    * @return Query String
-   * @throws JSONException
+   * @throws RepositoryException if the checkpoint is uninitialized
    */
-  private String getCheckpointClauseToDeleteDocs(String checkPoint)
+  private String getCheckpointClauseToDeleteDocs(Checkpoint checkPoint)
           throws RepositoryException {
-    JSONObject jo = null;
-    try {
-      jo = new JSONObject(checkPoint);
-    } catch (JSONException e) {
-      LOGGER.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
-              + checkPoint);
-      throw new IllegalArgumentException(
-              "CheckPoint string does not parse as JSON: " + checkPoint);
-    }
-    String uuid = extractDocidFromCheckpoint(jo, checkPoint,
-        JsonField.UUID_CUSTOM_DELETED_DOC.toString());
-    String c = extractNativeDateFromCheckpoint(jo, checkPoint,
-        JsonField.LAST_CUSTOM_DELETION_TIME.toString());
-    String queryString = makeCheckpointQueryStringToDeleteDocs(uuid, c);
-
-    return queryString;
+    String uuid = checkPoint.getString(JsonField.UUID_CUSTOM_DELETED_DOC);
+    String c = FileUtil.getQueryTimeString(
+        checkPoint.getString(JsonField.LAST_CUSTOM_DELETION_TIME));
+    return makeCheckpointQueryStringToDeleteDocs(uuid, c);
   }
 
   /**
@@ -319,24 +297,13 @@ public class FileTraversalManager implements TraversalManager {
    *
    * @param checkpoint
    * @return Query String
-   * @throws JSONException
+   * @throws RepositoryException if the checkpoint is uninitialized
    */
-  private String getCheckpointClauseToDelete(String checkPoint)
+  private String getCheckpointClauseToDelete(Checkpoint checkPoint)
           throws RepositoryException {
-    JSONObject jo = null;
-
-    try {
-      jo = new JSONObject(checkPoint);
-    } catch (JSONException e) {
-      LOGGER.log(Level.WARNING, "CheckPoint string does not parse as JSON: "
-              + checkPoint);
-      throw new IllegalArgumentException(
-              "CheckPoint string does not parse as JSON: " + checkPoint);
-    }
-    String uuid = extractDocidFromCheckpoint(jo, checkPoint,
-        JsonField.UUID_DELETION_EVENT.toString());
-    String c = extractNativeDateFromCheckpoint(jo, checkPoint,
-        JsonField.LAST_DELETION_EVENT_TIME.toString());
+    String uuid = checkPoint.getString(JsonField.UUID_DELETION_EVENT);
+    String c = FileUtil.getQueryTimeString(
+        checkPoint.getString(JsonField.LAST_DELETION_EVENT_TIME));
     return makeCheckpointQueryStringToDelete(uuid, c);
   }
 
@@ -378,48 +345,6 @@ public class FileTraversalManager implements TraversalManager {
     LOGGER.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
     LOGGER.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
     return statement;
-  }
-
-  /**
-   * To extract Docid from Checkpoint string
-   *
-   * @param jo
-   * @param checkPoint
-   * @param param
-   * @return
-   */
-  protected String extractDocidFromCheckpoint(JSONObject jo,
-          String checkPoint, String param) {
-    String uuid = null;
-    try {
-      uuid = jo.getString(param);
-    } catch (JSONException e) {
-      LOGGER.log(Level.WARNING, "Could not get uuid from checkPoint string: "
-              + checkPoint);
-      throw new IllegalArgumentException(
-              "Could not get uuid from checkPoint string: " + checkPoint);
-    }
-    return uuid;
-  }
-
-  /**
-   * To extract date part from Checkpoint string
-   *
-   * @param jo
-   * @param checkPoint
-   * @param param
-   * @return
-   */
-  protected String extractNativeDateFromCheckpoint(JSONObject jo,
-          String checkPoint, String param) throws RepositoryException {
-    try {
-      // Need to validate the zone info in the date time string
-      return FileUtil.getQueryTimeString(jo.getString(param));
-    } catch (JSONException e) {
-      throw new RepositoryException(
-          "Could not get last modified/removed date from checkPoint string: "
-              + checkPoint, e);
-    }
   }
 
   /**

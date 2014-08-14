@@ -24,15 +24,10 @@ import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SkippedDocumentException;
-import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.DatabaseType;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -55,13 +50,14 @@ public class FileDocumentList implements DocumentList {
   private Date fileDocumentToDeleteDate;
   private Date fileDocumentToDeleteDocsDate;
   private IId docId;
-  private String lastCheckPoint;
+  private Checkpoint lastCheckPoint;
   private IId docIdToDelete;
   private IId docIdToDeleteDocs;
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
-      IObjectStore objectStore, FileConnector connector, String checkPoint) {
+      IObjectStore objectStore, FileConnector connector,
+      Checkpoint checkPoint) {
     this.objectStore = objectStore;
     this.connector = connector;
     this.lastCheckPoint = checkPoint;
@@ -233,66 +229,14 @@ public class FileDocumentList implements DocumentList {
   public String checkpoint() throws RepositoryException {
     logger.log(Level.FINEST, "Last checkpoint: {0}", lastCheckPoint);
 
-    JSONObject jo;
-    if (lastCheckPoint == null) {
-      jo = new JSONObject();
-    } else {
-      try {
-        jo = new JSONObject(lastCheckPoint);
-      } catch (JSONException e) {
-        throw new RepositoryException(
-            "Unable to initialize a JSON object for the checkpoint", e);
-      }
-    }
-    setCheckpointTimeAndUuid(JsonField.LAST_MODIFIED_TIME, fileDocumentDate,
-        docId, JsonField.UUID, jo);
-    setCheckpointTimeAndUuid(JsonField.LAST_CUSTOM_DELETION_TIME,
+    lastCheckPoint.setCheckpointTimeAndUuid(JsonField.LAST_MODIFIED_TIME,
+        fileDocumentDate, docId, JsonField.UUID);
+    lastCheckPoint.setCheckpointTimeAndUuid(JsonField.LAST_CUSTOM_DELETION_TIME,
         fileDocumentToDeleteDocsDate, docIdToDeleteDocs,
-        JsonField.UUID_CUSTOM_DELETED_DOC, jo);
-    setCheckpointTimeAndUuid(JsonField.LAST_DELETION_EVENT_TIME,
+        JsonField.UUID_CUSTOM_DELETED_DOC);
+    lastCheckPoint.setCheckpointTimeAndUuid(JsonField.LAST_DELETION_EVENT_TIME,
         fileDocumentToDeleteDate, docIdToDelete,
-        JsonField.UUID_DELETION_EVENT, jo);
-    return jo.toString();
-  }
-
-  /*
-   * Helper method to compute the checkpoint date and UUID value.
-   */
-  private void setCheckpointTimeAndUuid(JsonField jsonDateField,
-      Date nextCheckpointDate, IId uuid, JsonField jsonUuidField,
-      JSONObject jo) throws RepositoryException {
-    Calendar cal = Calendar.getInstance();
-    String dateString;
-    try {
-      if (nextCheckpointDate == null) {
-        if (jo.isNull(jsonDateField.toString())) {
-          dateString = Value.calendarToIso8601(cal);
-        } else {
-          dateString = jo.getString(jsonDateField.toString());
-        }
-      } else {
-        cal.setTime(nextCheckpointDate);
-        dateString = Value.calendarToIso8601(cal);
-      }
-      String guid;
-      if (uuid == null) {
-        if (jo.isNull(jsonUuidField.toString())) {
-          guid = "";
-        } else {
-          guid = jo.getString(jsonUuidField.toString());
-        }
-      } else {
-        guid = uuid.toString();
-      }
-      jo.put(jsonUuidField.toString(), guid);
-      jo.put(jsonDateField.toString(), dateString);
-      logger.log(Level.FINE, "Set new checkpoint for {0} field to {1}, "
-          + "{2} field to {3}", new Object[] {
-              jsonDateField.toString(), dateString,
-              jsonUuidField.toString(), uuid});
-    } catch (JSONException e) {
-      throw new RepositoryException("Failed to set JSON values for fields: "
-          + jsonDateField.toString() + " or " + jsonUuidField.toString(), e);
-    }
+        JsonField.UUID_DELETION_EVENT);
+    return lastCheckPoint.toString();
   }
 }

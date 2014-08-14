@@ -438,10 +438,10 @@ public class FileDocumentListTest extends FileNetTestCase {
   }
 
   private DocumentList getObjectUnderTest(IObjectStore os, IObjectSet docSet,
-      IObjectSet customDeletionSet, IObjectSet deletionEventSet) {
-    Calendar cal = Calendar.getInstance();
+      IObjectSet customDeletionSet, IObjectSet deletionEventSet)
+      throws RepositoryException {
     return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
-        os, connec, CHECKPOINT);
+        os, connec, new Checkpoint(CHECKPOINT));
   }
 
   private boolean checkpointContains(String checkpoint, Property lastModified,
