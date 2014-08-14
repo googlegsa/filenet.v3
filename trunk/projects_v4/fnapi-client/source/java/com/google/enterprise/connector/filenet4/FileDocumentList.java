@@ -14,7 +14,6 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.common.collect.Iterators;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IId;
@@ -45,14 +44,6 @@ import java.util.logging.Logger;
 public class FileDocumentList implements DocumentList {
   private static final Logger logger = 
       Logger.getLogger(FileDocumentList.class.getName());
-
-  private static class EmptyObjectSet implements IObjectSet {
-    @Override public int getSize() { return 0; }
-
-    @Override public Iterator<? extends IBaseObject> getIterator() {
-      return Iterators.emptyIterator();
-    }
-  }
 
   private static final long serialVersionUID = 1L;
   private final IObjectStore objectStore;
@@ -92,12 +83,6 @@ public class FileDocumentList implements DocumentList {
           + "satisfying additional delete clause): "
           + objectSetToDeleteDocs.getSize());
     }
-  }
-
-  public FileDocumentList(IObjectSet objectSet, IObjectSet objectSetToDelete,
-      IObjectStore objectStore, FileConnector connector, String checkPoint) {
-    this(objectSet, new EmptyObjectSet(), objectSetToDelete, objectStore,
-        connector, checkPoint);
   }
 
   private Iterator<? extends IBaseObject> mergeAndSortObjects(

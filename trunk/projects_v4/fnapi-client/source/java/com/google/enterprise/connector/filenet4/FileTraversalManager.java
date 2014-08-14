@@ -22,7 +22,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.TraversalManager;
 
 import com.filenet.api.constants.GuidConstants;
@@ -30,23 +29,10 @@ import com.filenet.api.constants.PropertyNames;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Responsible for: 1. Construction of FileNet SQL queries for adding and
@@ -63,7 +49,7 @@ public class FileTraversalManager implements TraversalManager {
   private final IObjectStore objectStore;
   private final FileConnector connector;
 
-  private int batchint;
+  private int batchHint;
   private String tableName = "Document";
   private String order_by = " ORDER BY " + PropertyNames.DATE_LAST_MODIFIED
           + "," + PropertyNames.ID;
@@ -89,11 +75,18 @@ public class FileTraversalManager implements TraversalManager {
           + PropertyNames.DATE_LAST_MODIFIED + ">={0})";
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
-      IObjectStore objectStore, FileConnector fileConnector)
-      throws RepositoryException {
+      IObjectStore objectStore, FileConnector fileConnector) {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
     this.connector = fileConnector;
+  }
+
+  /**
+   * To set BatchHint for traversal.
+   */
+  @Override
+  public void setBatchHint(int batchHint) throws RepositoryException {
+    this.batchHint = batchHint;
   }
 
   @Override
@@ -123,33 +116,31 @@ public class FileTraversalManager implements TraversalManager {
     IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
 
     // to delete for additional delete clause
-    if (!Strings.isNullOrEmpty(connector.getDeleteAdditionalWhereClause())) {
+    IObjectSet objectSetToDeleteDocs;
+    if (Strings.isNullOrEmpty(connector.getDeleteAdditionalWhereClause())) {
+      objectSetToDeleteDocs = new EmptyObjectSet();
+    } else {
       String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(checkPoint,
           connector.getDeleteAdditionalWhereClause());
 
       LOGGER.log(Level.INFO, "Query to get documents satisfying the delete where clause: "
               + queryStringToDeleteDocs);
-      IObjectSet objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
+      objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
       LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents satisfying the delete where clause): "
               + objectSetToDeleteDocs.getSize());
-
-      if ((objectSet.getSize() > 0)
-              || (objectSetToDeleteDocs.getSize() > 0)
-              || (objectSetToDelete.getSize() > 0)) {
-        resultSet = new FileDocumentList(objectSet, objectSetToDeleteDocs,
-            objectSetToDelete, objectStore, connector, checkPoint);
-      }
-    } else {
-      if ((objectSet.getSize() > 0) || (objectSetToDelete.getSize() > 0)) {
-        resultSet = new FileDocumentList(objectSet, objectSetToDelete,
-            objectStore, connector, checkPoint);
-      }
-      LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
-      LOGGER.log(Level.INFO, "Number of documents sent to GSA: "
-              + objectSet.getSize());
-      LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents deleted form Repository): "
-              + objectSetToDelete.getSize());
     }
+    if ((objectSet.getSize() > 0)
+        || (objectSetToDeleteDocs.getSize() > 0)
+        || (objectSetToDelete.getSize() > 0)) {
+      resultSet = new FileDocumentList(objectSet, objectSetToDeleteDocs,
+          objectSetToDelete, objectStore, connector, checkPoint);
+    }
+    LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
+    LOGGER.log(Level.INFO, "Number of documents sent to GSA: "
+        + objectSet.getSize());
+    LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents deleted form Repository): "
+        + objectSetToDelete.getSize());
+
     return resultSet;
   }
 
@@ -167,8 +158,8 @@ public class FileTraversalManager implements TraversalManager {
   private String buildQueryString(String checkpoint)
           throws RepositoryException {
     StringBuffer query = new StringBuffer("SELECT ");
-    if (batchint > 0) {
-      query.append("TOP " + batchint + " ");
+    if (batchHint > 0) {
+      query.append("TOP " + batchHint + " ");
     }
     query.append(PropertyNames.ID);
     query.append(",");
@@ -183,7 +174,7 @@ public class FileTraversalManager implements TraversalManager {
     if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
       if ((additionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
         query = new StringBuffer(additionalWhereClause);
-        query.replace(0, 6, "SELECT TOP " + batchint + " ");
+        query.replace(0, 6, "SELECT TOP " + batchHint + " ");
         LOGGER.fine("Using Custom Query[" + additionalWhereClause
                 + "]");
       } else {
@@ -194,7 +185,6 @@ public class FileTraversalManager implements TraversalManager {
       query.append(getCheckpointClause(checkpoint));
     }
     query.append(order_by);
-
     return query.toString();
   }
 
@@ -205,8 +195,8 @@ public class FileTraversalManager implements TraversalManager {
   private String buildQueryStringToDeleteDocs(String checkpoint,
       String deleteadditionalWhereClause) throws RepositoryException {
     StringBuffer query = new StringBuffer("SELECT ");
-    if (batchint > 0) {
-      query.append("TOP " + batchint + " ");
+    if (batchHint > 0) {
+      query.append("TOP " + batchHint + " ");
     }
     query.append(PropertyNames.ID);
     query.append(",");
@@ -217,7 +207,7 @@ public class FileTraversalManager implements TraversalManager {
 
     if ((deleteadditionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
       query = new StringBuffer(deleteadditionalWhereClause);
-      query.replace(0, 6, "SELECT TOP " + batchint + " ");
+      query.replace(0, 6, "SELECT TOP " + batchHint + " ");
       LOGGER.fine("Using Custom Query[" + deleteadditionalWhereClause + "]");
     } else {
       query.append(deleteadditionalWhereClause);
@@ -244,9 +234,9 @@ public class FileTraversalManager implements TraversalManager {
           throws RepositoryException {
     LOGGER.fine("Build query to get the documents removed from repository: ");
     StringBuffer query = new StringBuffer("SELECT ");
-    if (batchint > 0) {
+    if (batchHint > 0) {
       query.append("TOP ");
-      query.append(batchint);
+      query.append(batchHint);
       query.append(" ");
     }
     // GuidConstants.Class_DeletionEvent = Only deleted objects in event
@@ -278,7 +268,6 @@ public class FileTraversalManager implements TraversalManager {
    */
   private String getCheckpointClause(String checkPoint)
           throws RepositoryException {
-
     JSONObject jo = null;
     try {
       jo = new JSONObject(checkPoint);
@@ -358,9 +347,8 @@ public class FileTraversalManager implements TraversalManager {
    * @param checkpoint values (String ID, String Date)
    * @return Query String
    */
-  protected String makeCheckpointQueryStringToDelete(String uuid, String c)
-          throws RepositoryException {
-    String statement = "";
+  private String makeCheckpointQueryStringToDelete(String uuid, String c) {
+    String statement;
     Object[] arguments = { c, uuid };
     if (uuid.equals("") || !connector.useIDForChangeDetection()) {
       statement = MessageFormat.format(whereClauseToDeleteOnlyDate, arguments);
@@ -379,11 +367,9 @@ public class FileTraversalManager implements TraversalManager {
    * @param checkpoint values (String ID, String Date)
    * @return Query String
    */
-  protected String makeCheckpointQueryStringToDeleteDocs(String uuid, String c)
-          throws RepositoryException {
-    String statement = "";
+  private String makeCheckpointQueryStringToDeleteDocs(String uuid, String c) {
+    String statement;
     Object[] arguments = { c, uuid };
-
     if (uuid.equals("") || !connector.useIDForChangeDetection()) {
       statement = MessageFormat.format(whereClauseToDeleteDocsOnlyDate, arguments);
     } else {
@@ -391,17 +377,7 @@ public class FileTraversalManager implements TraversalManager {
     }
     LOGGER.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
     LOGGER.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
-
     return statement;
-  }
-
-  /**
-   * To set BatchHint for traversal.
-   */
-  @Override
-  public void setBatchHint(int batchHint) throws RepositoryException {
-    this.batchint = batchHint;
-
   }
 
   /**
@@ -453,10 +429,8 @@ public class FileTraversalManager implements TraversalManager {
    * @param uuid
    * @param c
    * @return
-   * @throws RepositoryException
    */
-  protected String makeCheckpointQueryString(String uuid, String c)
-          throws RepositoryException {
+  private String makeCheckpointQueryString(String uuid, String c) {
     String statement;
     Object[] arguments = { c, uuid };
     if (uuid.equals("") || !connector.useIDForChangeDetection()) {
@@ -467,29 +441,5 @@ public class FileTraversalManager implements TraversalManager {
     LOGGER.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
     LOGGER.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
     return statement;
-  }
-
-  private Document stringToDom(String xmlSource) throws RepositoryException {
-    DocumentBuilder builder = null;
-    try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      builder = factory.newDocumentBuilder();
-      return builder.parse(new InputSource(new StringReader(xmlSource)));
-    } catch (ParserConfigurationException de) {
-      LOGGER.log(Level.WARNING, "Unable to configure parser for parsing XML string");
-      RepositoryException re = new RepositoryLoginException(
-              "Unable to configure parser for parsing XML string", de);
-      throw re;
-    } catch (SAXException de) {
-      LOGGER.log(Level.WARNING, "Unable to parse XML string");
-      RepositoryException re = new RepositoryLoginException(
-              "Unable to parse XML string", de);
-      throw re;
-    } catch (IOException de) {
-      LOGGER.log(Level.WARNING, "XML source string to be parsed not found.");
-      RepositoryException re = new RepositoryLoginException(
-              "XML source string to be parsed not found.", de);
-      throw re;
-    }
   }
 }
