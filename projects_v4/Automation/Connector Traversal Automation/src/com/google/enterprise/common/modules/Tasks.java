@@ -5,12 +5,12 @@ package com.google.enterprise.common.modules;
 
 // import com.google.enterprise.connector.common.GlobalConstants;
 
-import java.io.IOException;
+import com.thoughtworks.selenium.DefaultSelenium;
+import com.thoughtworks.selenium.SeleneseTestCase;
 
 import org.openqa.selenium.server.SeleniumServer;
 
-import com.thoughtworks.selenium.DefaultSelenium;
-import com.thoughtworks.selenium.SeleneseTestCase;
+import java.io.IOException;
 
 /**
  * This class provides functions with performs simple tasks such as

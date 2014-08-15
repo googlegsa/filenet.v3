@@ -17,8 +17,9 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import java.util.Map;
-import java.util.Properties;
+import com.google.enterprise.connector.spi.Connector;
+import com.google.enterprise.connector.spi.ConnectorFactory;
+import com.google.enterprise.connector.spi.RepositoryException;
 
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -26,9 +27,8 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-import com.google.enterprise.connector.spi.Connector;
-import com.google.enterprise.connector.spi.ConnectorFactory;
-import com.google.enterprise.connector.spi.RepositoryException;
+import java.util.Map;
+import java.util.Properties;
 
 public class FileNetConnectorFactory implements ConnectorFactory {
   public static final String CONNECTOR_INSTANCE_XML = "config/connectorInstance.xml";

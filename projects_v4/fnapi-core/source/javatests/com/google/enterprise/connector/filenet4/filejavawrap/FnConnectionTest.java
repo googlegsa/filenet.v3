@@ -14,9 +14,9 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.filenet.api.core.Connection;
 import com.filenet.api.util.UserContext;
 
-import javax.security.auth.Subject;
-
 import junit.framework.TestCase;
+
+import javax.security.auth.Subject;
 
 public class FnConnectionTest extends TestCase {
 

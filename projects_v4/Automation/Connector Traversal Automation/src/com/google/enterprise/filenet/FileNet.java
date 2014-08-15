@@ -3,13 +3,14 @@
  */
 package com.google.enterprise.filenet;
 
+import com.google.enterprise.common.modules.FileUtils;
+import com.google.enterprise.common.modules.Tasks;
+
+import com.thoughtworks.selenium.SeleneseTestCase;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.google.enterprise.common.modules.FileUtils;
-import com.google.enterprise.common.modules.Tasks;
-import com.thoughtworks.selenium.SeleneseTestCase;
 
 /**
  *  This is a Test Script which will configure a FileNET connector and

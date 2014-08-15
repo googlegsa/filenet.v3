@@ -3,15 +3,14 @@
  */
 package com.google.enterprise.common.modules;
 
+import com.google.enterprise.filenet.FilenetTasks;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Properties;
-
-import com.google.enterprise.filenet.FilenetTasks;
-
 
 /**
  * This class has functions to compare property files and log files
