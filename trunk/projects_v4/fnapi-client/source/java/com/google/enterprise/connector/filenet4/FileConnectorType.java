@@ -39,8 +39,6 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.net.ssl.SSLHandshakeException;
-
 /**
  *Represents FileNet connector type information. Contains methods for creating
  * and validating user form.

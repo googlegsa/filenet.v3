@@ -25,9 +25,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

@@ -19,8 +19,6 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.Session;
 
-import junit.framework.TestCase;
-
 public class FileConnectorTest extends FileNetTestCase {
 
   /*

@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4;
 import com.google.enterprise.connector.filenet4.FileAuthenticationManager;
 import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileSession;
-
 import com.google.enterprise.connector.spi.AuthenticationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
