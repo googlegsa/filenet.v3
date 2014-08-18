@@ -16,7 +16,11 @@ package com.google.enterprise.connector.filenet4.mockjavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IId;
+import com.google.enterprise.connector.filenet4.mock.AccessPermissionListMock;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
+import com.google.enterprise.connector.spi.RepositoryException;
+
+import com.filenet.api.collection.AccessPermissionList;
 
 import java.util.Date;
 
@@ -26,14 +30,23 @@ public class MockBaseObject implements IBaseObject {
   private final Date lastModified;
   private final boolean isDeleteEvent;
   private final boolean releasedVersion;
+  private final AccessPermissionList permissions;
 
   public MockBaseObject(IId id, IId versionSeriesId, Date lastModified,
      boolean isDeletionEvent, boolean releasedVersion) {
+    this(id, versionSeriesId, lastModified, isDeletionEvent, releasedVersion,
+        new AccessPermissionListMock());
+  }
+
+  public MockBaseObject(IId id, IId versionSeriesId, Date lastModified,
+      boolean isDeletionEvent, boolean releasedVersion,
+      AccessPermissionList perms) {
     this.id = id;
     this.versionSeriesId = versionSeriesId;
     this.lastModified = lastModified;
     this.isDeleteEvent = isDeletionEvent;
     this.releasedVersion = releasedVersion;
+    this.permissions = perms;
   }
 
   @Override
@@ -67,4 +80,7 @@ public class MockBaseObject implements IBaseObject {
     return releasedVersion;
   }
 
+  AccessPermissionList get_Permissions() throws RepositoryException {
+    return permissions;
+  }
 }
