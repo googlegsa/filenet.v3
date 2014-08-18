@@ -126,14 +126,14 @@ public class FileDocumentListTest extends FileNetTestCase {
     DocumentList docList = ftm.startTraversal();
     assertNotNull("Document list is null", docList);
     Document doc = docList.nextDocument();
-    while (doc != null) {
+    while (doc != null && doc instanceof FileDocument) {
       Property lastModifiedProp =
           doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED);
       Value lastModifiedValue = lastModifiedProp.nextValue();
       Calendar cal = Value.iso8601ToCalendar(lastModifiedValue.toString());
 
       Document nextDoc = docList.nextDocument();
-      if (nextDoc != null) {
+      if (nextDoc != null && nextDoc instanceof FileDocument) {
         Property nextDocLastModifiedProp =
             nextDoc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED);
         Value nextDocLastModifiedValue = nextDocLastModifiedProp.nextValue();

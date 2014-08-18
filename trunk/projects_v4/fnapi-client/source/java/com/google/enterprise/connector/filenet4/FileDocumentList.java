@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +45,7 @@ public class FileDocumentList implements DocumentList {
   private final IObjectStore objectStore;
   private final DatabaseType databaseType;
   private final Iterator<? extends IBaseObject> objects;
+  private final LinkedList<Document> acls;
   private final FileConnector connector;
   private Document fileDocument;
   private Date fileDocumentDate;
@@ -65,6 +67,7 @@ public class FileDocumentList implements DocumentList {
     this.databaseType = getDatabaseType(objectStore);
     this.objects = mergeAndSortObjects(objectSet, objectSetToDelete,
         objectSetToDeleteDocs);
+    this.acls = new LinkedList<Document>();
 
     // Docs to Add
     logger.log(Level.INFO, "Number of new documents discovered: "
@@ -159,7 +162,7 @@ public class FileDocumentList implements DocumentList {
    * @return com.google.enterprise.connector.spi.Document
    */
   @Override
-  public Document nextDocument() throws RepositoryDocumentException {
+  public Document nextDocument() throws RepositoryException {
     logger.entering("FileDocumentList", "nextDocument()");
 
     fileDocument = null;
@@ -189,6 +192,9 @@ public class FileDocumentList implements DocumentList {
         docId = object.get_Id();
         fileDocument = createAddDocument(object);
       }
+    } else {
+      logger.finest("Processing ACL document");
+      fileDocument = acls.pollFirst();
     }
     return fileDocument;
   }
@@ -197,10 +203,12 @@ public class FileDocumentList implements DocumentList {
    * Helper method to create add document.
    */
   private Document createAddDocument(IBaseObject object)
-      throws RepositoryDocumentException {
+      throws RepositoryException {
     IId id = object.get_Id();
     logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-    return new FileDocument(id, objectStore, connector);
+    FileDocument doc = new FileDocument(id, objectStore, connector);
+    doc.processInheritedPermissions(acls);
+    return doc;
   }
 
   /*

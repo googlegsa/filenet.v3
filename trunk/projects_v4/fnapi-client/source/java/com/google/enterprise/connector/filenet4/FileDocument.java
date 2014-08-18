@@ -22,11 +22,13 @@ import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.SpiConstants.AclInheritanceType;
 import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
+import com.filenet.api.constants.PermissionSource;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -106,23 +108,62 @@ public class FileDocument implements Document {
           + SpiConstants.ActionType.ADD.toString());
       return new SimpleProperty(list);
     } else if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
-      addPrincipals(list, name, permissions.getAllowUsers());
+      addPrincipals(list, name,
+          permissions.getAllowUsers(PermissionSource.SOURCE_DEFAULT));
+      addPrincipals(list, name,
+          permissions.getAllowUsers(PermissionSource.SOURCE_DIRECT));
       return new SimpleProperty(list);
     } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
-      addPrincipals(list, name, permissions.getDenyUsers());
+      addPrincipals(list, name,
+          permissions.getDenyUsers(PermissionSource.SOURCE_DEFAULT));
+      addPrincipals(list, name,
+          permissions.getDenyUsers(PermissionSource.SOURCE_DIRECT));
       return new SimpleProperty(list);
     } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
-      addPrincipals(list, name, permissions.getAllowGroups());
+      addPrincipals(list, name,
+          permissions.getAllowGroups(PermissionSource.SOURCE_DEFAULT));
+      addPrincipals(list, name,
+          permissions.getAllowGroups(PermissionSource.SOURCE_DIRECT));
       return new SimpleProperty(list);
     } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
-      addPrincipals(list, name, permissions.getDenyGroups());
+      addPrincipals(list, name,
+          permissions.getDenyGroups(PermissionSource.SOURCE_DEFAULT));
+      addPrincipals(list, name,
+          permissions.getDenyGroups(PermissionSource.SOURCE_DIRECT));
       return new SimpleProperty(list);
+    } else if (SpiConstants.PROPNAME_ACLINHERITFROM_DOCID.equals(name)) {
+      String parentId = getParentId();
+      if (parentId == null) {
+        return null;
+      } else {
+        logger.log(Level.FINE, "{0}: {1}", new Object[] {
+            SpiConstants.PROPNAME_ACLINHERITFROM_DOCID, parentId});
+        list.add(Value.getStringValue(parentId));
+        return new SimpleProperty(list);
+      }
     } else if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
       return null;
     } else {
       document.getProperty(name, list);
       return new SimpleProperty(list);
     }
+  }
+
+  private String getParentId() throws RepositoryException {
+    if (hasPermissions(PermissionSource.SOURCE_TEMPLATE)) {
+      return docId + AclDocument.SEC_POLICY_POSTFIX;
+    } else if (hasPermissions(PermissionSource.SOURCE_PARENT)) {
+      return docId + AclDocument.SEC_FOLDER_POSTFIX;
+    } else {
+      return null;
+    }
+  }
+
+  private boolean hasPermissions(PermissionSource permSrc) {
+    return !(permissions.getAllowUsers(permSrc).isEmpty()
+            && permissions.getDenyUsers(permSrc).isEmpty()
+            && permissions.getAllowGroups(permSrc).isEmpty()
+            && permissions.getDenyGroups(permSrc).isEmpty());
   }
 
   /*
@@ -169,5 +210,52 @@ public class FileDocument implements Document {
     logger.log(Level.FINEST, "Property names: {0}", properties);
 
     return properties;
+  }
+
+  public void processInheritedPermissions(LinkedList<Document> acls)
+      throws RepositoryException {
+    fetch();
+    logger.log(Level.FINEST, "Process inherited permissions for document: {0}",
+        docId);
+
+    // Send add request for adding ACLs inherited from parent folders.
+    String secParentId = null;
+    Document folderAclDoc = createAclDocument(PermissionSource.SOURCE_PARENT,
+        AclDocument.SEC_FOLDER_POSTFIX, null);
+    if (folderAclDoc != null) {
+      logger.log(Level.FINEST, "Create ACL document for folder {0}{1}",
+          new Object[] {docId, AclDocument.SEC_FOLDER_POSTFIX});
+      acls.add(folderAclDoc);
+      secParentId = docId + AclDocument.SEC_FOLDER_POSTFIX;
+    }
+
+    // Send add request for adding ACLs inherited from security template.
+    Document secAclDoc = createAclDocument(PermissionSource.SOURCE_TEMPLATE,
+        AclDocument.SEC_POLICY_POSTFIX, secParentId);
+    if (secAclDoc != null) {
+      logger.log(Level.FINEST,
+          "Create ACL document for security template {0}{1}",
+          new Object[] {docId, AclDocument.SEC_POLICY_POSTFIX});
+      acls.add(secAclDoc);
+    }
+  }
+
+  private Document createAclDocument(PermissionSource permSrc, String postfix,
+      String parentId) throws RepositoryException {
+    Set<String> allowUsers = permissions.getAllowUsers(permSrc);
+    Set<String> denyUsers = permissions.getDenyUsers(permSrc);
+    Set<String> allowGroups = permissions.getAllowGroups(permSrc);
+    Set<String> denyGroups = permissions.getDenyGroups(permSrc);
+    if (allowUsers.isEmpty() && denyUsers.isEmpty()
+            && allowGroups.isEmpty() && denyGroups.isEmpty()) {
+      logger.log(Level.FINEST,
+          "Document {0} does not have inherited permissions", docId);
+      return null;
+    } else {
+      return new AclDocument(docId + postfix, parentId,
+          AclInheritanceType.CHILD_OVERRIDES,
+          connector.getGoogleGlobalNamespace(), allowUsers, denyUsers,
+          allowGroups, denyGroups);
+    }
   }
 }

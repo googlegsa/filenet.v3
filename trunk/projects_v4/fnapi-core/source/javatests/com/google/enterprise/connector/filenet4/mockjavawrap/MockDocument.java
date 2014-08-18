@@ -20,7 +20,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
-import com.google.enterprise.connector.filenet4.mock.AccessPermissionListMock;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
@@ -80,9 +79,7 @@ public class MockDocument implements IDocument {
 
   @Override
   public AccessPermissionList get_Permissions() throws RepositoryException {
-    // Permissions.processPermissions is called on this list by the
-    // tests, but the results are not used.
-    return new AccessPermissionListMock();
+    return ((MockBaseObject) doc).get_Permissions();
   }
 
   @Override
