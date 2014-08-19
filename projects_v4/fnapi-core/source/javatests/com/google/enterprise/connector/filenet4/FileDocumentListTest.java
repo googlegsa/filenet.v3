@@ -65,7 +65,7 @@ public class FileDocumentListTest extends FileNetTestCase {
       + "\"lastModifiedDate\":\"2010-01-01T00:00:00.000\""
       + "}";
 
-  private static DateFormat dateFormatter =
+  private static final DateFormat dateFormatter =
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
   private static final String CHECKPOINT_TIMESTAMP =
@@ -85,9 +85,9 @@ public class FileDocumentListTest extends FileNetTestCase {
 
   private enum SkipPosition {FIRST, MIDDLE, LAST};
 
-  FileSession fs;
-  FileTraversalManager ftm;
-  FileConnector connec;
+  private FileSession fs;
+  private FileTraversalManager ftm;
+  private FileConnector connec;
 
   protected void setUp() throws Exception {
     connec = new FileConnector();
@@ -426,6 +426,34 @@ public class FileDocumentListTest extends FileNetTestCase {
         newEmptyObjectSet(), newEmptyObjectSet());
 
     assertCheckpointEquals(CHECKPOINT, docList.checkpoint());
+  }
+
+  /**
+   * This simulates a call to startTraversal that returns no
+   * documents. That's silly, of course, since it means the repository
+   * is empty, but it describes the behavior of the checkpoint strings
+   * in that case.
+   */
+  public void testEmptyCheckpointWithoutNextDocument() throws Exception {
+    @SuppressWarnings("unchecked") IObjectStore os =
+        newObjectStore("MockObjectStore", DatabaseType.MSSQL,
+            new HashMap<IId, IBaseObject>());
+    DocumentList docList = new FileDocumentList(newEmptyObjectSet(),
+        newEmptyObjectSet(), newEmptyObjectSet(), os, connec, new Checkpoint());
+    Checkpoint cp = new Checkpoint(docList.checkpoint());
+
+    // The checkpoint contains empty string values for the UUIDs and
+    // the current time for the dates.
+    assertFalse(cp.isEmpty());
+    assertEquals("", cp.getString(JsonField.UUID));
+    assertEquals("", cp.getString(JsonField.UUID_DELETION_EVENT));
+    assertEquals("", cp.getString(JsonField.UUID_CUSTOM_DELETED_DOC));
+
+    String date = cp.getString(JsonField.LAST_MODIFIED_TIME);
+    assertEquals(date, cp.getString(JsonField.LAST_DELETION_EVENT_TIME));
+    assertEquals(date, cp.getString(JsonField.LAST_CUSTOM_DELETION_TIME));
+    long nowMillis = new Date().getTime();
+    assertTrue(nowMillis - dateFormatter.parse(date).getTime() < 10000L);
   }
 
   private MockObjectStore newObjectStore(String name, DatabaseType dbType,

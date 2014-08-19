@@ -237,14 +237,15 @@ public class FileDocumentList implements DocumentList {
   public String checkpoint() throws RepositoryException {
     logger.log(Level.FINEST, "Last checkpoint: {0}", lastCheckPoint);
 
-    lastCheckPoint.setCheckpointTimeAndUuid(JsonField.LAST_MODIFIED_TIME,
-        fileDocumentDate, docId, JsonField.UUID);
-    lastCheckPoint.setCheckpointTimeAndUuid(JsonField.LAST_CUSTOM_DELETION_TIME,
-        fileDocumentToDeleteDocsDate, docIdToDeleteDocs,
-        JsonField.UUID_CUSTOM_DELETED_DOC);
-    lastCheckPoint.setCheckpointTimeAndUuid(JsonField.LAST_DELETION_EVENT_TIME,
-        fileDocumentToDeleteDate, docIdToDelete,
-        JsonField.UUID_DELETION_EVENT);
+    lastCheckPoint.setTimeAndUuid(
+        JsonField.LAST_MODIFIED_TIME, fileDocumentDate,
+        JsonField.UUID, docId);
+    lastCheckPoint.setTimeAndUuid(
+        JsonField.LAST_CUSTOM_DELETION_TIME, fileDocumentToDeleteDocsDate,
+        JsonField.UUID_CUSTOM_DELETED_DOC, docIdToDeleteDocs);
+    lastCheckPoint.setTimeAndUuid(
+        JsonField.LAST_DELETION_EVENT_TIME, fileDocumentToDeleteDate,
+        JsonField.UUID_DELETION_EVENT, docIdToDelete);
     return lastCheckPoint.toString();
   }
 }
