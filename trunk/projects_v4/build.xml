@@ -230,7 +230,7 @@
     </cobertura-instrument>
   </target>
 
-  <target name="run_tests" depends="instrument,compile-test">
+  <target name="run_tests" depends="instrument,compile-tests">
     <property name="test.suite" value="*" />
     <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
       <!--
