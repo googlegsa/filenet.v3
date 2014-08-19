@@ -86,9 +86,8 @@ class Checkpoint {
   /*
    * Helper method to compute the checkpoint date and UUID value.
    */
-  public void setCheckpointTimeAndUuid(JsonField jsonDateField,
-      Date nextCheckpointDate, IId uuid, JsonField jsonUuidField)
-      throws RepositoryException {
+  public void setTimeAndUuid(JsonField jsonDateField, Date nextCheckpointDate,
+      JsonField jsonUuidField, IId uuid) throws RepositoryException {
     Calendar cal = Calendar.getInstance();
     String dateString;
     try {

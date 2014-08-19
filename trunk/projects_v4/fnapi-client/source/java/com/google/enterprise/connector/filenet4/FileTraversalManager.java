@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
@@ -42,34 +43,50 @@ public class FileTraversalManager implements TraversalManager {
   private static final Logger LOGGER =
       Logger.getLogger(FileTraversalManager.class.getName());
 
+  private static final String tableName = "Document";
+
+  private static final String ORDER_BY =
+      " ORDER BY " + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
+
+  @VisibleForTesting
+  static final String WHERE_CLAUSE = " AND (("
+      + PropertyNames.DATE_LAST_MODIFIED + "={0} AND (''{1}''<"
+      + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_LAST_MODIFIED
+      + ">{0}))";
+
+  @VisibleForTesting
+  static final String WHERE_CLAUSE_ONLY_DATE = " AND (("
+          + PropertyNames.DATE_LAST_MODIFIED + ">={0}))";
+
+  private static final String ORDER_BY_TO_DELETE =
+      " ORDER BY " + PropertyNames.DATE_CREATED + "," + PropertyNames.ID;
+
+  @VisibleForTesting
+  static final String WHERE_CLAUSE_TO_DELETE = " WHERE (("
+          + PropertyNames.DATE_CREATED + "={0} AND (''{1}''<"
+          + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_CREATED
+          + ">{0}))";
+
+  @VisibleForTesting
+  static final String WHERE_CLAUSE_TO_DELETE_ONLY_DATE = " WHERE ("
+          + PropertyNames.DATE_CREATED + ">={0})";
+
+  @VisibleForTesting
+  static final String WHERE_CLAUSE_TO_DELETE_DOCS = " AND ((("
+          + PropertyNames.DATE_LAST_MODIFIED + "={0}  AND (''{1}''<"
+          + PropertyNames.ID
+          + "))OR ("
+          + PropertyNames.DATE_LAST_MODIFIED + ">{0})))";
+
+  @VisibleForTesting
+  static final String WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE = " AND ("
+          + PropertyNames.DATE_LAST_MODIFIED + ">={0})";
+
   private final IObjectFactory fileObjectFactory;
   private final IObjectStore objectStore;
   private final FileConnector connector;
 
   private int batchHint;
-  private String tableName = "Document";
-  private String order_by = " ORDER BY " + PropertyNames.DATE_LAST_MODIFIED
-          + "," + PropertyNames.ID;
-  private String whereClause = " AND ((" + PropertyNames.DATE_LAST_MODIFIED
-          + "={0} AND (''{1}''<" + PropertyNames.ID
-          + ")) OR (" + PropertyNames.DATE_LAST_MODIFIED + ">{0}))";
-  private String whereClauseOnlyDate = " AND (("
-          + PropertyNames.DATE_LAST_MODIFIED + ">={0}))";
-  private String orderByToDelete = " ORDER BY " + PropertyNames.DATE_CREATED
-          + "," + PropertyNames.ID;
-  private String whereClauseToDelete = " WHERE (("
-          + PropertyNames.DATE_CREATED + "={0} AND (''{1}''<"
-          + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_CREATED
-          + ">{0}))";
-  private String whereClauseToDeleteOnlyDate = " WHERE ("
-          + PropertyNames.DATE_CREATED + ">={0})";
-  private String whereClauseToDeleteDocs = " AND ((("
-          + PropertyNames.DATE_LAST_MODIFIED + "={0}  AND (''{1}''<"
-          + PropertyNames.ID
-          + "))OR ("
-          + PropertyNames.DATE_LAST_MODIFIED + ">{0})))";
-  private String whereClauseToDeleteDocsOnlyDate = " AND ("
-          + PropertyNames.DATE_LAST_MODIFIED + ">={0})";
 
   public FileTraversalManager(IObjectFactory fileObjectFactory,
       IObjectStore objectStore, FileConnector fileConnector) {
@@ -101,8 +118,8 @@ public class FileTraversalManager implements TraversalManager {
 
   private DocumentList doTraversal(Checkpoint checkPoint)
       throws RepositoryException {
-    DocumentList resultSet = null;
     objectStore.refreshSUserContext();
+    LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
 
     // to add
     String query = buildQueryString(checkPoint);
@@ -110,12 +127,16 @@ public class FileTraversalManager implements TraversalManager {
     ISearch search = fileObjectFactory.getSearch(objectStore);
     LOGGER.log(Level.INFO, "Query to Add document: " + query);
     IObjectSet objectSet = search.execute(query);
+    LOGGER.log(Level.INFO, "Number of documents sent to GSA: "
+        + objectSet.getSize());
 
     // to delete for deleted documents
     String queryStringToDelete = buildQueryToDelete(checkPoint);
     LOGGER.log(Level.INFO, "Query to get deleted documents (Documents deleted from repository): "
             + queryStringToDelete);
     IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
+    LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents deleted form Repository): "
+        + objectSetToDelete.getSize());
 
     // to delete for additional delete clause
     IObjectSet objectSetToDeleteDocs;
@@ -134,16 +155,11 @@ public class FileTraversalManager implements TraversalManager {
     if ((objectSet.getSize() > 0)
         || (objectSetToDeleteDocs.getSize() > 0)
         || (objectSetToDelete.getSize() > 0)) {
-      resultSet = new FileDocumentList(objectSet, objectSetToDeleteDocs,
+      return new FileDocumentList(objectSet, objectSetToDeleteDocs,
           objectSetToDelete, objectStore, connector, checkPoint);
+    } else {
+      return null;
     }
-    LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
-    LOGGER.log(Level.INFO, "Number of documents sent to GSA: "
-        + objectSet.getSize());
-    LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents deleted form Repository): "
-        + objectSetToDelete.getSize());
-
-    return resultSet;
   }
 
   /**
@@ -184,9 +200,10 @@ public class FileTraversalManager implements TraversalManager {
       }
     }
     if (!checkpoint.isEmpty()) {
-      query.append(getCheckpointClause(checkpoint));
+      query.append(getCheckpointClause(checkpoint, JsonField.LAST_MODIFIED_TIME,
+              JsonField.UUID, WHERE_CLAUSE, WHERE_CLAUSE_ONLY_DATE));
     }
-    query.append(order_by);
+    query.append(ORDER_BY);
     return query.toString();
   }
 
@@ -215,9 +232,12 @@ public class FileTraversalManager implements TraversalManager {
       query.append(deleteadditionalWhereClause);
     }
     if (!checkpoint.isEmpty()) {
-      query.append(getCheckpointClauseToDeleteDocs(checkpoint));
+      query.append(getCheckpointClause(checkpoint,
+              JsonField.LAST_CUSTOM_DELETION_TIME,
+              JsonField.UUID_CUSTOM_DELETED_DOC, WHERE_CLAUSE_TO_DELETE_DOCS,
+              WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE));
     }
-    query.append(order_by);
+    query.append(ORDER_BY);
     return query.toString();
   }
 
@@ -253,109 +273,32 @@ public class FileTraversalManager implements TraversalManager {
     query.append(" FROM ");
     query.append(GuidConstants.Class_DeletionEvent);
     if (!checkpoint.isEmpty()) {
-      query.append(getCheckpointClauseToDelete(checkpoint));
+      query.append(getCheckpointClause(checkpoint,
+              JsonField.LAST_DELETION_EVENT_TIME,
+              JsonField.UUID_DELETION_EVENT, WHERE_CLAUSE_TO_DELETE,
+              WHERE_CLAUSE_TO_DELETE_ONLY_DATE));
     }
-    query.append(orderByToDelete);
+    query.append(ORDER_BY_TO_DELETE);
     return query.toString();
   }
 
   /**
-   * Returns query string to send feeds to GSA by adding where clause
-   * condition for checkPoint values,
+   * Returns a query string for the checkpoint values.
    *
-   * @param checkpoint
-   * @return Query String
+   * @param checkpoint the checkpoint
+   * @param dateField the checkpoint date field
+   * @param uuidField the checkpoint ID field
+   * @param whereClause the date and ID where clause pattern
+   * @param whereClauseOnlyDate the date only where clause pattern
+   * @return a query string
    * @throws RepositoryException if the checkpoint is uninitialized
    */
-  private String getCheckpointClause(Checkpoint checkPoint)
-          throws RepositoryException {
-    String uuid = checkPoint.getString(JsonField.UUID);
-    String c = FileUtil.getQueryTimeString(
-        checkPoint.getString(JsonField.LAST_MODIFIED_TIME));
-    return makeCheckpointQueryString(uuid, c);
-  }
-
-  /**
-   * Returns query string to send delete feed to GSA by adding delete where
-   * condition for checkPoint values,
-   *
-   * @param checkpoint
-   * @return Query String
-   * @throws RepositoryException if the checkpoint is uninitialized
-   */
-  private String getCheckpointClauseToDeleteDocs(Checkpoint checkPoint)
-          throws RepositoryException {
-    String uuid = checkPoint.getString(JsonField.UUID_CUSTOM_DELETED_DOC);
-    String c = FileUtil.getQueryTimeString(
-        checkPoint.getString(JsonField.LAST_CUSTOM_DELETION_TIME));
-    return makeCheckpointQueryStringToDeleteDocs(uuid, c);
-  }
-
-  /**
-   * Returns query string to send delete feed for documents matching for
-   * checkPoint values condition,
-   *
-   * @param checkpoint
-   * @return Query String
-   * @throws RepositoryException if the checkpoint is uninitialized
-   */
-  private String getCheckpointClauseToDelete(Checkpoint checkPoint)
-          throws RepositoryException {
-    String uuid = checkPoint.getString(JsonField.UUID_DELETION_EVENT);
-    String c = FileUtil.getQueryTimeString(
-        checkPoint.getString(JsonField.LAST_DELETION_EVENT_TIME));
-    return makeCheckpointQueryStringToDelete(uuid, c);
-  }
-
-  /**
-   * Returns query string to send delete feed to GSA by adding Where clause
-   * condition for checkPoint values,
-   *
-   * @param checkpoint values (String ID, String Date)
-   * @return Query String
-   */
-  private String makeCheckpointQueryStringToDelete(String uuid, String c) {
-    String statement;
-    Object[] arguments = { c, uuid };
-    if (uuid.equals("") || !connector.useIDForChangeDetection()) {
-      statement = MessageFormat.format(whereClauseToDeleteOnlyDate, arguments);
-    } else {
-      statement = MessageFormat.format(whereClauseToDelete, arguments);
-    }
-    LOGGER.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
-    LOGGER.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
-    return statement;
-  }
-
-  /**
-   * Returns query string to send delete feed to GSA by adding Where clause
-   * condition for checkPoint values,
-   *
-   * @param checkpoint values (String ID, String Date)
-   * @return Query String
-   */
-  private String makeCheckpointQueryStringToDeleteDocs(String uuid, String c) {
-    String statement;
-    Object[] arguments = { c, uuid };
-    if (uuid.equals("") || !connector.useIDForChangeDetection()) {
-      statement = MessageFormat.format(whereClauseToDeleteDocsOnlyDate, arguments);
-    } else {
-      statement = MessageFormat.format(whereClauseToDeleteDocs, arguments);
-    }
-    LOGGER.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
-    LOGGER.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
-    return statement;
-  }
-
-  /**
-   * To construct check point query to fetch documents form FileNet repository
-   * using check point values provided as parameters
-   *
-   * @param uuid
-   * @param c
-   * @return
-   */
-  private String makeCheckpointQueryString(String uuid, String c) {
+  @VisibleForTesting
+  String getCheckpointClause(Checkpoint checkPoint, JsonField dateField,
+      JsonField uuidField, String whereClause, String whereClauseOnlyDate)
+      throws RepositoryException {
+    String uuid = checkPoint.getString(uuidField);
+    String c = FileUtil.getQueryTimeString(checkPoint.getString(dateField));
     String statement;
     Object[] arguments = { c, uuid };
     if (uuid.equals("") || !connector.useIDForChangeDetection()) {
