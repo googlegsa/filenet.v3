@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -76,12 +77,17 @@ public class FileSession implements Session {
     }
   }
 
+  @VisibleForTesting
+  Traverser getFileDocumentTraverser() {
+    return new FileDocumentTraverser(fileObjectFactory, objectStore, connector);
+  }
+
   /**
    * To return the TraversalManager class object
    */
   @Override
   public TraversalManager getTraversalManager() throws RepositoryException {
-    return new FileTraversalManager(fileObjectFactory, objectStore, connector);
+    return new FileTraversalManager(getFileDocumentTraverser());
   }
 
   /**

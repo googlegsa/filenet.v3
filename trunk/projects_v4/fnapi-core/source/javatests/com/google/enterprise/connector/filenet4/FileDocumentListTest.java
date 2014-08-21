@@ -85,11 +85,9 @@ public class FileDocumentListTest extends FileNetTestCase {
 
   private enum SkipPosition {FIRST, MIDDLE, LAST};
 
-  private FileSession fs;
-  private FileTraversalManager ftm;
   private FileConnector connec;
 
-  protected void setUp() throws Exception {
+  protected void setUp() throws RepositoryException {
     connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -97,17 +95,20 @@ public class FileDocumentListTest extends FileNetTestCase {
     connec.setWorkplace_display_url(TestConnection.displayURL);
     connec.setObject_factory(TestConnection.objectFactory);
     connec.setContent_engine_url(TestConnection.uri);
+  }
 
-    fs = (FileSession)connec.login();
-    ftm = (FileTraversalManager) fs.getTraversalManager();
+  private Traverser getObjectUnderTest() throws RepositoryException {
+    FileSession fs = (FileSession) connec.login();
+    return fs.getFileDocumentTraverser();
   }
 
   public void testLiveCheckpoint() throws Exception {
-    ftm.setBatchHint(100);
+    Traverser traverser = getObjectUnderTest();
+    traverser.setBatchHint(100);
     // Under live test and the test account, the deletion events weren't
     // returned from FileNet.
     boolean tested = false;
-    DocumentList docList = ftm.startTraversal();
+    DocumentList docList = traverser.getDocumentList(new Checkpoint());
     Document doc;
     while ((doc = docList.nextDocument()) != null) {
       assertTrue(checkpointContains(docList.checkpoint(),
@@ -122,8 +123,9 @@ public class FileDocumentListTest extends FileNetTestCase {
    * Testing chronological traversal
    */
   public void testLiveNextDocument() throws Exception {
+    Traverser traverser = getObjectUnderTest();
     boolean isTested = false;
-    DocumentList docList = ftm.startTraversal();
+    DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNotNull("Document list is null", docList);
     Document doc = docList.nextDocument();
     while (doc != null && doc instanceof FileDocument) {
@@ -429,7 +431,7 @@ public class FileDocumentListTest extends FileNetTestCase {
   }
 
   /**
-   * This simulates a call to startTraversal that returns no
+   * This simulates a first call to getDocumentList that returns no
    * documents. That's silly, of course, since it means the repository
    * is empty, but it describes the behavior of the checkpoint strings
    * in that case.
@@ -449,11 +451,17 @@ public class FileDocumentListTest extends FileNetTestCase {
     assertEquals("", cp.getString(JsonField.UUID_DELETION_EVENT));
     assertEquals("", cp.getString(JsonField.UUID_CUSTOM_DELETED_DOC));
 
-    String date = cp.getString(JsonField.LAST_MODIFIED_TIME);
-    assertEquals(date, cp.getString(JsonField.LAST_DELETION_EVENT_TIME));
-    assertEquals(date, cp.getString(JsonField.LAST_CUSTOM_DELETION_TIME));
-    long nowMillis = new Date().getTime();
-    assertTrue(nowMillis - dateFormatter.parse(date).getTime() < 10000L);
+    Date now = new Date();
+    assertDateNearly(now, cp.getString(JsonField.LAST_MODIFIED_TIME));
+    assertDateNearly(now, cp.getString(JsonField.LAST_DELETION_EVENT_TIME));
+    assertDateNearly(now, cp.getString(JsonField.LAST_CUSTOM_DELETION_TIME));
+  }
+
+  private void assertDateNearly(Date expectedDate, String actualDate)
+      throws ParseException {
+    long expectedMillis = expectedDate.getTime();
+    long actualMillis = dateFormatter.parse(actualDate).getTime();
+    assertTrue(actualDate, Math.abs(expectedMillis - actualMillis) < 10000L);
   }
 
   private MockObjectStore newObjectStore(String name, DatabaseType dbType,
