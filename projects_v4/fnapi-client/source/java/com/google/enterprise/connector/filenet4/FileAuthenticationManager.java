@@ -53,16 +53,17 @@ public class FileAuthenticationManager implements AuthenticationManager {
   public AuthenticationResponse authenticate(AuthenticationIdentity id)
       throws RepositoryException {
     IUserContext uc = conn.getUserContext();
-    String username = FileUtil.getUserName(id);
     try {
-      IUser user = uc.authenticate(username, id.getPassword());
+      IUser user = uc.authenticate(id.getUsername(), id.getPassword());
       List<Principal> principalGroups = FileUtil.getPrincipals(
           PrincipalType.UNKNOWN, globalNamespace, user.getGroupNames(),
           CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
+      principalGroups.add(new Principal(PrincipalType.UNKNOWN, globalNamespace,
+          Permissions.AUTHENTICATED_USERS,
+          CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE));
       return new AuthenticationResponse(true, "", principalGroups);
     } catch (Throwable e) {
-      logger.log(Level.WARNING, "Authentication failed for user "
-          + username, e);
+      logger.log(Level.WARNING, "Authentication failed for user " + id, e);
       return new AuthenticationResponse(false, "");
     }
   }

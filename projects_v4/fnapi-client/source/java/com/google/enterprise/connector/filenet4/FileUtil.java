@@ -14,8 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.Principal;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -47,17 +47,6 @@ public class FileUtil {
   private static final String ZULU_WITH_COLON = "+00:00";
 
   private FileUtil() {
-  }
-
-  public static String getUserName(AuthenticationIdentity id) {
-    String domain = id.getDomain();
-    if (Strings.isNullOrEmpty(domain)) {
-      return id.getUsername();
-    } else if (domain.contains(".")) {
-      return id.getUsername() + "@" + domain;
-    } else {
-      return domain + "\\" + id.getUsername();
-    }
   }
 
   /**
@@ -175,8 +164,8 @@ public class FileUtil {
       CaseSensitivityType caseSensitivityType) {
     List<Principal> principalList = new ArrayList<Principal>(names.size());
     for (String name : names) {
-      Principal principal = new Principal(principalType, namespace, name,
-          caseSensitivityType);
+      Principal principal = new Principal(principalType, namespace,
+          convertDn(name), caseSensitivityType);
       principalList.add(principal);
     }
     return principalList;
@@ -189,9 +178,83 @@ public class FileUtil {
       PrincipalType principalType, String namespace, Set<String> names,
       CaseSensitivityType caseSensitivityType) {
     for (String name : names) {
-      Principal principal = new Principal(principalType, namespace, name,
-          caseSensitivityType);
+      Principal principal = new Principal(principalType, namespace,
+          convertDn(name), caseSensitivityType);
       list.add(Value.getPrincipalValue(principal));
     }
+  }
+
+  /**
+   * Converts Distinguished Name to shortname@domain format.  If the input name
+   * is in domain\shortname, domain/shortname or shortname@domain, it will not
+   * do the conversion.
+   * 
+   * @param name string in Distinguished Name or other naming formats.
+   * @return shortname@domain.com
+   */
+  public static String convertDn(String name) {
+    if (name.toLowerCase().startsWith("cn=")) {
+      String domainName = getCNFromDN(name) + "@" + getDomain(name);
+      logger.log(Level.FINEST, "Convert DN {0} to {1}",
+          new Object[] {name, domainName});
+      return domainName;
+    }
+    return name;
+  }
+
+  /**
+   * Extracts CN attribute from a given DN.
+   * This method is copied from
+   * com/google/enterprise/connector/dctm/IdentityUtil
+   */
+  public static String getCNFromDN(String dn) {
+    if (Strings.isNullOrEmpty(dn)) {
+      return null;
+    }
+    int pre = dn.toLowerCase().indexOf("cn=");
+    int post = dn.indexOf(",", pre);
+    if (pre == -1) {
+      return null;
+    }
+    String cn;
+    if (post != -1) {
+      // Here 3 is length of 'cn='. We just want to add the
+      // group name.
+      cn = dn.substring(pre + 3, post);
+    } else {
+      cn = dn.substring(pre + 3);
+    }
+    return cn;
+  }
+
+  /**
+   * Given a dn, it returns the domain.
+   * E.g., DN: uid=xyz,ou=engineer,dc=corp.google,dc=com
+   * it will return corp.google.com
+   * 
+   * This method is copied from com/google/enterprise/secmgr/ldap/LDAPClient
+   * and modified to exclude NETBIOS naming check.
+   * 
+   * @param dn the distinguished name
+   * @return domain in the form abc.com, or null if the input was invalid or did
+   * not contain the domain attribute
+   */
+  public static String getDomain(String dn) {
+    if (Strings.isNullOrEmpty(dn)) {
+      return null;
+    }
+    Iterable<String> str =
+        Splitter.on(',').trimResults().omitEmptyStrings().split(dn);
+    StringBuilder strBuilder = new StringBuilder();
+    for (String substr : str) {
+      if (substr.startsWith("dc") || substr.startsWith("DC")) {
+        strBuilder.append(substr.substring(3)).append(".");
+      }
+    }
+    String strDomain = strBuilder.toString();
+    if (Strings.isNullOrEmpty(strDomain)) {
+      return null;
+    }
+    return strDomain.substring(0, strDomain.length() - 1);
   }
 }

@@ -42,6 +42,7 @@ public class FileDocumentTest extends FileNetTestCase {
   IObjectFactory iof;
   IUser adminUser;
 
+  @Override
   protected void setUp() throws Exception {
     connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
@@ -123,7 +124,8 @@ public class FileDocumentTest extends FileNetTestCase {
         new FnId(TestConnection.docId4), null);
     List<Value> ownerValue = new ArrayList<Value>();
     doc.getPropertyStringValue("Owner", ownerValue);
-    assertEquals(adminUser.get_Name(), ownerValue.get(0).toString());
+    assertEquals(adminUser.get_Name(),
+        FileUtil.convertDn(ownerValue.get(0).toString()));
     Permissions perms = new Permissions(doc.get_Permissions());
     assertTrue(perms.authorize(adminUser));
   }

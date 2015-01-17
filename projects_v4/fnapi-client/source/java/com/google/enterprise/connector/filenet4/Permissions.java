@@ -43,7 +43,7 @@ public class Permissions {
   private static final Logger LOGGER =
       Logger.getLogger(Permissions.class.getName());
 
-  private static final String AUTHENTICATED_USERS = "#AUTHENTICATED-USERS";
+  public static final String AUTHENTICATED_USERS = "#AUTHENTICATED-USERS";
   private static final String CREATOR_OWNER = "#CREATOR-OWNER";
 
   private static int VIEW_ACCESS_RIGHTS =

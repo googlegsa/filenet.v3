@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="third_party/lib/xlxpScanner.jar"/>
 	<classpathentry kind="lib" path="third_party/lib/xlxpScannerUtils.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/google-enterprise-connector-manager"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/connector-manager"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -2,6 +2,7 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileSession;
+import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
@@ -27,6 +28,7 @@ public class FnConnectionTest extends TestCase {
   IObjectFactory iof;
   IDocument fd;
 
+  @Override
   protected void setUp() throws RepositoryLoginException,
           RepositoryException, InstantiationException,
           IllegalAccessException, ClassNotFoundException {
@@ -45,33 +47,22 @@ public class FnConnectionTest extends TestCase {
 
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnConnection.getConnection()'
-   */
   public void testGetConnection() throws RepositoryException {
     Connection test = ((FnConnection) conn).getConnection();
     assertNotNull(test);
     assertEquals(TestConnection.uri, test.getURI());
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnConnection.getSubject()'
-   */
   public void testGetSubject() throws RepositoryException {
     Subject subject = conn.getSubject();
     assertNotNull(subject);
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.filejavawrap.FnConnection.getUserContext()'
-   */
   public void testGetUserContext() throws RepositoryException {
     IUserContext test = conn.getUserContext();
     assertNotNull(test);
-    assertEquals(TestConnection.currentUserContext, test.getName());
+    assertEquals(TestConnection.currentUserContext,
+        FileUtil.convertDn(test.getName()));
   }
 
 }

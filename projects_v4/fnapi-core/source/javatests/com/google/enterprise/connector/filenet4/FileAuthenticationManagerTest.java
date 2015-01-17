@@ -13,20 +13,21 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.FileAuthenticationManager;
-import com.google.enterprise.connector.filenet4.FileConnector;
-import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.spi.AuthenticationResponse;
+import com.google.enterprise.connector.spi.Principal;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.SimpleAuthenticationIdentity;
 
+import java.util.List;
+
 public class FileAuthenticationManagerTest extends FileNetTestCase {
-  /*
-   * Test method for 'com.google.enterprise.connector.file.FileAuthenticationManager.authenticate(AuthenticationIdentity)'
-   */
-  public void testAuthenticate() throws RepositoryLoginException, RepositoryException  {
-    FileConnector connec = new FileConnector();
+  private FileConnector connec;
+  private FileAuthenticationManager fatm;
+
+  @Override
+  protected void setUp() throws Exception {
+    super.setUp();
+    connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
     connec.setObject_store(TestConnection.objectStore);
@@ -35,16 +36,37 @@ public class FileAuthenticationManagerTest extends FileNetTestCase {
     connec.setContent_engine_url(TestConnection.uri);
 
     FileSession fs = (FileSession) connec.login();
-    FileAuthenticationManager fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
+    fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
+  }
 
-    //    Check FileAuthenticationManager
+  @Override
+  protected void tearDown() throws Exception {
+    super.tearDown();
+  }
+
+  public void testAuthenticate() throws RepositoryException {
     SimpleAuthenticationIdentity fai = new SimpleAuthenticationIdentity(
         TestConnection.username, TestConnection.password);
     AuthenticationResponse ar = fatm.authenticate(fai);
     assertEquals(true, ar.isValid());
-    assertTrue(ar.getGroups().size() > 0);
 
-    //    Check FileAuthenticationManager for a wrong user
+    @SuppressWarnings("unchecked") List<Principal> groups =
+        (List<Principal>) ar.getGroups();
+    assertTrue(groups.size() > 1);
+
+    boolean hasAuthUserGrp = false;
+    for (Principal group : groups) {
+      if (Permissions.AUTHENTICATED_USERS.equals(group.getName())) {
+        hasAuthUserGrp = true;
+      } else {
+        assertTrue("Group: " + group.getName(), group.getName().contains("@"));
+      }
+    }
+    assertTrue("Missing " + Permissions.AUTHENTICATED_USERS + " group",
+        hasAuthUserGrp);
+  }
+
+  public void testAuthenticate_fail() throws RepositoryException  {
     SimpleAuthenticationIdentity faiWrong = new SimpleAuthenticationIdentity(TestConnection.username, TestConnection.wrongPassword);
     AuthenticationResponse arWrong = fatm.authenticate(faiWrong);
     assertEquals(false, arWrong.isValid());
