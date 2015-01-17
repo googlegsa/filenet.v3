@@ -37,7 +37,7 @@ public class MockUtil {
     }
     String distinguishedName;
     if (domain.contains(".")) {
-      String[] dcs = domain.split(".");
+      String[] dcs = domain.split("\\.");
       StringBuilder builder = new StringBuilder();
       builder.append("cn=").append(shortName);
       for (String dc : dcs) {

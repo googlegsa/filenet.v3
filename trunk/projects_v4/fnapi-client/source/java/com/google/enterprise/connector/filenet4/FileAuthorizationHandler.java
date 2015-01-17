@@ -66,11 +66,10 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
   public IUser getUser(AuthenticationIdentity id) {
     // Lookup FileNet user and user's groups
     IUserContext uc = conn.getUserContext();
-    String username = FileUtil.getUserName(id);
     try {
-      return uc.lookupUser(username);
+      return uc.lookupUser(id.getUsername());
     } catch (RepositoryException e) {
-      logger.log(Level.WARNING, "Failed to lookup user [" + username
+      logger.log(Level.WARNING, "Failed to lookup user [" + id
           + "] in FileNet", e);
       return null;
     }

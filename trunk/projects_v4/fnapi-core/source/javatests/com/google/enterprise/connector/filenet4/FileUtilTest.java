@@ -35,6 +35,7 @@ import java.util.TimeZone;
 public class FileUtilTest extends TestCase {
   private TimeZone defaultTimeZone = TimeZone.getDefault();
 
+  @Override
   protected void tearDown() throws Exception {
     TimeZone.setDefault(defaultTimeZone);
   }
@@ -140,5 +141,25 @@ public class FileUtilTest extends TestCase {
     for (String name : nameSet) {
       assertTrue(name + " is not found", listValueString.contains(name));
     }
+  }
+
+  public void testConvertDn_email() {
+    assertEquals("jsmith@example.com",
+        FileUtil.convertDn("jsmith@example.com"));
+  }
+
+  public void testConvertDn_netbios() {
+    assertEquals("example.com\\jsmith",
+        FileUtil.convertDn("example.com\\jsmith"));
+  }
+
+  public void testConvertDn_slash() {
+    assertEquals("example.com/jsmith",
+        FileUtil.convertDn("example.com/jsmith"));
+  }
+
+  public void testConvertDn_dn() {
+    assertEquals("Jane Smith@example.com",
+        FileUtil.convertDn("cn=Jane Smith,ou=users,dc=example,dc=com"));
   }
 }
