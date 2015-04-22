@@ -23,6 +23,8 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.filenet.api.collection.AccessPermissionList;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MockBaseObject implements IBaseObject {
   private final IId id;
@@ -31,6 +33,7 @@ public class MockBaseObject implements IBaseObject {
   private final boolean isDeleteEvent;
   private final boolean releasedVersion;
   private final AccessPermissionList permissions;
+  private final Map<String, Object> props;
 
   public MockBaseObject(IId id, IId versionSeriesId, Date lastModified,
      boolean isDeletionEvent, boolean releasedVersion) {
@@ -47,6 +50,7 @@ public class MockBaseObject implements IBaseObject {
     this.isDeleteEvent = isDeletionEvent;
     this.releasedVersion = releasedVersion;
     this.permissions = perms;
+    this.props = new HashMap<String, Object>();
   }
 
   @Override
@@ -82,5 +86,17 @@ public class MockBaseObject implements IBaseObject {
 
   AccessPermissionList get_Permissions() throws RepositoryException {
     return permissions;
+  }
+
+  public void setProperty(String name, Object value) {
+    props.put(name, value);
+  }
+
+  public Object getProperty(String name) {
+    return props.get(name);
+  }
+
+  public Map<String, Object> getProperties() {
+    return props;
   }
 }

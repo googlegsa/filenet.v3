@@ -14,7 +14,6 @@
 
 package com.google.enterprise.connector.filenet4.mockjavawrap;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
@@ -26,9 +25,12 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,12 +40,16 @@ public class MockDocument implements IDocument {
   public final static String FN_LAST_MODIFIED = "DateLastModified";
 
   private final IBaseObject doc;
-  private final Map<String, ?> props;
+  private final Map<String, Object> props;
 
   public MockDocument(IBaseObject object) throws RepositoryDocumentException {
     this.doc = object;
-    this.props = ImmutableMap.of(FN_ID, doc.get_Id(),
-        FN_LAST_MODIFIED, doc.getModifyDate());
+    this.props = new HashMap<String, Object>();
+    props.put(FN_ID, doc.get_Id());
+    props.put(FN_LAST_MODIFIED, doc.getModifyDate());
+    if (doc instanceof MockBaseObject) {
+      props.putAll(((MockBaseObject) doc).getProperties());
+    }
   }
 
   @Override
@@ -89,7 +95,8 @@ public class MockDocument implements IDocument {
 
   @Override
   public InputStream getContent() throws RepositoryDocumentException {
-    return null;
+    return new ByteArrayInputStream(
+        "sample content".getBytes(StandardCharsets.UTF_8));
   }
 
   @Override
@@ -109,6 +116,26 @@ public class MockDocument implements IDocument {
       getPropertyGuidValue(name, list);
     } else if (FN_LAST_MODIFIED.equalsIgnoreCase(name)) {
       getPropertyDateValue(name, list);
+    } else {
+      getPropertyValue(name, list);
+    }
+  }
+
+  private void getPropertyValue(String name, List<Value> list)
+      throws RepositoryDocumentException {
+    Object obj = props.get(name);
+    if (obj == null) return;
+
+    if (obj instanceof String) {
+      getPropertyStringValue(name, list);
+    } else if (obj instanceof Date) {
+      getPropertyDateValue(name, list);
+    } else if (obj instanceof Long) {
+      getPropertyLongValue(name, list);
+    } else if (obj instanceof Double) {
+      getPropertyDoubleValue(name, list);
+    } else if (obj instanceof Boolean) {
+      getPropertyBooleanValue(name, list);
     }
   }
 

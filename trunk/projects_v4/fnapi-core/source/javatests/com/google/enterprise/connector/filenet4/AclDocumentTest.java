@@ -30,6 +30,7 @@ import com.google.enterprise.connector.filenet4.mockjavawrap.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
+import com.google.enterprise.connector.spi.SimpleTraversalContext;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 import com.google.enterprise.connector.spiimpl.PrincipalValue;
@@ -82,7 +83,8 @@ public class AclDocumentTest {
     assertNotNull(objectStore);
     assertEquals(entries.length, objectSet.getSize());
     return new FileDocumentList(objectSet, new EmptyObjectSet(),
-        new EmptyObjectSet(), objectStore, connector, null);
+        new EmptyObjectSet(), objectStore, connector,
+        new SimpleTraversalContext(), null);
   }
 
   private MockObjectStore getObjectStore(String[][] entries,

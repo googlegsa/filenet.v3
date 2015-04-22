@@ -21,14 +21,17 @@ import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
+import com.google.enterprise.connector.spi.SkippedDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.AclInheritanceType;
 import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
+import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.PermissionSource;
+import com.filenet.api.constants.PropertyNames;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -47,16 +50,18 @@ public class FileDocument implements Document {
   private final IId docId;
   private final IObjectStore objectStore;
   private final FileConnector connector;
+  private final TraversalContext traversalContext;
 
   private IDocument document = null;
   private String vsDocId;
   private Permissions permissions;
 
   public FileDocument(IId docId, IObjectStore objectStore,
-      FileConnector connector) {
+      FileConnector connector, TraversalContext traversalContext) {
     this.docId = docId;
     this.objectStore = objectStore;
     this.connector = connector;
+    this.traversalContext = traversalContext;
   }
 
   private void fetch() throws RepositoryException {
@@ -72,15 +77,82 @@ public class FileDocument implements Document {
         new Permissions(document.get_Permissions(), document.get_Owner());
   }
 
+  private boolean hasSupportedMimeType() throws RepositoryException {
+    String value = Value.getSingleValueString(this, PropertyNames.MIME_TYPE);
+    if (value == null) {
+      logger.log(Level.FINEST,
+          "Send content to the GSA since the {0} value is null [DocId: {1}]",
+          new Object[] {PropertyNames.MIME_TYPE, docId});
+      return true;
+    } else {
+      int supportLevel = traversalContext.mimeTypeSupportLevel(value);
+      if (supportLevel < 0) {
+        throw new SkippedDocumentException("Excluded "
+            + PropertyNames.MIME_TYPE + " [" + value
+            + "]: Skip document [DocId: " + docId.toString() + "]");
+      } else if (supportLevel == 0) {
+        logger.log(Level.FINER, "Unsupported {0} [{1}]: "
+            + "Send document metadata [DocId: {2}]",
+            new Object[] {PropertyNames.MIME_TYPE, value, docId});
+        return false;
+      } else {
+        return true;
+      }
+    }
+  }
+
+  private boolean hasAllowableSize() throws RepositoryException {
+    String value = Value.getSingleValueString(this, PropertyNames.CONTENT_SIZE);
+    if (value == null) {
+      logger.log(Level.FINEST,
+          "Send content to the GSA since the {0} value is null [DocId: {1}]",
+          new Object[] {PropertyNames.CONTENT_SIZE, docId});
+      return true;
+    } else {
+      double contentSize = Double.parseDouble(value);
+      if (contentSize > 0) {
+        if (contentSize <= traversalContext.maxDocumentSize()) {
+          logger.log(Level.FINEST, "{0} : {1}",
+              new Object[] {PropertyNames.CONTENT_SIZE, contentSize});
+          return true;
+        } else {
+          logger.log(Level.FINER,
+              "{0} [{1}] exceeds the allowable size [DocId: {2}]",
+              new Object[] {PropertyNames.CONTENT_SIZE, contentSize, docId});
+          return false;
+        }
+      } else {
+        logger.log(Level.FINEST, "{0} is empty [DocId: {1}]",
+            new Object[] {PropertyNames.CONTENT_SIZE, docId});
+        return false;
+      }
+    }
+  }
+
   @Override
   public Property findProperty(String name) throws RepositoryException {
     LinkedList<Value> list = new LinkedList<Value>();
 
     fetch();
+    // TODO (tdnguyen): refactor this method or conditions below to alleviate
+    // performance concern with using Value.getStringValueString().
+    // if (!name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
+    //    document.getProperty(name, list);
+    //    return new SimpleProperty(this);
+    // } else if (SpiConstants.PROPNAME_CONTENT.equals(name) {
+    //    ... All google: properties...
+    // } else {
+    //    return null;
+    // }
     if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
       logger.log(Level.FINEST, "Getting property: " + name);
-      list.add(Value.getBinaryValue(document.getContent()));
-      return new SimpleProperty(list);
+      if (traversalContext != null && hasSupportedMimeType()
+          && hasAllowableSize()) {
+        list.add(Value.getBinaryValue(document.getContent()));
+        return new SimpleProperty(list);
+      } else {
+        return null;
+      }
     } else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
       logger.log(Level.FINEST, "Getting property: " + name);
       list.add(Value.getStringValue(connector.getWorkplaceDisplayUrl()

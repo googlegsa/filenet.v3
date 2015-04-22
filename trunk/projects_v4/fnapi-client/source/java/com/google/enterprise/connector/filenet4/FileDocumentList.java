@@ -24,6 +24,7 @@ import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SkippedDocumentException;
+import com.google.enterprise.connector.spi.TraversalContext;
 
 import com.filenet.api.constants.DatabaseType;
 
@@ -47,6 +48,7 @@ public class FileDocumentList implements DocumentList {
   private final Iterator<? extends IBaseObject> objects;
   private final LinkedList<Document> acls;
   private final FileConnector connector;
+  private final TraversalContext traversalContext;
   private Document fileDocument;
   private Date fileDocumentDate;
   private Date fileDocumentToDeleteDate;
@@ -59,9 +61,10 @@ public class FileDocumentList implements DocumentList {
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
       IObjectStore objectStore, FileConnector connector,
-      Checkpoint checkPoint) {
+      TraversalContext traversalContext, Checkpoint checkPoint) {
     this.objectStore = objectStore;
     this.connector = connector;
+    this.traversalContext = traversalContext;
     this.lastCheckPoint = checkPoint;
 
     this.databaseType = getDatabaseType(objectStore);
@@ -206,7 +209,8 @@ public class FileDocumentList implements DocumentList {
       throws RepositoryException {
     IId id = object.get_Id();
     logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-    FileDocument doc = new FileDocument(id, objectStore, connector);
+    FileDocument doc =
+        new FileDocument(id, objectStore, connector, traversalContext);
     doc.processInheritedPermissions(acls);
     return doc;
   }

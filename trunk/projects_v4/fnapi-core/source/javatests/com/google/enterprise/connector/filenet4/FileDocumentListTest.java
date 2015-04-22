@@ -30,12 +30,15 @@ import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SimpleTraversalContext;
 import com.google.enterprise.connector.spi.SkippedDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
+import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.DatabaseType;
+import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.util.Id;
 
 import org.json.JSONException;
@@ -48,8 +51,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class FileDocumentListTest extends FileNetTestCase {
@@ -350,6 +355,68 @@ public class FileDocumentListTest extends FileNetTestCase {
         getCustomDeletion(os.getObjects()), newEmptyObjectSet());
   }
 
+  public void testMimeTypesAndSizes() throws Exception {
+    testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 32, true);
+    testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 50, false);
+    testMimeTypeAndContentSize("video/3gpp", 1024 * 1024 * 32, false);
+  }
+
+  private void testMimeTypeAndContentSize(String mimeType, int size,
+      boolean expectNotNull) throws Exception {
+    Map<IId, IBaseObject> docs = new HashMap<IId, IBaseObject>();
+    MockBaseObject doc1 = (MockBaseObject) createObject(
+        "AAAAAAA1-0000-0000-0000-000000000000",
+        CHECKPOINT_TIMESTAMP, false, false);
+    doc1.setProperty(PropertyNames.MIME_TYPE, mimeType);
+    doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(size));
+    docs.put(doc1.get_Id(), doc1);
+
+    @SuppressWarnings("unchecked")
+    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
+        docs);
+    DocumentList docList = getObjectUnderTest(os, getDocuments(os.getObjects()),
+        newEmptyObjectSet(), newEmptyObjectSet());
+    Document doc = docList.nextDocument();
+    assertNotNull(doc);
+    if (expectNotNull) {
+      assertNotNull(SpiConstants.PROPNAME_CONTENT + " is null",
+          doc.findProperty(SpiConstants.PROPNAME_CONTENT));
+    } else {
+      assertNull(doc.findProperty(SpiConstants.PROPNAME_CONTENT));
+    }
+  }
+
+  public void testExcludedMimeType() throws Exception {
+    Map<IId, IBaseObject> docs = new HashMap<IId, IBaseObject>();
+    MockBaseObject doc1 = (MockBaseObject) createObject(
+        "AAAAAAA1-0000-0000-0000-000000000000",
+        CHECKPOINT_TIMESTAMP, false, false);
+    doc1.setProperty(PropertyNames.MIME_TYPE, "text/plain");
+    doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(1024));
+    docs.put(doc1.get_Id(), doc1);
+
+    TraversalContext traversalContext = new SimpleTraversalContext() {
+      @Override public int mimeTypeSupportLevel(String mimeType) {
+        return -1;
+      }
+    };
+
+    @SuppressWarnings("unchecked")
+    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
+        docs);
+    DocumentList docList = new FileDocumentList(getDocuments(os.getObjects()),
+        newEmptyObjectSet(), newEmptyObjectSet(), os, connec, traversalContext,
+        new Checkpoint(CHECKPOINT));
+    Document doc = docList.nextDocument();
+    assertNotNull(doc);
+    try {
+      doc.findProperty(SpiConstants.PROPNAME_CONTENT);
+      fail("Expected SkippedDocumentException was not thrown.");
+    } catch (SkippedDocumentException ex) {
+      // Expected
+    }
+  }
+
   private void testMockCheckpoint(IObjectStore os, IObjectSet docSet,
       IObjectSet customDeletionSet, IObjectSet deletionEventSet)
           throws Exception {
@@ -441,7 +508,8 @@ public class FileDocumentListTest extends FileNetTestCase {
         newObjectStore("MockObjectStore", DatabaseType.MSSQL,
             new HashMap<IId, IBaseObject>());
     DocumentList docList = new FileDocumentList(newEmptyObjectSet(),
-        newEmptyObjectSet(), newEmptyObjectSet(), os, connec, new Checkpoint());
+        newEmptyObjectSet(), newEmptyObjectSet(), os, connec,
+        new SimpleTraversalContext(), new Checkpoint());
     Checkpoint cp = new Checkpoint(docList.checkpoint());
 
     // The checkpoint contains empty string values for the UUIDs and
@@ -477,7 +545,18 @@ public class FileDocumentListTest extends FileNetTestCase {
       IObjectSet customDeletionSet, IObjectSet deletionEventSet)
       throws RepositoryException {
     return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
-        os, connec, new Checkpoint(CHECKPOINT));
+        os, connec, getTraversalContext(), new Checkpoint(CHECKPOINT));
+  }
+
+  private TraversalContext getTraversalContext() {
+    Set<String> supportedMimeTypes = new HashSet<String>();
+    supportedMimeTypes.add("text/plain");
+    supportedMimeTypes.add("text/html");
+
+    SimpleTraversalContext context = new SimpleTraversalContext();
+    context.setMaxDocumentSize(1024 * 1024 * 32);
+    context.setMimeTypeSet(supportedMimeTypes);
+    return context;
   }
 
   private boolean checkpointContains(String checkpoint, Property lastModified,

@@ -16,6 +16,8 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.TraversalContext;
+import com.google.enterprise.connector.spi.TraversalContextAware;
 import com.google.enterprise.connector.spi.TraversalManager;
 
 import java.util.logging.Logger;
@@ -23,7 +25,8 @@ import java.util.logging.Logger;
 /**
  * Delegates the traversal to a {@code Traverser}.
  */
-public class FileTraversalManager implements TraversalManager {
+public class FileTraversalManager implements TraversalManager,
+    TraversalContextAware {
   private static final Logger LOGGER =
       Logger.getLogger(FileTraversalManager.class.getName());
 
@@ -49,5 +52,10 @@ public class FileTraversalManager implements TraversalManager {
           throws RepositoryException {
     LOGGER.info("Resuming traversal...");
     return traverser.getDocumentList(new Checkpoint(checkPoint));
+  }
+
+  @Override
+  public void setTraversalContext(TraversalContext traversalContext) {
+    traverser.setTraversalContext(traversalContext);
   }
 }

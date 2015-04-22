@@ -23,6 +23,7 @@ import com.google.enterprise.connector.filenet4.filewrap.IUser;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SimpleTraversalContext;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
@@ -69,8 +70,8 @@ public class FileDocumentTest extends FileNetTestCase {
    * 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
    */
   public void testFindProperty() throws RepositoryException {
-    FileDocument fd =
-        new FileDocument(new FnId(TestConnection.docId1), ios, connec);
+    FileDocument fd = new FileDocument(new FnId(TestConnection.docId1), ios,
+        connec, new SimpleTraversalContext());
 
     Property prop = fd.findProperty("Id");
     assertEquals(TestConnection.docId1, prop.nextValue().toString());
@@ -95,8 +96,8 @@ public class FileDocumentTest extends FileNetTestCase {
    * 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
    */
   public void testGetPropertyNames() throws RepositoryException {
-    FileDocument fd =
-        new FileDocument(new FnId(TestConnection.docId2), ios, connec);
+    FileDocument fd = new FileDocument(new FnId(TestConnection.docId2), ios,
+        connec, new SimpleTraversalContext());
     Iterator<String> properties = fd.getPropertyNames().iterator();
 
     int counter = 0;
