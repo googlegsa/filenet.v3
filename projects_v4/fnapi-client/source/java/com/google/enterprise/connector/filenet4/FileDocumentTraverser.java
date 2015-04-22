@@ -23,6 +23,7 @@ import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.TraversalContext;
 
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PropertyNames;
@@ -83,6 +84,7 @@ public class FileDocumentTraverser implements Traverser {
   private final IObjectStore objectStore;
   private final FileConnector connector;
 
+  private TraversalContext traversalContext;
   private int batchHint;
 
   public FileDocumentTraverser(IObjectFactory fileObjectFactory,
@@ -90,6 +92,11 @@ public class FileDocumentTraverser implements Traverser {
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
     this.connector = fileConnector;
+  }
+
+  @Override
+  public void setTraversalContext(TraversalContext traversalContext) {
+    this.traversalContext = traversalContext;
   }
 
   /**
@@ -141,7 +148,8 @@ public class FileDocumentTraverser implements Traverser {
         || (objectSetToDeleteDocs.getSize() > 0)
         || (objectSetToDelete.getSize() > 0)) {
       return new FileDocumentList(objectSet, objectSetToDeleteDocs,
-          objectSetToDelete, objectStore, connector, checkPoint);
+          objectSetToDelete, objectStore, connector, traversalContext,
+          checkPoint);
     } else {
       return null;
     }

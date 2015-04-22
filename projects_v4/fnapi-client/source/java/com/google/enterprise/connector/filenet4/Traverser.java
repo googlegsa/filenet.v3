@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.TraversalContext;
 
 /**
  * Similar to {@code TraversalManager} but using a mutable {@link
@@ -34,4 +35,6 @@ interface Traverser {
    */
   DocumentList getDocumentList(Checkpoint checkpoint)
       throws RepositoryException;
+
+  void setTraversalContext(TraversalContext traversalContext);
 }
