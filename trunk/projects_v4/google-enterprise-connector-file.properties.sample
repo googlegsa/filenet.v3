@@ -9,8 +9,8 @@
 # The root of the google-enterprise-connector-manager tree
 build.connector.manager.home = ${user.home}/gsa/google-enterprise-connector-manager
 
-# JDK 1.6 bootclasspath.
-build.bootclasspath = /System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Classes/classes.jar:/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Classes/jsse.jar
+# JDK 1.7 bootclasspath.
+build.bootclasspath = /Library/Java/JavaVirtualMachines/jdk1.7.0_76.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_76.jdk/Contents/Home/jre/lib/jsse.jar
 
 ##
 # Test Properties
