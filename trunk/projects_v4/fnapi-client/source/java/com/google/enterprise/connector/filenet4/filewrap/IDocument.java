@@ -64,4 +64,6 @@ public interface IDocument extends IBaseObject {
       throws RepositoryDocumentException;
 
   IActiveMarkingList get_ActiveMarkings() throws RepositoryDocumentException;
+
+  IFolder get_SecurityFolder();
 }

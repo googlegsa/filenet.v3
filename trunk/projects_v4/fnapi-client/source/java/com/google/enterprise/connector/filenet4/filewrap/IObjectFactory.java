@@ -34,4 +34,5 @@ public interface IObjectFactory {
   public ISearch getSearch(IObjectStore objectStore)
           throws RepositoryException;
 
+  IBaseObjectFactory getFactory(String type);
 }

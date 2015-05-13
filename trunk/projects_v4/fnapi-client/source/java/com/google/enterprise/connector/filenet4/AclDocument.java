@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -26,6 +27,7 @@ import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 import com.google.enterprise.connector.spi.Value;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.logging.Level;
@@ -58,6 +60,9 @@ class AclDocument implements Document {
   private final Set<String> allowGroups;
   private final Set<String> denyGroups;
 
+  private Date checkpointLastModified;
+  private IId checkpointLastUuid;
+
   public AclDocument(String docId, String parentId,
       AclInheritanceType inheritanceType, String googleGlobalNamespace,
       Set<String> allowUsers, Set<String> denyUsers, Set<String> allowGroups,
@@ -70,6 +75,22 @@ class AclDocument implements Document {
     this.denyUsers = denyUsers;
     this.allowGroups = allowGroups;
     this.denyGroups = denyGroups;
+  }
+
+  public Date getCheckpointLastModified() {
+    return checkpointLastModified;
+  }
+
+  public void setCheckpointLastModified(Date lastModified) {
+    this.checkpointLastModified = lastModified;
+  }
+
+  public IId getCheckpointLastUuid() {
+    return checkpointLastUuid;
+  }
+
+  public void setCheckpointLastUuid(IId lastUuid) {
+    this.checkpointLastUuid = lastUuid;
   }
 
   @Override

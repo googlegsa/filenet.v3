@@ -15,6 +15,8 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.FileUtil;
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -22,11 +24,16 @@ import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
+import com.filenet.api.constants.ClassNames;
 import com.filenet.api.core.Connection;
+import com.filenet.api.core.Document;
 import com.filenet.api.core.Domain;
 import com.filenet.api.core.Factory;
+import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.ObjectStore;
+import com.filenet.api.core.VersionSeries;
 import com.filenet.api.query.SearchScope;
+import com.filenet.api.security.SecurityPolicy;
 import com.filenet.api.util.UserContext;
 
 import java.util.logging.Level;
@@ -84,7 +91,7 @@ public class FnObjectFactory implements IObjectFactory {
     SearchScope search =
         new SearchScope(((FnObjectStore) objectStore).getObjectStore());
 
-    return new FnSearch(search);
+    return new FnSearch(search, getFactory(null));
   }
 
   private ObjectStore getRawObjectStore(String userName, String userPassword, 
@@ -101,5 +108,40 @@ public class FnObjectFactory implements IObjectFactory {
     os.refresh();
     logger.config("Connection to FileNet ObjectStore is successful...");
     return os;
+  }
+
+  @Override
+  public IBaseObjectFactory getFactory(String type) {
+    // TODO (tdnguyen): Refactor old codes to use new factories to create
+    // objects.
+    if (ClassNames.DOCUMENT.equals(type)) {
+      return new IBaseObjectFactory() {
+        @Override public IBaseObject createObject(Object object)
+            throws RepositoryException {
+          return new FnDocument((Document) object);
+        }
+      };
+    } else if (ClassNames.SECURITY_POLICY.equals(type)) {
+      return new IBaseObjectFactory() {
+        @Override public IBaseObject createObject(Object object)
+            throws RepositoryException {
+          return new FnSecurityPolicy((SecurityPolicy) object);
+        }
+      };
+    } else if (ClassNames.VERSION_SERIES.equals(type)) {
+      return new IBaseObjectFactory() {
+        @Override public IBaseObject createObject(Object object)
+            throws RepositoryException {
+          return new FnVersionSeries((VersionSeries) object);
+        }
+      };
+    } else {
+      return new IBaseObjectFactory() {
+        @Override public IBaseObject createObject(Object object)
+            throws RepositoryException {
+          return new FnBaseObject((IndependentObject) object);
+        }
+      };
+    }
   }
 }
