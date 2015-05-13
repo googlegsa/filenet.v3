@@ -71,6 +71,7 @@ class TestObjectFactory {
     return perm;
   }
 
+  @SafeVarargs
   public static AccessPermissionList newPermissionList(
       List<AccessPermission>... aceLists) {
     AccessPermissionListMock perms = new AccessPermissionListMock();

@@ -76,7 +76,8 @@ public class AclDocumentTest {
     connector = TestObjectFactory.newFileConnector();
   }
 
-  private DocumentList getDocumentList(String[][] entries,
+  @SafeVarargs
+  private final DocumentList getDocumentList(String[][] entries,
       List<AccessPermission>... perms) throws Exception {
     MockObjectStore objectStore = getObjectStore(entries, perms);
     IObjectSet objectSet = getObjectSet(objectStore);
@@ -87,7 +88,8 @@ public class AclDocumentTest {
         new SimpleTraversalContext(), null);
   }
 
-  private MockObjectStore getObjectStore(String[][] entries,
+  @SafeVarargs
+  private final MockObjectStore getObjectStore(String[][] entries,
       List<AccessPermission>... perms) throws Exception {
     return new MockObjectStore("TestObjectStore", DatabaseType.MSSQL,
         getObjectMap(entries, perms));
@@ -99,7 +101,8 @@ public class AclDocumentTest {
     return new FnObjectList(objectList);
   }
 
-  private Map<IId, IBaseObject> getObjectMap(String[][] entries,
+  @SafeVarargs
+  private final Map<IId, IBaseObject> getObjectMap(String[][] entries,
       List<AccessPermission>... perms) throws Exception {
     Map<IId, IBaseObject> data = new HashMap<IId, IBaseObject>();
     for (String[] entry : entries) {

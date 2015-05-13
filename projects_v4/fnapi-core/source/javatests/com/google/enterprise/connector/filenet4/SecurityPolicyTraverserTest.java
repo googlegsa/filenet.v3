@@ -111,8 +111,8 @@ public class SecurityPolicyTraverserTest {
     return secTemplate;
   }
 
-  private <E> Iterator<E> getIterator(E... objects) {
-    return Iterators.forArray(objects);
+  private <E> Iterator<E> getIterator(E object) {
+    return Iterators.singletonIterator(object);
   }
 
   private IDocument getDocument(String id, IFolder folder)

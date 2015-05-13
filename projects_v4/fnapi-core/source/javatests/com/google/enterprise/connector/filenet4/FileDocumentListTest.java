@@ -532,7 +532,8 @@ public class FileDocumentListTest extends FileNetTestCase {
     assertTrue(actualDate, Math.abs(expectedMillis - actualMillis) < 10000L);
   }
 
-  private MockObjectStore newObjectStore(String name, DatabaseType dbType,
+  @SafeVarargs
+  private final MockObjectStore newObjectStore(String name, DatabaseType dbType,
       Map<IId, IBaseObject>... objectMaps) {
     Map<IId, IBaseObject> data = new HashMap<IId, IBaseObject>();
     for (Map<IId, IBaseObject> objectMap : objectMaps) {
