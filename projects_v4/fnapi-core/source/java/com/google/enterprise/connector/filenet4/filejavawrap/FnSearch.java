@@ -14,59 +14,68 @@
 
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.IndependentObjectSet;
-import com.filenet.api.core.IndependentObject;
+import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.query.SearchSQL;
 import com.filenet.api.query.SearchScope;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@SuppressWarnings("rawtypes")
 public class FnSearch implements ISearch {
   private static final Logger logger =
       Logger.getLogger(FnSearch.class.getName());
 
   private final SearchScope search;
+  private final IBaseObjectFactory objectFactory;
 
-  public FnSearch(SearchScope search) {
+  public FnSearch(SearchScope search, IBaseObjectFactory factory) {
     this.search = search;
+    this.objectFactory = factory;
   }
 
   @Override
   public IObjectSet execute(String query) throws RepositoryException {
-    LinkedList<FnBaseObject> objectList = new LinkedList<FnBaseObject>();
+    return execute(query, 100, 1, objectFactory);
+  }
+
+  @Override
+  public IObjectSet execute(String query, int pageSize, int maxRecursion,
+      IBaseObjectFactory factory) throws RepositoryException {
+    logger.log(Level.FINEST, "Execute query: {0}", query);
+    LinkedList<IBaseObject> objectList = new LinkedList<IBaseObject>();
     IndependentObjectSet myObjects;
 
     SearchSQL sqlObject = new SearchSQL();
     sqlObject.setQueryString(query);
 
-    Integer myPageSize = new Integer(100);
-
-    PropertyFilter myFilter = new PropertyFilter();
-    int myFilterLevel = 1;
-
-    myFilter.setMaxRecursion(myFilterLevel);
-
-    Boolean continuable = new Boolean(true);
+    PropertyFilter myFilter;
+    if (maxRecursion > 0) {
+      myFilter = new PropertyFilter();
+      myFilter.setMaxRecursion(1);
+    } else {
+      myFilter = null;
+    }
 
     try {
-      myObjects = search.fetchObjects(sqlObject, myPageSize, myFilter,
-          continuable);
-    } catch (Exception e) {
+      myObjects = search.fetchObjects(sqlObject, pageSize, myFilter,
+          Boolean.TRUE);
+      Iterator<?> it = myObjects.iterator();
+      while (it.hasNext()) {
+        objectList.add(factory.createObject(it.next()));
+      }
+      return new FnObjectList(objectList);
+    } catch (EngineRuntimeException e) {
       throw new RepositoryException(e);
     }
-    Iterator it = myObjects.iterator();
-    while (it.hasNext()) {
-      objectList.add(new FnBaseObject((IndependentObject) it.next()));
-    }
-    return new FnObjectList(objectList);
   }
-
 }

@@ -17,6 +17,7 @@ package com.google.enterprise.connector.filenet4.mockjavawrap;
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IFolder;
 import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -181,4 +182,9 @@ public class MockDocument implements IDocument {
   @Override
   public IActiveMarkingList get_ActiveMarkings()
       throws RepositoryDocumentException { return null; }
+
+  @Override
+  public IFolder get_SecurityFolder() {
+    return null;
+  }
 }

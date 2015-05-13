@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
+import com.google.enterprise.connector.filenet4.filewrap.IFolder;
 import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -31,7 +32,9 @@ import com.filenet.api.collection.StringList;
 import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.ContentTransfer;
 import com.filenet.api.core.Document;
+import com.filenet.api.core.Folder;
 import com.filenet.api.events.DeletionEvent;
+import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
 import com.filenet.api.property.PropertyBinary;
@@ -520,6 +523,22 @@ public class FnDocument implements IDocument {
       return null;
     } else {
       return new FnActiveMarkingList(doc.get_ActiveMarkings());
+    }
+  }
+
+  @Override
+  public IFolder get_SecurityFolder() {
+    try {
+      Folder folder = doc.get_SecurityFolder();
+      if (folder == null) {
+        return null;
+      } else {
+        return new FnFolder(folder);
+      }
+    } catch (EngineRuntimeException e) {
+      logger.log(Level.WARNING,
+          "Unable to get security folder for document {0}", doc.get_Id());
+      return null;
     }
   }
 }

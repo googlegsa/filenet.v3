@@ -82,6 +82,12 @@ public class FileSession implements Session {
     return new FileDocumentTraverser(fileObjectFactory, objectStore, connector);
   }
 
+  @VisibleForTesting
+  Traverser getSecurityPolicyTraverser() {
+    return new SecurityPolicyTraverser(fileObjectFactory, objectStore,
+            connector);
+  }
+
   /**
    * To return the TraversalManager class object
    */

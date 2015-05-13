@@ -1,4 +1,4 @@
-// Copyright 2007 Google Inc. All Rights Reserved.
+// Copyright 2015 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
 
 package com.google.enterprise.connector.filenet4.filewrap;
 
+import com.google.enterprise.connector.filenet4.Permissions;
 import com.google.enterprise.connector.spi.RepositoryException;
 
-public interface ISearch {
+public interface ISecurityTemplate {
+  String get_DisplayName() throws RepositoryException;
 
-  public IObjectSet execute(String query) throws RepositoryException;
+  Permissions get_TemplatePermissions() throws RepositoryException;
 
-  IObjectSet execute(String query, int pageSize, int maxRecursion,
-      IBaseObjectFactory factory) throws RepositoryException;
+  IId get_ApplyStateID() throws RepositoryException;
 }
