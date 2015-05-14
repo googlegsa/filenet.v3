@@ -29,6 +29,7 @@ import com.filenet.api.core.Connection;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Domain;
 import com.filenet.api.core.Factory;
+import com.filenet.api.core.Folder;
 import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.ObjectStore;
 import com.filenet.api.core.VersionSeries;
@@ -119,6 +120,13 @@ public class FnObjectFactory implements IObjectFactory {
         @Override public IBaseObject createObject(Object object)
             throws RepositoryException {
           return new FnDocument((Document) object);
+        }
+      };
+    } else if (ClassNames.FOLDER.equals(type)) {
+      return new IBaseObjectFactory() {
+        @Override public IBaseObject createObject(Object object)
+            throws RepositoryException {
+          return new FnFolder((Folder) object);
         }
       };
     } else if (ClassNames.SECURITY_POLICY.equals(type)) {

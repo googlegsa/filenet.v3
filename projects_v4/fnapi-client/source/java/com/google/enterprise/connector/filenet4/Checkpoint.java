@@ -39,10 +39,12 @@ class Checkpoint {
     UUID_DELETION_EVENT("uuidToDelete"),
     UUID_CUSTOM_DELETED_DOC("uuidToDeleteDocs"),
     UUID_SECURITY_POLICY("uuidPolicy"),
+    UUID_FOLDER("uuidFolder"),
     LAST_MODIFIED_TIME("lastModified"),
     LAST_DELETION_EVENT_TIME("lastRemoveDate"),
     LAST_CUSTOM_DELETION_TIME("lastModifiedDate"),
-    LAST_SECURITY_POLICY_TIME("lastPolicyDate");
+    LAST_SECURITY_POLICY_TIME("lastPolicyDate"),
+    LAST_FOLDER_TIME("lastFolderDate");
 
     private final String fieldName;
 
