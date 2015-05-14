@@ -14,14 +14,23 @@
 
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
+import com.google.enterprise.connector.filenet4.EmptyObjectSet;
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
 import com.google.enterprise.connector.filenet4.filewrap.IId;
+import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
+import com.google.enterprise.connector.spi.RepositoryException;
 
+import com.filenet.api.collection.DocumentSet;
+import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
+import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.Properties;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.logging.Logger;
 
 public class FnFolder implements IFolder {
@@ -70,5 +79,25 @@ public class FnFolder implements IFolder {
   @Override
   public boolean isReleasedVersion() throws RepositoryDocumentException {
     return false;
+  }
+
+  @Override
+  public IObjectSet get_ContainedDocuments() throws RepositoryException {
+    try {
+      DocumentSet docSet = folder.get_ContainedDocuments();
+      if (docSet.isEmpty()) {
+        return new EmptyObjectSet();
+      } else {
+        LinkedList<IBaseObject> docList = new LinkedList<IBaseObject>();
+        Iterator<?> docIter = docSet.iterator();
+        while (docIter.hasNext()) {
+          Document doc = (Document) docIter.next();
+          docList.add(new FnDocument(doc));
+        }
+        return new FnObjectList(docList);
+      }
+    } catch (EngineRuntimeException e) {
+      throw new RepositoryException(e);
+    }
   }
 }

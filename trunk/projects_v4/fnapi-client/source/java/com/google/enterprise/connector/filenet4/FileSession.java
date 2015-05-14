@@ -88,6 +88,11 @@ public class FileSession implements Session {
             connector);
   }
 
+  @VisibleForTesting
+  Traverser getFolderTraverser() {
+    return new FolderTraverser(fileObjectFactory, objectStore, connector);
+  }
+
   /**
    * To return the TraversalManager class object
    */
