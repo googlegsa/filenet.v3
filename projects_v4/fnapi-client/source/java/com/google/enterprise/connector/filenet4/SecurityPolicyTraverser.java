@@ -50,7 +50,7 @@ import java.util.logging.Logger;
  * Checks for updated security policies so that it will send updated TMPL ACLs
  * to the GSA for documents inheriting permissions from these policies.
  */
-public class SecurityPolicyTraverser implements Traverser, DocumentList {
+class SecurityPolicyTraverser implements Traverser, DocumentList {
   private static final Logger LOGGER =
       Logger.getLogger(SecurityPolicyTraverser.class.getName());
 
@@ -75,7 +75,6 @@ public class SecurityPolicyTraverser implements Traverser, DocumentList {
   private final IObjectStore os;
   private final FileConnector connector;
 
-  private TraversalContext traversalContext;
   private int batchHint = 500;
   private String lastTimestamp;
   private Date lastModified;
@@ -92,19 +91,12 @@ public class SecurityPolicyTraverser implements Traverser, DocumentList {
   }
 
   @Override
-  public void setBatchHint(int batchHint) {
-    this.batchHint = batchHint;
+  public void setTraversalContext(TraversalContext traversalContext) {
   }
 
-  private String getCheckpointValue(JsonField jsonField,
-      Checkpoint checkpoint) {
-    try {
-      return checkpoint.getString(jsonField);
-    } catch (RepositoryException re) {
-      // Ignore exception when JsonField is not retrievable or when the
-      // checkpoint is empty.
-      return null;
-    }
+  @Override
+  public void setBatchHint(int batchHint) {
+    this.batchHint = batchHint;
   }
 
   @Override
@@ -131,6 +123,17 @@ public class SecurityPolicyTraverser implements Traverser, DocumentList {
       LOGGER.fine("Found " + acls.size()
           + " documents affected by security policy updates");
       return this;
+    }
+  }
+
+  private String getCheckpointValue(JsonField jsonField,
+      Checkpoint checkpoint) {
+    try {
+      return checkpoint.getString(jsonField);
+    } catch (RepositoryException re) {
+      // Ignore exception when JsonField is not retrievable or when the
+      // checkpoint is empty.
+      return null;
     }
   }
 
@@ -222,18 +225,6 @@ public class SecurityPolicyTraverser implements Traverser, DocumentList {
   }
 
   @Override
-  public String checkpoint() throws RepositoryException {
-    if (checkpoint == null) {
-      return null;
-    }
-    if (lastModified != null && secPolicyId != null) {
-      checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME,
-              lastModified, JsonField.UUID_SECURITY_POLICY, secPolicyId);
-    }
-    return checkpoint.toString();
-  }
-
-  @Override
   public Document nextDocument() throws RepositoryException {
     if (acls == null || acls.isEmpty()) {
       return null;
@@ -249,7 +240,14 @@ public class SecurityPolicyTraverser implements Traverser, DocumentList {
   }
 
   @Override
-  public void setTraversalContext(TraversalContext traversalContext) {
-    this.traversalContext = traversalContext;
+  public String checkpoint() throws RepositoryException {
+    if (checkpoint == null) {
+      return null;
+    }
+    if (lastModified != null && secPolicyId != null) {
+      checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME,
+              lastModified, JsonField.UUID_SECURITY_POLICY, secPolicyId);
+    }
+    return checkpoint.toString();
   }
 }

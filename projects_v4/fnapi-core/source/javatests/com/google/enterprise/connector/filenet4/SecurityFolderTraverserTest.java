@@ -60,7 +60,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-public class FolderTraverserTest {
+public class SecurityFolderTraverserTest {
   private static final Date Jan_1_1970 = new Date(72000000L);
 
   private static final String[][] FOLDERS = {
@@ -86,7 +86,7 @@ public class FolderTraverserTest {
   private DocumentList getDocumentList_Live(Checkpoint checkpoint)
       throws RepositoryException {
     FileSession session = (FileSession) connector.login();
-    Traverser traverser = session.getFolderTraverser();
+    Traverser traverser = session.getSecurityFolderTraverser();
     traverser.setBatchHint(TestConnection.batchSize);
     return traverser.getDocumentList(checkpoint);
   }
@@ -243,8 +243,8 @@ public class FolderTraverserTest {
 
     replay(os, docSet, folder, folderSet, searcher, objectFactory);
 
-    FolderTraverser traverser =
-        new FolderTraverser(objectFactory, os, connector);
+    SecurityFolderTraverser traverser =
+        new SecurityFolderTraverser(objectFactory, os, connector);
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNotNull(docList);
     int count = 0;
@@ -300,8 +300,8 @@ public class FolderTraverserTest {
         isA(IBaseObjectFactory.class))).andReturn(folderSet).times(1);
     replay(os, folderSet, searcher, objectFactory);
 
-    FolderTraverser traverser =
-        new FolderTraverser(objectFactory, os, connector);
+    SecurityFolderTraverser traverser =
+        new SecurityFolderTraverser(objectFactory, os, connector);
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     Document doc = docList.nextDocument();
     int index = 0;

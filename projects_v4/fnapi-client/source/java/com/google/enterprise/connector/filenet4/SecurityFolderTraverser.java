@@ -43,19 +43,19 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class FolderTraverser implements DocumentList, Traverser {
+class SecurityFolderTraverser implements DocumentList, Traverser {
   private static final Logger LOGGER =
-      Logger.getLogger(FolderTraverser.class.getName());
+      Logger.getLogger(SecurityFolderTraverser.class.getName());
 
   private static final String FOLDER_QUERY_WITH_UUID =
-      "SELECT {0}* FROM '" + GuidConstants.Class_Folder
+      "SELECT {0} * FROM '" + GuidConstants.Class_Folder
       + "' WHERE ((" + PropertyNames.DATE_LAST_MODIFIED + " = {1}) AND ("
       + PropertyNames.ID + " > {2})) OR ("
       + PropertyNames.DATE_LAST_MODIFIED + " > {1}) ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
   private static final String FOLDER_QUERY_WITHOUT_UUID =
-      "SELECT {0}* FROM '" + GuidConstants.Class_Folder
+      "SELECT {0} * FROM '" + GuidConstants.Class_Folder
       + "' WHERE " + PropertyNames.DATE_LAST_MODIFIED + " > {1} ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
@@ -63,21 +63,22 @@ public class FolderTraverser implements DocumentList, Traverser {
   private final IObjectStore os;
   private final FileConnector connector;
 
-  private TraversalContext traversalContext;
   private int batchHint = 500;
-  private String checkpointTime;
-  private String checkpointUuid;
 
   private Date folderLastModified;
   private IId folderLastUuid;
   private LinkedList<AclDocument> acls;
   private Checkpoint checkpoint;
 
-  public FolderTraverser(IObjectFactory objectFactory, IObjectStore os,
+  public SecurityFolderTraverser(IObjectFactory objectFactory, IObjectStore os,
       FileConnector connector) {
     this.objectFactory = objectFactory;
     this.os = os;
     this.connector = connector;
+  }
+
+  @Override
+  public void setTraversalContext(TraversalContext traversalContext) {
   }
 
   @Override
@@ -92,35 +93,12 @@ public class FolderTraverser implements DocumentList, Traverser {
     LOGGER.info("Searching for documents in updated folders");
     os.refreshSUserContext();
     this.checkpoint = checkpoint;
-    checkpointTime = getLastModified();
     acls = searchDocs();
     if (acls.size() > 0) {
       return this;
     } else {
       return null;
     }
-  }
-
-  private String getLastModified() {
-    String lastModified =
-        getCheckpointValue(Checkpoint.JsonField.LAST_FOLDER_TIME);
-    if (lastModified == null) {
-      lastModified =
-          getCheckpointValue(Checkpoint.JsonField.LAST_MODIFIED_TIME);
-      if (lastModified == null) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        lastModified = Value.calendarToIso8601(cal);
-        LOGGER.log(Level.FINEST, "Checkpoint does not contain folder or "
-            + "document last modified time, use current time [{0}] to search"
-            + " for folder updates", lastModified);
-      } else {
-        LOGGER.log(Level.FINEST, "Checkpoint does not contain folder last "
-            + "modified time, use document last modified time [{0}] to search"
-            + " for folder updates", lastModified);
-      }
-    }
-    return lastModified;
   }
 
   private String getCheckpointValue(Checkpoint.JsonField field) {
@@ -134,8 +112,8 @@ public class FolderTraverser implements DocumentList, Traverser {
   }
 
   private LinkedList<AclDocument> searchDocs() throws RepositoryException {
-    ISearch searcher = objectFactory.getSearch(os);
     LinkedList<AclDocument> aclDocs = new LinkedList<AclDocument>();
+    ISearch searcher = objectFactory.getSearch(os);
     IObjectSet folderSet = searcher.execute(getQuery(), 100, 0,
         objectFactory.getFactory(ClassNames.FOLDER));
     Iterator<? extends IBaseObject> folderIter = folderSet.getIterator();
@@ -166,11 +144,13 @@ public class FolderTraverser implements DocumentList, Traverser {
   }
 
   private String getQuery() {
+    String checkpointTime = getLastModified();
     String timeStr = FileUtil.getQueryTimeString(checkpointTime);
-    checkpointUuid = getCheckpointValue(Checkpoint.JsonField.UUID_FOLDER);
+    String checkpointUuid =
+        getCheckpointValue(Checkpoint.JsonField.UUID_FOLDER);
 
     String topClause =
-        (batchHint > 0) ? " TOP " + String.valueOf(batchHint) : "";
+        (batchHint > 0) ? "TOP " + batchHint : "";
     if (Strings.isNullOrEmpty(checkpointUuid)) {
       return MessageFormat.format(FOLDER_QUERY_WITHOUT_UUID,
           new Object[] {topClause, timeStr});
@@ -178,6 +158,28 @@ public class FolderTraverser implements DocumentList, Traverser {
       return MessageFormat.format(FOLDER_QUERY_WITH_UUID,
           new Object[] {topClause, timeStr, checkpointUuid});
     }
+  }
+
+  private String getLastModified() {
+    String lastModified =
+        getCheckpointValue(Checkpoint.JsonField.LAST_FOLDER_TIME);
+    if (lastModified == null) {
+      lastModified =
+          getCheckpointValue(Checkpoint.JsonField.LAST_MODIFIED_TIME);
+      if (lastModified == null) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        lastModified = Value.calendarToIso8601(cal);
+        LOGGER.log(Level.FINEST, "Checkpoint does not contain folder or "
+            + "document last modified time, use current time [{0}] to search"
+            + " for folder updates", lastModified);
+      } else {
+        LOGGER.log(Level.FINEST, "Checkpoint does not contain folder last "
+            + "modified time, use document last modified time [{0}] to search"
+            + " for folder updates", lastModified);
+      }
+    }
+    return lastModified;
   }
 
   @Override
@@ -201,10 +203,5 @@ public class FolderTraverser implements DocumentList, Traverser {
         + "UUID [{1}] to the checkpoint",
         new Object[] {folderLastModified, folderLastUuid});
     return checkpoint.toString();
-  }
-
-  @Override
-  public void setTraversalContext(TraversalContext traversalContext) {
-    this.traversalContext = traversalContext;
   }
 }
