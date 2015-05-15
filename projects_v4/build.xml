@@ -33,7 +33,7 @@
             location="${build.connector.manager.home}/projects" />
   <property name="connector-manager.dir"
             location="${connector-manager-projects.dir}/connector-manager" />
-  <property name="thirdparty.jar.dir"
+  <property name="connector-manager-thirdparty-jar.dir"
             location="${connector-manager.dir}/third-party" />
   <property name="spi.jar.dir" value="${connector-manager.dir}/dist/jarfile" />
   <property name="spi.jarfile" value="${spi.jar.dir}/connector-spi.jar" />
@@ -47,14 +47,14 @@
   <path id="compile.prod.classpath">
     <pathelement location="${file.jarfile}" />
     <pathelement location="${spi.jarfile}" />
-    <fileset dir="${thirdparty.jar.dir}">
+    <fileset dir="${connector-manager-thirdparty-jar.dir}">
       <include name="prod/*.jar" />
     </fileset>
   </path>
 
   <path id="compile.tests.classpath">
     <path refid="compile.prod.classpath" />
-    <fileset dir="${thirdparty.jar.dir}">
+    <fileset dir="${connector-manager-thirdparty-jar.dir}">
       <include name="tests/*.jar" />
     </fileset>
     <pathelement location="${jarfile}" />
@@ -62,7 +62,7 @@
 
   <property file="${config}/build_code_coverage.properties"/>
   <path id="cobertura.classpath">
-    <fileset dir="${thirdparty.jar.dir}/cobertura">
+    <fileset dir="${connector-manager-thirdparty-jar.dir}/cobertura">
       <include name="**/*.jar" />
     </fileset>
   </path>

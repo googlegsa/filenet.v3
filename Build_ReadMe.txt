@@ -1,3 +1,16 @@
-1. For running the Build.xml with ANT you need to put "ant-contrib-1.0b3.jar" in the $ANT_HOME\lib. You can download this jar from "http://sourceforge.net/project/showfiles.php?group_id=36177".
-2. Copy all the jars from lib folder of connector manager and put it in "\source\third_party\lib" directory.
-3. Copy the file javaapi.jar from your FileNet server and put it in "\source\third_party\lib" directory. Default location for this jar on FileNet server is "C:\Program Files\FileNet\Workplace\WEB-INF\lib\javaapi.jar"
+To compile the connector, you to copy Jace.jar from the FileNet
+Content Engine API to the third_party/lib directory.
+
+To run the unit tests, you need to copy all of the CE API JAR files:
+
+Jace.jar
+javaapi.jar
+listener.jar
+log4j-1.2.14.jar
+p8cjares.jar
+stax-api.jar
+xlxpScanner.jar
+xlxpScannerUtils.jar
+
+You will also need these files in Tomcat/webapps/connector-manager/WEB-INF/lib
+in order to run the connector.
