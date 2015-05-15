@@ -28,6 +28,8 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.Iterators;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
+import com.google.enterprise.connector.filenet4.filejavawrap.FnObjectList;
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
@@ -42,6 +44,7 @@ import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
+import com.google.enterprise.connector.spiimpl.PrincipalValue;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.constants.AccessRight;
@@ -50,12 +53,14 @@ import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.security.AccessPermission;
 
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -102,19 +107,19 @@ public class SecurityFolderTraverserTest {
     Checkpoint checkpoint = new Checkpoint();
     checkpoint.setTimeAndUuid(Checkpoint.JsonField.LAST_FOLDER_TIME, Jan_1_1970,
         Checkpoint.JsonField.UUID_FOLDER, new FnId(FOLDERS[0][0]));
-    DocumentList doclist = getDocumentList_Live(checkpoint);
-    assertNotNull(doclist);
+    DocumentList docList = getDocumentList_Live(checkpoint);
+    assertNotNull(docList);
 
     int count = 0;
     Date prevLastModified = Jan_1_1970;
-    Document doc = doclist.nextDocument();
-    while (doc != null) {
-      Checkpoint cp = new Checkpoint(doclist.checkpoint());
+    Document doc;
+    while ((doc = docList.nextDocument()) != null) {
+      assertIsFolderAcl(doc);
+      Checkpoint cp = new Checkpoint(docList.checkpoint());
       Date lastModified = DATE_PARSER.parse(
           cp.getString(Checkpoint.JsonField.LAST_FOLDER_TIME));
       assertTrue(lastModified.getTime() >= prevLastModified.getTime());
       prevLastModified = lastModified;
-      doc = doclist.nextDocument();
       count++;
     }
     assertTrue(count > 1);
@@ -199,39 +204,18 @@ public class SecurityFolderTraverserTest {
         templateAllowGroup};
   }
 
-  @SuppressWarnings("unchecked")
-  private <E> Iterator<E> getIterator(E...objects) {
-    return Iterators.forArray(objects);
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  private IObjectSet getObjectSet(Iterator iterator, int size) {
-    IObjectSet objectSet = createMock(IObjectSet.class);
-    expect(objectSet.getIterator()).andReturn(iterator).anyTimes();
-    expect(objectSet.getSize()).andReturn(size);
-    return objectSet;
-  }
-
   private List<IDocument> getDocuments(int count) throws RepositoryException {
-    String prefix = "AAAAAAAA-0000-0000-0000-000000000000";
     List<IDocument> docs = new ArrayList<IDocument>();
     for (int i = 1; i <= count; i++) {
-      String s = String.valueOf(i);
-      String id = prefix.substring(0, prefix.length() - s.length()) + s;
-      docs.add(createDocument(id, createACL(getIterator(createACEs()))));
+      String id = String.format("AAAAAAAA-0000-0000-0000-%012d", i);
+      docs.add(createDocument(id, createACL(Iterators.forArray(createACEs()))));
     }
     return docs;
   }
 
-  @Test
-  public void countDocumentsInFolder() throws Exception {
+  private SecurityFolderTraverser getObjectUnderTest(IObjectSet folderSet)
+      throws RepositoryException {
     IObjectStore os = createNiceMock(IObjectStore.class);
-
-    int docCount = 5;
-    List<IDocument> docs = getDocuments(docCount);
-    IObjectSet docSet = getObjectSet(docs.iterator(), docCount);
-    IFolder folder = createFolder(FOLDERS[0][0], docSet, new Date());
-    IObjectSet folderSet = getObjectSet(getIterator(folder), 1);
     ISearch searcher = createMock(ISearch.class);
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(isA(IObjectStore.class)))
@@ -240,30 +224,56 @@ public class SecurityFolderTraverserTest {
         createNiceMock(IBaseObjectFactory.class)).anyTimes();
     expect(searcher.execute(isA(String.class), eq(100), eq(0),
         isA(IBaseObjectFactory.class))).andReturn(folderSet).times(1);
+    replay(os, searcher, objectFactory);
 
-    replay(os, docSet, folder, folderSet, searcher, objectFactory);
+    return new SecurityFolderTraverser(objectFactory, os, connector);
+  }
 
-    SecurityFolderTraverser traverser =
-        new SecurityFolderTraverser(objectFactory, os, connector);
+  @Test
+  public void countDocumentsInFolder() throws Exception {
+    int docCount = 5;
+    List<IDocument> docs = getDocuments(docCount);
+    IObjectSet docSet = new FnObjectList(docs);
+    IFolder folder = createFolder(FOLDERS[0][0], docSet, new Date());
+    IObjectSet folderSet = new FnObjectList(Collections.singletonList(folder));
+    replay(folder);
+
+    SecurityFolderTraverser traverser = getObjectUnderTest(folderSet);
+
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNotNull(docList);
     int count = 0;
-    Document doc = docList.nextDocument();
-    while (doc != null) {
+    Document doc;
+    while ((doc = docList.nextDocument()) != null) {
       testAclDocument(doc);
       count++;
-      doc = docList.nextDocument();
     }
     assertEquals(docCount, count);
   }
 
-  private void testAclDocument(Document doc) throws RepositoryException {
-    assertTrue(doc instanceof AclDocument);
+  private void assertIsFolderAcl(Document doc) throws RepositoryException {
+    assertTrue(doc.getClass().toString(), doc instanceof AclDocument);
 
-    Property propId = doc.findProperty(SpiConstants.PROPNAME_DOCID);
-    String id = propId.nextValue().toString();
-    assertTrue(id + " is not ended with " + AclDocument.SEC_FOLDER_POSTFIX,
-        id.endsWith(AclDocument.SEC_FOLDER_POSTFIX));
+    String docid = Value.getSingleValueString(doc, SpiConstants.PROPNAME_DOCID);
+    assertTrue(docid + " is not ended with " + AclDocument.SEC_FOLDER_POSTFIX,
+        docid.endsWith(AclDocument.SEC_FOLDER_POSTFIX));
+
+    String inheritanceType = Value.getSingleValueString(doc,
+        SpiConstants.PROPNAME_ACLINHERITANCETYPE);
+    assertEquals(SpiConstants.AclInheritanceType.CHILD_OVERRIDES.toString(),
+        inheritanceType);
+
+    String inheritFrom = Value.getSingleValueString(doc,
+        SpiConstants.PROPNAME_ACLINHERITFROM);
+    assertEquals(null, inheritFrom);
+
+    String inheritFromDocid = Value.getSingleValueString(doc,
+        SpiConstants.PROPNAME_ACLINHERITFROM_DOCID);
+    assertEquals(null, inheritFromDocid);
+  }
+
+  private void testAclDocument(Document doc) throws RepositoryException {
+    assertIsFolderAcl(doc);
 
     testACLs(doc, SpiConstants.PROPNAME_ACLUSERS, 2, "Parent Allow User");
     testACLs(doc, SpiConstants.PROPNAME_ACLDENYUSERS, 1, "Parent Deny User");
@@ -275,41 +285,31 @@ public class SecurityFolderTraverserTest {
       String expectedPrefix) throws RepositoryException {
     Property propAllowUsers = doc.findProperty(propName);
     int count = 0;
-    Value val = propAllowUsers.nextValue();
-    while (val != null) {
+    Value val;
+    while ((val = propAllowUsers.nextValue()) != null) {
       count++;
-      String name = val.toString();
-      assertTrue("Unexpected grantee's name: " + name,
-          name.indexOf(expectedPrefix) > 0);
-      val = propAllowUsers.nextValue();
+      assertTrue(val.getClass().toString(), val instanceof PrincipalValue);
+      String name =
+          ((PrincipalValue) val).getPrincipal().getName();
+      assertTrue(name + " does not start with " + expectedPrefix,
+          name.startsWith(expectedPrefix));
     }
     assertEquals(expectedCount, count);
   }
 
   @Test
   public void testCheckpoint() throws Exception {
-    IObjectStore os = createNiceMock(IObjectStore.class);
     IObjectSet folderSet = getFolderSet(1);
-    ISearch searcher = createMock(ISearch.class);
-    IObjectFactory objectFactory = createMock(IObjectFactory.class);
-    expect(objectFactory.getSearch(isA(IObjectStore.class)))
-        .andReturn(searcher);
-    expect(objectFactory.getFactory(isA(String.class))).andReturn(
-        createNiceMock(IBaseObjectFactory.class)).anyTimes();
-    expect(searcher.execute(isA(String.class), eq(100), eq(0),
-        isA(IBaseObjectFactory.class))).andReturn(folderSet).times(1);
-    replay(os, folderSet, searcher, objectFactory);
 
-    SecurityFolderTraverser traverser =
-        new SecurityFolderTraverser(objectFactory, os, connector);
+    SecurityFolderTraverser traverser = getObjectUnderTest(folderSet);
+
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
-    Document doc = docList.nextDocument();
     int index = 0;
-    while (doc != null) {
+    Document doc;
+    while ((doc = docList.nextDocument()) != null) {
       Checkpoint checkpoint = new Checkpoint(docList.checkpoint());
       assertEquals(FOLDERS[index++][1],
           checkpoint.getString(JsonField.LAST_FOLDER_TIME));
-      doc = docList.nextDocument();
     }
     assertEquals(folderSet.getSize(), index);
   }
@@ -318,12 +318,12 @@ public class SecurityFolderTraverserTest {
     List<IFolder> folders = new ArrayList<IFolder>();
     for (int i = 0; i < FOLDERS.length; i++) {
       List<IDocument> docs = getDocuments(docsPerFolder);
-      IObjectSet docSet = getObjectSet(docs.iterator(), docs.size());
+      IObjectSet docSet = new FnObjectList(docs);
       IFolder folder =
           createFolder(FOLDERS[i][0], docSet, DATE_PARSER.parse(FOLDERS[i][1]));
       folders.add(folder);
-      replay(folder, docSet);
+      replay(folder);
     }
-    return getObjectSet(folders.iterator(), folders.size());
+    return new FnObjectList(folders);
   }
 }

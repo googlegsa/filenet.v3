@@ -26,10 +26,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
+import com.google.enterprise.connector.filenet4.filejavawrap.FnObjectList;
+import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
@@ -52,13 +53,14 @@ import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.VersionStatusId;
 import com.filenet.api.security.AccessPermission;
 
+import org.easymock.EasyMock;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 public class SecurityPolicyTraverserTest {
@@ -85,13 +87,6 @@ public class SecurityPolicyTraverserTest {
     this.connector = TestObjectFactory.newFileConnector();
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  private IObjectSet getObjectSet(Iterator iterator) {
-    IObjectSet objectSet = createMock(IObjectSet.class);
-    expect(objectSet.getIterator()).andReturn(iterator);
-    return objectSet;
-  }
-
   private ISecurityPolicy getSecurityPolicy(String id, Date lastModified,
       Iterable<ISecurityTemplate> securityTemplates)
           throws RepositoryException {
@@ -111,10 +106,6 @@ public class SecurityPolicyTraverserTest {
     return secTemplate;
   }
 
-  private <E> Iterator<E> getIterator(E object) {
-    return Iterators.singletonIterator(object);
-  }
-
   private IDocument getDocument(String id, IFolder folder)
       throws RepositoryException {
     IId iid = new FnId(id);
@@ -126,7 +117,8 @@ public class SecurityPolicyTraverserTest {
 
   @Test
   public void startTraversal_WithoutUpdatedSecPolicy() throws Exception {
-    IObjectSet objectSet = getObjectSet(createNiceMock(Iterator.class));
+    IObjectSet objectSet =
+        new FnObjectList(Collections.<IBaseObject>emptyList());
     IObjectStore os = createNiceMock(IObjectStore.class);
 
     ISearch searcher = createMock(ISearch.class);
@@ -138,13 +130,13 @@ public class SecurityPolicyTraverserTest {
     expect(searcher.execute(isA(String.class), eq(100), eq(0),
         isA(IBaseObjectFactory.class))).andReturn(objectSet);
 
-    replay(objectSet, objectFactory, os, searcher);
+    replay(objectFactory, os, searcher);
     Traverser traverser =
         new SecurityPolicyTraverser(objectFactory, os, connector);
     traverser.setBatchHint(TestConnection.batchSize);
     DocumentList acls = traverser.getDocumentList(new Checkpoint());
     assertNull(acls);
-    verify(objectSet, objectFactory, os);
+    verify(objectFactory, os);
   }
 
   private DocumentList getDocumentList_Live(Checkpoint checkpoint)
@@ -186,14 +178,13 @@ public class SecurityPolicyTraverserTest {
     // Policy.
     int count = 0;
     Date prevLastModified = Jan_1_1970;
-    Document doc = doclist.nextDocument();
-    while (doc != null) {
+    Document doc;
+    while ((doc = doclist.nextDocument()) != null) {
       Checkpoint cp = new Checkpoint(doclist.checkpoint());
       Date lastModified = DATE_PARSER.parse(
           cp.getString(Checkpoint.JsonField.LAST_SECURITY_POLICY_TIME));
       assertTrue(lastModified.getTime() >= prevLastModified.getTime());
       prevLastModified = lastModified;
-      doc = doclist.nextDocument();
       count++;
     }
     assertTrue(count > 1);
@@ -227,11 +218,10 @@ public class SecurityPolicyTraverserTest {
       folder = createMockFolder(folderId);
       replay(folder);
     }
-    Iterator<ISecurityPolicy> secPolicyIter = getIterator(secPolicy);
-    IObjectSet secPolicySet = getObjectSet(secPolicyIter);
+    IObjectSet secPolicySet =
+        new FnObjectList(Collections.singletonList(secPolicy));
     IDocument doc = getDocument(docId, folder);
-    Iterator<IDocument> docIter = getIterator(doc);
-    IObjectSet docSet = getObjectSet(docIter);
+    IObjectSet docSet = new FnObjectList(Collections.singletonList(doc));
     IObjectStore os = createNiceMock(IObjectStore.class);
     ISearch searcher = createMock(ISearch.class);
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
@@ -244,8 +234,7 @@ public class SecurityPolicyTraverserTest {
     expect(searcher.execute(isA(String.class), eq(100), eq(1),
         isA(IBaseObjectFactory.class))).andReturn(docSet).times(1);
 
-    replay(os, secPolicySet, secPolicy, secTemplate, docSet, doc, searcher,
-        objectFactory);
+    replay(os, secPolicy, secTemplate, doc, searcher, objectFactory);
 
     Traverser traverser =
         new SecurityPolicyTraverser(objectFactory, os, connector);
@@ -266,8 +255,7 @@ public class SecurityPolicyTraverserTest {
     assertEquals(timeStr, ck.getString(JsonField.LAST_SECURITY_POLICY_TIME));
     assertEquals(secPolicyId, ck.getString(JsonField.UUID_SECURITY_POLICY));
 
-    verify(os, secPolicySet, secPolicy, secTemplate, docSet, doc, searcher,
-        objectFactory);
+    verify(os, secPolicy, secTemplate, doc, searcher, objectFactory);
   }
 
   private IFolder createMockFolder(String id) throws RepositoryException {
