@@ -119,28 +119,57 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
     Iterator<? extends IBaseObject> folderIter = folderSet.getIterator();
     while (folderIter.hasNext()) {
       IFolder folder = (IFolder) folderIter.next();
-      IObjectSet docSet = folder.get_ContainedDocuments();
-      LOGGER.log(Level.FINEST, "Found {0} documents under {1} folder [{2}]",
-          new Object[] {docSet.getSize(), folder.get_FolderName(),
-              folder.get_Id()});
-      Iterator<? extends IBaseObject> docIter = docSet.getIterator();
-      while (docIter.hasNext()) {
-        IDocument doc = (IDocument) docIter.next();
-        Permissions permissions = new Permissions(doc.get_Permissions());
-        AclDocument aclDoc = new AclDocument(
-            doc.get_Id().toString() + AclDocument.SEC_FOLDER_POSTFIX, null,
-            AclInheritanceType.CHILD_OVERRIDES,
-            connector.getGoogleGlobalNamespace(),
-            permissions.getAllowUsers(PermissionSource.SOURCE_PARENT),
-            permissions.getDenyUsers(PermissionSource.SOURCE_PARENT),
-            permissions.getAllowGroups(PermissionSource.SOURCE_PARENT),
-            permissions.getDenyGroups(PermissionSource.SOURCE_PARENT));
-        aclDoc.setCheckpointLastModified(folder.getModifyDate());
-        aclDoc.setCheckpointLastUuid(folder.get_Id());
-        aclDocs.add(aclDoc);
-      }
+      addAllDescendantDocumentAcls(aclDocs, folder, folder.getModifyDate(),
+          folder.get_Id());
     }
     return aclDocs;
+  }
+
+  /* Recursively adds an AclDocument for each descendant Document of the
+   * Folder to the list.
+   *
+   * Changing the ACL on a folder changes the ACL on all its descendant
+   * subfolders, yet the last modified time of those subfolders does not
+   * get updated, so they don't show up in the query of modified folders.
+   * Therefore the SecurityFolderTraverser must recursively update the
+   * ACLs for all descendant subfolders. However, the connector does not
+   * send folder ACLs to the GSA. It sends a copy of them with the docs
+   * that inherit from those security folders. Therefore, we resend ACLs
+   * for all documents who directly or indirectly inherit from the original
+   * folder whose ACL changed.
+   */
+  private void addAllDescendantDocumentAcls(LinkedList<AclDocument> aclDocs,
+      IFolder folder, Date checkpointDate, IId checkpointId)
+      throws RepositoryException {
+    // First update the ACLs for all documents in this folder.
+    IObjectSet docSet = folder.get_ContainedDocuments();
+    LOGGER.log(Level.FINEST, "Found {0} documents under {1} folder [{2}]",
+        new Object[] {docSet.getSize(), folder.get_FolderName(),
+            folder.get_Id()});
+    Iterator<? extends IBaseObject> docIter = docSet.getIterator();
+    while (docIter.hasNext()) {
+      IDocument doc = (IDocument) docIter.next();    
+      Permissions permissions = new Permissions(doc.get_Permissions());
+      AclDocument aclDoc = new AclDocument(
+          doc.get_Id().toString() + AclDocument.SEC_FOLDER_POSTFIX, null,
+          AclInheritanceType.CHILD_OVERRIDES,
+          connector.getGoogleGlobalNamespace(),
+          permissions.getAllowUsers(PermissionSource.SOURCE_PARENT),
+          permissions.getDenyUsers(PermissionSource.SOURCE_PARENT),
+          permissions.getAllowGroups(PermissionSource.SOURCE_PARENT),
+          permissions.getDenyGroups(PermissionSource.SOURCE_PARENT));
+      aclDoc.setCheckpointLastModified(checkpointDate);
+      aclDoc.setCheckpointLastUuid(checkpointId);
+      aclDocs.add(aclDoc);
+    }
+
+    // Now do the same for documents in all descendant folders.
+    IObjectSet folderSet = folder.get_SubFolders();
+    Iterator<? extends IBaseObject> folderIter = folderSet.getIterator();
+    while (folderIter.hasNext()) {
+      addAllDescendantDocumentAcls(aclDocs, (IFolder) folderIter.next(),
+          checkpointDate, checkpointId);
+    }
   }
 
   private String getQuery() {
