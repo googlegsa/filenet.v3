@@ -25,7 +25,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
+import com.google.enterprise.connector.filenet4.EmptyObjectSet;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnObjectList;
@@ -59,11 +62,8 @@ import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 public class SecurityFolderTraverserTest {
   private static final Date Jan_1_1970 = new Date(72000000L);
@@ -76,10 +76,14 @@ public class SecurityFolderTraverserTest {
     {"{FFFFFFFF-0000-0000-0000-000000000005}", "2015-04-01T14:20:40.500-0700"}
   };
 
+  private static final String DOC_ID_FORMAT = "AAAAAAAA-0000-0000-%04d-%012d";
+
   private static int VIEW_ACCESS_RIGHTS =
       AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT;
   private static final SimpleDateFormat DATE_PARSER =
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+  private static final IObjectSet EMPTY_SET = new EmptyObjectSet();
 
   private FileConnector connector;
 
@@ -125,13 +129,15 @@ public class SecurityFolderTraverserTest {
     assertTrue(count > 1);
   }
 
-  private IFolder createFolder(String id, IObjectSet docSet, Date lastModified)
-      throws RepositoryException {
+  private IFolder createFolder(String id, IObjectSet docSet,
+      IObjectSet folderSet, Date lastModified) throws RepositoryException {
     IFolder folder = createNiceMock(IFolder.class);
     expect(folder.get_Id()).andReturn(new FnId(id));
     expect(folder.get_FolderName()).andReturn(id);
     expect(folder.getModifyDate()).andReturn(lastModified);
     expect(folder.get_ContainedDocuments()).andReturn(docSet);
+    expect(folder.get_SubFolders()).andReturn(folderSet);
+    replay(folder);
     return folder;
   }
 
@@ -204,13 +210,18 @@ public class SecurityFolderTraverserTest {
         templateAllowGroup};
   }
 
-  private List<IDocument> getDocuments(int count) throws RepositoryException {
-    List<IDocument> docs = new ArrayList<IDocument>();
-    for (int i = 1; i <= count; i++) {
-      String id = String.format("AAAAAAAA-0000-0000-0000-%012d", i);
+  private IObjectSet getDocuments(int docCount) throws RepositoryException {
+    return getChildDocuments(0, docCount);
+  }
+
+  private IObjectSet getChildDocuments(int folderNum, int docCount)
+      throws RepositoryException {
+    ImmutableList.Builder<IDocument> docs = ImmutableList.builder();
+    for (int i = 1; i <= docCount; i++) {
+      String id = String.format(DOC_ID_FORMAT, folderNum, i);
       docs.add(createDocument(id, createACL(Iterators.forArray(createACEs()))));
     }
-    return docs;
+    return new FnObjectList(docs.build());
   }
 
   private SecurityFolderTraverser getObjectUnderTest(IObjectSet folderSet)
@@ -232,11 +243,9 @@ public class SecurityFolderTraverserTest {
   @Test
   public void countDocumentsInFolder() throws Exception {
     int docCount = 5;
-    List<IDocument> docs = getDocuments(docCount);
-    IObjectSet docSet = new FnObjectList(docs);
-    IFolder folder = createFolder(FOLDERS[0][0], docSet, new Date());
-    IObjectSet folderSet = new FnObjectList(Collections.singletonList(folder));
-    replay(folder);
+    IObjectSet docSet = getDocuments(docCount);
+    IFolder folder = createFolder(FOLDERS[0][0], docSet, EMPTY_SET, new Date());
+    IObjectSet folderSet = new FnObjectList(ImmutableList.of(folder));
 
     SecurityFolderTraverser traverser = getObjectUnderTest(folderSet);
 
@@ -315,15 +324,66 @@ public class SecurityFolderTraverserTest {
   }
 
   private IObjectSet getFolderSet(int docsPerFolder) throws Exception {
-    List<IFolder> folders = new ArrayList<IFolder>();
+    ImmutableList.Builder<IFolder> folders = ImmutableList.builder();
     for (int i = 0; i < FOLDERS.length; i++) {
-      List<IDocument> docs = getDocuments(docsPerFolder);
-      IObjectSet docSet = new FnObjectList(docs);
-      IFolder folder =
-          createFolder(FOLDERS[i][0], docSet, DATE_PARSER.parse(FOLDERS[i][1]));
-      folders.add(folder);
-      replay(folder);
+      folders.add(getFolder(i, docsPerFolder, EMPTY_SET));
     }
-    return new FnObjectList(folders);
+    return new FnObjectList(folders.build());
+  }
+
+  private IFolder getFolder(int folderNum, int numDocuments,
+      IObjectSet subFolders) throws Exception {
+    return createFolder(FOLDERS[folderNum][0],
+        getChildDocuments(folderNum, numDocuments), subFolders,
+        DATE_PARSER.parse(FOLDERS[folderNum][1]));
+  }    
+
+  /**
+   * Creates a hierarchical folder set from FOLDERS structured like:
+   *     0
+   *    / \
+   *   1   2
+   *      / \
+   *     3   4
+   */
+  private IObjectSet getNestedFolderSet(int docsPerFolder) throws Exception {
+    assertEquals("FOLDERS is unexpected size", 5, FOLDERS.length);
+    return new FnObjectList(ImmutableList.<IFolder>of(
+        getFolder(0, docsPerFolder,
+            new FnObjectList(ImmutableList.<IFolder>of(
+                getFolder(1, docsPerFolder, EMPTY_SET),
+                getFolder(2, docsPerFolder,
+                   new FnObjectList(ImmutableList.<IFolder>of(
+                       getFolder(3, docsPerFolder, EMPTY_SET),
+                       getFolder(4, docsPerFolder, EMPTY_SET)))))))));
+  }
+
+  @Test
+  public void testRecursiveAclCollection() throws Exception {
+    int docsPerFolder = 4;
+    IObjectSet folderTree = getNestedFolderSet(docsPerFolder);
+
+    ImmutableSet.Builder<String> expectedDocids = ImmutableSet.builder();
+    // This is how getChildDocuments() numbers the documents.
+    for (int i = 0; i < FOLDERS.length; i++) {
+      for (int j = 1; j <= docsPerFolder; j++) {
+        expectedDocids.add(String.format("{" + DOC_ID_FORMAT + "}-FLDR", i, j));
+      }
+    }
+
+    SecurityFolderTraverser traverser = getObjectUnderTest(folderTree);
+
+    DocumentList docList = traverser.getDocumentList(new Checkpoint());
+    assertNotNull(docList);
+    
+    ImmutableSet.Builder<String> actualDocids = ImmutableSet.builder();
+    Document doc;
+    while ((doc = docList.nextDocument()) != null) {
+      testAclDocument(doc);
+      actualDocids.add(
+          Value.getSingleValueString(doc, SpiConstants.PROPNAME_DOCID));
+    }
+
+    assertEquals(expectedDocids.build(), actualDocids.build());
   }
 }

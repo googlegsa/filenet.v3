@@ -21,4 +21,6 @@ public interface IFolder extends IBaseObject {
   String get_FolderName();
 
   IObjectSet get_ContainedDocuments() throws RepositoryException;
+
+  IObjectSet get_SubFolders() throws RepositoryException;
 }

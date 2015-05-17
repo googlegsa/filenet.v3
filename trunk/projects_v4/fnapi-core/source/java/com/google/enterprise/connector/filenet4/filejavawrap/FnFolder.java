@@ -14,8 +14,8 @@
 
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
-import com.google.enterprise.connector.filenet4.EmptyObjectSet;
-import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.common.collect.ImmutableList;
+import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
 import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
@@ -23,6 +23,7 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.DocumentSet;
+import com.filenet.api.collection.FolderSet;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
 import com.filenet.api.exception.EngineRuntimeException;
@@ -84,18 +85,26 @@ public class FnFolder implements IFolder {
   @Override
   public IObjectSet get_ContainedDocuments() throws RepositoryException {
     try {
+      ImmutableList.Builder<IDocument> builder = ImmutableList.builder();
       DocumentSet docSet = folder.get_ContainedDocuments();
-      if (docSet.isEmpty()) {
-        return new EmptyObjectSet();
-      } else {
-        LinkedList<IBaseObject> docList = new LinkedList<IBaseObject>();
-        Iterator<?> docIter = docSet.iterator();
-        while (docIter.hasNext()) {
-          Document doc = (Document) docIter.next();
-          docList.add(new FnDocument(doc));
-        }
-        return new FnObjectList(docList);
+      for (Iterator<?> iter = docSet.iterator(); iter.hasNext();) {
+        builder.add(new FnDocument((Document) iter.next()));
       }
+      return new FnObjectList(builder.build());
+    } catch (EngineRuntimeException e) {
+      throw new RepositoryException(e);
+    }
+  }
+
+  @Override
+  public IObjectSet get_SubFolders() throws RepositoryException {
+    try {
+      ImmutableList.Builder<IFolder> builder = ImmutableList.builder();
+      FolderSet folderSet = folder.get_SubFolders();
+      for (Iterator<?> iter = folderSet.iterator(); iter.hasNext();) {
+        builder.add(new FnFolder((Folder) iter.next()));
+      }
+      return new FnObjectList(builder.build());
     } catch (EngineRuntimeException e) {
       throw new RepositoryException(e);
     }
