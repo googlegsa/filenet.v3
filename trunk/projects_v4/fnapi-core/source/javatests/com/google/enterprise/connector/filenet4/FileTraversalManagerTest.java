@@ -23,52 +23,99 @@ import static org.junit.Assert.assertEquals;
 
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SimpleTraversalContext;
+import com.google.enterprise.connector.spi.TraversalManager;
 import com.google.enterprise.connector.util.EmptyDocumentList;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class FileTraversalManagerTest {
-  private DocumentList emptyList;
-  private Traverser traverser;
-  private FileTraversalManager traversalMgr;
-
-  @Before
-  public void setUp() throws RepositoryException {
-    emptyList = new EmptyDocumentList("");
-    traverser = createMock(Traverser.class);
-    traversalMgr = new FileTraversalManager(traverser);
-  }
+  private static final DocumentList EMPTY_LIST = new EmptyDocumentList("");
 
   @Test
-  public void testStartTraversal() throws RepositoryException {
-    expect(traverser.getDocumentList(isA(Checkpoint.class)))
-        .andReturn(emptyList);
+  public void testSetTraversalContext() throws RepositoryException {
+    SimpleTraversalContext traversalContext = new SimpleTraversalContext();
+    Traverser traverser = createMock(Traverser.class);
+    traverser.setTraversalContext(traversalContext);
     replay(traverser);
 
-    DocumentList docList = traversalMgr.startTraversal();
-    assertEquals(emptyList, docList);
-    verify(traverser);
-  }
-
-  @Test
-  public void testResumeTraversal() throws RepositoryException {
-    expect(traverser.getDocumentList(isA(Checkpoint.class)))
-        .andReturn(emptyList);
-    replay(traverser);
-
-    // The checkpoint must be a valid JSON string.
-    DocumentList docList = traversalMgr.resumeTraversal("{}");
-    assertEquals(emptyList, docList);
+    FileTraversalManager traversalMgr = new FileTraversalManager(traverser);
+    traversalMgr.setTraversalContext(traversalContext);
     verify(traverser);
   }
 
   @Test
   public void testSetBatchHint() throws RepositoryException {
+    Traverser traverser = createMock(Traverser.class);
     traverser.setBatchHint(42);
     replay(traverser);
 
+    TraversalManager traversalMgr = new FileTraversalManager(traverser);
     traversalMgr.setBatchHint(42);
     verify(traverser);
+  }
+
+  @Test
+  public void testStartTraversal() throws RepositoryException {
+    Traverser traverser = createMock(Traverser.class);
+    expect(traverser.getDocumentList(isA(Checkpoint.class)))
+        .andReturn(EMPTY_LIST);
+    replay(traverser);
+
+    TraversalManager traversalMgr = new FileTraversalManager(traverser);
+    DocumentList docList = traversalMgr.startTraversal();
+    assertEquals(null, docList.nextDocument());
+    verify(traverser);
+  }
+
+  @Test
+  public void testResumeTraversal() throws RepositoryException {
+    Traverser traverser = createMock(Traverser.class);
+    expect(traverser.getDocumentList(isA(Checkpoint.class)))
+        .andReturn(EMPTY_LIST);
+    replay(traverser);
+
+    TraversalManager traversalMgr = new FileTraversalManager(traverser);
+
+    // The checkpoint must be a valid JSON string.
+    DocumentList docList = traversalMgr.resumeTraversal("{}");
+    assertEquals(null, docList.nextDocument());
+    verify(traverser);
+  }
+
+  @Test
+  public void testResumeTraversal_allNulls() throws RepositoryException {
+    Traverser traverser = createMock(Traverser.class);
+    expect(traverser.getDocumentList(isA(Checkpoint.class)))
+        .andReturn(null).anyTimes();
+    replay(traverser);
+
+    TraversalManager traversalMgr =
+        new FileTraversalManager(traverser, traverser);
+
+    // The checkpoint must be a valid JSON string.
+    DocumentList docList = traversalMgr.resumeTraversal("{}");
+    assertEquals(null, docList);
+    verify(traverser);
+  }
+
+  @Test
+  public void testResumeTraversal_skipNulls() throws RepositoryException {
+    Traverser nullTraverser = createMock(Traverser.class);
+    expect(nullTraverser.getDocumentList(isA(Checkpoint.class)))
+        .andReturn(null);
+    Traverser emptyTraverser = createMock(Traverser.class);
+    expect(emptyTraverser.getDocumentList(isA(Checkpoint.class)))
+        .andReturn(EMPTY_LIST);
+    replay(nullTraverser, emptyTraverser);
+
+    TraversalManager traversalMgr =
+        new FileTraversalManager(nullTraverser, emptyTraverser);
+
+    // The checkpoint must be a valid JSON string.
+    DocumentList docList = traversalMgr.resumeTraversal("{}");
+    assertEquals(null, docList.nextDocument());
+    verify(nullTraverser, emptyTraverser);
   }
 }

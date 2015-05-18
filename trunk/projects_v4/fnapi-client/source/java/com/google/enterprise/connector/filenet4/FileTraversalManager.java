@@ -14,48 +14,73 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.TraversalContextAware;
 import com.google.enterprise.connector.spi.TraversalManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Delegates the traversal to a {@code Traverser}.
+ * Delegates the traversal to a list of {@code Traverser}s.
  */
 public class FileTraversalManager implements TraversalManager,
     TraversalContextAware {
   private static final Logger LOGGER =
       Logger.getLogger(FileTraversalManager.class.getName());
 
-  private final Traverser traverser;
+  private final List<Traverser> traversers;
 
-  public FileTraversalManager(Traverser traverser) {
-    this.traverser = traverser;
+  public FileTraversalManager(Traverser... traversers) {
+    this.traversers = ImmutableList.copyOf(traversers);
+  }
+
+  @Override
+  public void setTraversalContext(TraversalContext traversalContext) {
+    for (Traverser t : traversers) {
+      t.setTraversalContext(traversalContext);
+    }
   }
 
   @Override
   public void setBatchHint(int batchHint) throws RepositoryException {
-    traverser.setBatchHint(batchHint);
+    for (Traverser t : traversers) {
+      t.setBatchHint(batchHint);
+    }
   }
 
   @Override
   public DocumentList startTraversal() throws RepositoryException {
-    LOGGER.info("Starting traversal...");
-    return traverser.getDocumentList(new Checkpoint());
+    return getDocumentList(new Checkpoint());
   }
 
   @Override
   public DocumentList resumeTraversal(String checkPoint)
           throws RepositoryException {
-    LOGGER.info("Resuming traversal...");
-    return traverser.getDocumentList(new Checkpoint(checkPoint));
+    return getDocumentList(new Checkpoint(checkPoint));
   }
 
-  @Override
-  public void setTraversalContext(TraversalContext traversalContext) {
-    traverser.setTraversalContext(traversalContext);
+  private DocumentList getDocumentList(Checkpoint checkpoint)
+      throws RepositoryException {
+    List<DocumentList> docLists = new ArrayList<>(traversers.size());
+    for (Traverser t : traversers) {
+      DocumentList docList = t.getDocumentList(checkpoint);
+      if (docList != null) {
+        LOGGER.finest("Adding document list to queue: "
+            + docList.getClass().getName());
+        docLists.add(docList);
+      }
+    }
+    if (docLists.size() > 0) {
+      LOGGER.finest("Concatenating " + docLists.size() + " document lists");
+      return new ConcatenatedDocumentList(docLists);
+    } else {
+      LOGGER.finest("No document lists returned from traversers");
+      return null;
+    }
   }
 }
