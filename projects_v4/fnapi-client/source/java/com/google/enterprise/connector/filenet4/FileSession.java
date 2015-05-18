@@ -99,7 +99,8 @@ public class FileSession implements Session {
    */
   @Override
   public TraversalManager getTraversalManager() throws RepositoryException {
-    return new FileTraversalManager(getFileDocumentTraverser());
+    return new FileTraversalManager(getFileDocumentTraverser(),
+        getSecurityPolicyTraverser(), getSecurityFolderTraverser());
   }
 
   /**
