@@ -54,11 +54,13 @@ import com.filenet.api.constants.VersionStatusId;
 import com.filenet.api.security.AccessPermission;
 
 import org.easymock.EasyMock;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -80,11 +82,25 @@ public class SecurityPolicyTraverserTest {
   private FileConnector connector;
   private List<AccessPermission> directAces;
 
+  private final List<Object> mocksToVerify = new ArrayList<>();
+
   @Before
   public void setUp() throws Exception {
     this.directAces = TestObjectFactory.generatePermissions(1, 1, 1, 1,
         VIEW_ACCESS_RIGHTS, 0, PermissionSource.SOURCE_DIRECT);
     this.connector = TestObjectFactory.newFileConnector();
+  }
+
+  @After
+  public void verifyMocks() {
+    for (Object mock : mocksToVerify) {
+      verify(mock);
+    }
+  }
+
+  private void replayAndVerify(Object... mocks) {
+    replay(mocks);
+    Collections.addAll(mocksToVerify, mocks);
   }
 
   private ISecurityPolicy getSecurityPolicy(String id, Date lastModified,
@@ -115,28 +131,37 @@ public class SecurityPolicyTraverserTest {
     return doc;
   }
 
-  @Test
-  public void startTraversal_WithoutUpdatedSecPolicy() throws Exception {
-    IObjectSet objectSet =
-        new FnObjectList(Collections.<IBaseObject>emptyList());
+  private SecurityPolicyTraverser getObjectUnderTest(IObjectSet secPolicySet,
+      IObjectSet docSet) throws RepositoryException {
     IObjectStore os = createNiceMock(IObjectStore.class);
-
     ISearch searcher = createMock(ISearch.class);
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
-    expect(objectFactory.getFactory(isA(String.class))).andReturn(
-        createNiceMock(IBaseObjectFactory.class)).anyTimes();
     expect(objectFactory.getSearch(isA(IObjectStore.class))).andReturn(
         searcher);
+    expect(objectFactory.getFactory(isA(String.class))).andReturn(
+        createNiceMock(IBaseObjectFactory.class)).anyTimes();
     expect(searcher.execute(isA(String.class), eq(100), eq(0),
-        isA(IBaseObjectFactory.class))).andReturn(objectSet);
+        isA(IBaseObjectFactory.class))).andReturn(secPolicySet);
+    if (secPolicySet.getSize() > 0) {
+      expect(searcher.execute(isA(String.class), eq(100), eq(1),
+              isA(IBaseObjectFactory.class)))
+          .andReturn(docSet)
+          .times(secPolicySet.getSize());
+    }
+    replayAndVerify(objectFactory, os, searcher);
 
-    replay(objectFactory, os, searcher);
-    Traverser traverser =
-        new SecurityPolicyTraverser(objectFactory, os, connector);
+    return new SecurityPolicyTraverser(objectFactory, os, connector);
+  }
+
+  @Test
+  public void startTraversal_WithoutUpdatedSecPolicy() throws Exception {
+    IObjectSet secPolicySet =
+        new FnObjectList(Collections.<IBaseObject>emptyList());
+
+    Traverser traverser = getObjectUnderTest(secPolicySet, null);
     traverser.setBatchHint(TestConnection.batchSize);
     DocumentList acls = traverser.getDocumentList(new Checkpoint());
     assertNull(acls);
-    verify(objectFactory, os);
   }
 
   private DocumentList getDocumentList_Live(Checkpoint checkpoint)
@@ -222,22 +247,9 @@ public class SecurityPolicyTraverserTest {
         new FnObjectList(Collections.singletonList(secPolicy));
     IDocument doc = getDocument(docId, folder);
     IObjectSet docSet = new FnObjectList(Collections.singletonList(doc));
-    IObjectStore os = createNiceMock(IObjectStore.class);
-    ISearch searcher = createMock(ISearch.class);
-    IObjectFactory objectFactory = createMock(IObjectFactory.class);
-    expect(objectFactory.getSearch(isA(IObjectStore.class))).andReturn(
-        searcher);
-    expect(objectFactory.getFactory(isA(String.class))).andReturn(
-        createNiceMock(IBaseObjectFactory.class)).anyTimes();
-    expect(searcher.execute(isA(String.class), eq(100), eq(0),
-        isA(IBaseObjectFactory.class))).andReturn(secPolicySet).times(1);
-    expect(searcher.execute(isA(String.class), eq(100), eq(1),
-        isA(IBaseObjectFactory.class))).andReturn(docSet).times(1);
+    replay(secPolicy, secTemplate, doc);
 
-    replay(os, secPolicy, secTemplate, doc, searcher, objectFactory);
-
-    Traverser traverser =
-        new SecurityPolicyTraverser(objectFactory, os, connector);
+    Traverser traverser = getObjectUnderTest(secPolicySet, docSet);
     traverser.setBatchHint(TestConnection.batchSize);
     DocumentList doclist = traverser.getDocumentList(new Checkpoint());
     assertNotNull(doclist);
@@ -255,7 +267,7 @@ public class SecurityPolicyTraverserTest {
     assertEquals(timeStr, ck.getString(JsonField.LAST_SECURITY_POLICY_TIME));
     assertEquals(secPolicyId, ck.getString(JsonField.UUID_SECURITY_POLICY));
 
-    verify(os, secPolicy, secTemplate, doc, searcher, objectFactory);
+    verify(secPolicy, secTemplate, doc);
   }
 
   private IFolder createMockFolder(String id) throws RepositoryException {
