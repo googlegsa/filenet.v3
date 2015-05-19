@@ -20,6 +20,7 @@ import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -56,6 +57,7 @@ import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.security.AccessPermission;
 
 import org.easymock.EasyMock;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -87,9 +89,24 @@ public class SecurityFolderTraverserTest {
 
   private FileConnector connector;
 
+  private final ImmutableList.Builder<Object> mocksToVerify =
+      ImmutableList.builder();
+
   @Before
   public void setUp() throws Exception {
     this.connector = TestObjectFactory.newFileConnector();
+  }
+
+  @After
+  public void verifyMocks() {
+    for (Object mock : mocksToVerify.build()) {
+      verify(mock);
+    }
+  }
+
+  private void replayAndVerify(Object... mocks) {
+    replay(mocks);
+    mocksToVerify.add(mocks);
   }
 
   @Test
@@ -212,6 +229,8 @@ public class SecurityFolderTraverserTest {
     expect(folder.getModifyDate()).andReturn(lastModified);
     expect(folder.get_ContainedDocuments()).andReturn(docSet);
     expect(folder.get_SubFolders()).andReturn(subFolders);
+    // We can't verify this mock because getModifyDate is not called
+    // for subfolders.
     replay(folder);
     return folder;
   }
@@ -224,7 +243,7 @@ public class SecurityFolderTraverserTest {
       IDocument doc = createNiceMock(IDocument.class);
       expect(doc.get_Id()).andReturn(iid);
       expect(doc.get_Permissions()).andReturn(createACL(createACEs()));
-      replay(doc);
+      replayAndVerify(doc);
       docs.add(doc);
     }
     return new FnObjectList(docs.build());
@@ -244,7 +263,7 @@ public class SecurityFolderTraverserTest {
   private AccessPermissionList createACL(final AccessPermission[] aces) {
     AccessPermissionList acl = createMock(AccessPermissionList.class);
     expect(acl.iterator()).andReturn(Iterators.forArray(aces));
-    replay(acl);
+    replayAndVerify(acl);
     return acl;
   }
 
@@ -257,7 +276,7 @@ public class SecurityFolderTraverserTest {
     expect(ace.get_PermissionSource()).andReturn(permSrc);
     expect(ace.get_GranteeType()).andReturn(granteeType);
     expect(ace.get_GranteeName()).andReturn(grantee);
-    replay(ace);
+    replayAndVerify(ace);
     return ace;
   }
 
@@ -311,7 +330,7 @@ public class SecurityFolderTraverserTest {
         createNiceMock(IBaseObjectFactory.class)).anyTimes();
     expect(searcher.execute(isA(String.class), eq(100), eq(0),
         isA(IBaseObjectFactory.class))).andReturn(folderSet).times(1);
-    replay(os, searcher, objectFactory);
+    replayAndVerify(os, searcher, objectFactory);
 
     return new SecurityFolderTraverser(objectFactory, os, connector);
   }
@@ -322,7 +341,7 @@ public class SecurityFolderTraverserTest {
 
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNotNull(docList);
-    
+
     ImmutableList.Builder<String> actualDocids = ImmutableList.builder();
     Document doc;
     while ((doc = docList.nextDocument()) != null) {
