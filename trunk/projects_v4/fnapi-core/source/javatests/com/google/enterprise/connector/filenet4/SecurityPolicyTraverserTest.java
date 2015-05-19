@@ -53,7 +53,6 @@ import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.VersionStatusId;
 import com.filenet.api.security.AccessPermission;
 
-import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -27,7 +27,6 @@ import com.google.enterprise.connector.spi.SimpleTraversalContext;
 import com.google.enterprise.connector.spi.TraversalManager;
 import com.google.enterprise.connector.util.EmptyDocumentList;
 
-import org.junit.Before;
 import org.junit.Test;
 
 public class FileTraversalManagerTest {
