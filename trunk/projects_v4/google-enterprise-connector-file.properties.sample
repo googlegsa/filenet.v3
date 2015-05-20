@@ -15,6 +15,7 @@ build.bootclasspath = /Library/Java/JavaVirtualMachines/jdk1.7.0_76.jdk/Contents
 ##
 # Test Properties
 test.batchSize=200
+test.domain=<user's domain>
 test.username=<test account's username>
 test.password=<test account's password>
 test.adminUsername=<administrator's username>
@@ -24,23 +25,16 @@ test.objectStoreName=<Object Store Name>
 test.wsUri=http://<server>:<port>/wsi/FNCEWS40MTOM
 test.objectFactoryClass=com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory
 test.displayUrl=http://<server>:<port>/WorkplaceXT/getContent
-test.incorrectDisplayUrl=http://<server>:<port>/WorkplaceXT/getContent
 test.waspLocation=wasp.location
 test.wsiPath=E:\\FileNetConnector\\share\\wsi
-test.repeatedSlashContentEngineURL=http://<server>:<port>/wsi/FNCEWS40MTOM/////////////
 test.currentUserContext=cn=administrator,o=sample
-
-##
-# Test Clauses
-test.wrong_additional_where_clause=and Document.this INSUBFOLDER
-test.additional_where_clause=and Document.this INSUBFOLDER '/example'
-test.where_clause_error_message=There was a syntax error
-test.workplace_url__error_message=Invalid URL format. Please verify your URL.
 
 ##
 # Test Documents
 test.docId1=8B2D49FA-5D6B-4F99-9A69-652FCADE4D90
 test.docId2=9F35EEE8-14F6-497B-A664-B81EAAA4DE14
+test.docId3=AE1238BD-6460-D4F2-697B-0CBF74AC454E
+test.docId4=2B2C92C2-DEEA-2489-9A9C-D40667EAE2D4
 
 ##
 # Test Version IDs

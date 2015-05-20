@@ -502,17 +502,11 @@ public class FileConnectorType implements ConnectorType {
    */
   private void testWorkplaceUrl(String workplaceServerUrl)
           throws RepositoryException {
-    // Added by Pankaj on 04/05/2009 to remove the dependency of
-    // Httpclient.jar file
     try {
       new UrlValidator().validate(workplaceServerUrl);
       LOGGER.log(Level.INFO, "Connection to Workplace URL is Successful");
-    } catch (UrlValidatorException e) {
-      LOGGER.log(Level.WARNING, resource.getString("workplace_url_error"));
-      throw new RepositoryException(
-              resource.getString("workplace_url_error"));
-    } catch (Throwable t) {
-      LOGGER.log(Level.WARNING, resource.getString("workplace_url_error"));
+    } catch (Exception e) {
+      LOGGER.log(Level.WARNING, "Error validating Workplace URL", e);
       throw new RepositoryException(
               resource.getString("workplace_url_error"));
     }
