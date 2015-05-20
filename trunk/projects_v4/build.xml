@@ -201,7 +201,7 @@
     <echo message="The run_tests target is deprecated. Use test instead." />
   </target>
 
-  <target name="test" depends="instrument,compile_tests">
+  <target name="test" depends="compile_tests,instrument">
     <property name="test.suite" value="*" />
     <junit fork="yes" dir="${basedir}" failureProperty="test.failed">
       <!--
