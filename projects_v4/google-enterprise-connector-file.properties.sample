@@ -25,8 +25,6 @@ test.objectStoreName=<Object Store Name>
 test.wsUri=http://<server>:<port>/wsi/FNCEWS40MTOM
 test.objectFactoryClass=com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory
 test.displayUrl=http://<server>:<port>/WorkplaceXT/getContent
-test.waspLocation=wasp.location
-test.wsiPath=E:\\FileNetConnector\\share\\wsi
 test.currentUserContext=cn=administrator,o=sample
 
 ##

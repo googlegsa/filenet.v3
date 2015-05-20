@@ -14,6 +14,10 @@
 
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.FileUtil;
@@ -28,10 +32,10 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.util.UserContext;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
-public class FnObjectStoreTest extends TestCase {
-
+public class FnObjectStoreTest {
   FileSession fs;
   IObjectStore ios;
   IConnection conn;
@@ -39,9 +43,10 @@ public class FnObjectStoreTest extends TestCase {
   IObjectFactory iof;
   IDocument fd;
 
-  protected void setUp() throws RepositoryLoginException,
-          RepositoryException, InstantiationException,
-          IllegalAccessException, ClassNotFoundException {
+  @Before
+  public void setUp() throws Exception {
+    assumeTrue(TestConnection.isLiveConnection());
+
     FileConnector connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -57,15 +62,16 @@ public class FnObjectStoreTest extends TestCase {
     // Domain domain = Factory.Domain.getInstance(conn.getConnection(),
     // "P8.V4");
     ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.username, TestConnection.password);
-
   }
 
+  @Test
   public void testGetObject() throws RepositoryException {
     fd = (IDocument) ios.getObject(ClassNames.DOCUMENT, TestConnection.docId1);
     assertNotNull(fd);
     assertEquals("{" + TestConnection.docId1 + "}", fd.get_Id().toString());
   }
 
+  @Test
   public void testFetchObject() throws RepositoryException {
     fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
         new FnId(TestConnection.docId1),
@@ -74,10 +80,12 @@ public class FnObjectStoreTest extends TestCase {
     assertEquals("{" + TestConnection.docId1 + "}", fd.get_Id().toString());
   }
 
+  @Test
   public void testGetName() throws RepositoryException {
     assertEquals(TestConnection.objectStore, ios.get_Name());
   }
 
+  @Test
   public void testGetObjectStore() throws RepositoryException {
     assertNotNull(((FnObjectStore) ios).getObjectStore());
   }

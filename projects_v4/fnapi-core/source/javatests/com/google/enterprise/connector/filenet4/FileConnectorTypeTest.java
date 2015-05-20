@@ -14,7 +14,15 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.enterprise.connector.spi.ConfigureResponse;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import java.net.URL;
 import java.net.MalformedURLException;
@@ -22,12 +30,14 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class FileConnectorTypeTest extends FileNetTestCase {
+public class FileConnectorTypeTest {
   private HashMap<String, String> map;
-
   private FileConnectorType testConnectorType;
 
+  @Before
   public void setUp() {
+    assumeTrue(TestConnection.isLiveConnection());
+
     map = new HashMap<>();
     map.put("username", TestConnection.adminUsername);
     map.put("Password", TestConnection.adminPassword);
@@ -38,12 +48,13 @@ public class FileConnectorTypeTest extends FileNetTestCase {
     map.put("additional_where_clause", "");//NOT COMPULSORY
     map.put("delete_additional_where_clause", "");
     map.put("check_marking", "");
-    String[] fields = map.keySet().toArray(String[0]);
+    String[] fields = map.keySet().toArray(new String[0]);
     map.put("googleGlobalNamespace", "Default");
     testConnectorType = new FileConnectorType();
     testConnectorType.setConfigKeys(fields);
   }
 
+  @Test
   public void testValidateConfigWithBlankWhereClause() {
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
     if (resp != null) {
@@ -51,6 +62,7 @@ public class FileConnectorTypeTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testValidateConfigIncorrectWhereClause() {
     map.put("additional_where_clause", "and Document.this INSUBFOLDER");
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
@@ -58,6 +70,7 @@ public class FileConnectorTypeTest extends FileNetTestCase {
         resp.getMessage().indexOf("There was a syntax error") != -1);
   }
 
+  @Test
   public void testValidateConfigCorrectWhereClause() {
     map.put("additional_where_clause",
         "and Document.this INSUBFOLDER '/TestFolder'");
@@ -67,6 +80,7 @@ public class FileConnectorTypeTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testInvalidWorkplaceURL() throws MalformedURLException {
     URL displayUrl = new URL(TestConnection.displayURL);
     map.put("workplace_display_url",
@@ -76,6 +90,7 @@ public class FileConnectorTypeTest extends FileNetTestCase {
         .getString("workplace_url_error"), resp.getMessage());
   }
 
+  @Test
   public void testRepeatedSlashContentEngineURL() {
     map.put("content_engine_url", TestConnection.uri + "///////");
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());

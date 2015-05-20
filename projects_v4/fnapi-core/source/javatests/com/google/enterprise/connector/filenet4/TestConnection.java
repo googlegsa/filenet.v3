@@ -16,6 +16,8 @@ package com.google.enterprise.connector.filenet4;
 
 import com.filenet.api.constants.PropertyNames;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -31,8 +33,6 @@ public class TestConnection {
   public static final String objectStore;
   public static final String objectFactory;
   public static final String displayURL;
-  public static final String property_wasp_location;
-  public static final String wsi_path;
   public static final String currentUserContext;
 
   // docId1 is Doc1 available for Administrator only
@@ -64,6 +64,18 @@ public class TestConnection {
   // Checkpoint of the last modified document TestAuthentication.pdf
   public static final String checkpoint2;
 
+  public static boolean isLiveConnection() {
+    try {
+      HttpURLConnection conn =
+          (HttpURLConnection) new URL(uri).openConnection();
+      conn.connect();
+      conn.disconnect();
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
   static {
     Properties props = System.getProperties();
     batchSize = Integer.parseInt(props.getProperty("batchSize"));
@@ -77,8 +89,6 @@ public class TestConnection {
     objectStore = props.getProperty("objectStoreName");
     objectFactory = props.getProperty("objectFactoryClass");
     displayURL = props.getProperty("displayUrl");
-    property_wasp_location = props.getProperty("waspLocation");
-    wsi_path = props.getProperty("wsiPath");
     currentUserContext = props.getProperty("currentUserContext");
 
     docId1 = props.getProperty("docId1");

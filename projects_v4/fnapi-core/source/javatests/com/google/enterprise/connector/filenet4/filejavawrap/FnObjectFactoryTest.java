@@ -14,6 +14,10 @@
 
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.TestConnection;
@@ -26,20 +30,21 @@ import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-public class FnObjectFactoryTest extends TestCase {
-
+public class FnObjectFactoryTest {
   FileSession fs;
   IObjectStore ios;
   IConnection conn;
   IObjectFactory iof;
 
-  protected void setUp() throws RepositoryLoginException,
-          RepositoryException, InstantiationException,
-          IllegalAccessException, ClassNotFoundException {
+  @Before
+  public void setUp() throws Exception {
+    assumeTrue(TestConnection.isLiveConnection());
+
     FileConnector connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -55,13 +60,13 @@ public class FnObjectFactoryTest extends TestCase {
     // Domain domain = Factory.Domain.getInstance(conn.getConnection(),
     // "P8.V4");
     ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.username, TestConnection.password);
-
   }
 
   /*
    * Test method for
    * 'com.google.enterprise.connector.file.filejavawrap.FnObjectFactory.getConnection(String)'
    */
+  @Test
   public void testGetConnection() throws RepositoryException {
     assertNotNull(conn);
     assertEquals(TestConnection.uri,
@@ -73,6 +78,7 @@ public class FnObjectFactoryTest extends TestCase {
    * 'com.google.enterprise.connector.file.filejavawrap.FnObjectFactory.getObjectStore(String,
    * IConnection, String, String)'
    */
+  @Test
   public void testGetObjectStore() throws RepositoryLoginException,
           RepositoryException {
     assertNotNull(ios);
@@ -83,6 +89,7 @@ public class FnObjectFactoryTest extends TestCase {
    * Test method for
    * 'com.google.enterprise.connector.file.filejavawrap.FnObjectFactory.getSearch(IObjectStore)'
    */
+  @Test
   public void testGetSearch() throws RepositoryException {
     ISearch is = iof.getSearch(ios);
     IObjectSet test = is.execute(

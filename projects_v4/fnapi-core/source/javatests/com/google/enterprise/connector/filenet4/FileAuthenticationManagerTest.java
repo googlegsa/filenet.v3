@@ -13,20 +13,28 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.enterprise.connector.spi.AuthenticationResponse;
 import com.google.enterprise.connector.spi.Principal;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleAuthenticationIdentity;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.List;
 
-public class FileAuthenticationManagerTest extends FileNetTestCase {
+public class FileAuthenticationManagerTest {
   private FileConnector connec;
   private FileAuthenticationManager fatm;
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
+    assumeTrue(TestConnection.isLiveConnection());
+
     connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -39,11 +47,7 @@ public class FileAuthenticationManagerTest extends FileNetTestCase {
     fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
   }
 
-  @Override
-  protected void tearDown() throws Exception {
-    super.tearDown();
-  }
-
+  @Test
   public void testAuthenticate() throws RepositoryException {
     SimpleAuthenticationIdentity fai = new SimpleAuthenticationIdentity(
         TestConnection.username, TestConnection.password);
@@ -66,6 +70,7 @@ public class FileAuthenticationManagerTest extends FileNetTestCase {
         hasAuthUserGrp);
   }
 
+  @Test
   public void testAuthenticate_fail() throws RepositoryException  {
     SimpleAuthenticationIdentity faiWrong = new SimpleAuthenticationIdentity(TestConnection.username, TestConnection.wrongPassword);
     AuthenticationResponse arWrong = fatm.authenticate(faiWrong);
