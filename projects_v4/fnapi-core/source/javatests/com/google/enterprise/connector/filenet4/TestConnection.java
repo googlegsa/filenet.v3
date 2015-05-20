@@ -31,16 +31,9 @@ public class TestConnection {
   public static final String objectStore;
   public static final String objectFactory;
   public static final String displayURL;
-  public static final String incorrectDisplayURL;
   public static final String property_wasp_location;
   public static final String wsi_path;
-  public static final String repeatedSlashContentEngineURL;
   public static final String currentUserContext;
-  public static final String wrong_additional_where_clause;
-  public static final String additional_where_clause;
-  public static final String additional_delete_where_clause;
-  public static final String where_clause_error_message;
-  public static final String workplace_url__error_message;
 
   // docId1 is Doc1 available for Administrator only
   public static final String docId1;
@@ -84,22 +77,9 @@ public class TestConnection {
     objectStore = props.getProperty("objectStoreName");
     objectFactory = props.getProperty("objectFactoryClass");
     displayURL = props.getProperty("displayUrl");
-    incorrectDisplayURL = props.getProperty("incorrectDisplayUrl");
     property_wasp_location = props.getProperty("waspLocation");
     wsi_path = props.getProperty("wsiPath");
-    repeatedSlashContentEngineURL = 
-        props.getProperty("repeatedSlashContentEngineURL");
     currentUserContext = props.getProperty("currentUserContext");
-
-    wrong_additional_where_clause = 
-        props.getProperty("wrong_additional_where_clause");
-    additional_where_clause = props.getProperty("additional_where_clause");
-    additional_delete_where_clause =
-        props.getProperty("additional_delete_where_clause");
-    where_clause_error_message = 
-        props.getProperty("where_clause_error_message");
-    workplace_url__error_message = 
-        props.getProperty("workplace_url__error_message");
 
     docId1 = props.getProperty("docId1");
     docId2 = props.getProperty("docId2");
