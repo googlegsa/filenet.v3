@@ -14,6 +14,14 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
@@ -44,6 +52,9 @@ import com.filenet.api.util.Id;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -57,7 +68,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-public class FileDocumentListTest extends FileNetTestCase {
+public class FileDocumentListTest {
   private static final Logger LOGGER =
       Logger.getLogger(FileDocumentListTest.class.getName());
 
@@ -92,7 +103,8 @@ public class FileDocumentListTest extends FileNetTestCase {
 
   private FileConnector connec;
 
-  protected void setUp() throws RepositoryException {
+  @Before
+  public void setUp() throws RepositoryException {
     connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -107,7 +119,10 @@ public class FileDocumentListTest extends FileNetTestCase {
     return fs.getFileDocumentTraverser();
   }
 
+  @Test
   public void testLiveCheckpoint() throws Exception {
+    assumeTrue(TestConnection.isLiveConnection());
+
     Traverser traverser = getObjectUnderTest();
     traverser.setBatchHint(100);
     // Under live test and the test account, the deletion events weren't
@@ -127,7 +142,10 @@ public class FileDocumentListTest extends FileNetTestCase {
   /*
    * Testing chronological traversal
    */
+  @Test
   public void testLiveNextDocument() throws Exception {
+    assumeTrue(TestConnection.isLiveConnection());
+
     Traverser traverser = getObjectUnderTest();
     boolean isTested = false;
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
@@ -170,6 +188,7 @@ public class FileDocumentListTest extends FileNetTestCase {
         DatabaseType.ORACLE);
   }
 
+  @Test
   public void testTimeAndGUIDSorting() throws Exception {
     String[][] entries = {
         {"AAAAAA01-0000-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
@@ -212,16 +231,19 @@ public class FileDocumentListTest extends FileNetTestCase {
     };
   }
 
+  @Test
   public void testUnreleasedNextDeletionEvent_firstEntry() throws Exception {
     testUnreleasedNextDeletionEvent("2014-01-01T08:00:00.100",
         SkipPosition.FIRST);
   }
 
+  @Test
   public void testUnreleasedNextDeletionEvent_middleEntry() throws Exception {
     testUnreleasedNextDeletionEvent("2014-02-03T08:00:00.100",
         SkipPosition.MIDDLE);
   }
 
+  @Test
   public void testUnreleasedNextDeletionEvent_lastEntry() throws Exception {
     testUnreleasedNextDeletionEvent("2014-03-03T08:00:00.100",
         SkipPosition.LAST);
@@ -235,16 +257,19 @@ public class FileDocumentListTest extends FileNetTestCase {
         generateObjectMap(unreleasedEntries, true, false), expectedPosition);
   }
 
+  @Test
   public void testUnreleasedNextCustomDeletion_firstEntry() throws Exception {
     testUnreleasedNextCustomDeletion("2014-01-01T08:00:00.100",
         SkipPosition.FIRST);
   }
 
+  @Test
   public void testUnreleasedNextCustomDeletion_middleEntry() throws Exception {
     testUnreleasedNextCustomDeletion("2014-02-03T08:00:00.100",
         SkipPosition.MIDDLE);
   }
 
+  @Test
   public void testUnreleasedNextCustomDeletion_lastEntry() throws Exception {
     testUnreleasedNextCustomDeletion("2014-03-03T08:00:00.100",
         SkipPosition.LAST);
@@ -324,6 +349,7 @@ public class FileDocumentListTest extends FileNetTestCase {
     return os;
   }
 
+  @Test
   public void testMockCheckpoint() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, getDocuments(os.getObjects()),
@@ -331,30 +357,35 @@ public class FileDocumentListTest extends FileNetTestCase {
         getDeletionEvents(os.getObjects()));
   }
 
+  @Test
   public void testMockCheckpoint_nullCustomDeletes() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, getDocuments(os.getObjects()), null,
         getDeletionEvents(os.getObjects()));
   }
 
+  @Test
   public void testMockCheckpoint_emptyDocuments() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, newEmptyObjectSet(),
         getCustomDeletion(os.getObjects()), getDeletionEvents(os.getObjects()));
   }
 
+  @Test
   public void testMockCheckpoint_emptyCustomDeletes() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, getDocuments(os.getObjects()),
         newEmptyObjectSet(), getDeletionEvents(os.getObjects()));
   }
 
+  @Test
   public void testMockCheckpoint_emptyDeletionEvents() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, getDocuments(os.getObjects()),
         getCustomDeletion(os.getObjects()), newEmptyObjectSet());
   }
 
+  @Test
   public void testMimeTypesAndSizes() throws Exception {
     testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 32, true);
     testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 50, false);
@@ -386,6 +417,7 @@ public class FileDocumentListTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testExcludedMimeType() throws Exception {
     Map<IId, IBaseObject> docs = new HashMap<IId, IBaseObject>();
     MockBaseObject doc1 = (MockBaseObject) createObject(
@@ -503,6 +535,7 @@ public class FileDocumentListTest extends FileNetTestCase {
    * is empty, but it describes the behavior of the checkpoint strings
    * in that case.
    */
+  @Test
   public void testEmptyCheckpointWithoutNextDocument() throws Exception {
     @SuppressWarnings("unchecked") IObjectStore os =
         newObjectStore("MockObjectStore", DatabaseType.MSSQL,

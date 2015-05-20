@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
@@ -109,12 +110,16 @@ public class SecurityFolderTraverserTest {
 
   @Test
   public void startTraversal_Live() throws RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     assertNull(getDocumentList_Live(new Checkpoint()));
   }
 
   @Test
   public void resumeTraversal_Live()
       throws RepositoryException, ParseException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     Checkpoint checkpoint = new Checkpoint();
     checkpoint.setTimeAndUuid(Checkpoint.JsonField.LAST_FOLDER_TIME, Jan_1_1970,
         Checkpoint.JsonField.UUID_FOLDER, new FnId(FOLDERS[0][0]));

@@ -14,6 +14,10 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.enterprise.connector.filenet4.filewrap.IUser;
@@ -28,6 +32,8 @@ import com.google.enterprise.connector.spi.SimpleAuthenticationIdentity;
 
 import com.filenet.api.security.Group;
 
+import org.junit.Test;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -35,9 +41,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class FileAuthorizationManagerTest extends FileNetTestCase {
+public class FileAuthorizationManagerTest {
 
+  @Test
   public void testAuthorizeDocids() throws RepositoryLoginException, RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     FileConnector connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -90,6 +99,7 @@ public class FileAuthorizationManagerTest extends FileNetTestCase {
    * Tests that multiple threads are used for the authorization, and
    * that every docid is authorized.
    */
+  @Test
   public void testMultipleThreads() throws RepositoryException {
     MockAuthorizationHandler handler = new MockAuthorizationHandler();
     AuthorizationManager fam = new FileAuthorizationManager(handler);

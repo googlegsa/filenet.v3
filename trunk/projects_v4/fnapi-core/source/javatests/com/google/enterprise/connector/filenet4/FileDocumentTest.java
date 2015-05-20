@@ -14,6 +14,11 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
@@ -30,12 +35,15 @@ import com.google.enterprise.connector.spi.Value;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.util.UserContext;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class FileDocumentTest extends FileNetTestCase {
+public class FileDocumentTest {
   FileConnector connec;
   FileSession fs;
   IObjectStore ios;
@@ -43,8 +51,10 @@ public class FileDocumentTest extends FileNetTestCase {
   IObjectFactory iof;
   IUser adminUser;
 
-  @Override
-  protected void setUp() throws Exception {
+  @Before
+  public void setUp() throws Exception {
+    assumeTrue(TestConnection.isLiveConnection());
+
     connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -69,6 +79,7 @@ public class FileDocumentTest extends FileNetTestCase {
    * Test method for
    * 'com.google.enterprise.connector.file.FileDocument.findProperty(String)'
    */
+  @Test
   public void testFindProperty() throws RepositoryException {
     FileDocument fd = new FileDocument(new FnId(TestConnection.docId1), ios,
         connec, new SimpleTraversalContext());
@@ -95,6 +106,7 @@ public class FileDocumentTest extends FileNetTestCase {
    * Test method for
    * 'com.google.enterprise.connector.file.FileDocument.getPropertyNames()'
    */
+  @Test
   public void testGetPropertyNames() throws RepositoryException {
     FileDocument fd = new FileDocument(new FnId(TestConnection.docId2), ios,
         connec, new SimpleTraversalContext());
@@ -120,6 +132,7 @@ public class FileDocumentTest extends FileNetTestCase {
    * document ACL but is the creator and owner and the #CREATOR-OWNER ACE must
    * be present in the ACL with AccessLevel.VIEW_AS_INT access or above.
    */
+  @Test
   public void testCreatorOwnerPermissions() throws RepositoryException {
     IDocument doc = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
         new FnId(TestConnection.docId4), null);

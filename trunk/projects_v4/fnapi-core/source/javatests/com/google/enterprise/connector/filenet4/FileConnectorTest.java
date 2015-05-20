@@ -13,18 +13,26 @@
 // limitations under the License.
 package com.google.enterprise.connector.filenet4;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.Session;
 
-public class FileConnectorTest extends FileNetTestCase {
+import org.junit.Test;
+
+public class FileConnectorTest {
 
   /*
    * Test method for 'com.google.enterprise.connector.file.FileConnector.login()'
    */
+  @Test
   public void testLogin() throws RepositoryLoginException, RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
 
     FileConnector connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
@@ -37,7 +45,5 @@ public class FileConnectorTest extends FileNetTestCase {
     Session fs = connec.login();
     assertNotNull(fs);
     assertTrue(fs instanceof FileSession);
-
   }
-
 }

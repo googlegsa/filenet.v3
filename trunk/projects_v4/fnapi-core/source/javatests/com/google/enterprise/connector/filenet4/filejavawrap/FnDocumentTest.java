@@ -14,6 +14,12 @@
 
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileNetTestCase;
 import com.google.enterprise.connector.filenet4.FileSession;
@@ -36,6 +42,9 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -47,7 +56,7 @@ import java.util.Set;
  *
  * @author pankaj_chouhan
  */
-public class FnDocumentTest extends FileNetTestCase {
+public class FnDocumentTest {
   FileSession fs;
   IObjectStore ios;
   IConnection conn;
@@ -57,9 +66,10 @@ public class FnDocumentTest extends FileNetTestCase {
   IUserContext uc;
   IUser user;
 
-  protected void setUp() throws RepositoryLoginException,
-          RepositoryException, InstantiationException,
-          IllegalAccessException, ClassNotFoundException {
+  @Before
+  public void setUp() throws Exception {
+    assumeTrue(TestConnection.isLiveConnection());
+
     FileConnector connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -90,6 +100,7 @@ public class FnDocumentTest extends FileNetTestCase {
    * Test method for
    * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getPropertyName()'
    */
+  @Test
   public void testGetPropertyNames() throws RepositoryException {
     Set<String> propNames = fd.getPropertyNames();
     assertNotNull(propNames);
@@ -103,6 +114,7 @@ public class FnDocumentTest extends FileNetTestCase {
    * Test expected data type of the property value computed by the
    * IDocument.getProperty(String, List) method.
    */
+  @Test
   public void testGetPropertyType() throws RepositoryException {
     String[][] typeArray = TestConnection.type;
 
@@ -137,15 +149,18 @@ public class FnDocumentTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testGetVersionSeries() throws RepositoryException {
     IVersionSeries vs = fd.getVersionSeries();
     assertEquals("{" + TestConnection.docVsId1 + "}", vs.get_Id().toString());
   }
 
+  @Test
   public void testGetId() throws RepositoryException {
     assertEquals("{" + TestConnection.docId1 + "}", fd.get_Id().toString());
   }
 
+  @Test
   public void testGetPermissions() throws RepositoryException {
     Permissions perms = new Permissions(fd.get_Permissions());
     assertNotNull(perms);
@@ -153,6 +168,7 @@ public class FnDocumentTest extends FileNetTestCase {
     assertTrue("User is not authorized", authorized);
   }
 
+  @Test
   public void testMarkingPermissions() throws RepositoryException {
     IVersionSeries versionSeries =
         (IVersionSeries) ios.getObject(ClassNames.VERSION_SERIES,
@@ -168,6 +184,7 @@ public class FnDocumentTest extends FileNetTestCase {
    * Test method for
    * 'com.google.enterprise.connector.file.filejavawrap.FnDocument.getContent()'
    */
+  @Test
   public void testGetContent() throws RepositoryException {
     uc.authenticate(TestConnection.adminUsername, TestConnection.adminPassword);
     InputStream is = fd.getContent();
@@ -187,6 +204,7 @@ public class FnDocumentTest extends FileNetTestCase {
   }
 
   /* Test FnDocument.getPropertyStringValue method */
+  @Test
   public void testGetPropertyStringValue() throws RepositoryException {
     Set<String> fieldNames = getFieldNames("STRING");
     assertFalse(fieldNames.isEmpty());
@@ -210,6 +228,7 @@ public class FnDocumentTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testGetPropertyGuidValue() throws RepositoryException {
     Set<String> fieldNames = getFieldNames("GUID");
     assertFalse(fieldNames.isEmpty());
@@ -228,6 +247,7 @@ public class FnDocumentTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testGetPropertyLongValue() throws RepositoryException {
     Set<String> fieldNames = getFieldNames("LONG");
     assertFalse(fieldNames.isEmpty());
@@ -246,6 +266,7 @@ public class FnDocumentTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testGetPropertyDoubleValue() throws RepositoryException {
     Set<String> fieldNames = getFieldNames("DOUBLE");
     assertFalse(fieldNames.isEmpty());
@@ -256,6 +277,7 @@ public class FnDocumentTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testGetPropertyDateValue() throws RepositoryException {
     Set<String> fieldNames = getFieldNames("DATE");
     assertFalse(fieldNames.isEmpty());
@@ -273,6 +295,7 @@ public class FnDocumentTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testGetPropertyBooleanValue() throws RepositoryException {
     Set<String> fieldNames = getFieldNames("BOOLEAN");
     assertFalse(fieldNames.isEmpty());
@@ -291,6 +314,7 @@ public class FnDocumentTest extends FileNetTestCase {
     }
   }
 
+  @Test
   public void testGetPropertyBinaryValue() throws RepositoryException {
     Set<String> fieldNames = getFieldNames("BINARY");
     assertFalse(fieldNames.isEmpty());

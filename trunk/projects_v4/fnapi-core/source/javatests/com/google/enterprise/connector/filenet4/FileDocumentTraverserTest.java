@@ -20,6 +20,10 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
@@ -30,16 +34,20 @@ import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class FileDocumentTraverserTest extends FileNetTestCase {
+public class FileDocumentTraverserTest {
   private static final SimpleDateFormat dateFormatter =
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
   private FileConnector connec;
 
-  protected void setUp() throws RepositoryException {
+  @Before
+  public void setUp() throws RepositoryException {
     connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -54,7 +62,10 @@ public class FileDocumentTraverserTest extends FileNetTestCase {
     return fs.getFileDocumentTraverser();
   }
 
+  @Test
   public void testStartTraversal() throws RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     Traverser traverser = getObjectUnderTest();
     traverser.setBatchHint(TestConnection.batchSize);
     DocumentList set = traverser.getDocumentList(new Checkpoint());
@@ -72,7 +83,10 @@ public class FileDocumentTraverserTest extends FileNetTestCase {
     assertEquals(TestConnection.batchSize, counter);
   }
 
+  @Test
   public void testResumeTraversal() throws RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     Traverser traverser = getObjectUnderTest();
     traverser.setBatchHint(TestConnection.batchSize);
     DocumentList set = traverser.getDocumentList(
@@ -89,7 +103,10 @@ public class FileDocumentTraverserTest extends FileNetTestCase {
 
   }
 
+  @Test
   public void testSetBatchHint() throws RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     Traverser traverser = getObjectUnderTest();
     traverser.setBatchHint(10);
     DocumentList set = traverser.getDocumentList(new Checkpoint());
@@ -100,6 +117,7 @@ public class FileDocumentTraverserTest extends FileNetTestCase {
     assertEquals(10, counter);
   }
 
+  @Test
   public void testEmptyObjectStoreMock() throws Exception {
     IObjectStore os = createNiceMock(IObjectStore.class);
     IObjectSet objectSet = createNiceMock(IObjectSet.class);
@@ -128,7 +146,7 @@ public class FileDocumentTraverserTest extends FileNetTestCase {
    * tests might be more valuable if we test the buildQuery* methods
    * instead.
    */
-  public void testGetCheckpointClause(JsonField dateField, JsonField uuidField,
+  private void testGetCheckpointClause(JsonField dateField, JsonField uuidField,
       boolean useIdForChangeDetection, String whereClause) throws Exception {
     String expectedId = "{AAAAAAAA-0000-0000-0000-000000000000}";
 
@@ -154,34 +172,40 @@ public class FileDocumentTraverserTest extends FileNetTestCase {
             useIdForChangeDetection ? "" : whereClause));
   }
 
+  @Test
   public void testGetCheckpointClause() throws Exception {
     testGetCheckpointClause(JsonField.LAST_MODIFIED_TIME,
         JsonField.UUID, true, FileDocumentTraverser.WHERE_CLAUSE);
   }
 
+  @Test
   public void testGetCheckpointClause_onlyDate() throws Exception {
     testGetCheckpointClause(JsonField.LAST_MODIFIED_TIME,
         JsonField.UUID, false, FileDocumentTraverser.WHERE_CLAUSE_ONLY_DATE);
   }
 
+  @Test
   public void testGetCheckpointClauseToDeleteDocs() throws Exception {
     testGetCheckpointClause(JsonField.LAST_CUSTOM_DELETION_TIME,
         JsonField.UUID_CUSTOM_DELETED_DOC, true,
         FileDocumentTraverser.WHERE_CLAUSE_TO_DELETE_DOCS);
   }
 
+  @Test
   public void testGetCheckpointClauseToDeleteDocs_onlyDate() throws Exception {
     testGetCheckpointClause(JsonField.LAST_CUSTOM_DELETION_TIME,
         JsonField.UUID_CUSTOM_DELETED_DOC, false,
         FileDocumentTraverser.WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE);
   }
 
+  @Test
   public void testGetCheckpointClauseToDelete() throws Exception {
     testGetCheckpointClause(JsonField.LAST_DELETION_EVENT_TIME,
         JsonField.UUID_DELETION_EVENT, true,
         FileDocumentTraverser.WHERE_CLAUSE_TO_DELETE);
   }
 
+  @Test
   public void testGetCheckpointClauseToDelete_onlyDate() throws Exception {
     testGetCheckpointClause(JsonField.LAST_DELETION_EVENT_TIME,
         JsonField.UUID_DELETION_EVENT, false,

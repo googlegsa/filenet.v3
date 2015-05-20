@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.Lists;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
@@ -174,6 +175,8 @@ public class SecurityPolicyTraverserTest {
   @Test
   public void startTraversal_WithUpdatedSecPolicies_Live()
       throws RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     DocumentList doclist = getDocumentList_Live(new Checkpoint());
     assertNull(doclist);
   }
@@ -181,6 +184,8 @@ public class SecurityPolicyTraverserTest {
   @Test
   public void resumeTraversal_WithUpdatedSecPolicies_Live()
       throws RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
+    
     Checkpoint checkpoint = new Checkpoint();
     checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME, Jan_1_1970,
         JsonField.UUID_SECURITY_POLICY, new FnId(secPolicyId));
@@ -191,6 +196,8 @@ public class SecurityPolicyTraverserTest {
   @Test
   public void resumeTraversal_Checkpointing_Live()
       throws RepositoryException, ParseException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     Checkpoint checkpoint = new Checkpoint();
     checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME, Jan_1_1970,
         JsonField.UUID_SECURITY_POLICY, new FnId(secPolicyId));
