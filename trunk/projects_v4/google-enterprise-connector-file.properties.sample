@@ -23,7 +23,7 @@ test.adminPassword=<administrator's password>
 test.wrongPassword=incorrectpassword
 test.objectStoreName=<Object Store Name>
 test.wsUri=http://<server>:<port>/wsi/FNCEWS40MTOM
-test.objectFactoryClass=com.google.enterprise.connector.filenet4.filejavawrap.FnObjectFactory
+test.objectFactoryClass=com.google.enterprise.connector.filenet4.api.FnObjectFactory
 test.displayUrl=http://<server>:<port>/WorkplaceXT/getContent
 test.currentUserContext=cn=administrator,o=sample
 
