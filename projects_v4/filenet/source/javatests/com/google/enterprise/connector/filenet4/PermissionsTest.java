@@ -15,10 +15,10 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.TestConnection;
-import com.google.enterprise.connector.filenet4.filewrap.IUser;
-import com.google.enterprise.connector.filenet4.mock.AccessPermissionListMock;
-import com.google.enterprise.connector.filenet4.mock.AccessPermissionMock;
-import com.google.enterprise.connector.filenet4.mock.MockUtil;
+import com.google.enterprise.connector.filenet4.api.AccessPermissionListMock;
+import com.google.enterprise.connector.filenet4.api.AccessPermissionMock;
+import com.google.enterprise.connector.filenet4.api.IUser;
+import com.google.enterprise.connector.filenet4.api.MockUtil;
 
 import com.filenet.api.constants.AccessLevel;
 import com.filenet.api.constants.AccessRight;

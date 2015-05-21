@@ -14,12 +14,12 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filewrap.IConnection;
-import com.google.enterprise.connector.filenet4.filewrap.IDocument;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.IUser;
-import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
-import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
+import com.google.enterprise.connector.filenet4.api.IConnection;
+import com.google.enterprise.connector.filenet4.api.IDocument;
+import com.google.enterprise.connector.filenet4.api.IObjectStore;
+import com.google.enterprise.connector.filenet4.api.IUser;
+import com.google.enterprise.connector.filenet4.api.IUserContext;
+import com.google.enterprise.connector.filenet4.api.IVersionSeries;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;

@@ -21,10 +21,10 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import com.google.enterprise.connector.filenet4.filejavawrap.FnObjectList;
-import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
-import com.google.enterprise.connector.filenet4.mockjavawrap.MockObjectStore;
+import com.google.enterprise.connector.filenet4.api.FnObjectList;
+import com.google.enterprise.connector.filenet4.api.IBaseObject;
+import com.google.enterprise.connector.filenet4.api.IObjectSet;
+import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;

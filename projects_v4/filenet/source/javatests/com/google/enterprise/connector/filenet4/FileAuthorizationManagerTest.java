@@ -20,8 +20,8 @@ import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
-import com.google.enterprise.connector.filenet4.filewrap.IUser;
-import com.google.enterprise.connector.filenet4.mock.FileUserMock;
+import com.google.enterprise.connector.filenet4.api.FileUserMock;
+import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.AuthorizationResponse;

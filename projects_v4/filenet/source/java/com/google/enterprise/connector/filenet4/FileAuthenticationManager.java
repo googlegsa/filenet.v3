@@ -14,9 +14,9 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filewrap.IConnection;
-import com.google.enterprise.connector.filenet4.filewrap.IUser;
-import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
+import com.google.enterprise.connector.filenet4.api.IConnection;
+import com.google.enterprise.connector.filenet4.api.IUser;
+import com.google.enterprise.connector.filenet4.api.IUserContext;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthenticationManager;
 import com.google.enterprise.connector.spi.AuthenticationResponse;

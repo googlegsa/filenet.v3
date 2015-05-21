@@ -14,10 +14,10 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
-import com.google.enterprise.connector.filenet4.mock.AccessPermissionListMock;
-import com.google.enterprise.connector.filenet4.mock.AccessPermissionMock;
-import com.google.enterprise.connector.filenet4.mockjavawrap.MockBaseObject;
+import com.google.enterprise.connector.filenet4.api.AccessPermissionListMock;
+import com.google.enterprise.connector.filenet4.api.AccessPermissionMock;
+import com.google.enterprise.connector.filenet4.api.IBaseObject;
+import com.google.enterprise.connector.filenet4.api.MockBaseObject;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.AccessPermissionList;

@@ -14,7 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
+import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import com.filenet.api.util.Id;

@@ -15,8 +15,8 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.Iterators;
-import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
+import com.google.enterprise.connector.filenet4.api.IBaseObject;
+import com.google.enterprise.connector.filenet4.api.IObjectSet;
 
 import java.util.Iterator;
 

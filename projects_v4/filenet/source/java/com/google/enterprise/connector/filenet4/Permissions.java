@@ -16,7 +16,7 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import com.google.enterprise.connector.filenet4.filewrap.IUser;
+import com.google.enterprise.connector.filenet4.api.IUser;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.constants.AccessLevel;
@@ -128,7 +128,7 @@ public class Permissions {
    * @param Username which needs to be authorized.
    * @return True or False, depending on the success or failure of check for
    *         USE right.
-   * @see com.google.enterprise.connector.filenet4.filewrap.IPermissions#authorizeMarking(java.lang.String)
+   * @see com.google.enterprise.connector.filenet4.api.IPermissions#authorizeMarking(java.lang.String)
    */
   public boolean authorizeMarking(IUser user, Integer constraintMask) {
     boolean hasUseRight = false;
@@ -191,7 +191,7 @@ public class Permissions {
    * @return True or False, depending on the success or failure of check for
    *         grantee name check.
    * @throws Exception
-   * @see com.google.enterprise.connector.filenet4.filewrap.IPermissions#checkGranteeName(AccessPermission,java.lang.String)
+   * @see com.google.enterprise.connector.filenet4.api.IPermissions#checkGranteeName(AccessPermission,java.lang.String)
    */
   private boolean matchesUser(AccessPermission perm, IUser user) {
     String granteeName = perm.get_GranteeName();

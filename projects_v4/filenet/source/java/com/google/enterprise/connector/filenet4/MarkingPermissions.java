@@ -14,9 +14,9 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
-import com.google.enterprise.connector.filenet4.filewrap.IMarking;
-import com.google.enterprise.connector.filenet4.filewrap.IUser;
+import com.google.enterprise.connector.filenet4.api.IActiveMarkingList;
+import com.google.enterprise.connector.filenet4.api.IMarking;
+import com.google.enterprise.connector.filenet4.api.IUser;
 
 import java.util.Iterator;
 import java.util.logging.Level;
