@@ -49,7 +49,6 @@ import com.filenet.api.util.Id;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.junit.Before;
 import org.junit.Test;
 

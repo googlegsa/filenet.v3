@@ -21,7 +21,6 @@ import com.google.enterprise.connector.spi.ConnectorType;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.XmlUtils;
 import com.google.enterprise.connector.util.UrlValidator;
-import com.google.enterprise.connector.util.UrlValidatorException;
 
 import com.filenet.api.exception.EngineRuntimeException;
 
