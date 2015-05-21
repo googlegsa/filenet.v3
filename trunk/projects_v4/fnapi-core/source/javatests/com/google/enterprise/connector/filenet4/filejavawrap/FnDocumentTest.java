@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.FileConnector;
-import com.google.enterprise.connector.filenet4.FileNetTestCase;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.filenet4.MarkingPermissions;
@@ -37,7 +36,6 @@ import com.google.enterprise.connector.filenet4.filewrap.IUserContext;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.filenet4.mock.MockUtil;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
