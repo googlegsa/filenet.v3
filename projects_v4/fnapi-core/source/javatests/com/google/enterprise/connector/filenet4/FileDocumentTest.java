@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
-import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
@@ -33,6 +32,7 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
+import com.filenet.api.util.Id;
 import com.filenet.api.util.UserContext;
 
 import org.junit.Before;
@@ -81,7 +81,7 @@ public class FileDocumentTest {
    */
   @Test
   public void testFindProperty() throws RepositoryException {
-    FileDocument fd = new FileDocument(new FnId(TestConnection.docId1), ios,
+    FileDocument fd = new FileDocument(new Id(TestConnection.docId1), ios,
         connec, new SimpleTraversalContext());
 
     Property prop = fd.findProperty("Id");
@@ -108,7 +108,7 @@ public class FileDocumentTest {
    */
   @Test
   public void testGetPropertyNames() throws RepositoryException {
-    FileDocument fd = new FileDocument(new FnId(TestConnection.docId2), ios,
+    FileDocument fd = new FileDocument(new Id(TestConnection.docId2), ios,
         connec, new SimpleTraversalContext());
     Iterator<String> properties = fd.getPropertyNames().iterator();
 
@@ -135,7 +135,7 @@ public class FileDocumentTest {
   @Test
   public void testCreatorOwnerPermissions() throws RepositoryException {
     IDocument doc = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
-        new FnId(TestConnection.docId4), null);
+        new Id(TestConnection.docId4), null);
     List<Value> ownerValue = new ArrayList<Value>();
     doc.getPropertyStringValue("Owner", ownerValue);
     assertEquals(adminUser.get_Name(),

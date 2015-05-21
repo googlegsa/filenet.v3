@@ -17,7 +17,6 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.Value;
@@ -144,8 +143,8 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public IId get_Id() throws RepositoryDocumentException {
-    return new FnId(doc.get_Id());
+  public Id get_Id() throws RepositoryDocumentException {
+    return doc.get_Id();
   }
 
   @Override
@@ -184,11 +183,11 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public IId getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() throws RepositoryDocumentException {
     if (doc instanceof DeletionEvent) {
-      return new FnId(((DeletionEvent) doc).get_VersionSeriesId());
+      return ((DeletionEvent) doc).get_VersionSeriesId();
     } else {
-      return new FnId(doc.get_VersionSeries().get_Id());
+      return doc.get_VersionSeries().get_Id();
     }
   }
 

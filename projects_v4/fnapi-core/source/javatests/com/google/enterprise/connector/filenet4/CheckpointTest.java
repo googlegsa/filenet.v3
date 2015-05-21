@@ -17,8 +17,9 @@ package com.google.enterprise.connector.filenet4;
 import static org.junit.Assert.assertEquals;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.spi.RepositoryException;
+
+import com.filenet.api.util.Id;
 
 import org.junit.Test;
 
@@ -36,7 +37,7 @@ public class CheckpointTest {
     String expectedId = "{AAAAAAAA-0000-0000-0000-000000000000}";
     Checkpoint cp = new Checkpoint();
     cp.setTimeAndUuid(JsonField.LAST_MODIFIED_TIME, new Date(),
-        JsonField.UUID, new FnId(expectedId));
+        JsonField.UUID, new Id(expectedId));
     assertEquals(expectedId, cp.getString(JsonField.UUID));
   }
 }

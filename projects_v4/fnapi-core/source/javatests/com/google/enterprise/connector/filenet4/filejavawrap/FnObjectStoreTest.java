@@ -30,6 +30,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import com.filenet.api.constants.ClassNames;
+import com.filenet.api.util.Id;
 import com.filenet.api.util.UserContext;
 
 import org.junit.Before;
@@ -74,7 +75,7 @@ public class FnObjectStoreTest {
   @Test
   public void testFetchObject() throws RepositoryException {
     fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
-        new FnId(TestConnection.docId1),
+        new Id(TestConnection.docId1),
         FileUtil.getDocumentPropertyFilter(TestConnection.included_meta));
     assertNotNull(fd);
     assertEquals("{" + TestConnection.docId1 + "}", fd.get_Id().toString());

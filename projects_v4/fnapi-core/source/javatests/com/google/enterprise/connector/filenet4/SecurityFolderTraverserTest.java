@@ -31,12 +31,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.EmptyObjectSet;
-import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnObjectList;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -55,6 +53,7 @@ import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.security.AccessPermission;
+import com.filenet.api.util.Id;
 
 import org.junit.After;
 import org.junit.Before;
@@ -63,7 +62,6 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 public class SecurityFolderTraverserTest {
@@ -122,7 +120,7 @@ public class SecurityFolderTraverserTest {
 
     Checkpoint checkpoint = new Checkpoint();
     checkpoint.setTimeAndUuid(Checkpoint.JsonField.LAST_FOLDER_TIME, Jan_1_1970,
-        Checkpoint.JsonField.UUID_FOLDER, new FnId(FOLDERS[0][0]));
+        Checkpoint.JsonField.UUID_FOLDER, new Id(FOLDERS[0][0]));
     DocumentList docList = getDocumentList_Live(checkpoint);
     assertNotNull(docList);
 
@@ -227,7 +225,7 @@ public class SecurityFolderTraverserTest {
     Date lastModified = DATE_PARSER.parse(FOLDERS[folderNum][1]);
     IObjectSet docSet = getChildDocuments(folderNum, numDocuments);
     IFolder folder = createNiceMock(IFolder.class);
-    expect(folder.get_Id()).andReturn(new FnId(id));
+    expect(folder.get_Id()).andReturn(new Id(id));
     expect(folder.get_FolderName()).andReturn(id);
     expect(folder.getModifyDate()).andReturn(lastModified);
     expect(folder.get_ContainedDocuments()).andReturn(docSet);
@@ -242,9 +240,9 @@ public class SecurityFolderTraverserTest {
       throws RepositoryException {
     ImmutableList.Builder<IDocument> docs = ImmutableList.builder();
     for (int i = 1; i <= docCount; i++) {
-      IId iid = new FnId(String.format(DOC_ID_FORMAT, folderNum, i));
+      Id id = new Id(String.format(DOC_ID_FORMAT, folderNum, i));
       IDocument doc = createNiceMock(IDocument.class);
-      expect(doc.get_Id()).andReturn(iid);
+      expect(doc.get_Id()).andReturn(id);
       expect(doc.get_Permissions()).andReturn(createACL(createACEs()));
       replayAndVerify(doc);
       docs.add(doc);

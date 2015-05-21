@@ -14,9 +14,10 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
+
+import com.filenet.api.util.Id;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,7 +92,7 @@ class Checkpoint {
    * Helper method to compute the checkpoint date and UUID value.
    */
   public void setTimeAndUuid(JsonField jsonDateField, Date nextCheckpointDate,
-      JsonField jsonUuidField, IId uuid) throws RepositoryException {
+      JsonField jsonUuidField, Id uuid) throws RepositoryException {
     Calendar cal = Calendar.getInstance();
     String dateString;
     try {

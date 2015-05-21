@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IConnection;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -64,14 +63,14 @@ public class FnObjectStore implements IObjectStore {
   @Override
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException {
-    return getObject(type, new FnId(id));
+    return getObject(type, new Id(id));
   }
 
   @Override
-  public IBaseObject getObject(String type, IId id)
+  public IBaseObject getObject(String type, Id id)
       throws RepositoryDocumentException {
     try {
-      IndependentObject obj = objectStore.getObject(type, ((FnId) id).getId());
+      IndependentObject obj = objectStore.getObject(type, id);
       if (type.equals(ClassNames.VERSION_SERIES)) {
         VersionSeries vs = (VersionSeries) obj;
         vs.refresh();
@@ -92,11 +91,11 @@ public class FnObjectStore implements IObjectStore {
   }
 
   @Override
-  public IBaseObject fetchObject(String type, IId id, PropertyFilter filter)
+  public IBaseObject fetchObject(String type, Id id, PropertyFilter filter)
           throws RepositoryDocumentException {
     IndependentObject obj = null;
     try {
-      obj = objectStore.fetchObject(type, ((FnId) id).getId(), filter);
+      obj = objectStore.fetchObject(type, id, filter);
       if (type.equals(ClassNames.VERSION_SERIES)) {
         return new FnVersionSeries((VersionSeries) obj);
       } else if (type.equals(ClassNames.DOCUMENT)) {

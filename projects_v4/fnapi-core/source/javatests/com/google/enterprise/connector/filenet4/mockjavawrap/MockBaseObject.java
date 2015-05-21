@@ -15,33 +15,33 @@
 package com.google.enterprise.connector.filenet4.mockjavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.mock.AccessPermissionListMock;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.util.Id;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MockBaseObject implements IBaseObject {
-  private final IId id;
-  private final IId versionSeriesId;
+  private final Id id;
+  private final Id versionSeriesId;
   private final Date lastModified;
   private final boolean isDeleteEvent;
   private final boolean releasedVersion;
   private final AccessPermissionList permissions;
   private final Map<String, Object> props;
 
-  public MockBaseObject(IId id, IId versionSeriesId, Date lastModified,
+  public MockBaseObject(Id id, Id versionSeriesId, Date lastModified,
      boolean isDeletionEvent, boolean releasedVersion) {
     this(id, versionSeriesId, lastModified, isDeletionEvent, releasedVersion,
         new AccessPermissionListMock());
   }
 
-  public MockBaseObject(IId id, IId versionSeriesId, Date lastModified,
+  public MockBaseObject(Id id, Id versionSeriesId, Date lastModified,
       boolean isDeletionEvent, boolean releasedVersion,
       AccessPermissionList perms) {
     this.id = id;
@@ -54,7 +54,7 @@ public class MockBaseObject implements IBaseObject {
   }
 
   @Override
-  public IId get_Id() throws RepositoryDocumentException {
+  public Id get_Id() throws RepositoryDocumentException {
     return id;
   }
 
@@ -64,7 +64,7 @@ public class MockBaseObject implements IBaseObject {
   }
 
   @Override
-  public IId getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() throws RepositoryDocumentException {
     return versionSeriesId;
   }
 

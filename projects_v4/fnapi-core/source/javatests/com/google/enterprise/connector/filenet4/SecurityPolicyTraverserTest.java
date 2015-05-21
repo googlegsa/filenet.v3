@@ -29,13 +29,11 @@ import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.Lists;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnObjectList;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -53,6 +51,7 @@ import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.VersionStatusId;
 import com.filenet.api.security.AccessPermission;
+import com.filenet.api.util.Id;
 
 import org.junit.After;
 import org.junit.Before;
@@ -106,7 +105,7 @@ public class SecurityPolicyTraverserTest {
   private ISecurityPolicy getSecurityPolicy(String id, Date lastModified,
       Iterable<ISecurityTemplate> securityTemplates)
           throws RepositoryException {
-    IId iid = new FnId(id);
+    Id iid = new Id(id);
     ISecurityPolicy secPolicy = createNiceMock(ISecurityPolicy.class);
     expect(secPolicy.get_Id()).andReturn(iid).anyTimes();
     expect(secPolicy.get_Name()).andReturn("Mock security policy");
@@ -124,7 +123,7 @@ public class SecurityPolicyTraverserTest {
 
   private IDocument getDocument(String id, IFolder folder)
       throws RepositoryException {
-    IId iid = new FnId(id);
+    Id iid = new Id(id);
     IDocument doc = createNiceMock(IDocument.class);
     expect(doc.get_Id()).andReturn(iid).anyTimes();
     expect(doc.get_SecurityFolder()).andReturn(folder);
@@ -185,10 +184,10 @@ public class SecurityPolicyTraverserTest {
   public void resumeTraversal_WithUpdatedSecPolicies_Live()
       throws RepositoryException {
     assumeTrue(TestConnection.isLiveConnection());
-    
+
     Checkpoint checkpoint = new Checkpoint();
     checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME, Jan_1_1970,
-        JsonField.UUID_SECURITY_POLICY, new FnId(secPolicyId));
+        JsonField.UUID_SECURITY_POLICY, new Id(secPolicyId));
     DocumentList doclist = getDocumentList_Live(checkpoint);
     assertNotNull(doclist);
   }
@@ -200,7 +199,7 @@ public class SecurityPolicyTraverserTest {
 
     Checkpoint checkpoint = new Checkpoint();
     checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME, Jan_1_1970,
-        JsonField.UUID_SECURITY_POLICY, new FnId(secPolicyId));
+        JsonField.UUID_SECURITY_POLICY, new Id(secPolicyId));
     DocumentList doclist = getDocumentList_Live(checkpoint);
 
     // The checkpoint holds the last modified time and UUID of the Security
@@ -237,10 +236,10 @@ public class SecurityPolicyTraverserTest {
     @SuppressWarnings("unchecked")
     AccessPermissionList permList =
         TestObjectFactory.newPermissionList(directAces);
-    IId releasedId = new FnId(VersionStatusId.RELEASED);
+
     ISecurityTemplate secTemplate =
         getSecurityTemplate(new Permissions(permList));
-    expect(secTemplate.get_ApplyStateID()).andReturn(releasedId);
+    expect(secTemplate.get_ApplyStateID()).andReturn(VersionStatusId.RELEASED);
     ISecurityPolicy secPolicy = getSecurityPolicy(secPolicyId, Jan_1_1970,
         Lists.newArrayList(secTemplate));
 
@@ -278,7 +277,7 @@ public class SecurityPolicyTraverserTest {
 
   private IFolder createMockFolder(String id) throws RepositoryException {
     IFolder folder = createNiceMock(IFolder.class);
-    expect(folder.get_Id()).andReturn(new FnId(id));
+    expect(folder.get_Id()).andReturn(new Id(id));
     return folder;
   }
 

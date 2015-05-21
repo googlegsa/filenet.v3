@@ -18,7 +18,6 @@ import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -34,6 +33,7 @@ import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.util.Id;
 
 import java.text.MessageFormat;
 import java.util.Calendar;
@@ -66,7 +66,7 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
   private int batchHint = 500;
 
   private Date folderLastModified;
-  private IId folderLastUuid;
+  private Id folderLastUuid;
   private LinkedList<AclDocument> acls;
   private Checkpoint checkpoint;
 
@@ -139,7 +139,7 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
    * folder whose ACL changed.
    */
   private void addAllDescendantDocumentAcls(LinkedList<AclDocument> aclDocs,
-      IFolder folder, Date checkpointDate, IId checkpointId)
+      IFolder folder, Date checkpointDate, Id checkpointId)
       throws RepositoryException {
     // First update the ACLs for all documents in this folder.
     IObjectSet docSet = folder.get_ContainedDocuments();

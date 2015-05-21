@@ -18,13 +18,13 @@ import com.google.enterprise.connector.filenet4.filewrap.IActiveMarkingList;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.util.Id;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -54,7 +54,7 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public IId get_Id() throws RepositoryDocumentException {
+  public Id get_Id() throws RepositoryDocumentException {
     return doc.get_Id();
   }
 
@@ -64,7 +64,7 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public IId getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() throws RepositoryDocumentException {
     return doc.getVersionSeriesId();
   }
 

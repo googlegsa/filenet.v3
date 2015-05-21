@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -26,6 +25,8 @@ import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 import com.google.enterprise.connector.spi.Value;
+
+import com.filenet.api.util.Id;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -61,7 +62,7 @@ class AclDocument implements Document {
   private final Set<String> denyGroups;
 
   private Date checkpointLastModified;
-  private IId checkpointLastUuid;
+  private Id checkpointLastUuid;
 
   public AclDocument(String docId, String parentId,
       AclInheritanceType inheritanceType, String googleGlobalNamespace,
@@ -85,11 +86,11 @@ class AclDocument implements Document {
     this.checkpointLastModified = lastModified;
   }
 
-  public IId getCheckpointLastUuid() {
+  public Id getCheckpointLastUuid() {
     return checkpointLastUuid;
   }
 
-  public void setCheckpointLastUuid(IId lastUuid) {
+  public void setCheckpointLastUuid(Id lastUuid) {
     this.checkpointLastUuid = lastUuid;
   }
 

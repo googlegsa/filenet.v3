@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -24,6 +23,7 @@ import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.VersionSeries;
 import com.filenet.api.events.DeletionEvent;
+import com.filenet.api.util.Id;
 
 import java.util.Date;
 import java.util.logging.Logger;
@@ -39,8 +39,8 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public IId get_Id() throws RepositoryDocumentException {
-    return new FnId(versionSeries.get_Id());
+  public Id get_Id() throws RepositoryDocumentException {
+    return versionSeries.get_Id();
   }
 
   @Override
@@ -75,7 +75,7 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public IId getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() throws RepositoryDocumentException {
     return get_Id();
   }
 
