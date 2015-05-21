@@ -26,13 +26,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.filenet4.filewrap.ISearch;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
+
+import com.filenet.api.util.Id;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -157,7 +158,7 @@ public class FileDocumentTraverserTest {
         FileUtil.getQueryTimeString(dateFormatter.format(expectedDate));
 
     Checkpoint cp = new Checkpoint();
-    cp.setTimeAndUuid(dateField, expectedDate, uuidField, new FnId(expectedId));
+    cp.setTimeAndUuid(dateField, expectedDate, uuidField, new Id(expectedId));
 
     connec.setUseIDForChangeDetection(String.valueOf(useIdForChangeDetection));
     FileDocumentTraverser traverser =

@@ -30,10 +30,10 @@ public interface IObjectStore {
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException;
 
-  public IBaseObject getObject(String type, IId id)
+  public IBaseObject getObject(String type, Id id)
       throws RepositoryDocumentException;
 
-  public IBaseObject fetchObject(String type, IId id,
+  public IBaseObject fetchObject(String type, Id id,
       PropertyFilter filter) throws RepositoryDocumentException;
 
   String get_Name() throws RepositoryException;

@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
@@ -27,6 +26,7 @@ import com.google.enterprise.connector.spi.SkippedDocumentException;
 import com.google.enterprise.connector.spi.TraversalContext;
 
 import com.filenet.api.constants.DatabaseType;
+import com.filenet.api.util.Id;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,10 +53,10 @@ public class FileDocumentList implements DocumentList {
   private Date fileDocumentDate;
   private Date fileDocumentToDeleteDate;
   private Date fileDocumentToDeleteDocsDate;
-  private IId docId;
+  private Id docId;
   private Checkpoint lastCheckPoint;
-  private IId docIdToDelete;
-  private IId docIdToDeleteDocs;
+  private Id docIdToDelete;
+  private Id docIdToDeleteDocs;
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
@@ -207,7 +207,7 @@ public class FileDocumentList implements DocumentList {
    */
   private Document createAddDocument(IBaseObject object)
       throws RepositoryException {
-    IId id = object.get_Id();
+    Id id = object.get_Id();
     logger.log(Level.FINEST, "Add document [ID: {0}]", id);
     FileDocument doc =
         new FileDocument(id, objectStore, connector, traversalContext);
@@ -220,8 +220,8 @@ public class FileDocumentList implements DocumentList {
    */
   private Document createDeleteDocument(IBaseObject object)
       throws RepositoryDocumentException {
-    IId id = object.get_Id();
-    IId versionSeriesId = object.getVersionSeriesId();
+    Id id = object.get_Id();
+    Id versionSeriesId = object.getVersionSeriesId();
     logger.log(Level.FINEST, "Delete document [ID: {0}, VersionSeriesID: {1}]",
         new Object[] {id, versionSeriesId});
     return new FileDeleteDocument(versionSeriesId, object.getModifyDate());

@@ -17,7 +17,6 @@ package com.google.enterprise.connector.filenet4.filejavawrap;
 import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
 import com.google.enterprise.connector.filenet4.filewrap.IFolder;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -28,6 +27,7 @@ import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.Properties;
+import com.filenet.api.util.Id;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -50,8 +50,8 @@ public class FnFolder implements IFolder {
   }
 
   @Override
-  public IId get_Id() throws RepositoryDocumentException {
-    return new FnId(folder.get_Id());
+  public Id get_Id() throws RepositoryDocumentException {
+    return folder.get_Id();
   }
 
   @Override
@@ -60,7 +60,7 @@ public class FnFolder implements IFolder {
   }
 
   @Override
-  public IId getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() throws RepositoryDocumentException {
     return get_Id();
   }
 

@@ -22,11 +22,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
+
+import com.filenet.api.util.Id;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class FileDeleteDocumentTest {
   @Before
   public void setUp() throws RepositoryException {
     now = new Date();
-    doc = new FileDeleteDocument(new FnId(ZEROS_ID), now);
+    doc = new FileDeleteDocument(Id.ZERO_ID, now);
   }
 
   @Test

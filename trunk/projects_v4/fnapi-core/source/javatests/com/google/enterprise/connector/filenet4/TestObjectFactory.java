@@ -14,7 +14,6 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.mock.AccessPermissionListMock;
 import com.google.enterprise.connector.filenet4.mock.AccessPermissionMock;
@@ -26,6 +25,7 @@ import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.security.AccessPermission;
+import com.filenet.api.util.Id;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -42,7 +42,7 @@ class TestObjectFactory {
       boolean isReleasedVersion, AccessPermissionList perms)
           throws ParseException, RepositoryException {
     Date createdTime = dateFormatter.parse(timeStr);
-    return new MockBaseObject(new FnId(guid), new FnId(guid), createdTime,
+    return new MockBaseObject(new Id(guid), new Id(guid), createdTime,
         false, isReleasedVersion, perms);
   }
 

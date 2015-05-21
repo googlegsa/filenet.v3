@@ -17,10 +17,12 @@ package com.google.enterprise.connector.filenet4.filewrap;
 import com.google.enterprise.connector.filenet4.Permissions;
 import com.google.enterprise.connector.spi.RepositoryException;
 
+import com.filenet.api.util.Id;
+
 public interface ISecurityTemplate {
   String get_DisplayName() throws RepositoryException;
 
   Permissions get_TemplatePermissions() throws RepositoryException;
 
-  IId get_ApplyStateID() throws RepositoryException;
+  Id get_ApplyStateID() throws RepositoryException;
 }

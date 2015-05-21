@@ -41,6 +41,7 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
+import com.filenet.api.util.Id;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +88,7 @@ public class FnDocumentTest {
     ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.adminUsername, TestConnection.adminPassword);
 
     fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
-        new FnId(TestConnection.docId1),
+        new Id(TestConnection.docId1),
         FileUtil.getDocumentPropertyFilter(TestConnection.included_meta));
 
     uc = new FnUserContext(conn);

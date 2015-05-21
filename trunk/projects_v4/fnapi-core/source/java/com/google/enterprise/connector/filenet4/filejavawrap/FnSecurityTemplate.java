@@ -15,12 +15,12 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.Permissions;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.ISecurityTemplate;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.security.SecurityTemplate;
+import com.filenet.api.util.Id;
 
 import java.util.logging.Logger;
 
@@ -56,9 +56,9 @@ public class FnSecurityTemplate implements ISecurityTemplate {
   }
 
   @Override
-  public IId get_ApplyStateID() throws RepositoryException {
+  public Id get_ApplyStateID() throws RepositoryException {
     try {
-      return new FnId(secTemplate.get_ApplyStateID());
+      return secTemplate.get_ApplyStateID();
     } catch (EngineRuntimeException e) {
       throw new RepositoryException("Unable to get security template state ID",
           e);

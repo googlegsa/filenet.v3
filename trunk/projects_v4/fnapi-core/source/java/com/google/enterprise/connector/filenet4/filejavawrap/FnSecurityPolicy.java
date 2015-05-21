@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.common.collect.ImmutableList;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.ISecurityPolicy;
 import com.google.enterprise.connector.filenet4.filewrap.ISecurityTemplate;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
@@ -24,6 +23,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.security.SecurityPolicy;
 import com.filenet.api.security.SecurityTemplate;
+import com.filenet.api.util.Id;
 
 import java.util.Date;
 import java.util.Iterator;
@@ -35,19 +35,19 @@ public class FnSecurityPolicy implements ISecurityPolicy {
       Logger.getLogger(FnSecurityPolicy.class.getName());
 
   private final SecurityPolicy secPolicy;
-  private final IId id;
+  private final Id id;
 
   public FnSecurityPolicy(SecurityPolicy securityPolicy)
       throws RepositoryException {
     this.secPolicy = securityPolicy;
-    this.id = new FnId(secPolicy.get_Id());
+    this.id = secPolicy.get_Id();
     LOGGER.log(Level.FINEST,
         "Constructing a new FnSecurityPolicy object [ID: {0}, Name: {1}]",
         new Object[] {id, secPolicy.get_Name()});
   }
 
   @Override
-  public IId get_Id() {
+  public Id get_Id() {
     return id;
   }
 
@@ -88,7 +88,7 @@ public class FnSecurityPolicy implements ISecurityPolicy {
   }
 
   @Override
-  public IId getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() throws RepositoryDocumentException {
     return id;
   }
 

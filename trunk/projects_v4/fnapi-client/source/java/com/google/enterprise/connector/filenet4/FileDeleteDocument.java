@@ -15,12 +15,13 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
+
+import com.filenet.api.util.Id;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -34,10 +35,10 @@ public class FileDeleteDocument implements Document {
   private static final Logger logger =
       Logger.getLogger(FileDeleteDocument.class.getName());
 
-  private final IId versionId;
+  private final Id versionId;
   private final Date timeStamp;
 
-  public FileDeleteDocument(IId commonVersionId, Date timeStamp) {
+  public FileDeleteDocument(Id commonVersionId, Date timeStamp) {
     this.versionId = commonVersionId;
     this.timeStamp = timeStamp;
   }

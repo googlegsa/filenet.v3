@@ -16,10 +16,11 @@ package com.google.enterprise.connector.filenet4.mockjavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IVersionSeries;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
+
+import com.filenet.api.util.Id;
 
 import java.util.Date;
 
@@ -31,7 +32,7 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public IId get_Id() throws RepositoryDocumentException {
+  public Id get_Id() throws RepositoryDocumentException {
     return object.get_Id();
   }
 
@@ -41,7 +42,7 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public IId getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() throws RepositoryDocumentException {
     return object.getVersionSeriesId();
   }
 

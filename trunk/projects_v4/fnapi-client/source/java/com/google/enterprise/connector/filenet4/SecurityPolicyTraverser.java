@@ -19,7 +19,6 @@ import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
@@ -37,6 +36,7 @@ import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.constants.VersionStatusId;
+import com.filenet.api.util.Id;
 
 import java.text.MessageFormat;
 import java.util.Calendar;
@@ -78,7 +78,7 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
   private int batchHint = 500;
   private String lastTimestamp;
   private Date lastModified;
-  private IId secPolicyId;
+  private Id secPolicyId;
   private Checkpoint checkpoint;
   private LinkedList<AclDocument> acls;
 

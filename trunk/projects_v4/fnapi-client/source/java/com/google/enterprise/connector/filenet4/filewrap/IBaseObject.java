@@ -16,15 +16,17 @@ package com.google.enterprise.connector.filenet4.filewrap;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
+import com.filenet.api.util.Id;
+
 import java.util.Date;
 
 public interface IBaseObject {
 
-  IId get_Id() throws RepositoryDocumentException;
+  Id get_Id() throws RepositoryDocumentException;
 
   Date getModifyDate() throws RepositoryDocumentException;
 
-  IId getVersionSeriesId() throws RepositoryDocumentException;
+  Id getVersionSeriesId() throws RepositoryDocumentException;
 
   Date getPropertyDateValueDelete(String name)
       throws RepositoryDocumentException;

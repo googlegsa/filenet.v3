@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4.filejavawrap;
 
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import com.filenet.api.constants.VersionStatus;
@@ -85,11 +84,11 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public IId get_Id() throws RepositoryDocumentException {
+  public Id get_Id() throws RepositoryDocumentException {
     if (object instanceof DeletionEvent) {
-      return new FnId(((DeletionEvent) object).get_Id());
+      return ((DeletionEvent) object).get_Id();
     } else {
-      return new FnId(((Document) object).get_Id());
+      return ((Document) object).get_Id();
     }
   }
 
@@ -132,14 +131,12 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public IId getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() throws RepositoryDocumentException {
     if (object instanceof DeletionEvent) {
-      Id id = ((DeletionEvent) this.object).get_VersionSeriesId();
-      return new FnId(id);
+      return ((DeletionEvent) this.object).get_VersionSeriesId();
     } else {
-      Id id = ((Document) this.object).get_ReleasedVersion()
+      return ((Document) this.object).get_ReleasedVersion()
           .get_VersionSeries().get_Id();
-      return new FnId(id);
     }
   }
 }

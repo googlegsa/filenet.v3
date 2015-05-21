@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.filewrap.IDocument;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
@@ -32,6 +31,7 @@ import com.google.enterprise.connector.spi.Value;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.util.Id;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -47,7 +47,7 @@ public class FileDocument implements Document {
   private static final Logger logger =
       Logger.getLogger(FileDocument.class.getName());
 
-  private final IId docId;
+  private final Id docId;
   private final IObjectStore objectStore;
   private final FileConnector connector;
   private final TraversalContext traversalContext;
@@ -56,7 +56,7 @@ public class FileDocument implements Document {
   private String vsDocId;
   private Permissions permissions;
 
-  public FileDocument(IId docId, IObjectStore objectStore,
+  public FileDocument(Id docId, IObjectStore objectStore,
       FileConnector connector, TraversalContext traversalContext) {
     this.docId = docId;
     this.objectStore = objectStore;

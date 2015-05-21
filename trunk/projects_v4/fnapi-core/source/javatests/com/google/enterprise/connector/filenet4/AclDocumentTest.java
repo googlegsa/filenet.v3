@@ -21,10 +21,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import com.google.enterprise.connector.filenet4.filejavawrap.FnId;
 import com.google.enterprise.connector.filenet4.filejavawrap.FnObjectList;
 import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
-import com.google.enterprise.connector.filenet4.filewrap.IId;
 import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
 import com.google.enterprise.connector.filenet4.mockjavawrap.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
@@ -39,6 +37,7 @@ import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.security.AccessPermission;
+import com.filenet.api.util.Id;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -102,11 +101,11 @@ public class AclDocumentTest {
   }
 
   @SafeVarargs
-  private final Map<IId, IBaseObject> getObjectMap(String[][] entries,
+  private final Map<Id, IBaseObject> getObjectMap(String[][] entries,
       List<AccessPermission>... perms) throws Exception {
-    Map<IId, IBaseObject> data = new HashMap<IId, IBaseObject>();
+    Map<Id, IBaseObject> data = new HashMap<Id, IBaseObject>();
     for (String[] entry : entries) {
-      data.put(new FnId(entry[0]),
+      data.put(new Id(entry[0]),
           TestObjectFactory.newBaseObject(entry[0], entry[1], true,
               TestObjectFactory.newPermissionList(perms)));
     }
