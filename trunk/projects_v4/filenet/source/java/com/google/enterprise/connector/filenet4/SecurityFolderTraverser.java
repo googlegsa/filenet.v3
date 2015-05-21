@@ -15,13 +15,13 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.base.Strings;
-import com.google.enterprise.connector.filenet4.filewrap.IBaseObject;
-import com.google.enterprise.connector.filenet4.filewrap.IDocument;
-import com.google.enterprise.connector.filenet4.filewrap.IFolder;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectSet;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.ISearch;
+import com.google.enterprise.connector.filenet4.api.IBaseObject;
+import com.google.enterprise.connector.filenet4.api.IDocument;
+import com.google.enterprise.connector.filenet4.api.IFolder;
+import com.google.enterprise.connector.filenet4.api.IObjectFactory;
+import com.google.enterprise.connector.filenet4.api.IObjectSet;
+import com.google.enterprise.connector.filenet4.api.IObjectStore;
+import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;

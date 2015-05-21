@@ -15,10 +15,10 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.enterprise.connector.filenet4.filewrap.IConnection;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.ISearch;
+import com.google.enterprise.connector.filenet4.api.IConnection;
+import com.google.enterprise.connector.filenet4.api.IObjectFactory;
+import com.google.enterprise.connector.filenet4.api.IObjectStore;
+import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.spi.AuthenticationManager;
 import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.RepositoryException;

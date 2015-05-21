@@ -19,12 +19,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
-import com.google.enterprise.connector.filenet4.filewrap.IConnection;
-import com.google.enterprise.connector.filenet4.filewrap.IDocument;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectFactory;
-import com.google.enterprise.connector.filenet4.filewrap.IObjectStore;
-import com.google.enterprise.connector.filenet4.filewrap.IUser;
-import com.google.enterprise.connector.filenet4.mock.MockUtil;
+import com.google.enterprise.connector.filenet4.api.IConnection;
+import com.google.enterprise.connector.filenet4.api.IDocument;
+import com.google.enterprise.connector.filenet4.api.IObjectFactory;
+import com.google.enterprise.connector.filenet4.api.IObjectStore;
+import com.google.enterprise.connector.filenet4.api.IUser;
+import com.google.enterprise.connector.filenet4.api.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleTraversalContext;
