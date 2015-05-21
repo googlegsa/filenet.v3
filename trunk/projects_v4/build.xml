@@ -14,14 +14,13 @@
 
   <!-- Define Directories. -->
   <property name="build" value="build" />
-  <property name="config" value="fnapi-client/config" />
+  <property name="config" value="filenet/config" />
   <property name="downloads.dir" value="downloads" />
 
-  <property name="src-client" value="fnapi-client/source/java" />
-  <property name="src-core" value="fnapi-core/source/java" />
+  <property name="src" value="filenet/source/java" />
   <property name="classes" location="build/classes" />
 
-  <property name="src-test" value="fnapi-core/source/javatests" />
+  <property name="src-test" value="filenet/source/javatests" />
   <property name="classes-test" value="build/test" />
 
   <property name="jar.dir" location="build/jar" />
@@ -82,12 +81,10 @@
 
   <target name="compile" depends="init">
     <!-- compile java source files -->
-    <javac destdir="${classes}"
+    <javac srcdir="${src}" destdir="${classes}"
            includeantruntime="false"
            debug="${COMPILE_DEBUG_FLAG}" debuglevel="${COMPILE_DEBUG_LEVEL}"
            target="${COMPILE_TARGET}" source="${COMPILE_TARGET}">
-      <src path="${src-client}" />
-      <src path="${src-core}" />
       <!-- CM, GData, and P8 JAR Class-Path references are not available. -->
       <compilerarg line="-Xlint -Xlint:-serial -Xlint:-path"/>
       <bootclasspath path="${COMPILE_BOOTCLASSPATH}"/>
@@ -173,7 +170,7 @@
 
     <!--
         Instrument the application classes, writing the
-        instrumented classes into ${build.instrumented.dir}.
+        instrumented classes into ${instrumented.dir}.
     -->
     <cobertura-instrument todir="${instrumented.dir}">
       <!--
@@ -302,9 +299,7 @@
       <zipfileset dir="../License" prefix="${src.archive}/License" />
       <zipfileset file="version.properties" prefix="${src.archive}/source" />
       <zipfileset file="build.xml" prefix="${src.archive}/source" />
-      <zipfileset dir="fnapi-client"
-                  prefix="${src.archive}/source/fnapi-client" />
-      <zipfileset dir="fnapi-core" prefix="${src.archive}/source/fnapi-core" />
+      <zipfileset dir="filenet" prefix="${src.archive}/source/filenet" />
     </zip>
     <checksum algorithm="SHA-1">
       <fileset dir="${downloads.dir}">
