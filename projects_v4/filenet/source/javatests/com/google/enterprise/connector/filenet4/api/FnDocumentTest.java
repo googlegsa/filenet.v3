@@ -29,6 +29,7 @@ import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.util.Id;
 
@@ -164,7 +165,7 @@ public class FnDocumentTest {
         (IVersionSeries) ios.getObject(ClassNames.VERSION_SERIES,
             TestConnection.docVsId1);
     IDocument doc = versionSeries.get_ReleasedVersion();
-    IActiveMarkingList activeMarkingList = doc.get_ActiveMarkings();
+    ActiveMarkingList activeMarkingList = doc.get_ActiveMarkings();
     assertNotNull("Active marking is null", activeMarkingList);
     assertTrue(user.get_Name() + " is not authorized by document's marking",
         new MarkingPermissions(activeMarkingList).authorize(user));

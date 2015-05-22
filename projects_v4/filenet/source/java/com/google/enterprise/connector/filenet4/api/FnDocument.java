@@ -18,6 +18,7 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.collection.BooleanList;
 import com.filenet.api.collection.DateTimeList;
 import com.filenet.api.collection.Float64List;
@@ -513,11 +514,16 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public IActiveMarkingList get_ActiveMarkings() {
-    if (doc.get_ActiveMarkings().isEmpty()) {
-      return null;
-    } else {
-      return new FnActiveMarkingList(doc.get_ActiveMarkings());
+  public ActiveMarkingList get_ActiveMarkings()
+      throws RepositoryDocumentException {
+    try {
+      if (doc.get_ActiveMarkings().isEmpty()) {
+        return null;
+      } else {
+        return doc.get_ActiveMarkings();
+      }
+    } catch (EngineRuntimeException e) {
+      throw new RepositoryDocumentException(e);
     }
   }
 

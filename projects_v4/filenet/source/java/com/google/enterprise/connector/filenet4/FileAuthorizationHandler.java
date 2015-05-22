@@ -75,6 +75,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
     }
   }
 
+  /** TODO(jlacey): Cleanup checkMarkings and hasMarkings. */
   @Override
   public boolean hasMarkings() {
     // check for the marking sets applied over the document class
@@ -155,7 +156,10 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
 
           // check whether current document has property values
           // set for properties associated with marking sets or
-          // not //
+          // not.
+          // TODO(jlacey): Cleanup get_ActiveMarkings here and in
+          // FnDocument for null vs. empty and the logging here and in
+          // MarkingPermissions.
           if (releasedVersion.get_ActiveMarkings() != null) {
             logger.log(Level.INFO, "Document has property associated with Markings set");
 

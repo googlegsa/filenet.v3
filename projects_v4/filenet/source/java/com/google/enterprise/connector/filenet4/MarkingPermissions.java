@@ -14,11 +14,12 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.api.IActiveMarkingList;
-import com.google.enterprise.connector.filenet4.api.IMarking;
 import com.google.enterprise.connector.filenet4.api.IUser;
 
-import java.util.Iterator;
+import com.filenet.api.collection.ActiveMarkingList;
+import com.filenet.api.security.ActiveMarking;
+import com.filenet.api.security.Marking;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,10 +31,10 @@ public class MarkingPermissions {
   private static final Logger LOGGER =
       Logger.getLogger(MarkingPermissions.class.getName());
 
-  private final IActiveMarkingList markings;
+  private final ActiveMarkingList activeMarkings;
 
-  public MarkingPermissions(IActiveMarkingList markings) {
-    this.markings = markings;
+  public MarkingPermissions(ActiveMarkingList activeMarkings) {
+    this.activeMarkings = activeMarkings;
   }
 
   /**
@@ -45,12 +46,10 @@ public class MarkingPermissions {
    *         authorization.
    */
   public boolean authorize(IUser user) {
-    Iterator<? extends IMarking> markings = this.markings.iterator();
-
-    LOGGER.log(Level.FINER, "Authorizing user :[" + user.get_Name()
-        + "] for Marking Sets");
-    while (markings.hasNext()) {
-      IMarking marking = markings.next();
+    LOGGER.log(Level.FINER, "Authorizing user:[{0}] for Marking Sets",
+        user.get_Name());
+    for (Object activeMarking : activeMarkings) {
+      Marking marking = ((ActiveMarking) activeMarking).get_Marking();
 
       LOGGER.log(Level.FINEST,
           "Authorizing user: {0} [Marking: {1}, Constraint Mask: {2}]",

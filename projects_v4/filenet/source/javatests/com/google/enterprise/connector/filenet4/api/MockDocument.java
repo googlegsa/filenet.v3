@@ -19,6 +19,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.util.Id;
 
 import java.io.ByteArrayInputStream;
@@ -175,7 +176,7 @@ public class MockDocument implements IDocument {
       throws RepositoryDocumentException {}
 
   @Override
-  public IActiveMarkingList get_ActiveMarkings()
+  public ActiveMarkingList get_ActiveMarkings()
       throws RepositoryDocumentException { return null; }
 
   @Override
