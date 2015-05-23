@@ -24,7 +24,6 @@ import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.filenet4.api.ISecurityPolicy;
-import com.google.enterprise.connector.filenet4.api.ISecurityTemplate;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -32,10 +31,13 @@ import com.google.enterprise.connector.spi.SpiConstants.AclInheritanceType;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.constants.VersionStatusId;
+import com.filenet.api.exception.EngineRuntimeException;
+import com.filenet.api.security.SecurityTemplate;
 import com.filenet.api.util.Id;
 
 import java.text.MessageFormat;
@@ -115,14 +117,18 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
       cal.setTime(lastModified);
       lastTimestamp = Value.calendarToIso8601(cal);
     }
-    acls = getDocuments(checkpoint);
-    if (acls.isEmpty()) {
-      LOGGER.fine("No updated security policy is found");
-      return null;
-    } else {
-      LOGGER.fine("Found " + acls.size()
-          + " documents affected by security policy updates");
-      return this;
+    try {
+      acls = getDocuments(checkpoint);
+      if (acls.isEmpty()) {
+        LOGGER.fine("No updated security policy is found");
+        return null;
+      } else {
+        LOGGER.fine("Found " + acls.size()
+            + " documents affected by security policy updates");
+        return this;
+      }
+    } catch (EngineRuntimeException e) {
+      throw new RepositoryException("Failed to get security policies", e);
     }
   }
 
@@ -155,10 +161,16 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
       LOGGER.log(Level.FINEST,
           "Processing security templates for security policy: {0} {1}",
           new Object[] {secPolicy.get_Name(), secPolicy.get_Id()});
-      for (ISecurityTemplate secTemplate : secPolicy.getSecurityTemplates()) {
+      SecurityTemplateList secTemplates = secPolicy.get_SecurityTemplates();
+      LOGGER.log(Level.FINEST,
+          "Found {0} security templates for {1} security policy",
+          new Object[] {secTemplates.size(), secPolicy.get_Id()});
+      for (Object o : secTemplates) {
+        SecurityTemplate secTemplate = (SecurityTemplate) o;
         if (VersionStatusId.RELEASED.toString().equals(
                 secTemplate.get_ApplyStateID().toString())) {
-          Permissions permissions = secTemplate.get_TemplatePermissions();
+          Permissions permissions =
+              new Permissions(secTemplate.get_TemplatePermissions());
           if (hasPermissions(permissions)) {
             IObjectSet docSet = searcher.execute(
                 buildDocumentSearchQuery(secPolicy), 100, 1, docFactory);

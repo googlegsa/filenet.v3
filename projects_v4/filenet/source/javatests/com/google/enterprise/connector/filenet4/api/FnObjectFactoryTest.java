@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4.api;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.FileConnector;
@@ -23,6 +24,10 @@ import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
+
+import com.filenet.api.collection.SecurityTemplateList;
+import com.filenet.api.core.Factory;
+import com.filenet.api.security.SecurityPolicy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,6 +82,35 @@ public class FnObjectFactoryTest {
           RepositoryException {
     assertNotNull(ios);
     assertEquals(TestConnection.objectStore, ios.get_Name());
+  }
+
+  /**
+   * Tests that get_SecurityTemplates does not return null on a
+   * SecurityPolicy or an ISecurityPolicy.
+   */
+  @Test
+  public void testNullSecurityTemplates() throws RepositoryException {
+    SecurityPolicy testPolicy = Factory.SecurityPolicy.createInstance(
+        ((FnObjectStore) ios).getObjectStore(), null);
+    testPolicy.set_SecurityTemplates(null);
+    SecurityTemplateList list = testPolicy.get_SecurityTemplates();
+    if (list == null) {
+      fail(list.toString());
+    }
+
+    // The security policy must be saved to have an ID, and must have
+    // a display name to be saved.
+    testPolicy.set_DisplayName("testNullSecurityTemplates");
+    testPolicy.save(com.filenet.api.constants.RefreshMode.REFRESH);
+    try {
+      // TODO(jlacey): Call getFactory here to get the FnSecurityPolicy.
+      ISecurityPolicy wrapper = new FnSecurityPolicy(testPolicy);
+      list = wrapper.get_SecurityTemplates();
+      assertNotNull(list);
+    } finally {
+      testPolicy.delete();
+      testPolicy.save(com.filenet.api.constants.RefreshMode.NO_REFRESH);
+    }
   }
 
   /*

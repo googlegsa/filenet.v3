@@ -16,9 +16,11 @@ package com.google.enterprise.connector.filenet4.api;
 
 import com.google.enterprise.connector.spi.RepositoryException;
 
+import com.filenet.api.collection.SecurityTemplateList;
+
 public interface ISecurityPolicy extends IBaseObject {
 
   String get_Name() throws RepositoryException;
 
-  Iterable<ISecurityTemplate> getSecurityTemplates() throws RepositoryException;
+  SecurityTemplateList get_SecurityTemplates() throws RepositoryException;
 }

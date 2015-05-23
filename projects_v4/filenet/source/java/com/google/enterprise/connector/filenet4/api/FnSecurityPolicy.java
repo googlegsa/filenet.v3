@@ -28,6 +28,11 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*
+ * TODO(jlacey): This class looks trivial to remove, except that
+ * instances are created by FnObjectFactory and it must extend
+ * IBaseObject (which it does through ISecurityPolicy).
+ */
 public class FnSecurityPolicy implements ISecurityPolicy {
   private static final Logger LOGGER =
       Logger.getLogger(FnSecurityPolicy.class.getName());
@@ -35,8 +40,7 @@ public class FnSecurityPolicy implements ISecurityPolicy {
   private final SecurityPolicy secPolicy;
   private final Id id;
 
-  public FnSecurityPolicy(SecurityPolicy securityPolicy)
-      throws RepositoryException {
+  public FnSecurityPolicy(SecurityPolicy securityPolicy) {
     this.secPolicy = securityPolicy;
     this.id = secPolicy.get_Id();
     LOGGER.log(Level.FINEST,
@@ -50,59 +54,37 @@ public class FnSecurityPolicy implements ISecurityPolicy {
   }
 
   @Override
-  public String get_Name() throws RepositoryException {
+  public String get_Name() {
     return secPolicy.get_Name();
   }
 
   @Override
-  public Iterable<ISecurityTemplate> getSecurityTemplates()
-      throws RepositoryException {
-    SecurityTemplateList templates = secPolicy.get_SecurityTemplates();
-    if (templates != null && templates.size() > 0) {
-      LOGGER.log(Level.FINEST,
-          "Found {0} security templates for {1} security policy",
-          new Object[] {templates.size(), id});
-      ImmutableList.Builder<ISecurityTemplate> builder =
-              ImmutableList.builder();
-      @SuppressWarnings("unchecked")
-      Iterator<SecurityTemplate> templatesIter = templates.iterator();
-      while (templatesIter.hasNext()) {
-        SecurityTemplate template = templatesIter.next();
-        builder.add(new FnSecurityTemplate(template));
-        LOGGER.log(Level.FINEST, "Adding {0} security template to list",
-            template.get_DisplayName());
-      }
-      return builder.build();
-    } else {
-      LOGGER.log(Level.FINEST,
-          "No security template is found for {0} security policy", id);
-      return null;
-    }
+  public SecurityTemplateList get_SecurityTemplates() {
+    return secPolicy.get_SecurityTemplates();
   }
 
   @Override
-  public Date getModifyDate() throws RepositoryDocumentException {
+  public Date getModifyDate() {
     return secPolicy.get_DateLastModified();
   }
 
   @Override
-  public Id getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() {
     return id;
   }
 
   @Override
-  public Date getPropertyDateValueDelete(String name)
-      throws RepositoryDocumentException {
+  public Date getPropertyDateValueDelete(String name) {
     return null;
   }
 
   @Override
-  public boolean isDeletionEvent() throws RepositoryDocumentException {
+  public boolean isDeletionEvent() {
     return false;
   }
 
   @Override
-  public boolean isReleasedVersion() throws RepositoryDocumentException {
+  public boolean isReleasedVersion() {
     return false;
   }
 }

@@ -39,7 +39,6 @@ import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.filenet4.api.ISecurityPolicy;
-import com.google.enterprise.connector.filenet4.api.ISecurityTemplate;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
@@ -47,10 +46,12 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.VersionStatusId;
 import com.filenet.api.security.AccessPermission;
+import com.filenet.api.security.SecurityTemplate;
 import com.filenet.api.util.Id;
 
 import org.junit.After;
@@ -103,20 +104,27 @@ public class SecurityPolicyTraverserTest {
   }
 
   private ISecurityPolicy getSecurityPolicy(String id, Date lastModified,
-      Iterable<ISecurityTemplate> securityTemplates)
-          throws RepositoryException {
+      SecurityTemplateList securityTemplates) throws RepositoryException {
     Id iid = new Id(id);
     ISecurityPolicy secPolicy = createNiceMock(ISecurityPolicy.class);
     expect(secPolicy.get_Id()).andReturn(iid).anyTimes();
     expect(secPolicy.get_Name()).andReturn("Mock security policy");
     expect(secPolicy.getModifyDate()).andReturn(lastModified).anyTimes();
-    expect(secPolicy.getSecurityTemplates()).andReturn(securityTemplates);
+    expect(secPolicy.get_SecurityTemplates()).andReturn(securityTemplates);
     return secPolicy;
   }
 
-  private ISecurityTemplate getSecurityTemplate(Permissions perms)
+  private SecurityTemplateList getSecurityTemplateList(
+      Iterable<SecurityTemplate> templates) throws RepositoryException {
+    SecurityTemplateList secTemplateList =
+        createNiceMock(SecurityTemplateList.class);
+    expect(secTemplateList.iterator()).andReturn(templates.iterator());
+    return secTemplateList;
+  }
+
+  private SecurityTemplate getSecurityTemplate(AccessPermissionList perms)
       throws RepositoryException {
-    ISecurityTemplate secTemplate = createNiceMock(ISecurityTemplate.class);
+    SecurityTemplate secTemplate = createNiceMock(SecurityTemplate.class);
     expect(secTemplate.get_TemplatePermissions()).andReturn(perms);
     return secTemplate;
   }
@@ -172,7 +180,7 @@ public class SecurityPolicyTraverserTest {
   }
 
   @Test
-  public void startTraversal_WithUpdatedSecPolicies_Live()
+  public void startTraversal_WithoutUpdatedSecPolicies_Live()
       throws RepositoryException {
     assumeTrue(TestConnection.isLiveConnection());
 
@@ -237,11 +245,12 @@ public class SecurityPolicyTraverserTest {
     AccessPermissionList permList =
         TestObjectFactory.newPermissionList(directAces);
 
-    ISecurityTemplate secTemplate =
-        getSecurityTemplate(new Permissions(permList));
+    SecurityTemplate secTemplate = getSecurityTemplate(permList);
+    SecurityTemplateList secTemplateList =
+        getSecurityTemplateList(Lists.newArrayList(secTemplate));
     expect(secTemplate.get_ApplyStateID()).andReturn(VersionStatusId.RELEASED);
     ISecurityPolicy secPolicy = getSecurityPolicy(secPolicyId, Jan_1_1970,
-        Lists.newArrayList(secTemplate));
+        secTemplateList);
 
     IFolder folder = null;
     if (docInheritsSecFolder) {
@@ -252,7 +261,7 @@ public class SecurityPolicyTraverserTest {
         new FnObjectList(Collections.singletonList(secPolicy));
     IDocument doc = getDocument(docId, folder);
     IObjectSet docSet = new FnObjectList(Collections.singletonList(doc));
-    replay(secPolicy, secTemplate, doc);
+    replay(secPolicy, secTemplateList, secTemplate, doc);
 
     Traverser traverser = getObjectUnderTest(secPolicySet, docSet);
     traverser.setBatchHint(TestConnection.batchSize);
@@ -272,7 +281,7 @@ public class SecurityPolicyTraverserTest {
     assertEquals(timeStr, ck.getString(JsonField.LAST_SECURITY_POLICY_TIME));
     assertEquals(secPolicyId, ck.getString(JsonField.UUID_SECURITY_POLICY));
 
-    verify(secPolicy, secTemplate, doc);
+    verify(secPolicy, secTemplateList, secTemplate, doc);
   }
 
   private IFolder createMockFolder(String id) throws RepositoryException {
