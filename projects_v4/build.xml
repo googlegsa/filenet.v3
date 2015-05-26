@@ -26,7 +26,18 @@
   <property name="jar.dir" location="build/jar" />
   <property name="jarfile"  value="${jar.dir}/connector-file4.jar" />
 
-  <property name="file.jarfile" location="third_party/lib/Jace.jar" />
+  <property name="file.jarfile" location="${build.ceclient.lib.dir}/Jace.jar" />
+  <fail>
+    <condition>
+      <not><and>
+        <isset property="build.ceclient.lib.dir"/>
+        <available file="${file.jarfile}"/>
+      </and></not>
+    </condition>
+    The build.ceclient.lib.dir property must be set in<!--
+    --> google-enterprise-connector-file.properties, and point at a <!--
+    --> directory that includes Jace.jar.
+  </fail>
 
   <property name="connector-manager-projects.dir"
             location="${build.connector.manager.home}/projects" />
@@ -242,7 +253,8 @@
         Generate an XML file containing the coverage data using
         the "srcdir" attribute.
     -->
-    <cobertura-report srcdir="${src.client.dir}" destdir="${coverage.xml.dir}" format="xml" />
+    <cobertura-report srcdir="${src.dir}" destdir="${coverage.xml.dir}"
+                      format="xml" />
   </target>
 
   <target name="alternate-coverage-report">
@@ -251,7 +263,7 @@
         data in a user-readable form using nested source filesets.
     -->
     <cobertura-report destdir="${coverage.html.dir}">
-      <fileset dir="${src.client.dir}">
+      <fileset dir="${src.dir}">
         <include name="**/*.java"/>
       </fileset>
     </cobertura-report>

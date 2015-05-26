@@ -12,6 +12,9 @@ build.connector.manager.home = ${user.home}/gsa/google-enterprise-connector-mana
 # JDK 1.7 bootclasspath.
 build.bootclasspath = /Library/Java/JavaVirtualMachines/jdk1.7.0_76.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_76.jdk/Contents/Home/jre/lib/jsse.jar
 
+# Directory containing the CE client JAR files, including Jace.jar.
+build.ceclient.lib.dir = ${user.home}/Applications/FileNet/CEClient/lib
+
 ##
 # Test Properties
 test.batchSize=200
