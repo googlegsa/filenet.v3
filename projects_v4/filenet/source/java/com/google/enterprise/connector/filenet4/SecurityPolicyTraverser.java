@@ -52,7 +52,7 @@ import java.util.logging.Logger;
  * Checks for updated security policies so that it will send updated TMPL ACLs
  * to the GSA for documents inheriting permissions from these policies.
  */
-class SecurityPolicyTraverser implements Traverser, DocumentList {
+class SecurityPolicyTraverser implements Traverser {
   private static final Logger LOGGER =
       Logger.getLogger(SecurityPolicyTraverser.class.getName());
 
@@ -78,18 +78,12 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
   private final FileConnector connector;
 
   private int batchHint = 500;
-  private String lastTimestamp;
-  private Date lastModified;
-  private Id secPolicyId;
-  private Checkpoint checkpoint;
-  private LinkedList<AclDocument> acls;
 
   public SecurityPolicyTraverser(IObjectFactory objectFactory, IObjectStore os,
       FileConnector connector) {
     this.objectFactory = objectFactory;
     this.os = os;
     this.connector = connector;
-    this.lastModified = new Date();
   }
 
   @Override
@@ -106,34 +100,24 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
       throws RepositoryException {
     LOGGER.fine("Searching for documents by updated security policy");
     os.refreshSUserContext();
-    this.checkpoint = checkpoint;
 
-    lastTimestamp =
-        getCheckpointValue(JsonField.LAST_SECURITY_POLICY_TIME, checkpoint);
-    LOGGER.log(Level.FINEST,
-        "Last updated security policy in the checkpoint: {0}", lastTimestamp);
-    if (lastTimestamp == null) {
-      Calendar cal = Calendar.getInstance();
-      cal.setTime(lastModified);
-      lastTimestamp = Value.calendarToIso8601(cal);
-    }
     try {
-      acls = getDocuments(checkpoint);
+      LinkedList<AclDocument> acls = getDocuments(checkpoint);
       if (acls.isEmpty()) {
         LOGGER.fine("No updated security policy is found");
         return null;
       } else {
         LOGGER.fine("Found " + acls.size()
             + " documents affected by security policy updates");
-        return this;
+        return new SecurityPolicyDocumentList(acls, checkpoint);
       }
     } catch (EngineRuntimeException e) {
       throw new RepositoryException("Failed to get security policies", e);
     }
   }
 
-  private String getCheckpointValue(JsonField jsonField,
-      Checkpoint checkpoint) {
+  private String getCheckpointValue(Checkpoint checkpoint,
+      JsonField jsonField) {
     try {
       return checkpoint.getString(jsonField);
     } catch (RepositoryException re) {
@@ -156,8 +140,8 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
     int docCount = 0;
     while (secPolicyIter.hasNext() && (docCount < batchHint)) {
       ISecurityPolicy secPolicy = (ISecurityPolicy) secPolicyIter.next();
-      lastModified = secPolicy.getModifyDate();
-      secPolicyId = secPolicy.get_Id();
+      Date lastModified = secPolicy.getModifyDate();
+      Id secPolicyId = secPolicy.get_Id();
       LOGGER.log(Level.FINEST,
           "Processing security templates for security policy: {0} {1}",
           new Object[] {secPolicy.get_Name(), secPolicy.get_Id()});
@@ -207,9 +191,9 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
 
   private String buildSecurityPolicyQuery(Checkpoint checkpoint)
       throws RepositoryException {
-    String timeStr = FileUtil.getQueryTimeString(lastTimestamp);
+    String timeStr = FileUtil.getQueryTimeString(getLastModified(checkpoint));
     String uuid =
-        getCheckpointValue(JsonField.UUID_SECURITY_POLICY, checkpoint);
+        getCheckpointValue(checkpoint, JsonField.UUID_SECURITY_POLICY);
 
     String topStr = "";
     if (batchHint > 0) {
@@ -224,6 +208,22 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
     }
   }
 
+  private String getLastModified(Checkpoint checkpoint) {
+    String lastModified =
+        getCheckpointValue(checkpoint, JsonField.LAST_SECURITY_POLICY_TIME);
+    LOGGER.log(Level.FINEST,
+        "Last updated security policy in the checkpoint: {0}", lastModified);
+    if (lastModified == null) {
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(new Date());
+      lastModified = Value.calendarToIso8601(cal);
+      LOGGER.log(Level.FINEST, "Checkpoint does not contain security policy "
+          + "last modified time, use current time [{0}] to search for updates.",
+          lastModified);
+    }
+    return lastModified;
+  }
+
   private String buildDocumentSearchQuery(ISecurityPolicy secPolicy)
       throws RepositoryException {
     return MessageFormat.format(DOCS_BY_SEC_POLICY_QUERY, secPolicy.get_Id());
@@ -236,30 +236,38 @@ class SecurityPolicyTraverser implements Traverser, DocumentList {
             || permissions.getDenyGroups().size() > 0;
   }
 
-  @Override
-  public Document nextDocument() throws RepositoryException {
-    if (acls == null || acls.isEmpty()) {
-      return null;
-    } else {
+  private static class SecurityPolicyDocumentList implements DocumentList {
+    private final LinkedList<AclDocument> acls;
+    private final Checkpoint checkpoint;
+    private Date lastModified;
+    private Id secPolicyId;
+
+    public SecurityPolicyDocumentList(LinkedList<AclDocument> acls, 
+        Checkpoint checkpoint) {
+      this.acls = acls;
+      this.checkpoint = checkpoint;
+    }
+
+    @Override
+    public Document nextDocument() throws RepositoryException {
       AclDocument aclDoc = acls.poll();
-      lastModified = aclDoc.getCheckpointLastModified();
-      secPolicyId = aclDoc.getCheckpointLastUuid();
-      LOGGER.log(Level.FINEST,
-          "Next Security Policy ACL document [UUID: {0}, Last Modified: {1}]",
-          new Object[] {secPolicyId, lastModified});
+      if (aclDoc != null) {
+        lastModified = aclDoc.getCheckpointLastModified();
+        secPolicyId = aclDoc.getCheckpointLastUuid();
+        LOGGER.log(Level.FINEST,
+            "Next Security Policy ACL document [UUID: {0}, Last Modified: {1}]",
+            new Object[] {secPolicyId, lastModified});
+      }
       return aclDoc;
     }
-  }
 
-  @Override
-  public String checkpoint() throws RepositoryException {
-    if (checkpoint == null) {
-      return null;
+    @Override
+    public String checkpoint() throws RepositoryException {
+      if (lastModified != null && secPolicyId != null) {
+        checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME,
+             lastModified, JsonField.UUID_SECURITY_POLICY, secPolicyId);
+      }
+      return checkpoint.toString();
     }
-    if (lastModified != null && secPolicyId != null) {
-      checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME,
-              lastModified, JsonField.UUID_SECURITY_POLICY, secPolicyId);
-    }
-    return checkpoint.toString();
   }
 }

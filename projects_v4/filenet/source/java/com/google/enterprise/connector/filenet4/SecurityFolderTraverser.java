@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.base.Strings;
+import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IFolder;
@@ -43,7 +44,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class SecurityFolderTraverser implements DocumentList, Traverser {
+class SecurityFolderTraverser implements Traverser {
   private static final Logger LOGGER =
       Logger.getLogger(SecurityFolderTraverser.class.getName());
 
@@ -64,11 +65,6 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
   private final FileConnector connector;
 
   private int batchHint = 500;
-
-  private Date folderLastModified;
-  private Id folderLastUuid;
-  private LinkedList<AclDocument> acls;
-  private Checkpoint checkpoint;
 
   public SecurityFolderTraverser(IObjectFactory objectFactory, IObjectStore os,
       FileConnector connector) {
@@ -92,16 +88,16 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
       throws RepositoryException {
     LOGGER.info("Searching for documents in updated folders");
     os.refreshSUserContext();
-    this.checkpoint = checkpoint;
-    acls = searchDocs();
+    LinkedList<AclDocument> acls = searchDocs(checkpoint);
     if (acls.size() > 0) {
-      return this;
+      return new SecurityFolderDocumentList(acls, checkpoint);
     } else {
       return null;
     }
   }
 
-  private String getCheckpointValue(Checkpoint.JsonField field) {
+  private String getCheckpointValue(Checkpoint checkpoint,
+      JsonField field) {
     try {
       return checkpoint.getString(field);
     } catch (RepositoryException e) {
@@ -111,10 +107,11 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
     }
   }
 
-  private LinkedList<AclDocument> searchDocs() throws RepositoryException {
+  private LinkedList<AclDocument> searchDocs(Checkpoint checkpoint)
+      throws RepositoryException {
     LinkedList<AclDocument> aclDocs = new LinkedList<AclDocument>();
     ISearch searcher = objectFactory.getSearch(os);
-    IObjectSet folderSet = searcher.execute(getQuery(), 100, 0,
+    IObjectSet folderSet = searcher.execute(getQuery(checkpoint), 100, 0,
         objectFactory.getFactory(ClassNames.FOLDER));
     Iterator<? extends IBaseObject> folderIter = folderSet.getIterator();
     while (folderIter.hasNext()) {
@@ -172,11 +169,11 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
     }
   }
 
-  private String getQuery() {
-    String checkpointTime = getLastModified();
+  private String getQuery(Checkpoint checkpoint) {
+    String checkpointTime = getLastModified(checkpoint);
     String timeStr = FileUtil.getQueryTimeString(checkpointTime);
     String checkpointUuid =
-        getCheckpointValue(Checkpoint.JsonField.UUID_FOLDER);
+        getCheckpointValue(checkpoint, JsonField.UUID_FOLDER);
 
     String topClause =
         (batchHint > 0) ? "TOP " + batchHint : "";
@@ -189,12 +186,12 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
     }
   }
 
-  private String getLastModified() {
+  private String getLastModified(Checkpoint checkpoint) {
     String lastModified =
-        getCheckpointValue(Checkpoint.JsonField.LAST_FOLDER_TIME);
+        getCheckpointValue(checkpoint, JsonField.LAST_FOLDER_TIME);
     if (lastModified == null) {
-      lastModified =
-          getCheckpointValue(Checkpoint.JsonField.LAST_MODIFIED_TIME);
+      lastModified = 
+          getCheckpointValue(checkpoint, JsonField.LAST_MODIFIED_TIME);
       if (lastModified == null) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
@@ -211,26 +208,39 @@ class SecurityFolderTraverser implements DocumentList, Traverser {
     return lastModified;
   }
 
-  @Override
-  public Document nextDocument() throws RepositoryException {
-    if (acls == null || acls.isEmpty()) {
-      return null;
-    } else {
+  private static class SecurityFolderDocumentList implements DocumentList {
+    private final LinkedList<AclDocument> acls;
+    private final Checkpoint checkpoint;
+    private Date folderLastModified;
+    private Id folderLastUuid;
+
+    public SecurityFolderDocumentList(LinkedList<AclDocument> acls, 
+        Checkpoint checkpoint) {
+      this.acls = acls;
+      this.checkpoint = checkpoint;
+    }
+
+    @Override
+    public Document nextDocument() throws RepositoryException {
       AclDocument aclDoc = acls.poll();
-      folderLastUuid = aclDoc.getCheckpointLastUuid();
-      folderLastModified = aclDoc.getCheckpointLastModified();
+      if (aclDoc != null) {
+        folderLastUuid = aclDoc.getCheckpointLastUuid();
+        folderLastModified = aclDoc.getCheckpointLastModified();
+      }      
       return aclDoc;
     }
-  }
 
-  @Override
-  public String checkpoint() throws RepositoryException {
-    checkpoint.setTimeAndUuid(
-        Checkpoint.JsonField.LAST_FOLDER_TIME, folderLastModified,
-        Checkpoint.JsonField.UUID_FOLDER, folderLastUuid);
-    LOGGER.log(Level.FINEST, "Saving folder's last modified time [{0}] and "
-        + "UUID [{1}] to the checkpoint",
-        new Object[] {folderLastModified, folderLastUuid});
-    return checkpoint.toString();
+    @Override
+    public String checkpoint() throws RepositoryException {
+      if (folderLastModified != null && folderLastUuid != null) {
+        checkpoint.setTimeAndUuid(
+            JsonField.LAST_FOLDER_TIME, folderLastModified,
+            JsonField.UUID_FOLDER, folderLastUuid);
+        LOGGER.log(Level.FINEST, "Saving folder's last modified time [{0}] and "
+            + "UUID [{1}] to the checkpoint",
+            new Object[] {folderLastModified, folderLastUuid});
+      }
+      return checkpoint.toString();
+    }
   }
 }
