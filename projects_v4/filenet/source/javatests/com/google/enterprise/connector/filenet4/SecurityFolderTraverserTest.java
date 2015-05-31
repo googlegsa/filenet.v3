@@ -15,12 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -32,13 +27,9 @@ import com.google.common.collect.Iterators;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.EmptyObjectSet;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
-import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IFolder;
-import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
-import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
@@ -55,7 +46,6 @@ import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.util.Id;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,7 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class SecurityFolderTraverserTest {
+public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
   private static final Date Jan_1_1970 = new Date(72000000L);
 
   private static final String[][] FOLDERS = {
@@ -86,24 +76,9 @@ public class SecurityFolderTraverserTest {
 
   private FileConnector connector;
 
-  private final ImmutableList.Builder<Object> mocksToVerify =
-      ImmutableList.builder();
-
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     this.connector = TestObjectFactory.newFileConnector();
-  }
-
-  @After
-  public void verifyMocks() {
-    for (Object mock : mocksToVerify.build()) {
-      verify(mock);
-    }
-  }
-
-  private void replayAndVerify(Object... mocks) {
-    replay(mocks);
-    mocksToVerify.add(mocks);
   }
 
   @Test
@@ -151,7 +126,7 @@ public class SecurityFolderTraverserTest {
   public void testCheckpoint() throws Exception {
     IObjectSet folderSet = getFolderSet(1);
 
-    SecurityFolderTraverser traverser = getObjectUnderTest(folderSet);
+    Traverser traverser = getSecurityFolderTraverser(connector, folderSet);
 
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     int index = 0;
@@ -168,7 +143,7 @@ public class SecurityFolderTraverserTest {
   public void testGetDocumentList_multipleCalls() throws Exception {
     IObjectSet folderSet = getFolderSet(1);
     assertTrue("Expected at least one folder", folderSet.getSize() > 0);
-    SecurityFolderTraverser traverser = getObjectUnderTest(folderSet);
+    Traverser traverser = getSecurityFolderTraverser(connector, folderSet);
 
     DocumentList first = traverser.getDocumentList(new Checkpoint());
     DocumentList second = traverser.getDocumentList(new Checkpoint());
@@ -342,25 +317,9 @@ public class SecurityFolderTraverserTest {
         templateAllowGroup};
   }
 
-  private SecurityFolderTraverser getObjectUnderTest(IObjectSet folderSet)
-      throws RepositoryException {
-    IObjectStore os = createNiceMock(IObjectStore.class);
-    ISearch searcher = createMock(ISearch.class);
-    IObjectFactory objectFactory = createMock(IObjectFactory.class);
-    expect(objectFactory.getSearch(isA(IObjectStore.class)))
-        .andReturn(searcher).atLeastOnce();
-    expect(objectFactory.getFactory(isA(String.class))).andReturn(
-        createNiceMock(IBaseObjectFactory.class)).atLeastOnce();
-    expect(searcher.execute(isA(String.class), eq(100), eq(0),
-        isA(IBaseObjectFactory.class))).andReturn(folderSet).atLeastOnce();
-    replayAndVerify(os, searcher, objectFactory);
-
-    return new SecurityFolderTraverser(objectFactory, os, connector);
-  }
-
   private void testAclCollection(IObjectSet folderSet,
       List<String> expectedDocids) throws Exception {
-    SecurityFolderTraverser traverser = getObjectUnderTest(folderSet);
+    Traverser traverser = getSecurityFolderTraverser(connector, folderSet);
 
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNotNull(docList);

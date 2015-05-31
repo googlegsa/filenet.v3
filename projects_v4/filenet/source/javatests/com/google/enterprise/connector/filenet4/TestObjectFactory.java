@@ -46,7 +46,7 @@ class TestObjectFactory {
         false, isReleasedVersion, perms);
   }
 
-  public static FileConnector newFileConnector() throws Exception {
+  public static FileConnector newFileConnector() {
     FileConnector connector = new FileConnector();
     connector.setUsername(TestConnection.adminUsername);
     connector.setPassword(TestConnection.adminPassword);

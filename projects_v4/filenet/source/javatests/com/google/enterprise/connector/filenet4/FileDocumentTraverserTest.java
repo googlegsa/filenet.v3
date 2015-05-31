@@ -14,22 +14,13 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.api.IObjectFactory;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
-import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
 
@@ -41,21 +32,15 @@ import org.junit.Test;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class FileDocumentTraverserTest {
+public class FileDocumentTraverserTest extends TraverserFactoryFixture {
   private static final SimpleDateFormat dateFormatter =
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
   private FileConnector connec;
 
   @Before
-  public void setUp() throws RepositoryException {
-    connec = new FileConnector();
-    connec.setUsername(TestConnection.adminUsername);
-    connec.setPassword(TestConnection.adminPassword);
-    connec.setObject_store(TestConnection.objectStore);
-    connec.setWorkplace_display_url(TestConnection.displayURL);
-    connec.setObject_factory(TestConnection.objectFactory);
-    connec.setContent_engine_url(TestConnection.uri);
+  public void setUp() {
+    connec = TestObjectFactory.newFileConnector();
   }
 
   private Traverser getObjectUnderTest() throws RepositoryException {
@@ -120,20 +105,10 @@ public class FileDocumentTraverserTest {
 
   @Test
   public void testEmptyObjectStoreMock() throws Exception {
-    IObjectStore os = createNiceMock(IObjectStore.class);
-    IObjectSet objectSet = createNiceMock(IObjectSet.class);
-
-    IObjectFactory factory = createMock(IObjectFactory.class);
-    ISearch search = createMock(ISearch.class);
-    expect(factory.getSearch(os)).andReturn(search);
-    expect(search.execute(isA(String.class))).andReturn(objectSet).times(2);
-    replay(os, factory, search, objectSet);
-
-    FileDocumentTraverser traverser =
-        new FileDocumentTraverser(factory, os, connec);
+    Traverser traverser =
+        getFileDocumentTraverser(connec, new EmptyObjectSet());
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNull(docList);
-    verify(os, factory, search, objectSet);
   }
 
   /**

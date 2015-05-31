@@ -15,35 +15,25 @@
 package com.google.enterprise.connector.filenet4;
 
 import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
-import com.google.common.collect.Lists;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
-import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IFolder;
-import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
-import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.filenet4.api.ISecurityPolicy;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
-import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.SecurityTemplateList;
@@ -54,7 +44,6 @@ import com.filenet.api.security.AccessPermission;
 import com.filenet.api.security.SecurityTemplate;
 import com.filenet.api.util.Id;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -65,7 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class SecurityPolicyTraverserTest {
+public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
   private static final int VIEW_ACCESS_RIGHTS =
       AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT;
 
@@ -73,34 +62,15 @@ public class SecurityPolicyTraverserTest {
       "{AAAAAAAA-0000-0000-0000-000000000000}";
   private static final String docId =
       "{AAAAAAAA-AAAA-0000-0000-000000000001}";
-  private static final String folderId =
-      "{FFFFFFFF-FFFF-0000-0000-000000000001}";
   private static final Date Jan_1_1970 = new Date(72000000L);
   private static final SimpleDateFormat DATE_PARSER =
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
   private FileConnector connector;
-  private List<AccessPermission> directAces;
-
-  private final List<Object> mocksToVerify = new ArrayList<>();
 
   @Before
-  public void setUp() throws Exception {
-    this.directAces = TestObjectFactory.generatePermissions(1, 1, 1, 1,
-        VIEW_ACCESS_RIGHTS, 0, PermissionSource.SOURCE_DIRECT);
+  public void setUp() {
     this.connector = TestObjectFactory.newFileConnector();
-  }
-
-  @After
-  public void verifyMocks() {
-    for (Object mock : mocksToVerify) {
-      verify(mock);
-    }
-  }
-
-  private void replayAndVerify(Object... mocks) {
-    replay(mocks);
-    Collections.addAll(mocksToVerify, mocks);
   }
 
   private ISecurityPolicy getSecurityPolicy(String id, Date lastModified,
@@ -145,34 +115,13 @@ public class SecurityPolicyTraverserTest {
     return doc;
   }
 
-  private SecurityPolicyTraverser getObjectUnderTest(IObjectSet secPolicySet,
-      IObjectSet docSet) throws RepositoryException {
-    IObjectStore os = createNiceMock(IObjectStore.class);
-    ISearch searcher = createMock(ISearch.class);
-    IObjectFactory objectFactory = createMock(IObjectFactory.class);
-    expect(objectFactory.getSearch(isA(IObjectStore.class))).andReturn(
-        searcher).atLeastOnce();
-    expect(objectFactory.getFactory(isA(String.class))).andReturn(
-        createNiceMock(IBaseObjectFactory.class)).atLeastOnce();
-    expect(searcher.execute(isA(String.class), eq(100), eq(0),
-        isA(IBaseObjectFactory.class))).andReturn(secPolicySet).atLeastOnce();
-    if (secPolicySet.getSize() > 0) {
-      expect(searcher.execute(isA(String.class), eq(100), eq(1),
-              isA(IBaseObjectFactory.class)))
-          .andReturn(docSet)
-          .times(secPolicySet.getSize(), secPolicySet.getSize() * 2);
-    }
-    replayAndVerify(objectFactory, os, searcher);
-
-    return new SecurityPolicyTraverser(objectFactory, os, connector);
-  }
-
   @Test
   public void startTraversal_WithoutUpdatedSecPolicy() throws Exception {
     IObjectSet secPolicySet =
         new FnObjectList(Collections.<IBaseObject>emptyList());
 
-    Traverser traverser = getObjectUnderTest(secPolicySet, null);
+    Traverser traverser =
+        getSecurityPolicyTraverser(connector, secPolicySet, null);
     traverser.setBatchHint(TestConnection.batchSize);
     DocumentList acls = traverser.getDocumentList(new Checkpoint());
     assertNull(acls);
@@ -262,18 +211,16 @@ public class SecurityPolicyTraverserTest {
   }
 
   private IObjectSet getSecurityPolicySet() throws RepositoryException {
+    List<AccessPermission> directAces = TestObjectFactory.generatePermissions(
+        1, 1, 1, 1, VIEW_ACCESS_RIGHTS, 0, PermissionSource.SOURCE_DIRECT);
     AccessPermissionList permList =
         TestObjectFactory.newPermissionList(directAces);
-
     SecurityTemplate secTemplate = getSecurityTemplate(permList);
     SecurityTemplateList secTemplateList =
         new MockSecurityTemplateList(secTemplate);
     ISecurityPolicy secPolicy = getSecurityPolicy(secPolicyId, Jan_1_1970,
         secTemplateList);
-
-    IObjectSet secPolicySet =
-        new FnObjectList(Collections.singletonList(secPolicy));
-    return secPolicySet;
+    return new FnObjectList(Collections.singletonList(secPolicy));
   }
 
   /** Gets a traverser with a default stack of mock collaborators. */
@@ -286,7 +233,7 @@ public class SecurityPolicyTraverserTest {
     }
     IDocument doc = getDocument(docId, folder);
     IObjectSet docSet = new FnObjectList(Collections.singletonList(doc));
-    return getObjectUnderTest(secPolicySet, docSet);
+    return getSecurityPolicyTraverser(connector, secPolicySet, docSet);
   }
 
   private void resumeTraversal(boolean docInheritsSecFolder) throws Exception {
@@ -296,11 +243,12 @@ public class SecurityPolicyTraverserTest {
     assertNotNull(doclist);
 
     Document docAcl = doclist.nextDocument();
-    assertPropertyEquals(SpiConstants.PROPNAME_DOCID,
-        docId + AclDocument.SEC_POLICY_POSTFIX, docAcl);
+    assertEquals(docId + AclDocument.SEC_POLICY_POSTFIX,
+        Value.getSingleValueString(docAcl, SpiConstants.PROPNAME_DOCID));
     if (docInheritsSecFolder) {
-      assertPropertyEquals(SpiConstants.PROPNAME_ACLINHERITFROM_DOCID,
-          docId + AclDocument.SEC_FOLDER_POSTFIX, docAcl);
+      assertEquals(docId + AclDocument.SEC_FOLDER_POSTFIX,
+          Value.getSingleValueString(docAcl,
+              SpiConstants.PROPNAME_ACLINHERITFROM_DOCID));
     }
 
     String timeStr = DATE_PARSER.format(Jan_1_1970);
@@ -309,13 +257,5 @@ public class SecurityPolicyTraverserTest {
     assertEquals(secPolicyId, ck.getString(JsonField.UUID_SECURITY_POLICY));
 
     assertNull(doclist.nextDocument());
-  }
-
-  private void assertPropertyEquals(String propName, String expected,
-      Document doc) throws RepositoryException {
-    Property prop = doc.findProperty(propName);
-    assertNotNull(propName + " is null", prop);
-    assertEquals(propName + " is not equal " + expected,
-        expected, prop.nextValue().toString());
   }
 }
