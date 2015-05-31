@@ -165,6 +165,29 @@ public class SecurityFolderTraverserTest {
   }
 
   @Test
+  public void testGetDocumentList_multipleCalls() throws Exception {
+    IObjectSet folderSet = getFolderSet(1);
+    assertTrue("Expected at least one folder", folderSet.getSize() > 0);
+    SecurityFolderTraverser traverser = getObjectUnderTest(folderSet);
+
+    DocumentList first = traverser.getDocumentList(new Checkpoint());
+    DocumentList second = traverser.getDocumentList(new Checkpoint());
+
+    consumeDocumentList(first, folderSet.getSize());
+    consumeDocumentList(second, folderSet.getSize());
+  }
+
+  private void consumeDocumentList(DocumentList docList, int expectedSize)
+      throws RepositoryException {
+    int index = 0;
+    Document doc;
+    while ((doc = docList.nextDocument()) != null) {
+      index++;
+    }
+    assertEquals(expectedSize, index);
+  }
+
+  @Test
   public void testSingleFolderAclCollection() throws Exception {
     int docCount = 5;
     IFolder folder = getFolder(0, docCount, EMPTY_SET);
@@ -224,15 +247,13 @@ public class SecurityFolderTraverserTest {
     String id = FOLDERS[folderNum][0];
     Date lastModified = DATE_PARSER.parse(FOLDERS[folderNum][1]);
     IObjectSet docSet = getChildDocuments(folderNum, numDocuments);
-    IFolder folder = createNiceMock(IFolder.class);
-    expect(folder.get_Id()).andReturn(new Id(id));
-    expect(folder.get_FolderName()).andReturn(id);
-    expect(folder.getModifyDate()).andReturn(lastModified);
-    expect(folder.get_ContainedDocuments()).andReturn(docSet);
-    expect(folder.get_SubFolders()).andReturn(subFolders);
-    // We can't verify this mock because getModifyDate is not called
-    // for subfolders.
-    replay(folder);
+    IFolder folder = createMock(IFolder.class);
+    expect(folder.get_Id()).andReturn(new Id(id)).atLeastOnce();
+    expect(folder.get_FolderName()).andReturn(id).atLeastOnce();
+    expect(folder.getModifyDate()).andReturn(lastModified).anyTimes();
+    expect(folder.get_ContainedDocuments()).andReturn(docSet).atLeastOnce();
+    expect(folder.get_SubFolders()).andReturn(subFolders).atLeastOnce();
+    replayAndVerify(folder);
     return folder;
   }
 
@@ -241,9 +262,10 @@ public class SecurityFolderTraverserTest {
     ImmutableList.Builder<IDocument> docs = ImmutableList.builder();
     for (int i = 1; i <= docCount; i++) {
       Id id = new Id(String.format(DOC_ID_FORMAT, folderNum, i));
-      IDocument doc = createNiceMock(IDocument.class);
-      expect(doc.get_Id()).andReturn(id);
-      expect(doc.get_Permissions()).andReturn(createACL(createACEs()));
+      IDocument doc = createMock(IDocument.class);
+      expect(doc.get_Id()).andReturn(id).atLeastOnce();
+      expect(doc.get_Permissions()).andReturn(createACL(createACEs()))
+          .atLeastOnce();
       replayAndVerify(doc);
       docs.add(doc);
     }
@@ -263,7 +285,7 @@ public class SecurityFolderTraverserTest {
 
   private AccessPermissionList createACL(final AccessPermission[] aces) {
     AccessPermissionList acl = createMock(AccessPermissionList.class);
-    expect(acl.iterator()).andReturn(Iterators.forArray(aces));
+    expect(acl.iterator()).andReturn(Iterators.forArray(aces)).atLeastOnce();
     replayAndVerify(acl);
     return acl;
   }
@@ -326,11 +348,11 @@ public class SecurityFolderTraverserTest {
     ISearch searcher = createMock(ISearch.class);
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(isA(IObjectStore.class)))
-        .andReturn(searcher);
+        .andReturn(searcher).atLeastOnce();
     expect(objectFactory.getFactory(isA(String.class))).andReturn(
-        createNiceMock(IBaseObjectFactory.class)).anyTimes();
+        createNiceMock(IBaseObjectFactory.class)).atLeastOnce();
     expect(searcher.execute(isA(String.class), eq(100), eq(0),
-        isA(IBaseObjectFactory.class))).andReturn(folderSet).times(1);
+        isA(IBaseObjectFactory.class))).andReturn(folderSet).atLeastOnce();
     replayAndVerify(os, searcher, objectFactory);
 
     return new SecurityFolderTraverser(objectFactory, os, connector);

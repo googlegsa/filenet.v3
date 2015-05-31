@@ -106,35 +106,42 @@ public class SecurityPolicyTraverserTest {
   private ISecurityPolicy getSecurityPolicy(String id, Date lastModified,
       SecurityTemplateList securityTemplates) throws RepositoryException {
     Id iid = new Id(id);
-    ISecurityPolicy secPolicy = createNiceMock(ISecurityPolicy.class);
+    ISecurityPolicy secPolicy = createMock(ISecurityPolicy.class);
     expect(secPolicy.get_Id()).andReturn(iid).anyTimes();
-    expect(secPolicy.get_Name()).andReturn("Mock security policy");
+    expect(secPolicy.get_Name()).andReturn("Mock security policy").anyTimes();
     expect(secPolicy.getModifyDate()).andReturn(lastModified).anyTimes();
-    expect(secPolicy.get_SecurityTemplates()).andReturn(securityTemplates);
+    expect(secPolicy.get_SecurityTemplates()).andReturn(securityTemplates)
+        .atLeastOnce();
+    replayAndVerify(secPolicy);
     return secPolicy;
   }
 
-  private SecurityTemplateList getSecurityTemplateList(
-      Iterable<SecurityTemplate> templates) throws RepositoryException {
-    SecurityTemplateList secTemplateList =
-        createNiceMock(SecurityTemplateList.class);
-    expect(secTemplateList.iterator()).andReturn(templates.iterator());
-    return secTemplateList;
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private static class MockSecurityTemplateList
+      extends ArrayList implements SecurityTemplateList {
+    MockSecurityTemplateList(SecurityTemplate... templates) {
+      Collections.addAll(this, templates);
+    }
   }
 
   private SecurityTemplate getSecurityTemplate(AccessPermissionList perms)
       throws RepositoryException {
-    SecurityTemplate secTemplate = createNiceMock(SecurityTemplate.class);
-    expect(secTemplate.get_TemplatePermissions()).andReturn(perms);
+    SecurityTemplate secTemplate = createMock(SecurityTemplate.class);
+    expect(secTemplate.get_TemplatePermissions()).andReturn(perms)
+        .atLeastOnce();
+    expect(secTemplate.get_ApplyStateID()).andReturn(VersionStatusId.RELEASED)
+        .atLeastOnce();
+    replayAndVerify(secTemplate);
     return secTemplate;
   }
 
   private IDocument getDocument(String id, IFolder folder)
       throws RepositoryException {
     Id iid = new Id(id);
-    IDocument doc = createNiceMock(IDocument.class);
+    IDocument doc = createMock(IDocument.class);
     expect(doc.get_Id()).andReturn(iid).anyTimes();
-    expect(doc.get_SecurityFolder()).andReturn(folder);
+    expect(doc.get_SecurityFolder()).andReturn(folder).atLeastOnce();
+    replayAndVerify(doc);
     return doc;
   }
 
@@ -144,16 +151,16 @@ public class SecurityPolicyTraverserTest {
     ISearch searcher = createMock(ISearch.class);
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(isA(IObjectStore.class))).andReturn(
-        searcher);
+        searcher).atLeastOnce();
     expect(objectFactory.getFactory(isA(String.class))).andReturn(
-        createNiceMock(IBaseObjectFactory.class)).anyTimes();
+        createNiceMock(IBaseObjectFactory.class)).atLeastOnce();
     expect(searcher.execute(isA(String.class), eq(100), eq(0),
-        isA(IBaseObjectFactory.class))).andReturn(secPolicySet);
+        isA(IBaseObjectFactory.class))).andReturn(secPolicySet).atLeastOnce();
     if (secPolicySet.getSize() > 0) {
       expect(searcher.execute(isA(String.class), eq(100), eq(1),
               isA(IBaseObjectFactory.class)))
           .andReturn(docSet)
-          .times(secPolicySet.getSize());
+          .times(secPolicySet.getSize(), secPolicySet.getSize() * 2);
     }
     replayAndVerify(objectFactory, os, searcher);
 
@@ -229,6 +236,20 @@ public class SecurityPolicyTraverserTest {
   }
 
   @Test
+  public void testGetDocumentList_multipleCalls() throws Exception {
+    Traverser traverser = getObjectUnderTest(true);
+
+    DocumentList first = traverser.getDocumentList(new Checkpoint());
+    DocumentList second = traverser.getDocumentList(new Checkpoint());
+
+    assertNotNull("Got null Document on first pass", first.nextDocument());
+    assertNull(first.nextDocument());
+
+    assertNotNull("Got null Document on second pass", second.nextDocument());
+    assertNull(second.nextDocument());
+  }
+
+  @Test
   public void resumeTraversal_WithUpdatedSecPolicies_DocsInheritingSecFldr()
       throws Exception {
     resumeTraversal(true);
@@ -240,30 +261,36 @@ public class SecurityPolicyTraverserTest {
     resumeTraversal(false);
   }
 
-  private void resumeTraversal(boolean docInheritsSecFolder) throws Exception {
-    @SuppressWarnings("unchecked")
+  private IObjectSet getSecurityPolicySet() throws RepositoryException {
     AccessPermissionList permList =
         TestObjectFactory.newPermissionList(directAces);
 
     SecurityTemplate secTemplate = getSecurityTemplate(permList);
     SecurityTemplateList secTemplateList =
-        getSecurityTemplateList(Lists.newArrayList(secTemplate));
-    expect(secTemplate.get_ApplyStateID()).andReturn(VersionStatusId.RELEASED);
+        new MockSecurityTemplateList(secTemplate);
     ISecurityPolicy secPolicy = getSecurityPolicy(secPolicyId, Jan_1_1970,
         secTemplateList);
 
-    IFolder folder = null;
-    if (docInheritsSecFolder) {
-      folder = createMockFolder(folderId);
-      replay(folder);
-    }
     IObjectSet secPolicySet =
         new FnObjectList(Collections.singletonList(secPolicy));
+    return secPolicySet;
+  }
+
+  /** Gets a traverser with a default stack of mock collaborators. */
+  private SecurityPolicyTraverser getObjectUnderTest(
+      boolean docInheritsSecFolder) throws RepositoryException {
+    IObjectSet secPolicySet = getSecurityPolicySet();
+    IFolder folder = null;
+    if (docInheritsSecFolder) {
+      folder = createMock(IFolder.class);
+    }
     IDocument doc = getDocument(docId, folder);
     IObjectSet docSet = new FnObjectList(Collections.singletonList(doc));
-    replay(secPolicy, secTemplateList, secTemplate, doc);
+    return getObjectUnderTest(secPolicySet, docSet);
+  }
 
-    Traverser traverser = getObjectUnderTest(secPolicySet, docSet);
+  private void resumeTraversal(boolean docInheritsSecFolder) throws Exception {
+    Traverser traverser = getObjectUnderTest(docInheritsSecFolder);
     traverser.setBatchHint(TestConnection.batchSize);
     DocumentList doclist = traverser.getDocumentList(new Checkpoint());
     assertNotNull(doclist);
@@ -281,13 +308,7 @@ public class SecurityPolicyTraverserTest {
     assertEquals(timeStr, ck.getString(JsonField.LAST_SECURITY_POLICY_TIME));
     assertEquals(secPolicyId, ck.getString(JsonField.UUID_SECURITY_POLICY));
 
-    verify(secPolicy, secTemplateList, secTemplate, doc);
-  }
-
-  private IFolder createMockFolder(String id) throws RepositoryException {
-    IFolder folder = createNiceMock(IFolder.class);
-    expect(folder.get_Id()).andReturn(new Id(id));
-    return folder;
+    assertNull(doclist.nextDocument());
   }
 
   private void assertPropertyEquals(String propName, String expected,
