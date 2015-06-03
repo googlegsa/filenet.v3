@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 
 public class FnObjectStore implements IObjectStore {
   private static final Logger logger =
-      Logger.getLogger(FnDocument.class.getName());
+      Logger.getLogger(FnObjectStore.class.getName());
 
   private final ObjectStore objectStore;
   private final IConnection connection;
@@ -136,16 +136,6 @@ public class FnObjectStore implements IObjectStore {
       throw new RepositoryException("Unable to fetch property definition for "
           + objectId.toString(), e);
     }
-  }
-
-  @Override
-  public String getSUserLogin() {
-    return login;
-  }
-
-  @Override
-  public String getSUserPassword() {
-    return password;
   }
 
   @Override

@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.createMockBuilder;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -22,17 +23,27 @@ import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.ISearch;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
+
+import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.constants.AccessRight;
+import com.filenet.api.constants.PermissionSource;
+import com.filenet.api.property.PropertyFilter;
+import com.filenet.api.security.AccessPermission;
+import com.filenet.api.util.Id;
 
 import org.junit.After;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 class TraverserFactoryFixture {
@@ -53,14 +64,43 @@ class TraverserFactoryFixture {
   protected FileDocumentTraverser getFileDocumentTraverser(
       FileConnector connector, IObjectSet objectSet)
       throws RepositoryException {
-    IObjectStore os = createNiceMock(IObjectStore.class);
+    IObjectStore os = createMockBuilder(PartialObjectStore.class)
+        .withConstructor(objectSet).createNiceMock();
+
+    // The first search result is for added and update documents, and
+    // the second result (empty) is for deleted documents.
     ISearch searcher = createMock(ISearch.class);
-    expect(searcher.execute(isA(String.class))).andReturn(objectSet).times(2);
+    expect(searcher.execute(isA(String.class))).andReturn(objectSet)
+        .andReturn(new EmptyObjectSet());
+
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher);
     replayAndVerify(os, searcher, objectFactory);
 
     return new FileDocumentTraverser(objectFactory, os, connector);
+  }
+
+  /** Partial mock for IObjectStore since fetchObject is not trivial. */
+  private static abstract class PartialObjectStore implements IObjectStore {
+    private final IObjectSet objectSet;
+
+    PartialObjectStore(IObjectSet objectSet) {
+      this.objectSet = objectSet;
+    }
+
+    @Override
+    public IBaseObject fetchObject(String type, Id id, PropertyFilter filter)
+        throws RepositoryDocumentException {
+      Iterator<? extends IBaseObject> it = objectSet.getIterator();
+      while (it.hasNext()) {
+        IBaseObject obj = it.next();
+        if (obj.get_Id().equals(id)) {
+          return obj;
+        }
+      }
+      // TODO(jlacey): Does the real implementation throw an exception instead?
+      return null;
+    }
   }
 
   protected SecurityFolderTraverser getSecurityFolderTraverser(
@@ -101,5 +141,12 @@ class TraverserFactoryFixture {
     replayAndVerify(objectFactory, os, searcher);
 
     return new SecurityPolicyTraverser(objectFactory, os, connector);
+  }
+
+  protected AccessPermissionList getPermissions(PermissionSource source) {
+    List<AccessPermission> aces = TestObjectFactory.generatePermissions(
+        1, 1, 1, 1, (AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT),
+        0, source);
+    return TestObjectFactory.newPermissionList(aces);
   }
 }

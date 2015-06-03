@@ -14,17 +14,11 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.common.collect.ImmutableList;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
-
 import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.security.SecurityPolicy;
-import com.filenet.api.security.SecurityTemplate;
 import com.filenet.api.util.Id;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

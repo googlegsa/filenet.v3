@@ -37,10 +37,8 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.SecurityTemplateList;
-import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.VersionStatusId;
-import com.filenet.api.security.AccessPermission;
 import com.filenet.api.security.SecurityTemplate;
 import com.filenet.api.util.Id;
 
@@ -52,12 +50,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
 public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
-  private static final int VIEW_ACCESS_RIGHTS =
-      AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT;
-
   private static final String secPolicyId =
       "{AAAAAAAA-0000-0000-0000-000000000000}";
   private static final String docId =
@@ -211,10 +205,8 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
   }
 
   private IObjectSet getSecurityPolicySet() throws RepositoryException {
-    List<AccessPermission> directAces = TestObjectFactory.generatePermissions(
-        1, 1, 1, 1, VIEW_ACCESS_RIGHTS, 0, PermissionSource.SOURCE_DIRECT);
     AccessPermissionList permList =
-        TestObjectFactory.newPermissionList(directAces);
+        getPermissions(PermissionSource.SOURCE_DIRECT);
     SecurityTemplate secTemplate = getSecurityTemplate(permList);
     SecurityTemplateList secTemplateList =
         new MockSecurityTemplateList(secTemplate);
@@ -243,6 +235,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     assertNotNull(doclist);
 
     Document docAcl = doclist.nextDocument();
+    assertTrue(docAcl.getClass().toString(), docAcl instanceof AclDocument);
     assertEquals(docId + AclDocument.SEC_POLICY_POSTFIX,
         Value.getSingleValueString(docAcl, SpiConstants.PROPNAME_DOCID));
     if (docInheritsSecFolder) {

@@ -14,16 +14,26 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.api.FnObjectList;
+import com.google.enterprise.connector.filenet4.api.IDocument;
+import com.google.enterprise.connector.filenet4.api.IVersionSeries;
+import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SpiConstants;
+import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.util.Id;
 
 import org.junit.Before;
@@ -104,11 +114,58 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
   }
 
   @Test
-  public void testEmptyObjectStoreMock() throws Exception {
+  public void testGetDocumentList_empty() throws Exception {
     Traverser traverser =
         getFileDocumentTraverser(connec, new EmptyObjectSet());
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNull(docList);
+  }
+
+  @Test
+  public void testGetDocumentList_nonEmpty() throws RepositoryException {
+    String id = "{AAAAAAAA-0000-0000-0000-000000000000}";
+    Date lastModified = new Date();
+    IDocument doc = getDocument(id, lastModified);
+
+    Traverser traverser = getFileDocumentTraverser(connec,
+        new FnObjectList(ImmutableList.of(doc)));
+    DocumentList docList = traverser.getDocumentList(new Checkpoint());
+
+    assertEquals(ImmutableList.of(id), getDocids(docList));
+    String checkpoint = docList.checkpoint();
+    assertTrue(checkpoint, checkpoint.contains(id));
+    assertTrue(checkpoint,
+        checkpoint.contains(dateFormatter.format(lastModified)));
+  }
+
+  protected IDocument getDocument(String id, Date lastModified)
+      throws RepositoryException {
+    Id iid = new Id(id);
+
+    IVersionSeries version = createNiceMock(IVersionSeries.class);
+    expect(version.get_Id()).andReturn(iid).anyTimes();
+
+    IDocument doc = createNiceMock(IDocument.class);
+    expect(doc.get_Id()).andReturn(iid).atLeastOnce();
+    expect(doc.getModifyDate()).andReturn(lastModified).atLeastOnce();
+    expect(doc.get_Permissions())
+        .andReturn(getPermissions(PermissionSource.SOURCE_DIRECT))
+        .atLeastOnce();
+    expect(doc.getVersionSeries()).andReturn(version).atLeastOnce();
+
+    replayAndVerify(version, doc);
+    return doc;
+  }
+
+  private ImmutableList<String> getDocids(DocumentList docList)
+      throws RepositoryException {
+    ImmutableList.Builder<String> builder = ImmutableList.builder();
+    Document doc;
+    while ((doc = docList.nextDocument()) != null) {
+      builder.add(
+          Value.getSingleValueString(doc, SpiConstants.PROPNAME_DOCID));
+    }
+    return builder.build();
   }
 
   /**

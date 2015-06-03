@@ -85,16 +85,6 @@ public class MockObjectStore implements IObjectStore {
     return this.dbType;
   }
 
-  @Override
-  public String getSUserLogin() {
-    return null;
-  }
-
-  @Override
-  public String getSUserPassword() {
-    return null;
-  }
-
   public Map<Id, IBaseObject> getObjects() {
     return objects;
   }

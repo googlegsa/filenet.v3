@@ -44,8 +44,4 @@ public interface IObjectStore {
   public DatabaseType get_DatabaseType() throws RepositoryException;
 
   public void refreshSUserContext() throws RepositoryLoginException;
-
-  public String getSUserLogin();
-
-  public String getSUserPassword();
 }
