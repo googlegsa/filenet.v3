@@ -14,6 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static com.google.enterprise.connector.filenet4.Mocks.mockDocument;
+import static com.google.enterprise.connector.filenet4.Mocks.mockDocumentList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -21,8 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.SimpleDocument;
-import com.google.enterprise.connector.spi.Value;
 import com.google.enterprise.connector.util.EmptyDocumentList;
 
 import org.junit.Rule;
@@ -31,7 +31,6 @@ import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 public class ConcatenatedDocumentListTest {
@@ -72,7 +71,7 @@ public class ConcatenatedDocumentListTest {
     DocumentList emptyList = new EmptyDocumentList("empty");
     Document mockDocument = mockDocument();
     DocumentList mockList =
-        new MockDocumentList(ImmutableList.of(mockDocument), "mock");
+        mockDocumentList(ImmutableList.of(mockDocument), "mock");
 
     List<DocumentList> listOfLists = ImmutableList.of(emptyList, mockList);
     DocumentList cat = new ConcatenatedDocumentList(listOfLists);
@@ -87,7 +86,7 @@ public class ConcatenatedDocumentListTest {
     DocumentList emptyList = new EmptyDocumentList("empty");
     Document mockDocument = mockDocument();
     DocumentList mockList =
-        new MockDocumentList(ImmutableList.of(mockDocument), "mock");
+        mockDocumentList(ImmutableList.of(mockDocument), "mock");
 
     List<DocumentList> listOfLists = ImmutableList.of(mockList, emptyList);
     DocumentList cat = new ConcatenatedDocumentList(listOfLists);
@@ -102,10 +101,10 @@ public class ConcatenatedDocumentListTest {
     DocumentList emptyList = new EmptyDocumentList("empty");
     Document firstDocument = mockDocument();
     DocumentList firstList =
-        new MockDocumentList(ImmutableList.of(firstDocument), "first");
+        mockDocumentList(ImmutableList.of(firstDocument), "first");
     Document lastDocument = mockDocument();
     DocumentList lastList =
-        new MockDocumentList(ImmutableList.of(lastDocument), "last");
+        mockDocumentList(ImmutableList.of(lastDocument), "last");
 
     List<DocumentList> listOfLists =
         ImmutableList.of(firstList, emptyList, lastList);
@@ -124,12 +123,9 @@ public class ConcatenatedDocumentListTest {
       documents.add(mockDocument());
     }
 
-    DocumentList firstList =
-        new MockDocumentList(documents.subList(0, 3), "first");
-    DocumentList middleList =
-        new MockDocumentList(documents.subList(3, 6), "middle");
-    DocumentList lastList =
-        new MockDocumentList(documents.subList(6, 9), "last");
+    DocumentList firstList = mockDocumentList(documents.subList(0, 3), "first");
+    DocumentList middleList = mockDocumentList(documents.subList(3, 6), "mid");
+    DocumentList lastList = mockDocumentList(documents.subList(6, 9), "last");
 
     List<DocumentList> listOfLists =
         ImmutableList.of(firstList, middleList, lastList);
@@ -140,33 +136,5 @@ public class ConcatenatedDocumentListTest {
     }
     assertNull(cat.nextDocument());
     assertEquals("last", cat.checkpoint());
-  }
-
-  private final Document mockDocument() {
-    return new SimpleDocument(Collections.<String, List<Value>>emptyMap());
-  }
-
-  private static class MockDocumentList implements DocumentList {
-    private final Iterator<Document> iterator;
-    private final String checkpoint;
-
-    MockDocumentList(List<Document> docs, String checkpoint) {
-      this.iterator = docs.iterator();
-      this.checkpoint = checkpoint;
-    }
-
-    @Override
-    public Document nextDocument() {
-      if (iterator.hasNext()) {
-        return iterator.next();
-      } else {
-        return null;
-      }
-    }
-
-    @Override
-    public String checkpoint() {
-      return checkpoint;
-    }
   }
 }
