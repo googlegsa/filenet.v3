@@ -57,14 +57,14 @@ class SecurityPolicyTraverser implements Traverser {
       Logger.getLogger(SecurityPolicyTraverser.class.getName());
 
   private static final String SEC_POLICY_QUERY_WITH_UUID =
-      "SELECT {0}* FROM '" + GuidConstants.Class_SecurityPolicy
+      "SELECT TOP {0} * FROM '" + GuidConstants.Class_SecurityPolicy
       + "' WHERE ((" + PropertyNames.DATE_LAST_MODIFIED + " = {1}) AND ("
       + PropertyNames.ID + " > {2})) OR ("
       + PropertyNames.DATE_LAST_MODIFIED + " > {1}) ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
   private static final String SEC_POLICY_QUERY_WITHOUT_UUID =
-      "SELECT {0}* FROM '" + GuidConstants.Class_SecurityPolicy
+      "SELECT TOP {0} * FROM '" + GuidConstants.Class_SecurityPolicy
       + "' WHERE " + PropertyNames.DATE_LAST_MODIFIED + " > {1} ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
@@ -77,7 +77,7 @@ class SecurityPolicyTraverser implements Traverser {
   private final IObjectStore os;
   private final FileConnector connector;
 
-  private int batchHint = 500;
+  private int batchHint = 1000;
 
   public SecurityPolicyTraverser(IObjectFactory objectFactory, IObjectStore os,
       FileConnector connector) {
@@ -195,16 +195,12 @@ class SecurityPolicyTraverser implements Traverser {
     String uuid =
         getCheckpointValue(checkpoint, JsonField.UUID_SECURITY_POLICY);
 
-    String topStr = "";
-    if (batchHint > 0) {
-      topStr = "TOP " + String.valueOf(batchHint) + " ";
-    }
     if (Strings.isNullOrEmpty(uuid)) {
       return MessageFormat.format(SEC_POLICY_QUERY_WITHOUT_UUID,
-          new Object[] {topStr, timeStr});
+          new Object[] {batchHint, timeStr});
     } else {
       return MessageFormat.format(SEC_POLICY_QUERY_WITH_UUID,
-          new Object[] {topStr, timeStr, uuid});
+          new Object[] {batchHint, timeStr, uuid});
     }
   }
 

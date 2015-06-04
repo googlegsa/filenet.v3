@@ -49,14 +49,14 @@ class SecurityFolderTraverser implements Traverser {
       Logger.getLogger(SecurityFolderTraverser.class.getName());
 
   private static final String FOLDER_QUERY_WITH_UUID =
-      "SELECT {0} * FROM '" + GuidConstants.Class_Folder
+      "SELECT TOP {0} * FROM '" + GuidConstants.Class_Folder
       + "' WHERE ((" + PropertyNames.DATE_LAST_MODIFIED + " = {1}) AND ("
       + PropertyNames.ID + " > {2})) OR ("
       + PropertyNames.DATE_LAST_MODIFIED + " > {1}) ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
   private static final String FOLDER_QUERY_WITHOUT_UUID =
-      "SELECT {0} * FROM '" + GuidConstants.Class_Folder
+      "SELECT TOP {0} * FROM '" + GuidConstants.Class_Folder
       + "' WHERE " + PropertyNames.DATE_LAST_MODIFIED + " > {1} ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
@@ -64,7 +64,7 @@ class SecurityFolderTraverser implements Traverser {
   private final IObjectStore os;
   private final FileConnector connector;
 
-  private int batchHint = 500;
+  private int batchHint = 1000;
 
   public SecurityFolderTraverser(IObjectFactory objectFactory, IObjectStore os,
       FileConnector connector) {
@@ -80,7 +80,6 @@ class SecurityFolderTraverser implements Traverser {
   @Override
   public void setBatchHint(int batchHint) throws RepositoryException {
     this.batchHint = batchHint;
-    LOGGER.finest("Setting batchHint for FolderTraverser to " + batchHint);
   }
 
   @Override
@@ -175,14 +174,12 @@ class SecurityFolderTraverser implements Traverser {
     String checkpointUuid =
         getCheckpointValue(checkpoint, JsonField.UUID_FOLDER);
 
-    String topClause =
-        (batchHint > 0) ? "TOP " + batchHint : "";
     if (Strings.isNullOrEmpty(checkpointUuid)) {
       return MessageFormat.format(FOLDER_QUERY_WITHOUT_UUID,
-          new Object[] {topClause, timeStr});
+          new Object[] {batchHint, timeStr});
     } else {
       return MessageFormat.format(FOLDER_QUERY_WITH_UUID,
-          new Object[] {topClause, timeStr, checkpointUuid});
+          new Object[] {batchHint, timeStr, checkpointUuid});
     }
   }
 

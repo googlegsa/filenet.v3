@@ -48,6 +48,11 @@ public class FileTraversalManager implements TraversalManager,
 
   @Override
   public void setBatchHint(int batchHint) throws RepositoryException {
+    // Reset the default if we get an unusable value.
+    if (batchHint <= 0) {
+      batchHint = 1000;
+    }
+    LOGGER.finest("Setting batchHint to " + batchHint);
     for (Traverser t : traversers) {
       t.setBatchHint(batchHint);
     }

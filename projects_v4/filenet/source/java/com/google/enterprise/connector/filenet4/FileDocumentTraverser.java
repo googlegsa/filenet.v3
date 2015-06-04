@@ -85,7 +85,7 @@ public class FileDocumentTraverser implements Traverser {
   private final FileConnector connector;
 
   private TraversalContext traversalContext;
-  private int batchHint;
+  private int batchHint = 1000;
 
   public FileDocumentTraverser(IObjectFactory fileObjectFactory,
       IObjectStore objectStore, FileConnector fileConnector) {
@@ -168,10 +168,9 @@ public class FileDocumentTraverser implements Traverser {
    */
   private String buildQueryString(Checkpoint checkpoint)
           throws RepositoryException {
-    StringBuffer query = new StringBuffer("SELECT ");
-    if (batchHint > 0) {
-      query.append("TOP " + batchHint + " ");
-    }
+    StringBuilder query = new StringBuilder("SELECT TOP ");
+    query.append(batchHint);
+    query.append(" ");
     query.append(PropertyNames.ID);
     query.append(",");
     query.append(PropertyNames.DATE_LAST_MODIFIED);
@@ -184,7 +183,7 @@ public class FileDocumentTraverser implements Traverser {
     String additionalWhereClause = connector.getAdditionalWhereClause();
     if (additionalWhereClause != null && !additionalWhereClause.equals("")) {
       if ((additionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
-        query = new StringBuffer(additionalWhereClause);
+        query = new StringBuilder(additionalWhereClause);
         query.replace(0, 6, "SELECT TOP " + batchHint + " ");
         LOGGER.fine("Using Custom Query[" + additionalWhereClause
                 + "]");
@@ -206,10 +205,9 @@ public class FileDocumentTraverser implements Traverser {
    */
   private String buildQueryStringToDeleteDocs(Checkpoint checkpoint,
       String deleteadditionalWhereClause) throws RepositoryException {
-    StringBuffer query = new StringBuffer("SELECT ");
-    if (batchHint > 0) {
-      query.append("TOP " + batchHint + " ");
-    }
+    StringBuilder query = new StringBuilder("SELECT TOP ");
+    query.append(batchHint);
+    query.append(" ");
     query.append(PropertyNames.ID);
     query.append(",");
     query.append(PropertyNames.DATE_LAST_MODIFIED);
@@ -218,7 +216,7 @@ public class FileDocumentTraverser implements Traverser {
     query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
     if ((deleteadditionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
-      query = new StringBuffer(deleteadditionalWhereClause);
+      query = new StringBuilder(deleteadditionalWhereClause);
       query.replace(0, 6, "SELECT TOP " + batchHint + " ");
       LOGGER.fine("Using Custom Query[" + deleteadditionalWhereClause + "]");
     } else {
@@ -248,12 +246,10 @@ public class FileDocumentTraverser implements Traverser {
   private String buildQueryToDelete(Checkpoint checkpoint)
           throws RepositoryException {
     LOGGER.fine("Build query to get the documents removed from repository: ");
-    StringBuffer query = new StringBuffer("SELECT ");
-    if (batchHint > 0) {
-      query.append("TOP ");
-      query.append(batchHint);
-      query.append(" ");
-    }
+    StringBuilder query = new StringBuilder("SELECT TOP ");
+    query.append(batchHint);
+    query.append(" ");
+
     // GuidConstants.Class_DeletionEvent = Only deleted objects in event
     // table
     query.append(PropertyNames.ID);
