@@ -191,7 +191,7 @@ public class FileDocumentTraverser implements Traverser {
         query.append(additionalWhereClause);
       }
     }
-    if (!checkpoint.isEmpty()) {
+    if (!checkpoint.isNull(JsonField.LAST_MODIFIED_TIME)) {
       query.append(getCheckpointClause(checkpoint, JsonField.LAST_MODIFIED_TIME,
               JsonField.UUID, WHERE_CLAUSE, WHERE_CLAUSE_ONLY_DATE));
     }
@@ -222,7 +222,7 @@ public class FileDocumentTraverser implements Traverser {
     } else {
       query.append(deleteadditionalWhereClause);
     }
-    if (!checkpoint.isEmpty()) {
+    if (!checkpoint.isNull(JsonField.LAST_CUSTOM_DELETION_TIME)) {
       query.append(getCheckpointClause(checkpoint,
               JsonField.LAST_CUSTOM_DELETION_TIME,
               JsonField.UUID_CUSTOM_DELETED_DOC, WHERE_CLAUSE_TO_DELETE_DOCS,
@@ -261,7 +261,7 @@ public class FileDocumentTraverser implements Traverser {
     query.append(PropertyNames.SOURCE_OBJECT_ID);
     query.append(" FROM ");
     query.append(GuidConstants.Class_DeletionEvent);
-    if (!checkpoint.isEmpty()) {
+    if (!checkpoint.isNull(JsonField.LAST_DELETION_EVENT_TIME)) {
       query.append(getCheckpointClause(checkpoint,
               JsonField.LAST_DELETION_EVENT_TIME,
               JsonField.UUID_DELETION_EVENT, WHERE_CLAUSE_TO_DELETE,

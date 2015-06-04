@@ -61,11 +61,19 @@ class Checkpoint {
 
   private final JSONObject jo;
 
-  private boolean isEmpty;
-
   public Checkpoint() {
     jo = new JSONObject();
-    isEmpty = true;
+
+    String now = Value.calendarToIso8601(Calendar.getInstance());
+    try {
+      jo.put(JsonField.LAST_DELETION_EVENT_TIME.toString(), now);
+      jo.put(JsonField.UUID_DELETION_EVENT.toString(), "");
+      jo.put(JsonField.LAST_CUSTOM_DELETION_TIME.toString(), now);
+      jo.put(JsonField.UUID_CUSTOM_DELETED_DOC.toString(), "");
+    } catch (JSONException e) {
+      // This can't happen (only thrown if the value is NaN).
+      logger.log(Level.FINEST, "Error constructing empty checkpoint", e);
+    }
   }
 
   public Checkpoint(String checkpoint) throws RepositoryException {
@@ -75,17 +83,6 @@ class Checkpoint {
       throw new RepositoryException(
           "Unable to initialize a JSON object for the checkpoint", e);
     }
-    isEmpty = false;
-  }
-
-  /**
-   * Gets whether the checkpoint is uninitialized.
-   *
-   * @return {@code true} if the checkpoint is uninitialized, or
-   *     {@code false} if any checkpoint fields have been set
-   */
-  public boolean isEmpty() {
-    return isEmpty;
   }
 
   /*
@@ -93,23 +90,23 @@ class Checkpoint {
    */
   public void setTimeAndUuid(JsonField jsonDateField, Date nextCheckpointDate,
       JsonField jsonUuidField, Id uuid) throws RepositoryException {
-    Calendar cal = Calendar.getInstance();
-    String dateString;
     try {
+      String dateString;
       if (nextCheckpointDate == null) {
         if (jo.isNull(jsonDateField.toString())) {
-          dateString = Value.calendarToIso8601(cal);
+          dateString = null;
         } else {
           dateString = jo.getString(jsonDateField.toString());
         }
       } else {
+        Calendar cal = Calendar.getInstance();
         cal.setTime(nextCheckpointDate);
         dateString = Value.calendarToIso8601(cal);
       }
       String guid;
       if (uuid == null) {
         if (jo.isNull(jsonUuidField.toString())) {
-          guid = "";
+          guid = null;
         } else {
           guid = jo.getString(jsonUuidField.toString());
         }
@@ -118,7 +115,6 @@ class Checkpoint {
       }
       jo.put(jsonUuidField.toString(), guid);
       jo.put(jsonDateField.toString(), dateString);
-      isEmpty = false;
       logger.log(Level.FINE, "Set new checkpoint for {0} field to {1}, "
           + "{2} field to {3}", new Object[] {
               jsonDateField.toString(), dateString,
@@ -129,7 +125,12 @@ class Checkpoint {
     }
   }
 
-  /**
+  /** Checks whether the given field exists in the checkpoint. */
+  public boolean isNull(JsonField jsonField) {
+    return jo.isNull(jsonField.toString());
+  }
+
+ /**
    * Gets the given field from the checkpoint.
    *
    * @return the string value for the field
@@ -141,8 +142,7 @@ class Checkpoint {
       return jo.getString(jsonField.toString());
     } catch (JSONException e) {
       throw new RepositoryException("Illegal checkpoint object: could not get "
-          + jsonField + " from checkpoint: " + this);
-
+          + jsonField + " from checkpoint: " + this, e);
     }
   }
 

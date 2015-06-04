@@ -17,6 +17,7 @@ package com.google.enterprise.connector.filenet4;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -34,13 +35,17 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.PermissionSource;
+import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.util.Id;
 
+import org.easymock.Capture;
+import org.easymock.CaptureType;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class FileDocumentTraverserTest extends TraverserFactoryFixture {
   private static final SimpleDateFormat dateFormatter =
@@ -166,6 +171,33 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
           Value.getSingleValueString(doc, SpiConstants.PROPNAME_DOCID));
     }
     return builder.build();
+  }
+
+  @Test
+  public void testGetDocumentList_initialCheckpoint() throws Exception {
+    connec.setDelete_additional_where_clause("and 1=1");
+
+    Capture<String> capture = new Capture<>(CaptureType.ALL);
+    Traverser traverser =
+        getFileDocumentTraverser(connec, new EmptyObjectSet(), capture);
+    DocumentList docList = traverser.getDocumentList(new Checkpoint());
+    assertNull(docList);
+    assertTrue(capture.toString(), capture.hasCaptured());
+    List<String> queries = capture.getValues();
+    assertEquals(queries.toString(), 3, queries.size());
+
+    // The document query should be unconstrained, but the two delete
+    // queries should have a WHERE clause date restriction.
+    assertFalse(queries.get(0), queries.get(0).contains(
+        prefix(FileDocumentTraverser.WHERE_CLAUSE_ONLY_DATE)));
+    assertTrue(queries.get(1), queries.get(1).contains(
+        prefix(FileDocumentTraverser.WHERE_CLAUSE_TO_DELETE_ONLY_DATE)));
+    assertTrue(queries.get(2), queries.get(2).contains(
+        prefix(FileDocumentTraverser.WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE)));
+  }
+
+  private String prefix(String whereClause) {
+    return whereClause.substring(0, whereClause.indexOf('{'));
   }
 
   /**

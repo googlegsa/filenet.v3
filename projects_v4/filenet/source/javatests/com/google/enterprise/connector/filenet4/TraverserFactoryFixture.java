@@ -14,12 +14,14 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createMockBuilder;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
+//import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
@@ -39,6 +41,8 @@ import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.util.Id;
 
+import org.easymock.Capture;
+import org.easymock.CaptureType;
 import org.junit.After;
 
 import java.util.ArrayList;
@@ -64,14 +68,22 @@ class TraverserFactoryFixture {
   protected FileDocumentTraverser getFileDocumentTraverser(
       FileConnector connector, IObjectSet objectSet)
       throws RepositoryException {
+    return getFileDocumentTraverser(connector, objectSet,
+        new Capture<String>(CaptureType.NONE));
+  }
+
+  protected FileDocumentTraverser getFileDocumentTraverser(
+      FileConnector connector, IObjectSet objectSet, Capture<String> capture)
+      throws RepositoryException {
     IObjectStore os = createMockBuilder(PartialObjectStore.class)
         .withConstructor(objectSet).createNiceMock();
 
     // The first search result is for added and update documents, and
-    // the second result (empty) is for deleted documents.
+    // the second and optional third results (both empty) are for
+    // deleted documents.
     ISearch searcher = createMock(ISearch.class);
-    expect(searcher.execute(isA(String.class))).andReturn(objectSet)
-        .andReturn(new EmptyObjectSet());
+    expect(searcher.execute(capture(capture))).andReturn(objectSet)
+        .andReturn(new EmptyObjectSet()).times(1, 2);
 
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher);

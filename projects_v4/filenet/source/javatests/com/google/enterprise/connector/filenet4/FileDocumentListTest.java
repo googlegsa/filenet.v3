@@ -14,6 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static com.google.enterprise.connector.filenet4.CheckpointTest.assertNullField;
+import static com.google.enterprise.connector.filenet4.CheckpointTest.assertDateNearly;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -527,10 +529,8 @@ public class FileDocumentListTest {
   }
 
   /**
-   * This simulates a first call to getDocumentList that returns no
-   * documents. That's silly, of course, since it means the repository
-   * is empty, but it describes the behavior of the checkpoint strings
-   * in that case.
+   * This simulates a first call to getDocumentList that times out, so
+   * nextDocument is never called but checkpoint is.
    */
   @Test
   public void testEmptyCheckpointWithoutNextDocument() throws Exception {
@@ -542,24 +542,15 @@ public class FileDocumentListTest {
         new SimpleTraversalContext(), new Checkpoint());
     Checkpoint cp = new Checkpoint(docList.checkpoint());
 
-    // The checkpoint contains empty string values for the UUIDs and
-    // the current time for the dates.
-    assertFalse(cp.isEmpty());
-    assertEquals("", cp.getString(JsonField.UUID));
-    assertEquals("", cp.getString(JsonField.UUID_DELETION_EVENT));
-    assertEquals("", cp.getString(JsonField.UUID_CUSTOM_DELETED_DOC));
-
+    // The checkpoint contains only the dates for the delete queries.
     Date now = new Date();
-    assertDateNearly(now, cp.getString(JsonField.LAST_MODIFIED_TIME));
+    assertNullField(cp, JsonField.LAST_MODIFIED_TIME);
     assertDateNearly(now, cp.getString(JsonField.LAST_DELETION_EVENT_TIME));
     assertDateNearly(now, cp.getString(JsonField.LAST_CUSTOM_DELETION_TIME));
-  }
 
-  private void assertDateNearly(Date expectedDate, String actualDate)
-      throws ParseException {
-    long expectedMillis = expectedDate.getTime();
-    long actualMillis = dateFormatter.parse(actualDate).getTime();
-    assertTrue(actualDate, Math.abs(expectedMillis - actualMillis) < 10000L);
+    assertNullField(cp, JsonField.UUID);
+    assertEquals("", cp.getString(JsonField.UUID_DELETION_EVENT));
+    assertEquals("", cp.getString(JsonField.UUID_CUSTOM_DELETED_DOC));
   }
 
   @SafeVarargs
