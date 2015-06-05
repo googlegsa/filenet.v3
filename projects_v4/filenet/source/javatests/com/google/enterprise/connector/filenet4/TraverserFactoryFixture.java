@@ -21,7 +21,6 @@ import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;
-//import static org.easymock.EasyMock.newCapture;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
@@ -50,7 +49,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-class TraverserFactoryFixture {
+// Some JVMs require this class to be public in order for JUnit to
+// call newInstance on the subclasses.
+public class TraverserFactoryFixture {
   private final List<Object> mocksToVerify = new ArrayList<>();
 
   @After
