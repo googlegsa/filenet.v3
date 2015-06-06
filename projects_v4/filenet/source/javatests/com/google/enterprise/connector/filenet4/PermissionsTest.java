@@ -17,7 +17,6 @@ package com.google.enterprise.connector.filenet4;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.filenet4.api.AccessPermissionListMock;
 import com.google.enterprise.connector.filenet4.api.AccessPermissionMock;
-import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.filenet4.api.MockUtil;
 
 import com.filenet.api.constants.AccessLevel;
@@ -26,6 +25,7 @@ import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.security.Group;
+import com.filenet.api.security.User;
 
 import junit.framework.TestCase;
 
@@ -38,11 +38,10 @@ public class PermissionsTest extends TestCase {
       AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT;
 
   private AccessPermissionListMock perms;
-  private IUser user;
-  
+  private User user;
+
   @Override
   protected void setUp() throws Exception {
-    super.setUp();
     perms = new AccessPermissionListMock();
     user = MockUtil.createAdministratorUser();
   }
@@ -134,25 +133,25 @@ public class PermissionsTest extends TestCase {
   }
 
   private void testUserAccess(AccessType accessType, int accessRights,
-      IUser testUser, boolean expectedResult) {
+      User testUser, boolean expectedResult) {
     testUserAccess(accessType, accessRights, testUser.get_Name(), testUser,
         expectedResult);
   }
 
   private void testUserAccess(AccessType accessType, int accessRights,
-      String granteeName, IUser testUser, boolean expectedResult) {
+      String granteeName, User testUser, boolean expectedResult) {
     testAccess(accessType, accessRights, SecurityPrincipalType.USER,
         granteeName, testUser, expectedResult);
   }
 
   private void testGroupAccess(AccessType accessType, int accessRights,
-      String granteeName, IUser testUser, boolean expectedResult) {
+      String granteeName, User testUser, boolean expectedResult) {
     testAccess(accessType, accessRights, SecurityPrincipalType.GROUP,
         granteeName, testUser, expectedResult);
   }
 
   private void testAccess(AccessType accessType, int accessRights,
-      SecurityPrincipalType granteeType, String granteeName, IUser testUser,
+      SecurityPrincipalType granteeType, String granteeName, User testUser,
       boolean expectedResult) {
     AccessPermissionMock perm =
         new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
@@ -167,12 +166,12 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testShortName() {
-    IUser jsmith = MockUtil.createUserWithShortName("jsmith");
+    User jsmith = MockUtil.createUserWithShortName("jsmith");
     testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, jsmith, true);
   }
 
   public void testShortNameWithDifferentDomain() {
-    IUser jsmith = MockUtil.createUserWithShortName("jsmith");
+    User jsmith = MockUtil.createUserWithShortName("jsmith");
     testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, "jsmith@example.com",
         jsmith, false);
   }
@@ -183,7 +182,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testInvalidUser() {
-    IUser invalidUser = MockUtil.createBlankUser();
+    User invalidUser = MockUtil.createBlankUser();
     testUserAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS, user.get_Name(),
         invalidUser, false);
   }
@@ -204,7 +203,7 @@ public class PermissionsTest extends TestCase {
     Group everyone = MockUtil.createEveryoneGroup();
     assertEquals(everyone.get_ShortName(), "everyone");
 
-    IUser jsmith = MockUtil.createUserWithShortName("jsmith");
+    User jsmith = MockUtil.createUserWithShortName("jsmith");
     assertTrue(getGroupNames(jsmith).contains(everyone.get_Name()));
 
     testGroupAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
@@ -216,7 +215,7 @@ public class PermissionsTest extends TestCase {
     assertEquals(everyone.get_DistinguishedName(),
         MockUtil.getDistinguishedName("everyone@" + TestConnection.domain));
 
-    IUser jsmith = MockUtil.createUserWithShortName("jsmith");
+    User jsmith = MockUtil.createUserWithShortName("jsmith");
     assertTrue(getGroupNames(jsmith).contains(everyone.get_Name()));
 
     testGroupAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
@@ -251,7 +250,7 @@ public class PermissionsTest extends TestCase {
    * TODO(jlacey): This is copied from FileAuthenticationManager, and
    * could be moved to FileUtil and shared.
    */
-  private Set<String> getGroupNames(IUser user) {
+  private Set<String> getGroupNames(User user) {
     HashSet<String> groups = new HashSet<>();
     Iterator<?> iter = user.get_MemberOfGroups().iterator();
     while (iter.hasNext()) {
@@ -482,20 +481,20 @@ public class PermissionsTest extends TestCase {
 
   private void testUserMarking(AccessType accessType, int accessMask,
       boolean expectedResult, AccessRight... allowRights) {
-    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+    User user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
     testMarking(accessType, accessMask, SecurityPrincipalType.USER,
         user1.get_Name(), user1, expectedResult, allowRights);
   }
 
   private void testMarking(AccessType accessType, int accessMask,
-      SecurityPrincipalType secType, String granteeName, IUser testUser,
+      SecurityPrincipalType secType, String granteeName, User testUser,
       boolean expectedResult, AccessRight... allowRights) {
     testMarking(accessType, accessMask, secType, granteeName, testUser,
         expectedResult, constraintMask(allowRights));
   }
 
   private void testMarking(AccessType accessType, int accessMask,
-      SecurityPrincipalType secType, String granteeName, IUser testUser,
+      SecurityPrincipalType secType, String granteeName, User testUser,
       boolean expectedResult, int constraintMask) {
     AccessPermissionMock perm1 =
         new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
@@ -527,7 +526,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testMarking_NoUseRight_ViewLevelConstraint() {
-    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+    User user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
     testMarking(AccessType.ALLOW, AccessRight.NONE_AS_INT,
         SecurityPrincipalType.USER, user1.get_Name(), user1, true,
         constraintMask(AccessLevel.VIEW_AS_INT));
@@ -574,7 +573,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testMarking_NoUseRight_HavingBothAllowAndDeny() {
-    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+    User user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
 
     AccessPermissionMock perm1 =
         new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
@@ -600,7 +599,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testMarking_HavingBothAllowAndDenyUseRights() {
-    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+    User user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
 
     AccessPermissionMock allowUse =
         new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
@@ -626,7 +625,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testMarking_UserNotMatchingAnyAces() {
-    IUser user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
+    User user1 = MockUtil.createUserWithDomain("user1", "foo.example.com");
     testMarking(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
         SecurityPrincipalType.USER, "user2@bar.example.com", user1, true,
         AccessRight.READ, AccessRight.VIEW_CONTENT);

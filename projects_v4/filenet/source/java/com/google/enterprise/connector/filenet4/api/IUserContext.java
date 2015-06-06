@@ -17,12 +17,14 @@ package com.google.enterprise.connector.filenet4.api;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
+import com.filenet.api.security.User;
+
 public interface IUserContext {
 
   String getName() throws RepositoryException;
 
-  IUser authenticate(String username, String password)
+  User authenticate(String username, String password)
       throws RepositoryLoginException;
 
-  IUser lookupUser(String username) throws RepositoryException;
+  User lookupUser(String username) throws RepositoryException;
 }

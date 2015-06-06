@@ -21,7 +21,6 @@ import static org.junit.Assume.assumeTrue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.enterprise.connector.filenet4.api.UserMock;
-import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
@@ -31,6 +30,7 @@ import com.google.enterprise.connector.spi.Session;
 import com.google.enterprise.connector.spi.SimpleAuthenticationIdentity;
 
 import com.filenet.api.security.Group;
+import com.filenet.api.security.User;
 
 import org.junit.Test;
 
@@ -81,14 +81,14 @@ public class FileAuthorizationManagerTest {
 
     @Override public boolean hasMarkings() { return false; }
 
-    @Override public IUser getUser(AuthenticationIdentity identity) {
+    @Override public User getUser(AuthenticationIdentity identity) {
       String username = identity.getUsername();
       return new UserMock(username, username, username, username,
           ImmutableList.<Group>of());
     }
 
     @Override
-    public AuthorizationResponse authorizeDocid(String docid, IUser user,
+    public AuthorizationResponse authorizeDocid(String docid, User user,
         boolean checkMarkings) throws RepositoryException {
       threads.add(Thread.currentThread().getName());
       return new AuthorizationResponse(true, docid);

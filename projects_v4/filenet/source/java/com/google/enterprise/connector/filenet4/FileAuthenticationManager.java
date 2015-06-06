@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.api.IConnection;
-import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.filenet4.api.IUserContext;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthenticationManager;
@@ -26,6 +25,7 @@ import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 
 import com.filenet.api.security.Group;
+import com.filenet.api.security.User;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -59,7 +59,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
       throws RepositoryException {
     IUserContext uc = conn.getUserContext();
     try {
-      IUser user = uc.authenticate(id.getUsername(), id.getPassword());
+      User user = uc.authenticate(id.getUsername(), id.getPassword());
       List<Principal> principalGroups = FileUtil.getPrincipals(
           PrincipalType.UNKNOWN, globalNamespace, getGroupNames(user),
           CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
@@ -73,7 +73,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
     }
   }
 
-  private Set<String> getGroupNames(IUser user) {
+  private Set<String> getGroupNames(User user) {
     Set<String> groups = new HashSet<>();
     Iterator<?> iter = user.get_MemberOfGroups().iterator();
     while (iter.hasNext()) {

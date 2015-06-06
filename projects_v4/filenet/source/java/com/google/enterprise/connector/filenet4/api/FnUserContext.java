@@ -50,7 +50,7 @@ public class FnUserContext implements IUserContext {
   }
 
   @Override
-  public IUser authenticate(String username, String password)
+  public User authenticate(String username, String password)
           throws RepositoryLoginException {
     if (FnCredentialMap.isNull()) {
       logger.info("Initializing the FileNet credentials...");
@@ -79,7 +79,7 @@ public class FnUserContext implements IUserContext {
       logger.info("User: " + u.get_Name() + " is authenticated");
 
       FnCredentialMap.putUserCred(username, password);
-      return new FnUser(u);
+      return u;
     } catch (Throwable e) {
       logger.log(Level.WARNING,
           "Unable to GET connection or user is not authenticated");
@@ -107,12 +107,12 @@ public class FnUserContext implements IUserContext {
    *     PropertyNames.DISTINGUISHED_NAME, null));
    */
   @Override
-  public IUser lookupUser(String username) throws RepositoryException {
+  public User lookupUser(String username) throws RepositoryException {
     try {
       logger.log(Level.FINE, "Lookup user: {0}", username);
       User user = Factory.User.fetchInstance(
           ((FnConnection) conn).getConnection(), username, null);
-      return new FnUser(user);
+      return user;
     } catch (Exception e) {
       throw new RepositoryException(username + " username is not found", e);
     }

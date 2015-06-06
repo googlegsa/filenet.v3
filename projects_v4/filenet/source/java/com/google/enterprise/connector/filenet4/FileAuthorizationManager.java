@@ -14,11 +14,12 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
+
+import com.filenet.api.security.User;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -75,7 +76,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
     // popSubject
     handler.pushSubject();
 
-    IUser user = handler.getUser(identity);
+    User user = handler.getUser(identity);
     if (user == null) {
       handler.popSubject();
       return null;
@@ -128,11 +129,11 @@ public class FileAuthorizationManager implements AuthorizationManager {
     private final boolean checkMarkings;
     // Iterator instance is shared among worker threads.
     private final Iterator<String> iterator;
-    private final IUser user;
+    private final User user;
     private final Map<String, AuthorizationResponse> responses;
 
     public AuthorizationTask(AuthorizationHandler handler,
-        boolean checkMarkings, Iterator<String> docidsIterator, IUser user,
+        boolean checkMarkings, Iterator<String> docidsIterator, User user,
         Map<String, AuthorizationResponse> responses) {
       this.handler = handler;
       this.checkMarkings = checkMarkings;

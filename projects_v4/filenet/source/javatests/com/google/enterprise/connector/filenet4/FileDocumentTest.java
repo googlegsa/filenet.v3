@@ -23,7 +23,6 @@ import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.filenet4.api.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -32,6 +31,7 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.ClassNames;
+import com.filenet.api.security.User;
 import com.filenet.api.util.Id;
 import com.filenet.api.util.UserContext;
 
@@ -49,7 +49,7 @@ public class FileDocumentTest {
   IObjectStore ios;
   UserContext uc;
   IObjectFactory iof;
-  IUser adminUser;
+  User adminUser;
 
   @Before
   public void setUp() throws Exception {

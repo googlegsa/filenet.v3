@@ -14,11 +14,10 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.api.IUser;
-
 import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.security.ActiveMarking;
 import com.filenet.api.security.Marking;
+import com.filenet.api.security.User;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,7 +44,7 @@ public class MarkingPermissions {
    * @return True or False, depending on the success or failure of
    *         authorization.
    */
-  public boolean authorize(IUser user) {
+  public boolean authorize(User user) {
     LOGGER.log(Level.FINER, "Authorizing user:[{0}] for Marking Sets",
         user.get_Name());
     for (Object activeMarking : activeMarkings) {

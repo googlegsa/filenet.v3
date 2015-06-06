@@ -31,6 +31,7 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.constants.ClassNames;
+import com.filenet.api.security.User;
 import com.filenet.api.util.Id;
 
 import org.junit.Before;
@@ -55,7 +56,7 @@ public class FnDocumentTest {
   IDocument fd, fd2;
   IVersionSeries vs;
   IUserContext uc;
-  IUser user;
+  User user;
 
   @Before
   public void setUp() throws Exception {

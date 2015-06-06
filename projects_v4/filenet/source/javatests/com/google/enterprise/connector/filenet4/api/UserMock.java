@@ -16,10 +16,11 @@ package com.google.enterprise.connector.filenet4.api;
 
 import com.filenet.api.collection.GroupSet;
 import com.filenet.api.security.Group;
+import com.filenet.api.security.User;
 
 import java.util.Collection;
 
-public class UserMock implements IUser {
+public class UserMock extends SecurityPrincipalMock implements User {
   private final String shortName;
   private final String userName;
   private final String distinguishedName;
@@ -58,5 +59,15 @@ public class UserMock implements IUser {
   @Override
   public GroupSet get_MemberOfGroups() {
     return new GroupSetMock(userGroups);
+  }
+
+  @Override
+  public String get_DisplayName() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public String get_Id() {
+    throw new UnsupportedOperationException();
   }
 }

@@ -14,10 +14,11 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
+
+import com.filenet.api.security.User;
 
 interface AuthorizationHandler {
   void pushSubject();
@@ -26,8 +27,8 @@ interface AuthorizationHandler {
 
   boolean hasMarkings();
 
-  IUser getUser(AuthenticationIdentity identity);
+  User getUser(AuthenticationIdentity identity);
 
-  AuthorizationResponse authorizeDocid(String docid, IUser user,
+  AuthorizationResponse authorizeDocid(String docid, User user,
       boolean checkMarkings) throws RepositoryException;
 }

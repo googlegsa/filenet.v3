@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
-import com.google.enterprise.connector.filenet4.api.IUser;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.constants.AccessLevel;
@@ -26,6 +25,7 @@ import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.security.Group;
+import com.filenet.api.security.User;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,7 +79,7 @@ public class Permissions {
    * @return True or False, depending on the success or failure of
    *         authorization.
    */
-  public boolean authorize(IUser user) {
+  public boolean authorize(User user) {
     boolean isAuthorized = false;
     Iterator iter = perms.iterator();
 
@@ -130,7 +130,7 @@ public class Permissions {
    *         USE right.
    * @see com.google.enterprise.connector.filenet4.api.IPermissions#authorizeMarking(java.lang.String)
    */
-  public boolean authorizeMarking(IUser user, Integer constraintMask) {
+  public boolean authorizeMarking(User user, Integer constraintMask) {
     boolean hasUseRight = false;
 
     Iterator iter = perms.iterator();
@@ -193,7 +193,7 @@ public class Permissions {
    * @throws Exception
    * @see com.google.enterprise.connector.filenet4.api.IPermissions#checkGranteeName(AccessPermission,java.lang.String)
    */
-  private boolean matchesUser(AccessPermission perm, IUser user) {
+  private boolean matchesUser(AccessPermission perm, User user) {
     String granteeName = perm.get_GranteeName();
     String granteeType = perm.get_GranteeType().toString();
     String accessType = perm.get_AccessType().toString();

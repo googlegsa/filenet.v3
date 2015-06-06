@@ -17,7 +17,6 @@ package com.google.enterprise.connector.filenet4;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.filenet4.api.IUserContext;
 import com.google.enterprise.connector.filenet4.api.IVersionSeries;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
@@ -29,6 +28,7 @@ import com.filenet.api.admin.PropertyDefinitionString;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.security.MarkingSet;
+import com.filenet.api.security.User;
 import com.filenet.api.util.UserContext;
 
 import java.io.UnsupportedEncodingException;
@@ -63,7 +63,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
   }
 
   @Override
-  public IUser getUser(AuthenticationIdentity id) {
+  public User getUser(AuthenticationIdentity id) {
     // Lookup FileNet user and user's groups
     IUserContext uc = conn.getUserContext();
     try {
@@ -114,7 +114,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
   }
 
   @Override
-  public AuthorizationResponse authorizeDocid(String docId, IUser user,
+  public AuthorizationResponse authorizeDocid(String docId, User user,
       boolean checkMarkings) throws RepositoryException {
     AuthorizationResponse authorizationResponse = null;
     IVersionSeries versionSeries = null;

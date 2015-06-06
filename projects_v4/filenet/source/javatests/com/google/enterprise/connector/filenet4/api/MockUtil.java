@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.filenet4.TestConnection;
 
 import com.filenet.api.security.Group;
+import com.filenet.api.security.User;
 
 public class MockUtil {
 
@@ -46,7 +47,7 @@ public class MockUtil {
     return distinguishedName;
   }
 
-  public static IUser createAdministratorUser() {
+  public static User createAdministratorUser() {
     String userName = TestConnection.adminUsername + "@"
         + TestConnection.domain;
     String shortName = "administrator";
@@ -61,7 +62,7 @@ public class MockUtil {
     return user;
   }
 
-  public static IUser createUserWithShortName(String shortName) {
+  public static User createUserWithShortName(String shortName) {
     String userName = shortName + "@" + TestConnection.domain;
     String distinguishedName = getDistinguishedName(userName);
 
@@ -72,7 +73,7 @@ public class MockUtil {
     return user;
   }
 
-  public static IUser createUserWithDomain(String shortName, String domain) {
+  public static User createUserWithDomain(String shortName, String domain) {
     String userName = shortName + "@" + domain;
     String distinguishedName;
     if (domain.contains(".")) {
@@ -100,7 +101,7 @@ public class MockUtil {
         getDistinguishedName(groupName));
   }
 
-  public static IUser createBlankUser() {
+  public static User createBlankUser() {
     return new UserMock("", "", "", "", null);
   }
 

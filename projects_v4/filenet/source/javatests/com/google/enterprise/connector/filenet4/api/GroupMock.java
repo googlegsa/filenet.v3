@@ -16,17 +16,9 @@ package com.google.enterprise.connector.filenet4.api;
 
 import com.filenet.api.collection.GroupSet;
 import com.filenet.api.collection.UserSet;
-import com.filenet.api.core.Connection;
-import com.filenet.api.core.ObjectReference;
-import com.filenet.api.meta.ClassDescription;
-import com.filenet.api.property.Properties;
-import com.filenet.api.property.Property;
-import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.Group;
 
-public class GroupMock implements Group {
-  private static final long serialVersionUID = 1L;
-
+public class GroupMock extends SecurityPrincipalMock implements Group {
   private final String name;
   private final String shortName;
   private final String distinguishedName;
@@ -35,72 +27,6 @@ public class GroupMock implements Group {
     this.name = name;
     this.shortName = shortName;
     this.distinguishedName = distinguishedName;
-  }
-
-  @Override
-  public void fetchProperties(String[] arg0) {
-    // unimplemented
-  }
-
-  @Override
-  public void fetchProperties(PropertyFilter arg0) {
-    // unimplemented
-  }
-
-  @Override
-  public Property fetchProperty(String arg0, PropertyFilter arg1) {
-    return null;
-  }
-
-  @Override
-  public Property fetchProperty(String arg0, PropertyFilter arg1,
-      Integer arg2) {
-    return null;
-  }
-
-  @Override
-  public ObjectReference getObjectReference() {
-    return null;
-  }
-
-  @Override
-  public void refresh() {
-    // unimplemented
-  }
-
-  @Override
-  public void refresh(String[] arg0) {
-    // unimplemented
-  }
-
-  @Override
-  public void refresh(PropertyFilter arg0) {
-    // unimplemented
-  }
-
-  @Override
-  public String getClassName() {
-    return GroupMock.class.getName();
-  }
-
-  @Override
-  public Connection getConnection() {
-    return null;
-  }
-
-  @Override
-  public Properties getProperties() {
-    return null;
-  }
-
-  @Override
-  public String[] getSuperClasses() {
-    return null;
-  }
-
-  @Override
-  public ClassDescription get_ClassDescription() {
-    return null;
   }
 
   @Override
@@ -142,5 +68,4 @@ public class GroupMock implements Group {
   public UserSet get_Users() {
     return null;
   }
-
 }
