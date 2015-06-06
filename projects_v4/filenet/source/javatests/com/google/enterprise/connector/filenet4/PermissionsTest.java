@@ -29,6 +29,8 @@ import com.filenet.api.security.Group;
 
 import junit.framework.TestCase;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class PermissionsTest extends TestCase {
@@ -192,7 +194,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testUserGroupAccess_WithDomainName() {
-    Set<String> userGroups = user.getGroupNames();
+    Set<String> userGroups = getGroupNames(user);
     assertTrue(userGroups.contains("administrators@" + TestConnection.domain));
     testGroupAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
         "administrators@" + TestConnection.domain, user, true);
@@ -203,7 +205,7 @@ public class PermissionsTest extends TestCase {
     assertEquals(everyone.get_ShortName(), "everyone");
 
     IUser jsmith = MockUtil.createUserWithShortName("jsmith");
-    assertTrue(jsmith.getGroupNames().contains(everyone.get_Name()));
+    assertTrue(getGroupNames(jsmith).contains(everyone.get_Name()));
 
     testGroupAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
         everyone.get_ShortName(), jsmith, false);
@@ -215,14 +217,14 @@ public class PermissionsTest extends TestCase {
         MockUtil.getDistinguishedName("everyone@" + TestConnection.domain));
 
     IUser jsmith = MockUtil.createUserWithShortName("jsmith");
-    assertTrue(jsmith.getGroupNames().contains(everyone.get_Name()));
+    assertTrue(getGroupNames(jsmith).contains(everyone.get_Name()));
 
     testGroupAccess(AccessType.ALLOW, VIEW_ACCESS_RIGHTS,
         everyone.get_DistinguishedName(), jsmith, true);
   }
 
   public void testUserGroupAccess_HavingBothAllowAndDeny() {
-    Set<String> userGroups = user.getGroupNames();
+    Set<String> userGroups = getGroupNames(user);
     assertTrue(userGroups.contains("administrators@" + TestConnection.domain));
 
     AccessPermissionMock permAllow =
@@ -243,6 +245,20 @@ public class PermissionsTest extends TestCase {
 
     Permissions testPermsDenyGroup = new Permissions(perms);
     assertFalse(testPermsDenyGroup.authorize(user));
+  }
+
+  /*
+   * TODO(jlacey): This is copied from FileAuthenticationManager, and
+   * could be moved to FileUtil and shared.
+   */
+  private Set<String> getGroupNames(IUser user) {
+    HashSet<String> groups = new HashSet<>();
+    Iterator<?> iter = user.get_MemberOfGroups().iterator();
+    while (iter.hasNext()) {
+      Group group = (Group) iter.next();
+      groups.add(group.get_Name());
+    }
+    return groups;
   }
 
   public void testEmptyPermissionList() {

@@ -14,41 +14,22 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-
 import com.filenet.api.collection.GroupSet;
-import com.filenet.api.security.Group;
 import com.filenet.api.security.User;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 public class FnUser implements IUser {
   private final String shortName;
   private final String userName;
   private final String distinguishedName;
   private final String email;
-  private final Map<String,Group> groups;
+  private final GroupSet groups;
 
   public FnUser(User user) {
     this.shortName = user.get_ShortName();
     this.userName = user.get_Name();
     this.distinguishedName = user.get_DistinguishedName();
     this.email = user.get_Email();
-    this.groups = new HashMap<String,Group>();
-    initUserGroups(user.get_MemberOfGroups());
-  }
-
-  @SuppressWarnings("unchecked")
-  private void initUserGroups(GroupSet groupSet) {
-    Iterator<Group> iter = groupSet.iterator();
-    while (iter.hasNext()) {
-      Group grp = iter.next();
-      groups.put(grp.get_Name().toLowerCase(), grp);
-    }
+    this.groups = user.get_MemberOfGroups();
   }
 
   @Override
@@ -72,12 +53,7 @@ public class FnUser implements IUser {
   }
 
   @Override
-  public Collection<Group> getGroups() {
-    return Collections.unmodifiableCollection(groups.values());
-  }
-
-  @Override
-  public Set<String> getGroupNames() {
-    return groups.keySet();
+  public GroupSet get_MemberOfGroups() {
+    return groups;
   }
 }

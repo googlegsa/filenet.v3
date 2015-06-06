@@ -14,22 +14,20 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-
+import com.filenet.api.collection.GroupSet;
 import com.filenet.api.security.Group;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
 
-public class FileUserMock implements IUser {
+public class UserMock implements IUser {
   private final String shortName;
   private final String userName;
   private final String distinguishedName;
   private final String email;
-  private final Map<String,Group> userGroups;
+  private final Collection<Group> userGroups;
 
-  public FileUserMock(String shortName, String userName,
-      String distinguishedName, String email, Map<String,Group> userGroups) {
+  public UserMock(String shortName, String userName,
+      String distinguishedName, String email, Collection<Group> userGroups) {
     this.shortName = shortName;
     this.userName = userName;
     this.distinguishedName = distinguishedName;
@@ -58,13 +56,7 @@ public class FileUserMock implements IUser {
   }
 
   @Override
-  public Collection<Group> getGroups() {
-    return userGroups.values();
+  public GroupSet get_MemberOfGroups() {
+    return new GroupSetMock(userGroups);
   }
-
-  @Override
-  public Set<String> getGroupNames() {
-    return userGroups.keySet();
-  }
-
 }

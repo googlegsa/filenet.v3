@@ -14,10 +14,7 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.filenet.api.security.Group;
-
-import java.util.Collection;
-import java.util.Set;
+import com.filenet.api.collection.GroupSet;
 
 public interface IUser {
 
@@ -29,7 +26,5 @@ public interface IUser {
 
   String get_Email();
 
-  Collection<Group> getGroups();
-
-  Set<String> getGroupNames();
+  GroupSet get_MemberOfGroups();
 }

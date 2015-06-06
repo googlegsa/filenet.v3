@@ -25,7 +25,12 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 
+import com.filenet.api.security.Group;
+
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +61,7 @@ public class FileAuthenticationManager implements AuthenticationManager {
     try {
       IUser user = uc.authenticate(id.getUsername(), id.getPassword());
       List<Principal> principalGroups = FileUtil.getPrincipals(
-          PrincipalType.UNKNOWN, globalNamespace, user.getGroupNames(),
+          PrincipalType.UNKNOWN, globalNamespace, getGroupNames(user),
           CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
       principalGroups.add(new Principal(PrincipalType.UNKNOWN, globalNamespace,
           Permissions.AUTHENTICATED_USERS,
@@ -66,5 +71,15 @@ public class FileAuthenticationManager implements AuthenticationManager {
       logger.log(Level.WARNING, "Authentication failed for user " + id, e);
       return new AuthenticationResponse(false, "");
     }
+  }
+
+  private Set<String> getGroupNames(IUser user) {
+    Set<String> groups = new HashSet<>();
+    Iterator<?> iter = user.get_MemberOfGroups().iterator();
+    while (iter.hasNext()) {
+      Group group = (Group) iter.next();
+      groups.add(group.get_Name());
+    }
+    return groups;
   }
 }

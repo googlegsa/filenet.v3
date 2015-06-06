@@ -14,13 +14,10 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.filenet4.TestConnection;
 
 import com.filenet.api.security.Group;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MockUtil {
 
@@ -56,14 +53,11 @@ public class MockUtil {
     String distinguishedName = getDistinguishedName(userName);
 
     String groupName = "administrators@" + TestConnection.domain;
-    Map<String,Group> groups = new HashMap<String,Group>();
-    GroupMock groupMock1 =
-        new GroupMock(groupName, "administrators",
-            getDistinguishedName(groupName));
-    groups.put(groupMock1.get_Name(), groupMock1);
+    Group groupMock1 = new GroupMock(groupName, "administrators",
+        getDistinguishedName(groupName));
 
-    FileUserMock user = new FileUserMock(shortName, userName, distinguishedName,
-        userName, groups);
+    UserMock user = new UserMock(shortName, userName, distinguishedName,
+        userName, ImmutableList.of(groupMock1));
     return user;
   }
 
@@ -71,12 +65,10 @@ public class MockUtil {
     String userName = shortName + "@" + TestConnection.domain;
     String distinguishedName = getDistinguishedName(userName);
 
-    Map<String,Group> groups = new HashMap<String,Group>();
     Group everyone = createEveryoneGroup();
-    groups.put(everyone.get_Name(), everyone);
 
-    FileUserMock user = new FileUserMock(shortName, userName, distinguishedName,
-        userName, groups);
+    UserMock user = new UserMock(shortName, userName, distinguishedName,
+        userName, ImmutableList.of(everyone));
     return user;
   }
 
@@ -96,13 +88,12 @@ public class MockUtil {
     }
 
     Group everyone = createEveryoneGroup();
-    Map<String,Group> groups = ImmutableMap.of(everyone.get_Name(), everyone);
 
-    FileUserMock user = new FileUserMock(shortName, userName, distinguishedName,
-        userName, groups);
+    UserMock user = new UserMock(shortName, userName, distinguishedName,
+        userName, ImmutableList.of(everyone));
     return user;
   }
-  
+
   public static Group createEveryoneGroup() {
     String groupName = "everyone@" + TestConnection.domain;
     return new GroupMock(groupName, "everyone",
@@ -110,7 +101,7 @@ public class MockUtil {
   }
 
   public static IUser createBlankUser() {
-    return new FileUserMock("", "", "", "", null);
+    return new UserMock("", "", "", "", null);
   }
 
   /** Prevents instantiation */

@@ -240,17 +240,12 @@ public class Permissions {
             new Object[] {accessType, user.get_Name(), AUTHENTICATED_USERS});
         return true;
       }
-      // This is a performance optimization to check grantee name [group]
-      // against groups that the current user is a member of.
-      if (user.getGroupNames().contains(granteeName.toLowerCase())) {
-        LOGGER.log(Level.FINER,
-            "Authorization [{0}]: [{1}] user is a member of group {2}",
-            new Object[] {accessType, user.get_Name(), granteeName});
-        return true;
-      }
-      for (Group group : user.getGroups()) {
-        if (matchesAnyString(granteeName, group.get_DistinguishedName(),
-            group.get_DisplayName())) {
+
+      Iterator<?> iter = user.get_MemberOfGroups().iterator();
+      while (iter.hasNext()) {
+        Group group = (Group) iter.next();
+        if (matchesAnyString(granteeName, group.get_Name(),
+            group.get_DistinguishedName(), group.get_DisplayName())) {
           LOGGER.log(Level.FINER,
               "Authorization [{0}]: [{1}] user is a member of group {2}",
               new Object[] {accessType, user.get_Name(), granteeName});

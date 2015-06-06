@@ -18,9 +18,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
-import com.google.enterprise.connector.filenet4.api.FileUserMock;
+import com.google.enterprise.connector.filenet4.api.UserMock;
 import com.google.enterprise.connector.filenet4.api.IUser;
 import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationManager;
@@ -83,8 +83,8 @@ public class FileAuthorizationManagerTest {
 
     @Override public IUser getUser(AuthenticationIdentity identity) {
       String username = identity.getUsername();
-      return new FileUserMock(username, username, username, username,
-          ImmutableMap.<String, Group>of());
+      return new UserMock(username, username, username, username,
+          ImmutableList.<Group>of());
     }
 
     @Override
