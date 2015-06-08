@@ -17,6 +17,7 @@ package com.google.enterprise.connector.filenet4;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
@@ -80,6 +81,7 @@ public class FileDocumentTraverser implements Traverser {
   static final String WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE = " AND ("
           + PropertyNames.DATE_LAST_MODIFIED + ">={0})";
 
+  private final IConnection connection;
   private final IObjectFactory fileObjectFactory;
   private final IObjectStore objectStore;
   private final FileConnector connector;
@@ -87,8 +89,10 @@ public class FileDocumentTraverser implements Traverser {
   private TraversalContext traversalContext;
   private int batchHint = 1000;
 
-  public FileDocumentTraverser(IObjectFactory fileObjectFactory,
-      IObjectStore objectStore, FileConnector fileConnector) {
+  public FileDocumentTraverser(IConnection connection,
+      IObjectFactory fileObjectFactory, IObjectStore objectStore,
+      FileConnector fileConnector) {
+    this.connection = connection;
     this.fileObjectFactory = fileObjectFactory;
     this.objectStore = objectStore;
     this.connector = fileConnector;
@@ -110,7 +114,7 @@ public class FileDocumentTraverser implements Traverser {
   @Override
   public DocumentList getDocumentList(Checkpoint checkPoint)
       throws RepositoryException {
-    objectStore.refreshSUserContext();
+    connection.refreshSUserContext();
     LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
 
     // to add

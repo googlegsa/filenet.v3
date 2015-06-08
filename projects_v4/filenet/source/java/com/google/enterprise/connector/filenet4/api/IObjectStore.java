@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4.api;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.property.PropertyFilter;
@@ -36,6 +35,4 @@ public interface IObjectStore {
   String get_Name() throws RepositoryException;
 
   public DatabaseType get_DatabaseType() throws RepositoryException;
-
-  public void refreshSUserContext() throws RepositoryLoginException;
 }

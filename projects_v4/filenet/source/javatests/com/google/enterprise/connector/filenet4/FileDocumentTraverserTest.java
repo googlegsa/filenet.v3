@@ -35,7 +35,6 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.PermissionSource;
-import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.util.Id;
 
 import org.easymock.Capture;
@@ -226,7 +225,7 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
 
     connec.setUseIDForChangeDetection(String.valueOf(useIdForChangeDetection));
     FileDocumentTraverser traverser =
-        new FileDocumentTraverser(null, null, connec);
+        new FileDocumentTraverser(null, null, null, connec);
 
     assertEquals(whereClause
         .replace("{0}", expectedDateString)

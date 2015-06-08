@@ -79,19 +79,20 @@ public class FileSession implements Session {
 
   @VisibleForTesting
   Traverser getFileDocumentTraverser() {
-    return new FileDocumentTraverser(fileObjectFactory, objectStore, connector);
+    return new FileDocumentTraverser(connection, fileObjectFactory,
+        objectStore, connector);
   }
 
   @VisibleForTesting
   Traverser getSecurityPolicyTraverser() {
-    return new SecurityPolicyTraverser(fileObjectFactory, objectStore,
-            connector);
+    return new SecurityPolicyTraverser(connection, fileObjectFactory,
+        objectStore, connector);
   }
 
   @VisibleForTesting
   Traverser getSecurityFolderTraverser() {
-    return new SecurityFolderTraverser(fileObjectFactory, objectStore,
-        connector);
+    return new SecurityFolderTraverser(connection, fileObjectFactory,
+        objectStore, connector);
   }
 
   /**

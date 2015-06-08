@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4.api;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.DatabaseType;
@@ -35,21 +34,9 @@ public class FnObjectStore implements IObjectStore {
       Logger.getLogger(FnObjectStore.class.getName());
 
   private final ObjectStore objectStore;
-  private final IConnection connection;
-  private final String login;
-  private final String password;
 
-  public FnObjectStore(ObjectStore objectStore, IConnection connection,
-      String login, String password) {
+  public FnObjectStore(ObjectStore objectStore) {
     this.objectStore = objectStore;
-    this.connection = connection;
-    this.login = login;
-    this.password = password;
-  }
-
-  @Override
-  public void refreshSUserContext() throws RepositoryLoginException {
-    connection.getUserContext().authenticate(login, password);
   }
 
   @Override

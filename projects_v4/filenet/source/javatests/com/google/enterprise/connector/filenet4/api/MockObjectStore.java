@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4.api;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.DatabaseType;
@@ -65,11 +64,6 @@ public class MockObjectStore implements IObjectStore {
   @Override
   public String get_Name() throws RepositoryException {
     return this.name;
-  }
-
-  @Override
-  public void refreshSUserContext() throws RepositoryLoginException {
-    // Not implemented
   }
 
   @Override

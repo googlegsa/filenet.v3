@@ -84,7 +84,7 @@ public class FnObjectFactory implements IObjectFactory {
         throw new RepositoryLoginException(e);
       }
     }
-    return new FnObjectStore(os, conn, userName, userPassword);
+    return new FnObjectStore(os);
   }
 
   private ObjectStore getRawObjectStore(String userName, String userPassword, 

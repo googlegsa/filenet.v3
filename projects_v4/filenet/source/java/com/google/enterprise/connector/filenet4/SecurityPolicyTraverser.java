@@ -18,6 +18,7 @@ import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
+import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
@@ -73,14 +74,17 @@ class SecurityPolicyTraverser implements Traverser {
       + PropertyNames.SECURITY_FOLDER + " FROM '" + GuidConstants.Class_Document
       + "' WHERE " + PropertyNames.SECURITY_POLICY + " = Object({0})";
 
+  private final IConnection connection;
   private final IObjectFactory objectFactory;
   private final IObjectStore os;
   private final FileConnector connector;
 
   private int batchHint = 1000;
 
-  public SecurityPolicyTraverser(IObjectFactory objectFactory, IObjectStore os,
+  public SecurityPolicyTraverser(IConnection connection,
+      IObjectFactory objectFactory, IObjectStore os,
       FileConnector connector) {
+    this.connection = connection;
     this.objectFactory = objectFactory;
     this.os = os;
     this.connector = connector;
@@ -99,7 +103,7 @@ class SecurityPolicyTraverser implements Traverser {
   public DocumentList getDocumentList(Checkpoint checkpoint)
       throws RepositoryException {
     LOGGER.fine("Searching for documents by updated security policy");
-    os.refreshSUserContext();
+    connection.refreshSUserContext();
 
     try {
       LinkedList<AclDocument> acls = getDocuments(checkpoint);

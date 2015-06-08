@@ -26,6 +26,7 @@ import static org.easymock.EasyMock.verify;
 
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
+import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
@@ -76,6 +77,7 @@ public class TraverserFactoryFixture {
   protected FileDocumentTraverser getFileDocumentTraverser(
       FileConnector connector, IObjectSet objectSet, Capture<String> capture)
       throws RepositoryException {
+    IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createMockBuilder(PartialObjectStore.class)
         .withConstructor(objectSet).createNiceMock();
 
@@ -88,9 +90,9 @@ public class TraverserFactoryFixture {
 
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher);
-    replayAndVerify(os, searcher, objectFactory);
+    replayAndVerify(connection, os, searcher, objectFactory);
 
-    return new FileDocumentTraverser(objectFactory, os, connector);
+    return new FileDocumentTraverser(connection, objectFactory, os, connector);
   }
 
   /** Partial mock for IObjectStore since fetchObject is not trivial. */
@@ -119,6 +121,7 @@ public class TraverserFactoryFixture {
   protected SecurityFolderTraverser getSecurityFolderTraverser(
       FileConnector connector, IObjectSet folderSet)
       throws RepositoryException {
+    IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
     IBaseObjectFactory baseFactory = createNiceMock(IBaseObjectFactory.class);
     ISearch searcher = createMock(ISearch.class);
@@ -128,14 +131,16 @@ public class TraverserFactoryFixture {
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
     expect(objectFactory.getFactory(isA(String.class)))
         .andReturn(baseFactory).atLeastOnce();
-    replayAndVerify(os, searcher, objectFactory);
+    replayAndVerify(connection, os, searcher, objectFactory);
 
-    return new SecurityFolderTraverser(objectFactory, os, connector);
+    return new SecurityFolderTraverser(connection, objectFactory, os,
+        connector);
   }
 
   protected SecurityPolicyTraverser getSecurityPolicyTraverser(
       FileConnector connector, IObjectSet secPolicySet, IObjectSet docSet)
       throws RepositoryException {
+    IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
     IBaseObjectFactory baseFactory = createNiceMock(IBaseObjectFactory.class);
     ISearch searcher = createMock(ISearch.class);
@@ -151,9 +156,10 @@ public class TraverserFactoryFixture {
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
     expect(objectFactory.getFactory(isA(String.class)))
         .andReturn(baseFactory).atLeastOnce();
-    replayAndVerify(objectFactory, os, searcher);
+    replayAndVerify(connection, objectFactory, os, searcher);
 
-    return new SecurityPolicyTraverser(objectFactory, os, connector);
+    return new SecurityPolicyTraverser(connection, objectFactory, os,
+        connector);
   }
 
   protected AccessPermissionList getPermissions(PermissionSource source) {

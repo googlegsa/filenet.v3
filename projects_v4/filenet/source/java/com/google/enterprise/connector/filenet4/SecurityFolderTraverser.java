@@ -17,6 +17,7 @@ package com.google.enterprise.connector.filenet4;
 import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
+import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IFolder;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
@@ -60,14 +61,17 @@ class SecurityFolderTraverser implements Traverser {
       + "' WHERE " + PropertyNames.DATE_LAST_MODIFIED + " > {1} ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
+  private final IConnection connection;
   private final IObjectFactory objectFactory;
   private final IObjectStore os;
   private final FileConnector connector;
 
   private int batchHint = 1000;
 
-  public SecurityFolderTraverser(IObjectFactory objectFactory, IObjectStore os,
+  public SecurityFolderTraverser(IConnection connection,
+      IObjectFactory objectFactory, IObjectStore os,
       FileConnector connector) {
+    this.connection = connection;
     this.objectFactory = objectFactory;
     this.os = os;
     this.connector = connector;
@@ -86,7 +90,7 @@ class SecurityFolderTraverser implements Traverser {
   public DocumentList getDocumentList(Checkpoint checkpoint)
       throws RepositoryException {
     LOGGER.info("Searching for documents in updated folders");
-    os.refreshSUserContext();
+    connection.refreshSUserContext();
     LinkedList<AclDocument> acls = searchDocs(checkpoint);
     if (acls.size() > 0) {
       return new SecurityFolderDocumentList(acls, checkpoint);

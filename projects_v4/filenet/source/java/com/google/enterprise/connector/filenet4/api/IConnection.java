@@ -14,6 +14,8 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
+import com.google.enterprise.connector.spi.RepositoryLoginException;
+
 import javax.security.auth.Subject;
 
 /**
@@ -24,4 +26,6 @@ public interface IConnection {
   public IUserContext getUserContext();
 
   public Subject getSubject();
+
+  void refreshSUserContext() throws RepositoryLoginException;
 }

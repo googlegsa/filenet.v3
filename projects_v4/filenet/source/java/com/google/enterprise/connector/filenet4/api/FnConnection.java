@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4.api;
 
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import com.filenet.api.core.Connection;
 import com.filenet.api.core.Factory;
@@ -25,12 +26,16 @@ import javax.security.auth.Subject;
 public class FnConnection implements IConnection {
   private final Connection conn;
   private final Subject subject;
+  private final String userName;
+  private final String userPassword;
 
   public FnConnection(String contentEngineUri, String userName,
       String userPassword) throws RepositoryException {
     this.conn = Factory.Connection.getConnection(contentEngineUri);
     this.subject = UserContext.createSubject(this.conn, userName,
         userPassword, "FileNetP8");
+    this.userName = userName;
+    this.userPassword = userPassword;
   }
 
   Connection getConnection() {
@@ -45,5 +50,10 @@ public class FnConnection implements IConnection {
   @Override
   public Subject getSubject() {
     return subject;
+  }
+
+  @Override
+  public void refreshSUserContext() throws RepositoryLoginException {
+    getUserContext().authenticate(userName, userPassword);
   }
 }
