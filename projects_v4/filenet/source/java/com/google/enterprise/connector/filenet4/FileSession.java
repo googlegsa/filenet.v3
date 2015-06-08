@@ -120,7 +120,7 @@ public class FileSession implements Session {
   public AuthorizationManager getAuthorizationManager()
           throws RepositoryException {
     return new FileAuthorizationManager(
-        new FileAuthorizationHandler(connection, objectStore,
+        new FileAuthorizationHandler(connection, fileObjectFactory, objectStore,
             connector.checkMarking()));
   }
 

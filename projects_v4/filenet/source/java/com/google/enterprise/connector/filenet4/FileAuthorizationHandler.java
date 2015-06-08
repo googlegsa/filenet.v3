@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
+import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.IUserContext;
 import com.google.enterprise.connector.filenet4.api.IVersionSeries;
@@ -42,12 +43,15 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
       Logger.getLogger(FileAuthorizationHandler.class.getName());
 
   private final IConnection conn;
+  private final IObjectFactory objectFactory;
   private final IObjectStore objectStore;
   private boolean checkMarkings;
 
-  public FileAuthorizationHandler(IConnection conn, IObjectStore objectStore,
-          boolean checkMarkings) {
+  public FileAuthorizationHandler(IConnection conn,
+      IObjectFactory objectFactory, IObjectStore objectStore,
+      boolean checkMarkings) {
     this.conn = conn;
+    this.objectFactory = objectFactory;
     this.objectStore = objectStore;
     this.checkMarkings = checkMarkings;
   }
@@ -81,8 +85,8 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
     // check for the marking sets applied over the document class
     try {
       Iterator<PropertyDefinition> propertyDefinitionIterator =
-          objectStore.getPropertyDefinitions(GuidConstants.Class_Document,
-              null);
+          objectFactory.getPropertyDefinitions(objectStore,
+              GuidConstants.Class_Document, null);
       boolean hasMarkings = false;
 
       while (propertyDefinitionIterator.hasNext()) {

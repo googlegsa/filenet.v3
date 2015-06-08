@@ -18,6 +18,9 @@ import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
+import com.filenet.api.admin.DocumentClassDefinition;
+import com.filenet.api.admin.PropertyDefinition;
+import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.core.Connection;
 import com.filenet.api.core.Document;
@@ -27,10 +30,14 @@ import com.filenet.api.core.Folder;
 import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.ObjectStore;
 import com.filenet.api.core.VersionSeries;
+import com.filenet.api.exception.EngineRuntimeException;
+import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.query.SearchScope;
 import com.filenet.api.security.SecurityPolicy;
+import com.filenet.api.util.Id;
 import com.filenet.api.util.UserContext;
 
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,7 +70,7 @@ public class FnObjectFactory implements IObjectFactory {
     try {
       os = getRawObjectStore(userName, userPassword,
           ((FnConnection) conn).getConnection(), objectStoreName);
-    } catch (Throwable e) {
+    } catch (EngineRuntimeException e) {
       logger.log(Level.WARNING, "Unable to connect to the Object Store with user: "
               + userName, e);
       String shortName = FileUtil.getShortName(userName);
@@ -72,21 +79,12 @@ public class FnObjectFactory implements IObjectFactory {
       try {
         os = getRawObjectStore(shortName, userPassword,
             ((FnConnection) conn).getConnection(), objectStoreName);
-      } catch (Throwable th) {
+      } catch (EngineRuntimeException th) {
         logger.log(Level.SEVERE, "Problems while connecting to FileNet object store. Got Exception: ", th);
         throw new RepositoryLoginException(e);
       }
     }
     return new FnObjectStore(os, conn, userName, userPassword);
-  }
-
-  @Override
-  public ISearch getSearch(IObjectStore objectStore)
-          throws RepositoryException {
-    SearchScope search =
-        new SearchScope(((FnObjectStore) objectStore).getObjectStore());
-
-    return new FnSearch(search, getFactory(null));
   }
 
   private ObjectStore getRawObjectStore(String userName, String userPassword, 
@@ -103,6 +101,33 @@ public class FnObjectFactory implements IObjectFactory {
     os.refresh();
     logger.config("Connection to FileNet ObjectStore is successful...");
     return os;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Iterator<PropertyDefinition> getPropertyDefinitions(
+      IObjectStore objectStore, Id objectId, PropertyFilter filter)
+      throws RepositoryException {
+    try {
+      DocumentClassDefinition documentClassDefinition =
+          Factory.DocumentClassDefinition.fetchInstance(
+              ((FnObjectStore) objectStore).getObjectStore(), objectId, filter);
+      PropertyDefinitionList propertyDefinitionList =
+          documentClassDefinition.get_PropertyDefinitions();
+      return propertyDefinitionList.iterator();
+    } catch (EngineRuntimeException e) {
+      throw new RepositoryException("Unable to fetch property definition for "
+          + objectId.toString(), e);
+    }
+  }
+
+  @Override
+  public ISearch getSearch(IObjectStore objectStore)
+          throws RepositoryException {
+    SearchScope search =
+        new SearchScope(((FnObjectStore) objectStore).getObjectStore());
+
+    return new FnSearch(search, getFactory(null));
   }
 
   @Override
