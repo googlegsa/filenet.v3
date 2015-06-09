@@ -23,11 +23,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySetMock;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
-import com.google.enterprise.connector.filenet4.api.ISecurityPolicy;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -39,6 +38,7 @@ import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.VersionStatusId;
 import com.filenet.api.core.Folder;
+import com.filenet.api.security.SecurityPolicy;
 import com.filenet.api.security.SecurityTemplate;
 import com.filenet.api.util.Id;
 
@@ -67,13 +67,13 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     this.connector = TestObjectFactory.newFileConnector();
   }
 
-  private ISecurityPolicy getSecurityPolicy(String id, Date lastModified,
-      SecurityTemplateList securityTemplates) throws RepositoryException {
+  private SecurityPolicy getSecurityPolicy(String id, Date lastModified,
+      SecurityTemplateList securityTemplates) {
     Id iid = new Id(id);
-    ISecurityPolicy secPolicy = createMock(ISecurityPolicy.class);
+    SecurityPolicy secPolicy = createMock(SecurityPolicy.class);
     expect(secPolicy.get_Id()).andReturn(iid).anyTimes();
     expect(secPolicy.get_Name()).andReturn("Mock security policy").anyTimes();
-    expect(secPolicy.getModifyDate()).andReturn(lastModified).anyTimes();
+    expect(secPolicy.get_DateLastModified()).andReturn(lastModified).anyTimes();
     expect(secPolicy.get_SecurityTemplates()).andReturn(securityTemplates)
         .atLeastOnce();
     replayAndVerify(secPolicy);
@@ -88,8 +88,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     }
   }
 
-  private SecurityTemplate getSecurityTemplate(AccessPermissionList perms)
-      throws RepositoryException {
+  private SecurityTemplate getSecurityTemplate(AccessPermissionList perms) {
     SecurityTemplate secTemplate = createMock(SecurityTemplate.class);
     expect(secTemplate.get_TemplatePermissions()).andReturn(perms)
         .atLeastOnce();
@@ -111,9 +110,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
 
   @Test
   public void startTraversal_WithoutUpdatedSecPolicy() throws Exception {
-    IObjectSet secPolicySet =
-        new FnObjectList(Collections.<IBaseObject>emptyList());
-
+    SecurityPolicySetMock secPolicySet = new SecurityPolicySetMock();
     Traverser traverser =
         getSecurityPolicyTraverser(connector, secPolicySet, null);
     traverser.setBatchHint(TestConnection.batchSize);
@@ -204,21 +201,21 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     resumeTraversal(false);
   }
 
-  private IObjectSet getSecurityPolicySet() throws RepositoryException {
+  private SecurityPolicySetMock getSecurityPolicySet() {
     AccessPermissionList permList =
         getPermissions(PermissionSource.SOURCE_DIRECT);
     SecurityTemplate secTemplate = getSecurityTemplate(permList);
     SecurityTemplateList secTemplateList =
         new MockSecurityTemplateList(secTemplate);
-    ISecurityPolicy secPolicy = getSecurityPolicy(secPolicyId, Jan_1_1970,
+    SecurityPolicy secPolicy = getSecurityPolicy(secPolicyId, Jan_1_1970,
         secTemplateList);
-    return new FnObjectList(Collections.singletonList(secPolicy));
+    return new SecurityPolicySetMock(Collections.singletonList(secPolicy));
   }
 
   /** Gets a traverser with a default stack of mock collaborators. */
   private SecurityPolicyTraverser getObjectUnderTest(
       boolean docInheritsSecFolder) throws RepositoryException {
-    IObjectSet secPolicySet = getSecurityPolicySet();
+    SecurityPolicySetMock secPolicySet = getSecurityPolicySet();
     Folder folder = null;
     if (docInheritsSecFolder) {
       folder = createMock(Folder.class);

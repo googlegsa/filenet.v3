@@ -26,6 +26,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import com.filenet.api.collection.SecurityTemplateList;
+import com.filenet.api.constants.RefreshMode;
 import com.filenet.api.core.Factory;
 import com.filenet.api.security.SecurityPolicy;
 
@@ -85,8 +86,7 @@ public class FnObjectFactoryTest {
   }
 
   /**
-   * Tests that get_SecurityTemplates does not return null on a
-   * SecurityPolicy or an ISecurityPolicy.
+   * Tests that get_SecurityTemplates does not return null on a SecurityPolicy.
    */
   @Test
   public void testNullSecurityTemplates() throws RepositoryException {
@@ -101,15 +101,15 @@ public class FnObjectFactoryTest {
     // The security policy must be saved to have an ID, and must have
     // a display name to be saved.
     testPolicy.set_DisplayName("testNullSecurityTemplates");
-    testPolicy.save(com.filenet.api.constants.RefreshMode.REFRESH);
+    testPolicy.save(RefreshMode.REFRESH);
     try {
-      // TODO(jlacey): Call getFactory here to get the FnSecurityPolicy.
-      ISecurityPolicy wrapper = new FnSecurityPolicy(testPolicy);
-      list = wrapper.get_SecurityTemplates();
-      assertNotNull(list);
+      list = testPolicy.get_SecurityTemplates();
+      if (list == null) {
+        fail(list.toString());
+      }
     } finally {
       testPolicy.delete();
-      testPolicy.save(com.filenet.api.constants.RefreshMode.NO_REFRESH);
+      testPolicy.save(RefreshMode.NO_REFRESH);
     }
   }
 

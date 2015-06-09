@@ -32,7 +32,6 @@ import com.filenet.api.core.VersionSeries;
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.query.SearchScope;
-import com.filenet.api.security.SecurityPolicy;
 import com.filenet.api.util.Id;
 import com.filenet.api.util.UserContext;
 
@@ -138,13 +137,6 @@ public class FnObjectFactory implements IObjectFactory {
         @Override public IBaseObject createObject(Object object)
             throws RepositoryException {
           return new FnDocument((Document) object);
-        }
-      };
-    } else if (ClassNames.SECURITY_POLICY.equals(type)) {
-      return new IBaseObjectFactory() {
-        @Override public IBaseObject createObject(Object object)
-            throws RepositoryException {
-          return new FnSecurityPolicy((SecurityPolicy) object);
         }
       };
     } else if (ClassNames.VERSION_SERIES.equals(type)) {

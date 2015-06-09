@@ -24,6 +24,7 @@ import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 
+import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySetMock;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IConnection;
@@ -136,19 +137,19 @@ public class TraverserFactoryFixture {
   }
 
   protected SecurityPolicyTraverser getSecurityPolicyTraverser(
-      FileConnector connector, IObjectSet secPolicySet, IObjectSet docSet)
-      throws RepositoryException {
+      FileConnector connector, SecurityPolicySetMock secPolicySet,
+      IObjectSet docSet) throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
     IBaseObjectFactory baseFactory = createNiceMock(IBaseObjectFactory.class);
     ISearch searcher = createMock(ISearch.class);
-    expect(searcher.execute(isA(String.class), eq(100), eq(0), eq(baseFactory)))
+    expect(searcher.execute(isA(String.class), eq(100), eq(0)))
         .andReturn(secPolicySet).atLeastOnce();
-    if (secPolicySet.getSize() > 0) {
+    if (!secPolicySet.isEmpty()) {
       expect(searcher.execute(isA(String.class), eq(100), eq(1),
               eq(baseFactory)))
           .andReturn(docSet)
-          .times(secPolicySet.getSize(), secPolicySet.getSize() * 2);
+          .times(secPolicySet.size(), secPolicySet.size() * 2);
     }
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();

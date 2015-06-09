@@ -24,7 +24,6 @@ import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.ISearch;
-import com.google.enterprise.connector.filenet4.api.ISecurityPolicy;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -32,12 +31,14 @@ import com.google.enterprise.connector.spi.SpiConstants.AclInheritanceType;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.constants.VersionStatusId;
 import com.filenet.api.exception.EngineRuntimeException;
+import com.filenet.api.security.SecurityPolicy;
 import com.filenet.api.security.SecurityTemplate;
 import com.filenet.api.util.Id;
 
@@ -135,16 +136,15 @@ class SecurityPolicyTraverser implements Traverser {
       throws RepositoryException {
     ISearch searcher = objectFactory.getSearch(os);
     LinkedList<AclDocument> docs = new LinkedList<AclDocument>();
-    IObjectSet secPolicySet =
-        searcher.execute(buildSecurityPolicyQuery(checkpoint), 100, 0,
-            objectFactory.getFactory(ClassNames.SECURITY_POLICY));
+    IndependentObjectSet secPolicySet =
+        searcher.execute(buildSecurityPolicyQuery(checkpoint), 100, 0);
     IBaseObjectFactory docFactory =
         objectFactory.getFactory(ClassNames.DOCUMENT);
-    Iterator<? extends IBaseObject> secPolicyIter = secPolicySet.getIterator();
+    Iterator<?> secPolicyIter = secPolicySet.iterator();
     int docCount = 0;
     while (secPolicyIter.hasNext() && (docCount < batchHint)) {
-      ISecurityPolicy secPolicy = (ISecurityPolicy) secPolicyIter.next();
-      Date lastModified = secPolicy.getModifyDate();
+      SecurityPolicy secPolicy = (SecurityPolicy) secPolicyIter.next();
+      Date lastModified = secPolicy.get_DateLastModified();
       Id secPolicyId = secPolicy.get_Id();
       LOGGER.log(Level.FINEST,
           "Processing security templates for security policy: {0} {1}",
@@ -224,7 +224,7 @@ class SecurityPolicyTraverser implements Traverser {
     return lastModified;
   }
 
-  private String buildDocumentSearchQuery(ISecurityPolicy secPolicy)
+  private String buildDocumentSearchQuery(SecurityPolicy secPolicy)
       throws RepositoryException {
     return MessageFormat.format(DOCS_BY_SEC_POLICY_QUERY, secPolicy.get_Id());
   }

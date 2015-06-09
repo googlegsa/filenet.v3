@@ -19,9 +19,11 @@ import com.filenet.api.collection.EngineSet;
 import com.filenet.api.collection.FolderSet;
 import com.filenet.api.collection.GroupSet;
 import com.filenet.api.collection.PageIterator;
+import com.filenet.api.collection.SecurityPolicySet;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
 import com.filenet.api.security.Group;
+import com.filenet.api.security.SecurityPolicy;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -50,6 +52,14 @@ public class EngineSetMocks {
       extends EngineSetMock<Group> implements GroupSet {
     public GroupSetMock() { super(); }
     public GroupSetMock(Collection<? extends Group> values) { super(values); }
+  }
+
+  public static class SecurityPolicySetMock
+      extends EngineSetMock<SecurityPolicy> implements SecurityPolicySet {
+    public SecurityPolicySetMock() { super(); }
+    public SecurityPolicySetMock(Collection<? extends SecurityPolicy> values) {
+      super(values);
+    }
   }
 
   private static class EngineSetMock<T> implements EngineSet {
