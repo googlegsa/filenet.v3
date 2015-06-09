@@ -35,6 +35,7 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.FolderSet;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.property.PropertyFilter;
@@ -119,18 +120,15 @@ public class TraverserFactoryFixture {
   }
 
   protected SecurityFolderTraverser getSecurityFolderTraverser(
-      FileConnector connector, IObjectSet folderSet)
+      FileConnector connector, FolderSet folderSet)
       throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
-    IBaseObjectFactory baseFactory = createNiceMock(IBaseObjectFactory.class);
     ISearch searcher = createMock(ISearch.class);
-    expect(searcher.execute(isA(String.class), eq(100), eq(0), eq(baseFactory)))
+    expect(searcher.execute(isA(String.class), eq(100), eq(0)))
         .andReturn(folderSet).atLeastOnce();
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
-    expect(objectFactory.getFactory(isA(String.class)))
-        .andReturn(baseFactory).atLeastOnce();
     replayAndVerify(connection, os, searcher, objectFactory);
 
     return new SecurityFolderTraverser(connection, objectFactory, os,

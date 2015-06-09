@@ -14,8 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import static com.google.enterprise.connector.filenet4.CheckpointTest.assertNullField;
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertDateNearly;
+import static com.google.enterprise.connector.filenet4.CheckpointTest.assertNullField;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

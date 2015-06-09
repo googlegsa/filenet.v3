@@ -528,14 +528,9 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public IFolder get_SecurityFolder() {
+  public Folder get_SecurityFolder() {
     try {
-      Folder folder = doc.get_SecurityFolder();
-      if (folder == null) {
-        return null;
-      } else {
-        return new FnFolder(folder);
-      }
+      return doc.get_SecurityFolder();
     } catch (EngineRuntimeException e) {
       logger.log(Level.WARNING,
           "Unable to get security folder for document {0}", doc.get_Id());

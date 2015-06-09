@@ -45,11 +45,9 @@ public class FnSearch implements ISearch {
   }
 
   @Override
-  public IObjectSet execute(String query, int pageSize, int maxRecursion,
-      IBaseObjectFactory factory) throws RepositoryException {
+  public IndependentObjectSet execute(String query, int pageSize,
+      int maxRecursion) {
     logger.log(Level.FINEST, "Execute query: {0}", query);
-    LinkedList<IBaseObject> objectList = new LinkedList<IBaseObject>();
-    IndependentObjectSet myObjects;
 
     SearchSQL sqlObject = new SearchSQL();
     sqlObject.setQueryString(query);
@@ -62,10 +60,16 @@ public class FnSearch implements ISearch {
       myFilter = null;
     }
 
+    return search.fetchObjects(sqlObject, pageSize, myFilter, Boolean.TRUE);
+  }
+
+  @Override
+  public IObjectSet execute(String query, int pageSize, int maxRecursion,
+      IBaseObjectFactory factory) throws RepositoryException {
     try {
-      myObjects = search.fetchObjects(sqlObject, pageSize, myFilter,
-          Boolean.TRUE);
+      IndependentObjectSet myObjects = execute(query, pageSize, maxRecursion);
       Iterator<?> it = myObjects.iterator();
+      LinkedList<IBaseObject> objectList = new LinkedList<IBaseObject>();
       while (it.hasNext()) {
         objectList.add(factory.createObject(it.next()));
       }

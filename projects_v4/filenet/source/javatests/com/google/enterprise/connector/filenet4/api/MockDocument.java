@@ -20,6 +20,7 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.ActiveMarkingList;
+import com.filenet.api.core.Folder;
 import com.filenet.api.util.Id;
 
 import java.io.ByteArrayInputStream;
@@ -180,7 +181,7 @@ public class MockDocument implements IDocument {
       throws RepositoryDocumentException { return null; }
 
   @Override
-  public IFolder get_SecurityFolder() {
+  public Folder get_SecurityFolder() {
     return null;
   }
 }

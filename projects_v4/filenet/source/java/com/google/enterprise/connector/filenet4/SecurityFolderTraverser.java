@@ -16,12 +16,8 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IConnection;
-import com.google.enterprise.connector.filenet4.api.IDocument;
-import com.google.enterprise.connector.filenet4.api.IFolder;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.spi.Document;
@@ -31,10 +27,14 @@ import com.google.enterprise.connector.spi.SpiConstants.AclInheritanceType;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
-import com.filenet.api.constants.ClassNames;
+import com.filenet.api.collection.DocumentSet;
+import com.filenet.api.collection.FolderSet;
+import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.core.Folder;
+import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.util.Id;
 
 import java.text.MessageFormat;
@@ -91,11 +91,15 @@ class SecurityFolderTraverser implements Traverser {
       throws RepositoryException {
     LOGGER.info("Searching for documents in updated folders");
     connection.refreshSUserContext();
-    LinkedList<AclDocument> acls = searchDocs(checkpoint);
-    if (acls.size() > 0) {
-      return new SecurityFolderDocumentList(acls, checkpoint);
-    } else {
-      return null;
+    try {
+      LinkedList<AclDocument> acls = searchDocs(checkpoint);
+      if (acls.size() > 0) {
+        return new SecurityFolderDocumentList(acls, checkpoint);
+      } else {
+        return null;
+      }
+    } catch (EngineRuntimeException e) {
+      throw new RepositoryException(e);
     }
   }
 
@@ -114,13 +118,13 @@ class SecurityFolderTraverser implements Traverser {
       throws RepositoryException {
     LinkedList<AclDocument> aclDocs = new LinkedList<AclDocument>();
     ISearch searcher = objectFactory.getSearch(os);
-    IObjectSet folderSet = searcher.execute(getQuery(checkpoint), 100, 0,
-        objectFactory.getFactory(ClassNames.FOLDER));
-    Iterator<? extends IBaseObject> folderIter = folderSet.getIterator();
+    IndependentObjectSet folderSet =
+        searcher.execute(getQuery(checkpoint), 100, 0);
+    Iterator<?> folderIter = folderSet.iterator();
     while (folderIter.hasNext()) {
-      IFolder folder = (IFolder) folderIter.next();
-      addAllDescendantDocumentAcls(aclDocs, folder, folder.getModifyDate(),
-          folder.get_Id());
+      Folder folder = (Folder) folderIter.next();
+      addAllDescendantDocumentAcls(aclDocs, folder,
+          folder.get_DateLastModified(), folder.get_Id());
     }
     return aclDocs;
   }
@@ -139,16 +143,17 @@ class SecurityFolderTraverser implements Traverser {
    * folder whose ACL changed.
    */
   private void addAllDescendantDocumentAcls(LinkedList<AclDocument> aclDocs,
-      IFolder folder, Date checkpointDate, Id checkpointId)
+      Folder folder, Date checkpointDate, Id checkpointId)
       throws RepositoryException {
     // First update the ACLs for all documents in this folder.
-    IObjectSet docSet = folder.get_ContainedDocuments();
-    LOGGER.log(Level.FINEST, "Found {0} documents under {1} folder [{2}]",
-        new Object[] {docSet.getSize(), folder.get_FolderName(),
-            folder.get_Id()});
-    Iterator<? extends IBaseObject> docIter = docSet.getIterator();
+    DocumentSet docSet = folder.get_ContainedDocuments();
+    int count = 0;
+    Iterator<?> docIter = docSet.iterator();
     while (docIter.hasNext()) {
-      IDocument doc = (IDocument) docIter.next();    
+      // Document collides with the SPI class of the same name.
+      com.filenet.api.core.Document doc =
+          (com.filenet.api.core.Document) docIter.next();
+      count++;
       Permissions permissions = new Permissions(doc.get_Permissions());
       AclDocument aclDoc = new AclDocument(
           doc.get_Id().toString() + AclDocument.SEC_FOLDER_POSTFIX, null,
@@ -162,12 +167,14 @@ class SecurityFolderTraverser implements Traverser {
       aclDoc.setCheckpointLastUuid(checkpointId);
       aclDocs.add(aclDoc);
     }
+    LOGGER.log(Level.FINEST, "Found {0} documents under {1} folder [{2}]",
+        new Object[] {count, folder.get_FolderName(), folder.get_Id()});
 
     // Now do the same for documents in all descendant folders.
-    IObjectSet folderSet = folder.get_SubFolders();
-    Iterator<? extends IBaseObject> folderIter = folderSet.getIterator();
+    FolderSet folderSet = folder.get_SubFolders();
+    Iterator<?> folderIter = folderSet.iterator();
     while (folderIter.hasNext()) {
-      addAllDescendantDocumentAcls(aclDocs, (IFolder) folderIter.next(),
+      addAllDescendantDocumentAcls(aclDocs, (Folder) folderIter.next(),
           checkpointDate, checkpointId);
     }
   }

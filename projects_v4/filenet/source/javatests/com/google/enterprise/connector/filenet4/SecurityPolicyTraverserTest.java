@@ -26,7 +26,6 @@ import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IDocument;
-import com.google.enterprise.connector.filenet4.api.IFolder;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.ISecurityPolicy;
 import com.google.enterprise.connector.spi.Document;
@@ -39,6 +38,7 @@ import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.VersionStatusId;
+import com.filenet.api.core.Folder;
 import com.filenet.api.security.SecurityTemplate;
 import com.filenet.api.util.Id;
 
@@ -99,7 +99,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     return secTemplate;
   }
 
-  private IDocument getDocument(String id, IFolder folder)
+  private IDocument getDocument(String id, Folder folder)
       throws RepositoryException {
     Id iid = new Id(id);
     IDocument doc = createMock(IDocument.class);
@@ -219,9 +219,9 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
   private SecurityPolicyTraverser getObjectUnderTest(
       boolean docInheritsSecFolder) throws RepositoryException {
     IObjectSet secPolicySet = getSecurityPolicySet();
-    IFolder folder = null;
+    Folder folder = null;
     if (docInheritsSecFolder) {
-      folder = createMock(IFolder.class);
+      folder = createMock(Folder.class);
     }
     IDocument doc = getDocument(docId, folder);
     IObjectSet docSet = new FnObjectList(Collections.singletonList(doc));

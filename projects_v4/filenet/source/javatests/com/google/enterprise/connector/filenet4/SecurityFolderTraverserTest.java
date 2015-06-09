@@ -17,6 +17,7 @@ package com.google.enterprise.connector.filenet4;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -25,11 +26,8 @@ import static org.junit.Assume.assumeTrue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.EmptyObjectSet;
-import com.google.enterprise.connector.filenet4.api.FnObjectList;
-import com.google.enterprise.connector.filenet4.api.IDocument;
-import com.google.enterprise.connector.filenet4.api.IFolder;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
+import com.google.enterprise.connector.filenet4.EngineSetMocks.DocumentSetMock;
+import com.google.enterprise.connector.filenet4.EngineSetMocks.FolderSetMock;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
@@ -39,10 +37,13 @@ import com.google.enterprise.connector.spi.Value;
 import com.google.enterprise.connector.spiimpl.PrincipalValue;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.DocumentSet;
+import com.filenet.api.collection.FolderSet;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.SecurityPrincipalType;
+import com.filenet.api.core.Folder;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.util.Id;
 
@@ -72,7 +73,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
   private static final SimpleDateFormat DATE_PARSER =
       new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-  private static final IObjectSet EMPTY_SET = new EmptyObjectSet();
+  private static final FolderSet EMPTY_SET = new FolderSetMock();
 
   private FileConnector connector;
 
@@ -124,7 +125,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
 
   @Test
   public void testCheckpoint() throws Exception {
-    IObjectSet folderSet = getFolderSet(1);
+    FolderSetMock folderSet = getFolderSet(1);
 
     Traverser traverser = getSecurityFolderTraverser(connector, folderSet);
 
@@ -136,20 +137,20 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
       assertEquals(FOLDERS[index++][1],
           checkpoint.getString(JsonField.LAST_FOLDER_TIME));
     }
-    assertEquals(folderSet.getSize(), index);
+    assertEquals(folderSet.size(), index);
   }
 
   @Test
   public void testGetDocumentList_multipleCalls() throws Exception {
-    IObjectSet folderSet = getFolderSet(1);
-    assertTrue("Expected at least one folder", folderSet.getSize() > 0);
+    FolderSetMock folderSet = getFolderSet(1);
+    assertFalse("Expected at least one folder", folderSet.isEmpty());
     Traverser traverser = getSecurityFolderTraverser(connector, folderSet);
 
     DocumentList first = traverser.getDocumentList(new Checkpoint());
     DocumentList second = traverser.getDocumentList(new Checkpoint());
 
-    consumeDocumentList(first, folderSet.getSize());
-    consumeDocumentList(second, folderSet.getSize());
+    consumeDocumentList(first, folderSet.size());
+    consumeDocumentList(second, folderSet.size());
   }
 
   private void consumeDocumentList(DocumentList docList, int expectedSize)
@@ -165,8 +166,8 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
   @Test
   public void testSingleFolderAclCollection() throws Exception {
     int docCount = 5;
-    IFolder folder = getFolder(0, docCount, EMPTY_SET);
-    IObjectSet folderSet = new FnObjectList(ImmutableList.of(folder));
+    Folder folder = getFolder(0, docCount, EMPTY_SET);
+    FolderSet folderSet = new FolderSetMock(ImmutableList.of(folder));
     List<String> expectedDocids = getExpectedDocids(1, docCount);
     testAclCollection(folderSet, expectedDocids);
   }
@@ -174,7 +175,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
   @Test
   public void testMultipleUnnestedFoldersAclCollection() throws Exception {
     int docsPerFolder = 4;
-    IObjectSet folderSet = getFolderSet(docsPerFolder);
+    FolderSetMock folderSet = getFolderSet(docsPerFolder);
     List<String> expectedDocids =
         getExpectedDocids(FOLDERS.length, docsPerFolder);
     testAclCollection(folderSet, expectedDocids);
@@ -183,7 +184,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
   @Test
   public void testRecursiveAclCollection() throws Exception {
     int docsPerFolder = 4;
-    IObjectSet folderTree = getNestedFolderSet(docsPerFolder);
+    FolderSetMock folderTree = getNestedFolderSet(docsPerFolder);
     List<String> expectedDocids =
         getExpectedDocids(FOLDERS.length, docsPerFolder);
     testAclCollection(folderTree, expectedDocids);
@@ -197,54 +198,57 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
    *      / \
    *     3   4
    */
-  private IObjectSet getNestedFolderSet(int docsPerFolder) throws Exception {
+  private FolderSetMock getNestedFolderSet(int docsPerFolder)
+      throws ParseException {
     assertEquals("FOLDERS is unexpected size", 5, FOLDERS.length);
-    return new FnObjectList(ImmutableList.<IFolder>of(
+    return new FolderSetMock(ImmutableList.<Folder>of(
         getFolder(0, docsPerFolder,
-            new FnObjectList(ImmutableList.<IFolder>of(
+            new FolderSetMock(ImmutableList.<Folder>of(
                 getFolder(1, docsPerFolder, EMPTY_SET),
                 getFolder(2, docsPerFolder,
-                   new FnObjectList(ImmutableList.<IFolder>of(
+                   new FolderSetMock(ImmutableList.<Folder>of(
                        getFolder(3, docsPerFolder, EMPTY_SET),
                        getFolder(4, docsPerFolder, EMPTY_SET)))))))));
   }
 
-  private IObjectSet getFolderSet(int docsPerFolder) throws Exception {
-    ImmutableList.Builder<IFolder> folders = ImmutableList.builder();
+  private FolderSetMock getFolderSet(int docsPerFolder) throws Exception {
+    ImmutableList.Builder<Folder> folders = ImmutableList.builder();
     for (int i = 0; i < FOLDERS.length; i++) {
       folders.add(getFolder(i, docsPerFolder, EMPTY_SET));
     }
-    return new FnObjectList(folders.build());
+    return new FolderSetMock(folders.build());
   }
 
-  private IFolder getFolder(int folderNum, int numDocuments,
-      IObjectSet subFolders) throws Exception {
+  private Folder getFolder(int folderNum, int numDocuments,
+      FolderSet subFolders) throws ParseException {
     String id = FOLDERS[folderNum][0];
     Date lastModified = DATE_PARSER.parse(FOLDERS[folderNum][1]);
-    IObjectSet docSet = getChildDocuments(folderNum, numDocuments);
-    IFolder folder = createMock(IFolder.class);
+    DocumentSet docSet = getChildDocuments(folderNum, numDocuments);
+    Folder folder = createMock(Folder.class);
     expect(folder.get_Id()).andReturn(new Id(id)).atLeastOnce();
     expect(folder.get_FolderName()).andReturn(id).atLeastOnce();
-    expect(folder.getModifyDate()).andReturn(lastModified).anyTimes();
+    expect(folder.get_DateLastModified()).andReturn(lastModified).anyTimes();
     expect(folder.get_ContainedDocuments()).andReturn(docSet).atLeastOnce();
     expect(folder.get_SubFolders()).andReturn(subFolders).atLeastOnce();
     replayAndVerify(folder);
     return folder;
   }
 
-  private IObjectSet getChildDocuments(int folderNum, int docCount)
-      throws RepositoryException {
-    ImmutableList.Builder<IDocument> docs = ImmutableList.builder();
+  private DocumentSet getChildDocuments(int folderNum, int docCount) {
+    // Document collides with the SPI class of the same name.
+    ImmutableList.Builder<com.filenet.api.core.Document> docs =
+        ImmutableList.builder();
     for (int i = 1; i <= docCount; i++) {
       Id id = new Id(String.format(DOC_ID_FORMAT, folderNum, i));
-      IDocument doc = createMock(IDocument.class);
+      com.filenet.api.core.Document doc =
+          createMock(com.filenet.api.core.Document.class);
       expect(doc.get_Id()).andReturn(id).atLeastOnce();
       expect(doc.get_Permissions()).andReturn(createACL(createACEs()))
           .atLeastOnce();
       replayAndVerify(doc);
       docs.add(doc);
     }
-    return new FnObjectList(docs.build());
+    return new DocumentSetMock(docs.build());
   }
 
   private List<String> getExpectedDocids(int numFolders, int docsPerFolder) {
@@ -317,7 +321,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
         templateAllowGroup};
   }
 
-  private void testAclCollection(IObjectSet folderSet,
+  private void testAclCollection(FolderSet folderSet,
       List<String> expectedDocids) throws Exception {
     Traverser traverser = getSecurityFolderTraverser(connector, folderSet);
 

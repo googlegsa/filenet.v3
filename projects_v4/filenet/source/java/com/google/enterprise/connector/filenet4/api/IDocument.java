@@ -20,6 +20,7 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.ActiveMarkingList;
+import com.filenet.api.core.Folder;
 
 import java.io.InputStream;
 import java.util.List;
@@ -66,5 +67,5 @@ public interface IDocument extends IBaseObject {
 
   ActiveMarkingList get_ActiveMarkings() throws RepositoryDocumentException;
 
-  IFolder get_SecurityFolder();
+  Folder get_SecurityFolder();
 }
