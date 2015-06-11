@@ -17,7 +17,8 @@ package com.google.enterprise.connector.filenet4.api;
 import java.util.Iterator;
 
 public interface IObjectSet {
-  public int getSize();
+  boolean isEmpty();
 
-  public Iterator<? extends IBaseObject> getIterator();
+  @SuppressWarnings("rawtypes")
+  public Iterator iterator();
 }

@@ -89,7 +89,7 @@ class SecurityFolderTraverser implements Traverser {
   @Override
   public DocumentList getDocumentList(Checkpoint checkpoint)
       throws RepositoryException {
-    LOGGER.info("Searching for documents in updated folders");
+    LOGGER.fine("Searching for documents in updated folders");
     connection.refreshSUserContext();
     try {
       LinkedList<AclDocument> acls = searchDocs(checkpoint);

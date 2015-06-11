@@ -52,7 +52,9 @@ import com.filenet.api.util.Id;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -70,6 +72,9 @@ import java.util.logging.Logger;
 public class FileDocumentListTest {
   private static final Logger LOGGER =
       Logger.getLogger(FileDocumentListTest.class.getName());
+
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
 
   private static final String CHECKPOINT = "{"
       + "\"uuid\":\"{AAAAAAAA-0000-0000-0000-000000000000}\","
@@ -349,6 +354,27 @@ public class FileDocumentListTest {
   }
 
   @Test
+  public void testNullObjectSet_nullDocuments() throws Exception {
+    thrown.expect(NullPointerException.class);
+    DocumentList docList = getObjectUnderTest(getCheckpointObjectStore(),
+        null, new EmptyObjectSet(), new EmptyObjectSet());
+  }
+
+  @Test
+  public void testNullObjectSet_nullCustomDeletes() throws Exception {
+    thrown.expect(NullPointerException.class);
+    DocumentList docList = getObjectUnderTest(getCheckpointObjectStore(),
+        new EmptyObjectSet(), null, new EmptyObjectSet());
+  }
+
+  @Test
+  public void testNullObjectSet_nullDeletionEvents() throws Exception {
+    thrown.expect(NullPointerException.class);
+    DocumentList docList = getObjectUnderTest(getCheckpointObjectStore(),
+        new EmptyObjectSet(), new EmptyObjectSet(), null);
+  }
+
+  @Test
   public void testMockCheckpoint() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, getDocuments(os.getObjects()),
@@ -357,16 +383,9 @@ public class FileDocumentListTest {
   }
 
   @Test
-  public void testMockCheckpoint_nullCustomDeletes() throws Exception {
-    MockObjectStore os = getCheckpointObjectStore();
-    testMockCheckpoint(os, getDocuments(os.getObjects()), null,
-        getDeletionEvents(os.getObjects()));
-  }
-
-  @Test
   public void testMockCheckpoint_emptyDocuments() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
-    testMockCheckpoint(os, newEmptyObjectSet(),
+    testMockCheckpoint(os, new EmptyObjectSet(),
         getCustomDeletion(os.getObjects()), getDeletionEvents(os.getObjects()));
   }
 
@@ -374,14 +393,14 @@ public class FileDocumentListTest {
   public void testMockCheckpoint_emptyCustomDeletes() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, getDocuments(os.getObjects()),
-        newEmptyObjectSet(), getDeletionEvents(os.getObjects()));
+        new EmptyObjectSet(), getDeletionEvents(os.getObjects()));
   }
 
   @Test
   public void testMockCheckpoint_emptyDeletionEvents() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, getDocuments(os.getObjects()),
-        getCustomDeletion(os.getObjects()), newEmptyObjectSet());
+        getCustomDeletion(os.getObjects()), new EmptyObjectSet());
   }
 
   @Test
@@ -405,7 +424,7 @@ public class FileDocumentListTest {
     MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
         docs);
     DocumentList docList = getObjectUnderTest(os, getDocuments(os.getObjects()),
-        newEmptyObjectSet(), newEmptyObjectSet());
+        new EmptyObjectSet(), new EmptyObjectSet());
     Document doc = docList.nextDocument();
     assertNotNull(doc);
     if (expectNotNull) {
@@ -436,8 +455,8 @@ public class FileDocumentListTest {
     MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
         docs);
     DocumentList docList = new FileDocumentList(getDocuments(os.getObjects()),
-        newEmptyObjectSet(), newEmptyObjectSet(), os, connec, traversalContext,
-        new Checkpoint(CHECKPOINT));
+        new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
+        traversalContext, new Checkpoint(CHECKPOINT));
     Document doc = docList.nextDocument();
     assertNotNull(doc);
     try {
@@ -451,11 +470,9 @@ public class FileDocumentListTest {
   private void testMockCheckpoint(IObjectStore os, IObjectSet docSet,
       IObjectSet customDeletionSet, IObjectSet deletionEventSet)
           throws Exception {
-    boolean expectAddTested = (docSet != null && docSet.getSize() > 0);
-    boolean expectCustomDeletionTested =
-        (customDeletionSet != null && customDeletionSet.getSize() > 0);
-    boolean expectDeletionEventTested =
-        (deletionEventSet != null && deletionEventSet.getSize() > 0);
+    boolean expectAddTested = !docSet.isEmpty();
+    boolean expectCustomDeletionTested = !customDeletionSet.isEmpty();
+    boolean expectDeletionEventTested = !deletionEventSet.isEmpty();
 
     boolean isAddTested = false;
     boolean isDeletionEventTested = false;
@@ -522,8 +539,8 @@ public class FileDocumentListTest {
     @SuppressWarnings("unchecked") IObjectStore os =
         newObjectStore("MockObjectStore", DatabaseType.MSSQL,
             new HashMap<Id, IBaseObject>());
-    DocumentList docList = getObjectUnderTest(os, newEmptyObjectSet(),
-        newEmptyObjectSet(), newEmptyObjectSet());
+    DocumentList docList = getObjectUnderTest(os, new EmptyObjectSet(),
+        new EmptyObjectSet(), new EmptyObjectSet());
 
     assertCheckpointEquals(CHECKPOINT, docList.checkpoint());
   }
@@ -537,8 +554,8 @@ public class FileDocumentListTest {
     @SuppressWarnings("unchecked") IObjectStore os =
         newObjectStore("MockObjectStore", DatabaseType.MSSQL,
             new HashMap<Id, IBaseObject>());
-    DocumentList docList = new FileDocumentList(newEmptyObjectSet(),
-        newEmptyObjectSet(), newEmptyObjectSet(), os, connec,
+    DocumentList docList = new FileDocumentList(new EmptyObjectSet(),
+        new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
         new SimpleTraversalContext(), new Checkpoint());
     Checkpoint cp = new Checkpoint(docList.checkpoint());
 
@@ -590,7 +607,7 @@ public class FileDocumentListTest {
     JSONObject json = new JSONObject(checkpoint);
     String checkpointTime = (String) json.get(jsonField.toString());
     String docLastModifiedTime = lastModified.nextValue().toString();
-    
+
     return checkpointTime.equals(docLastModifiedTime);
   }
 
@@ -654,10 +671,6 @@ public class FileDocumentListTest {
           Value.calendarToIso8601(cal), isDeleteEvent, releasedVersion));
     }
     return objectMap;
-  }
-
-  private IObjectSet newEmptyObjectSet() {
-    return new FnObjectList(new ArrayList<IBaseObject>());
   }
 
   /**

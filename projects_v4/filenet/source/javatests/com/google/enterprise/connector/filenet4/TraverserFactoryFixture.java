@@ -108,9 +108,9 @@ public class TraverserFactoryFixture {
     @Override
     public IBaseObject fetchObject(String type, Id id, PropertyFilter filter)
         throws RepositoryDocumentException {
-      Iterator<? extends IBaseObject> it = objectSet.getIterator();
+      Iterator<?> it = objectSet.iterator();
       while (it.hasNext()) {
-        IBaseObject obj = it.next();
+        IBaseObject obj = (IBaseObject) it.next();
         if (obj.get_Id().equals(id)) {
           return obj;
         }

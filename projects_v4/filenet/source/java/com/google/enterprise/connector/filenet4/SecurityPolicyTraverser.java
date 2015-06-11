@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
@@ -105,7 +104,6 @@ class SecurityPolicyTraverser implements Traverser {
       throws RepositoryException {
     LOGGER.fine("Searching for documents by updated security policy");
     connection.refreshSUserContext();
-
     try {
       LinkedList<AclDocument> acls = getDocuments(checkpoint);
       if (acls.isEmpty()) {
@@ -162,7 +160,7 @@ class SecurityPolicyTraverser implements Traverser {
           if (hasPermissions(permissions)) {
             IObjectSet docSet = searcher.execute(
                 buildDocumentSearchQuery(secPolicy), 100, 1, docFactory);
-            Iterator<? extends IBaseObject> docIter = docSet.getIterator();
+            Iterator<?> docIter = docSet.iterator();
             while (docIter.hasNext()) {
               String parentId = null;
               IDocument doc = (IDocument) docIter.next();

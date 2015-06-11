@@ -115,24 +115,24 @@ public class FileDocumentTraverser implements Traverser {
   public DocumentList getDocumentList(Checkpoint checkPoint)
       throws RepositoryException {
     connection.refreshSUserContext();
-    LOGGER.log(Level.INFO, "Target ObjectStore is: " + this.objectStore);
+    LOGGER.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
+
+    ISearch search = fileObjectFactory.getSearch(objectStore);
 
     // to add
     String query = buildQueryString(checkPoint);
-
-    ISearch search = fileObjectFactory.getSearch(objectStore);
-    LOGGER.log(Level.INFO, "Query to Add document: " + query);
+    LOGGER.log(Level.FINE, "Query for added or updated documents: {0}", query);
     IObjectSet objectSet = search.execute(query);
-    LOGGER.log(Level.INFO, "Number of documents sent to GSA: "
-        + objectSet.getSize());
+    LOGGER.fine((objectSet.isEmpty()) ? "Found no documents to add or update"
+        : "Found documents to add or update");
 
     // to delete for deleted documents
     String queryStringToDelete = buildQueryToDelete(checkPoint);
-    LOGGER.log(Level.INFO, "Query to get deleted documents (Documents deleted from repository): "
-            + queryStringToDelete);
+    LOGGER.log(Level.FINE, "Query for deleted documents: {0}",
+        queryStringToDelete);
     IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
-    LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents deleted form Repository): "
-        + objectSetToDelete.getSize());
+    LOGGER.fine((objectSetToDelete.isEmpty()) ? "Found no documents to delete"
+        : "Found documents to delete");
 
     // to delete for additional delete clause
     IObjectSet objectSetToDeleteDocs;
@@ -141,16 +141,17 @@ public class FileDocumentTraverser implements Traverser {
     } else {
       String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(checkPoint,
           connector.getDeleteAdditionalWhereClause());
-
-      LOGGER.log(Level.INFO, "Query to get documents satisfying the delete where clause: "
-              + queryStringToDeleteDocs);
+      LOGGER.log(Level.FINE,
+          "Query for documents satisfying the delete WHERE clause: {0}",
+          queryStringToDeleteDocs);
       objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
-      LOGGER.log(Level.INFO, "Number of documents whose index will be deleted from GSA (Documents satisfying the delete where clause): "
-              + objectSetToDeleteDocs.getSize());
+      LOGGER.fine((objectSetToDeleteDocs.isEmpty())
+          ? "Found no documents to delete using WHERE clause"
+          : "Found documents to delete using WHERE clause");
     }
-    if ((objectSet.getSize() > 0)
-        || (objectSetToDeleteDocs.getSize() > 0)
-        || (objectSetToDelete.getSize() > 0)) {
+
+    if (!objectSet.isEmpty() || !objectSetToDeleteDocs.isEmpty()
+        || !objectSetToDelete.isEmpty()) {
       return new FileDocumentList(objectSet, objectSetToDeleteDocs,
           objectSetToDelete, objectStore, connector, traversalContext,
           checkPoint);
@@ -189,8 +190,8 @@ public class FileDocumentTraverser implements Traverser {
       if ((additionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
         query = new StringBuilder(additionalWhereClause);
         query.replace(0, 6, "SELECT TOP " + batchHint + " ");
-        LOGGER.fine("Using Custom Query[" + additionalWhereClause
-                + "]");
+        LOGGER.log(Level.FINE, "Using Custom Query[{0}]",
+            additionalWhereClause);
       } else {
         query.append(additionalWhereClause);
       }
@@ -222,7 +223,8 @@ public class FileDocumentTraverser implements Traverser {
     if ((deleteadditionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
       query = new StringBuilder(deleteadditionalWhereClause);
       query.replace(0, 6, "SELECT TOP " + batchHint + " ");
-      LOGGER.fine("Using Custom Query[" + deleteadditionalWhereClause + "]");
+      LOGGER.log(Level.FINE, "Using Custom Query[{0}]",
+          deleteadditionalWhereClause);
     } else {
       query.append(deleteadditionalWhereClause);
     }
@@ -249,7 +251,6 @@ public class FileDocumentTraverser implements Traverser {
    */
   private String buildQueryToDelete(Checkpoint checkpoint)
           throws RepositoryException {
-    LOGGER.fine("Build query to get the documents removed from repository: ");
     StringBuilder query = new StringBuilder("SELECT TOP ");
     query.append(batchHint);
     query.append(" ");
@@ -299,8 +300,8 @@ public class FileDocumentTraverser implements Traverser {
     } else {
       statement = MessageFormat.format(whereClause, arguments);
     }
-    LOGGER.log(Level.FINE, "MakeCheckpointQueryString date: " + c);
-    LOGGER.log(Level.FINE, "MakeCheckpointQueryString ID: " + uuid);
+    LOGGER.log(Level.FINE, "MakeCheckpointQueryString date: {0}", c);
+    LOGGER.log(Level.FINE, "MakeCheckpointQueryString ID: {0}", uuid);
     return statement;
   }
 }

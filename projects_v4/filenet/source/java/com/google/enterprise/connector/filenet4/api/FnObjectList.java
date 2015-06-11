@@ -14,7 +14,6 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -26,12 +25,17 @@ public class FnObjectList implements IObjectSet {
   }
 
   @Override
-  public int getSize() {
+  public boolean isEmpty() {
+    return objectList.isEmpty();
+  }
+
+  public int size() {
     return objectList.size();
   }
 
   @Override
-  public Iterator<? extends IBaseObject> getIterator() {
+  @SuppressWarnings("rawtypes")
+  public Iterator iterator() {
     return objectList.iterator();
   }
 }

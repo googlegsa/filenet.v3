@@ -15,7 +15,9 @@
 package com.google.enterprise.connector.filenet4.api;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
@@ -125,12 +127,11 @@ public class FnObjectFactoryTest {
         + TestConnection.docId1 + "' and VersionStatus=1 "
         + "and ContentSize IS NOT NULL  AND (ISCLASS(d, Document) " 
         + "OR ISCLASS(d, WorkflowDefinition))  ORDER BY DateLastModified,Id");
-    assertEquals(1, test.getSize());
-    Iterator<? extends IBaseObject> it = test.getIterator();
-    while (it.hasNext()) {
-      IBaseObject ibo = it.next();
-      assertEquals("{" + TestConnection.docId1 + "}", ibo.get_Id().toString());
-    }
+    Iterator<?> it = test.iterator();
+    assertTrue(it.hasNext());
+    IBaseObject ibo = (IBaseObject) it.next();
+    assertEquals("{" + TestConnection.docId1 + "}", ibo.get_Id().toString());
+    assertFalse(it.hasNext());
   }
 
 }

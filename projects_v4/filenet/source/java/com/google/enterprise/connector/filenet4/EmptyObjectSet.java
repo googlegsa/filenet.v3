@@ -15,19 +15,19 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.Iterators;
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
 
 import java.util.Iterator;
 
 public class EmptyObjectSet implements IObjectSet {
   @Override
-  public int getSize() {
-    return 0;
+  public boolean isEmpty() {
+    return true;
   }
 
   @Override
-  public Iterator<? extends IBaseObject> getIterator() {
+  @SuppressWarnings("rawtypes")
+  public Iterator iterator() {
     return Iterators.emptyIterator();
   }
 }

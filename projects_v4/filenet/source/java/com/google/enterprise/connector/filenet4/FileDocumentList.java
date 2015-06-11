@@ -49,7 +49,6 @@ public class FileDocumentList implements DocumentList {
   private final LinkedList<Document> acls;
   private final FileConnector connector;
   private final TraversalContext traversalContext;
-  private Document fileDocument;
   private Date fileDocumentDate;
   private Date fileDocumentToDeleteDate;
   private Date fileDocumentToDeleteDocsDate;
@@ -71,30 +70,12 @@ public class FileDocumentList implements DocumentList {
     this.objects = mergeAndSortObjects(objectSet, objectSetToDelete,
         objectSetToDeleteDocs);
     this.acls = new LinkedList<Document>();
-
-    // Docs to Add
-    logger.log(Level.INFO, "Number of new documents discovered: "
-            + objectSet.getSize());
-
-    // Docs to Delete
-    logger.log(Level.INFO, "Number of new documents to be removed (Documents deleted from repository): "
-            + objectSetToDelete.getSize());
-
-    if (objectSetToDeleteDocs != null) {
-      logger.info("Number of new documents to be removed (Documents "
-          + "satisfying additional delete clause): "
-          + objectSetToDeleteDocs.getSize());
-    }
   }
 
   private Iterator<? extends IBaseObject> mergeAndSortObjects(
       IObjectSet objectSet, IObjectSet objectSetToDelete,
       IObjectSet objectSetToDeleteDocs) {
-    int size = objectSet.getSize() + objectSetToDelete.getSize();
-    if (objectSetToDeleteDocs != null) {
-      size += objectSetToDeleteDocs.getSize();
-    }
-    List<IBaseObject> objectList = new ArrayList<IBaseObject>(size);
+    List<IBaseObject> objectList = new ArrayList<>();
 
     // Adding documents, deletion events and custom deletion to the object list
     addToList(objectList, objectSet);
@@ -116,7 +97,8 @@ public class FileDocumentList implements DocumentList {
           }
         }
     });
-    logger.log(Level.FINEST, "Total objects: {0}", objectList.size());
+    logger.log(Level.INFO, "Number of documents to add, update, or delete: {0}",
+        objectList.size());
 
     return objectList.iterator();
   }
@@ -138,9 +120,9 @@ public class FileDocumentList implements DocumentList {
    * Helper method to add objects to list.
    */
   private void addToList(List<IBaseObject> objectList, IObjectSet objectSet) {
-    Iterator<? extends IBaseObject> iter = objectSet.getIterator();
+    Iterator<?> iter = objectSet.iterator();
     while (iter.hasNext()) {
-      objectList.add(iter.next());
+      objectList.add((IBaseObject) iter.next());
     }
   }
 
@@ -150,11 +132,9 @@ public class FileDocumentList implements DocumentList {
    */
   private void addCustomDeletionToList(List<IBaseObject> objectList,
       IObjectSet objectSet) {
-    if (objectSet != null) {
-      Iterator<? extends IBaseObject> iter = objectSet.getIterator();
-      while (iter.hasNext()) {
-        objectList.add(new FileDeletionObject(iter.next()));
-      }
+    Iterator<?> iter = objectSet.iterator();
+    while (iter.hasNext()) {
+      objectList.add(new FileDeletionObject((IBaseObject) iter.next()));
     }
   }
 
@@ -168,7 +148,7 @@ public class FileDocumentList implements DocumentList {
   public Document nextDocument() throws RepositoryException {
     logger.entering("FileDocumentList", "nextDocument()");
 
-    fileDocument = null;
+    Document fileDocument;
     if (objects.hasNext()) {
       IBaseObject object = objects.next();
       if (object.isDeletionEvent()) {

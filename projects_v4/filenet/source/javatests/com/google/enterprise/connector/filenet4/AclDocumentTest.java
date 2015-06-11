@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -79,9 +78,9 @@ public class AclDocumentTest {
   private final DocumentList getDocumentList(String[][] entries,
       List<AccessPermission>... perms) throws Exception {
     MockObjectStore objectStore = getObjectStore(entries, perms);
-    IObjectSet objectSet = getObjectSet(objectStore);
+    FnObjectList objectSet = getObjectSet(objectStore);
     assertNotNull(objectStore);
-    assertEquals(entries.length, objectSet.getSize());
+    assertEquals(entries.length, objectSet.size());
     return new FileDocumentList(objectSet, new EmptyObjectSet(),
         new EmptyObjectSet(), objectStore, connector,
         new SimpleTraversalContext(), null);
@@ -94,7 +93,7 @@ public class AclDocumentTest {
         getObjectMap(entries, perms));
   }
 
-  private IObjectSet getObjectSet(MockObjectStore mockOs) {
+  private FnObjectList getObjectSet(MockObjectStore mockOs) {
     List<IBaseObject> objectList = new ImmutableList.Builder<IBaseObject>()
         .addAll(mockOs.getObjects().values().iterator()).build();
     return new FnObjectList(objectList);
