@@ -23,10 +23,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.EngineSetMocks.DocumentSetMock;
 import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySetMock;
-import com.google.enterprise.connector.filenet4.api.FnObjectList;
-import com.google.enterprise.connector.filenet4.api.IDocument;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -34,6 +32,7 @@ import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.DocumentSet;
 import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.VersionStatusId;
@@ -98,10 +97,12 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     return secTemplate;
   }
 
-  private IDocument getDocument(String id, Folder folder)
+  // Document collides with the SPI class of the same name.
+  private com.filenet.api.core.Document getDocument(String id, Folder folder)
       throws RepositoryException {
     Id iid = new Id(id);
-    IDocument doc = createMock(IDocument.class);
+    com.filenet.api.core.Document doc =
+        createMock(com.filenet.api.core.Document.class);
     expect(doc.get_Id()).andReturn(iid).anyTimes();
     expect(doc.get_SecurityFolder()).andReturn(folder).atLeastOnce();
     replayAndVerify(doc);
@@ -220,8 +221,8 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     if (docInheritsSecFolder) {
       folder = createMock(Folder.class);
     }
-    IDocument doc = getDocument(docId, folder);
-    IObjectSet docSet = new FnObjectList(Collections.singletonList(doc));
+    com.filenet.api.core.Document doc = getDocument(docId, folder);
+    DocumentSet docSet = new DocumentSetMock(Collections.singletonList(doc));
     return getSecurityPolicyTraverser(connector, secPolicySet, docSet);
   }
 

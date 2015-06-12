@@ -17,6 +17,7 @@ package com.google.enterprise.connector.filenet4.api;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.IndependentObjectSet;
+import com.filenet.api.core.IndependentObject;
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.query.SearchSQL;
@@ -32,16 +33,9 @@ public class FnSearch implements ISearch {
       Logger.getLogger(FnSearch.class.getName());
 
   private final SearchScope search;
-  private final IBaseObjectFactory objectFactory;
 
-  public FnSearch(SearchScope search, IBaseObjectFactory factory) {
+  public FnSearch(SearchScope search) {
     this.search = search;
-    this.objectFactory = factory;
-  }
-
-  @Override
-  public IObjectSet execute(String query) throws RepositoryException {
-    return execute(query, 100, 1, objectFactory);
   }
 
   @Override
@@ -64,14 +58,15 @@ public class FnSearch implements ISearch {
   }
 
   @Override
-  public IObjectSet execute(String query, int pageSize, int maxRecursion,
-      IBaseObjectFactory factory) throws RepositoryException {
+  public IObjectSet execute(String query) throws RepositoryException {
     try {
-      IndependentObjectSet myObjects = execute(query, pageSize, maxRecursion);
+      IndependentObjectSet myObjects = execute(query, 100, 1);
+
       Iterator<?> it = myObjects.iterator();
       LinkedList<IBaseObject> objectList = new LinkedList<IBaseObject>();
       while (it.hasNext()) {
-        objectList.add(factory.createObject(it.next()));
+        IndependentObject object = (IndependentObject) it.next();
+        objectList.add(new FnBaseObject(object));
       }
       return new FnObjectList(objectList);
     } catch (EngineRuntimeException e) {

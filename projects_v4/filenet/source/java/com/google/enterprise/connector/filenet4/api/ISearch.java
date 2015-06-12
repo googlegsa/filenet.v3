@@ -18,13 +18,10 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.IndependentObjectSet;
 
-/* TODO(jlacey): Migrate all callers to the IndependentObjectSet overload. */
 public interface ISearch {
 
+  /* TODO(jlacey): Migrate all callers to the IndependentObjectSet overload. */
   public IObjectSet execute(String query) throws RepositoryException;
 
   IndependentObjectSet execute(String query, int pageSize, int maxRecursion);
-
-  IObjectSet execute(String query, int pageSize, int maxRecursion,
-      IBaseObjectFactory factory) throws RepositoryException;
 }

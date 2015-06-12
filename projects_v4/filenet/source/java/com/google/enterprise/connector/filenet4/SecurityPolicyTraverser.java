@@ -16,11 +16,8 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IConnection;
-import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.spi.Document;
@@ -32,7 +29,6 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.collection.SecurityTemplateList;
-import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.constants.VersionStatusId;
@@ -136,8 +132,6 @@ class SecurityPolicyTraverser implements Traverser {
     LinkedList<AclDocument> docs = new LinkedList<AclDocument>();
     IndependentObjectSet secPolicySet =
         searcher.execute(buildSecurityPolicyQuery(checkpoint), 100, 0);
-    IBaseObjectFactory docFactory =
-        objectFactory.getFactory(ClassNames.DOCUMENT);
     Iterator<?> secPolicyIter = secPolicySet.iterator();
     int docCount = 0;
     while (secPolicyIter.hasNext() && (docCount < batchHint)) {
@@ -158,12 +152,14 @@ class SecurityPolicyTraverser implements Traverser {
           Permissions permissions =
               new Permissions(secTemplate.get_TemplatePermissions());
           if (hasPermissions(permissions)) {
-            IObjectSet docSet = searcher.execute(
-                buildDocumentSearchQuery(secPolicy), 100, 1, docFactory);
+            IndependentObjectSet docSet = searcher.execute(
+                buildDocumentSearchQuery(secPolicy), 100, 1);
             Iterator<?> docIter = docSet.iterator();
             while (docIter.hasNext()) {
+              // Document collides with the SPI class of the same name.
+              com.filenet.api.core.Document doc =
+                  (com.filenet.api.core.Document) docIter.next();
               String parentId = null;
-              IDocument doc = (IDocument) docIter.next();
               if (doc.get_SecurityFolder() != null) {
                 parentId = doc.get_Id() + AclDocument.SEC_FOLDER_POSTFIX;
               }

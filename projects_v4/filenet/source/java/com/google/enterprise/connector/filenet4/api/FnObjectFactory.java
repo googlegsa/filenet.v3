@@ -21,14 +21,10 @@ import com.google.enterprise.connector.spi.RepositoryLoginException;
 import com.filenet.api.admin.DocumentClassDefinition;
 import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.collection.PropertyDefinitionList;
-import com.filenet.api.constants.ClassNames;
 import com.filenet.api.core.Connection;
-import com.filenet.api.core.Document;
 import com.filenet.api.core.Domain;
 import com.filenet.api.core.Factory;
-import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.ObjectStore;
-import com.filenet.api.core.VersionSeries;
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.query.SearchScope;
@@ -120,39 +116,10 @@ public class FnObjectFactory implements IObjectFactory {
   }
 
   @Override
-  public ISearch getSearch(IObjectStore objectStore)
-          throws RepositoryException {
+  public ISearch getSearch(IObjectStore objectStore) {
     SearchScope search =
         new SearchScope(((FnObjectStore) objectStore).getObjectStore());
 
-    return new FnSearch(search, getFactory(null));
-  }
-
-  @Override
-  public IBaseObjectFactory getFactory(String type) {
-    // TODO (tdnguyen): Refactor old codes to use new factories to create
-    // objects.
-    if (ClassNames.DOCUMENT.equals(type)) {
-      return new IBaseObjectFactory() {
-        @Override public IBaseObject createObject(Object object)
-            throws RepositoryException {
-          return new FnDocument((Document) object);
-        }
-      };
-    } else if (ClassNames.VERSION_SERIES.equals(type)) {
-      return new IBaseObjectFactory() {
-        @Override public IBaseObject createObject(Object object)
-            throws RepositoryException {
-          return new FnVersionSeries((VersionSeries) object);
-        }
-      };
-    } else {
-      return new IBaseObjectFactory() {
-        @Override public IBaseObject createObject(Object object)
-            throws RepositoryException {
-          return new FnBaseObject((IndependentObject) object);
-        }
-      };
-    }
+    return new FnSearch(search);
   }
 }

@@ -26,7 +26,6 @@ import static org.easymock.EasyMock.verify;
 
 import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySetMock;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
-import com.google.enterprise.connector.filenet4.api.IBaseObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
@@ -36,6 +35,7 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.DocumentSet;
 import com.filenet.api.collection.FolderSet;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.PermissionSource;
@@ -138,23 +138,19 @@ public class TraverserFactoryFixture {
 
   protected SecurityPolicyTraverser getSecurityPolicyTraverser(
       FileConnector connector, SecurityPolicySetMock secPolicySet,
-      IObjectSet docSet) throws RepositoryException {
+      DocumentSet docSet) throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
-    IBaseObjectFactory baseFactory = createNiceMock(IBaseObjectFactory.class);
     ISearch searcher = createMock(ISearch.class);
     expect(searcher.execute(isA(String.class), eq(100), eq(0)))
         .andReturn(secPolicySet).atLeastOnce();
     if (!secPolicySet.isEmpty()) {
-      expect(searcher.execute(isA(String.class), eq(100), eq(1),
-              eq(baseFactory)))
+      expect(searcher.execute(isA(String.class), eq(100), eq(1)))
           .andReturn(docSet)
           .times(secPolicySet.size(), secPolicySet.size() * 2);
     }
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
-    expect(objectFactory.getFactory(isA(String.class)))
-        .andReturn(baseFactory).atLeastOnce();
     replayAndVerify(connection, objectFactory, os, searcher);
 
     return new SecurityPolicyTraverser(connection, objectFactory, os,
