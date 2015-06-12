@@ -303,8 +303,8 @@ public class FileConnectorType implements ConnectorType {
             ISearch search = session.getSearch();
             search.execute(query.toString());
           }
-        } catch (RepositoryException e) {
-          if (e.getCause().toString().trim().contains(ACCESS_DENIED_EXCEPTION)) {
+        } catch (EngineRuntimeException e) {
+          if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = OBJECT_STORE;
             form = makeConfigForm(configData, this.validation);
@@ -312,8 +312,7 @@ public class FileConnectorType implements ConnectorType {
             return new ConfigureResponse(
                     resource.getString("object_store_access_error"),
                     form);
-          } else if (e.getCause().toString().trim().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
-
+          } else if (e.toString().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = WHERECLAUSE;
             form = makeConfigForm(configData, this.validation);
@@ -368,8 +367,8 @@ public class FileConnectorType implements ConnectorType {
             ISearch search = session.getSearch();
             search.execute(deleteuery.toString());
           }
-        } catch (RepositoryException e) {
-          if (e.getCause().toString().trim().contains(ACCESS_DENIED_EXCEPTION)) {
+        } catch (EngineRuntimeException e) {
+          if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = OBJECT_STORE;
             form = makeConfigForm(configData, this.validation);
@@ -377,7 +376,7 @@ public class FileConnectorType implements ConnectorType {
             return new ConfigureResponse(
                     resource.getString("object_store_access_error"),
                     form);
-          } else if (e.getCause().toString().trim().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
+          } else if (e.toString().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = DELETEWHERECLAUSE;
             form = makeConfigForm(configData, this.validation);

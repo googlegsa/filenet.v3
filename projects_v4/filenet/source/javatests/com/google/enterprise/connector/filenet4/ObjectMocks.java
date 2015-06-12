@@ -19,7 +19,6 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 
-import com.google.enterprise.connector.filenet4.api.FnBaseObject;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 
 import com.filenet.api.collection.AccessPermissionList;
@@ -71,48 +70,33 @@ class ObjectMocks {
     return new Id(guid + ZERO_ID.substring(guid.length()));
   }
 
-  /** Gets a basic wrapped Document. */
-  public static FnBaseObject newBaseObject(MockObjectStore objectStore,
+  /** Gets a basic Document. */
+  public static Document mockDocument(MockObjectStore objectStore,
       String guid, String timeStr, boolean isReleasedVersion) {
-    return newBaseObject(objectStore, guid, timeStr, isReleasedVersion,
+    return mockDocument(objectStore, guid, timeStr, isReleasedVersion,
         null, null, new AccessPermissionListMock());
   }
 
-  /** Gets a wrapped Document with ContentSize and MimeType properties. */
-  public static FnBaseObject newBaseObject(MockObjectStore objectStore,
+  /** Gets a Document with ContentSize and MimeType properties. */
+  public static Document mockDocument(MockObjectStore objectStore,
       String guid, String timeStr, boolean isReleasedVersion,
       Double contentSize, String mimeType) {
-    return newBaseObject(objectStore, guid, timeStr, isReleasedVersion,
+    return mockDocument(objectStore, guid, timeStr, isReleasedVersion,
         contentSize, mimeType, new AccessPermissionListMock());
   }
 
-  /** Gets a wrapped Document with a Permissions property. */
-  public static FnBaseObject newBaseObject(MockObjectStore objectStore,
+  /** Gets a Document with a Permissions property. */
+  public static Document mockDocument(MockObjectStore objectStore,
       String guid, String timeStr, boolean isReleasedVersion,
       AccessPermissionList perms) {
-    return newBaseObject(objectStore, guid, timeStr, isReleasedVersion,
+    return mockDocument(objectStore, guid, timeStr, isReleasedVersion,
         null, null, perms);
   }
 
-  /** Gets a wrapped Document. */
-  private static FnBaseObject newBaseObject(MockObjectStore objectStore,
+  /** Gets a Document. */
+  private static Document mockDocument(MockObjectStore objectStore,
       String guid, String timeStr, boolean isReleasedVersion,
       Double contentSize, String mimeType, AccessPermissionList perms) {
-    Document document = mockDocument(guid, timeStr, isReleasedVersion,
-        contentSize, mimeType, perms);
-    objectStore.addObject(document);
-    return new FnBaseObject(document);
-  }
-
-  public static FnBaseObject newDeletionEvent(MockObjectStore objectStore,
-      String vsId, String eventId, String timeStr, boolean isReleasedVersion) {
-    return new FnBaseObject(
-        mockDeletionEvent(vsId, eventId, timeStr, isReleasedVersion));
-  }
-
-  private static Document mockDocument(String guid, String timeStr,
-      boolean isReleasedVersion, Double contentSize, String mimeType,
-      AccessPermissionList perms) {
     VersionSeries vs = createMock(VersionSeries.class);
     expect(vs.get_Id()).andStubReturn(newId(guid));
     Document doc = createMock(Document.class);
@@ -128,11 +112,12 @@ class ObjectMocks {
     expect(doc.get_MimeType()).andStubReturn(mimeType);
     expect(doc.get_Permissions()).andStubReturn(perms);
     replay(vs, doc);
+    objectStore.addObject(doc);
     return doc;
   }
 
-  private static DeletionEvent mockDeletionEvent(String vsId, String eventId,
-      String timeStr, boolean isReleasedVersion) {
+  public static DeletionEvent mockDeletionEvent(MockObjectStore objectStore,
+      String vsId, String eventId, String timeStr, boolean isReleasedVersion) {
     VersionSeries vs = createMock(VersionSeries.class);
     expect(vs.get_Id()).andStubReturn(newId(vsId));
     ObjectStore os = createMock(ObjectStore.class);

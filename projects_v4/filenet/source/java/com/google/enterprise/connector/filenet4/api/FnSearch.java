@@ -14,17 +14,11 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.enterprise.connector.spi.RepositoryException;
-
 import com.filenet.api.collection.IndependentObjectSet;
-import com.filenet.api.core.IndependentObject;
-import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.query.SearchSQL;
 import com.filenet.api.query.SearchScope;
 
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -58,19 +52,7 @@ public class FnSearch implements ISearch {
   }
 
   @Override
-  public IObjectSet execute(String query) throws RepositoryException {
-    try {
-      IndependentObjectSet myObjects = execute(query, 100, 1);
-
-      Iterator<?> it = myObjects.iterator();
-      LinkedList<FnBaseObject> objectList = new LinkedList<>();
-      while (it.hasNext()) {
-        IndependentObject object = (IndependentObject) it.next();
-        objectList.add(new FnBaseObject(object));
-      }
-      return new FnObjectList(objectList);
-    } catch (EngineRuntimeException e) {
-      throw new RepositoryException(e);
-    }
+  public IndependentObjectSet execute(String query) {
+    return execute(query, 100, 1);
   }
 }

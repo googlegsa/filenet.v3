@@ -16,8 +16,8 @@ package com.google.enterprise.connector.filenet4;
 
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertDateNearly;
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertNullField;
-import static com.google.enterprise.connector.filenet4.ObjectMocks.newBaseObject;
-import static com.google.enterprise.connector.filenet4.ObjectMocks.newDeletionEvent;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.mockDeletionEvent;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.mockDocument;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newId;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
 import static org.junit.Assert.assertEquals;
@@ -31,10 +31,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.api.FnBaseObject;
-import com.google.enterprise.connector.filenet4.api.FnObjectList;
+import com.google.enterprise.connector.filenet4.EngineSetMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
@@ -48,8 +46,10 @@ import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.DatabaseType;
+import com.filenet.api.core.IndependentObject;
 import com.filenet.api.util.Id;
 
 import org.json.JSONException;
@@ -243,14 +243,15 @@ public class FileDocumentListTest {
   private void testSorting(int[] expectedOrder, String[][] entries,
       DatabaseType dbType) throws Exception {
     MockObjectStore os = newObjectStore(dbType);
-    IObjectSet documents = getDocuments(os, entries, true);
+    IndependentObjectSet documents = getDocuments(os, entries, true);
     testSorting(expectedOrder, entries, os,
         documents, new EmptyObjectSet(), new EmptyObjectSet());
   }
 
   private void testSorting(int[] expectedOrder, String[][] entries,
-      MockObjectStore os, IObjectSet documents, IObjectSet customDeletions,
-      IObjectSet deletionEvents) throws Exception {
+      MockObjectStore os, IndependentObjectSet documents,
+      IndependentObjectSet customDeletions, IndependentObjectSet deletionEvents)
+      throws Exception {
     DocumentList docList =
         getObjectUnderTest(os, documents, customDeletions, deletionEvents);
 
@@ -319,9 +320,9 @@ public class FileDocumentListTest {
         position);
   }
 
-  private void testUnreleasedNextDocument(Id unreleasedGuid,
-      MockObjectStore os, IObjectSet customDeletionSet,
-      IObjectSet deletionEventSet, SkipPosition expectedPosition)
+  private void testUnreleasedNextDocument(Id unreleasedGuid, MockObjectStore os,
+      IndependentObjectSet customDeletionSet,
+      IndependentObjectSet deletionEventSet, SkipPosition expectedPosition)
       throws Exception {
     String[][] docEntries = new String[][] {
         {"AAAAAAA1-0000-0000-0000-000000000000", "2014-02-01T08:00:00.100"},
@@ -329,7 +330,7 @@ public class FileDocumentListTest {
         {"BBBBBBB1-0000-0000-0000-000000000000", "2014-03-01T08:00:00.100"},
         {"BBBBBBB2-0000-0000-0000-000000000000", "2014-03-02T08:00:00.100"}};
 
-    IObjectSet docSet = getDocuments(os, docEntries, true);
+    IndependentObjectSet docSet = getDocuments(os, docEntries, true);
 
     // Begin testing nextDocument for exception
     DocumentList docList =
@@ -425,9 +426,9 @@ public class FileDocumentListTest {
         getCustomDeletions(os, cdEntries, true), new EmptyObjectSet());
   }
 
-  private void testMockCheckpoint(IObjectStore os, IObjectSet docSet,
-      IObjectSet customDeletionSet, IObjectSet deletionEventSet)
-          throws Exception {
+  private void testMockCheckpoint(IObjectStore os, IndependentObjectSet docSet,
+      IndependentObjectSet customDeletionSet,
+      IndependentObjectSet deletionEventSet) throws Exception {
     boolean expectAddTested = !docSet.isEmpty();
     boolean expectCustomDeletionTested = !customDeletionSet.isEmpty();
     boolean expectDeletionEventTested = !deletionEventSet.isEmpty();
@@ -535,9 +536,10 @@ public class FileDocumentListTest {
   private void testMimeTypeAndContentSize(String mimeType, double size,
       boolean expectNotNull) throws Exception {
     MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    FnBaseObject doc1 = newBaseObject(os,
+    IndependentObject doc1 = mockDocument(os,
         "AAAAAAA1", CHECKPOINT_TIMESTAMP, false, size, mimeType);
-    IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
+    IndependentObjectSet docSet =
+        new IndependentObjectSetMock(ImmutableList.of(doc1));
 
     DocumentList docList = getObjectUnderTest(os, docSet,
         new EmptyObjectSet(), new EmptyObjectSet());
@@ -554,9 +556,10 @@ public class FileDocumentListTest {
   @Test
   public void testExcludedMimeType() throws Exception {
     MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    FnBaseObject doc1 = newBaseObject(os,
+    IndependentObject doc1 = mockDocument(os,
         "AAAAAAA1", CHECKPOINT_TIMESTAMP, false, 1024.0, "text/plain");
-    IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
+    IndependentObjectSet docSet =
+        new IndependentObjectSetMock(ImmutableList.of(doc1));
 
     TraversalContext traversalContext = new SimpleTraversalContext() {
       @Override public int mimeTypeSupportLevel(String mimeType) {
@@ -583,8 +586,8 @@ public class FileDocumentListTest {
    * @param entries an array of arrays of IDs and timestamps
    * @param releasedVersion if the documents should be released versions
    */
-  private IObjectSet getDocuments(MockObjectStore os, String[][] entries,
-      boolean releasedVersion) {
+  private IndependentObjectSet getDocuments(MockObjectStore os,
+      String[][] entries, boolean releasedVersion) {
     return getObjects(os, entries, false, releasedVersion);
   }
 
@@ -594,8 +597,8 @@ public class FileDocumentListTest {
    * @param entries an array of arrays of IDs and timestamps
    * @param releasedVersion if the deleted documents should be released versions
    */
-  private IObjectSet getDeletionEvents(MockObjectStore os, String[][] entries,
-      boolean releasedVersion) {
+  private IndependentObjectSet getDeletionEvents(MockObjectStore os,
+      String[][] entries, boolean releasedVersion) {
     return getObjects(os, entries, true, releasedVersion);
   }
 
@@ -605,8 +608,8 @@ public class FileDocumentListTest {
    * @param entries an array of arrays of IDs and timestamps
    * @param releasedVersion if the deleted documents should be released versions
    */
-  private IObjectSet getCustomDeletions(MockObjectStore os, String[][] entries,
-      boolean releasedVersion) {
+  private IndependentObjectSet getCustomDeletions(MockObjectStore os,
+      String[][] entries, boolean releasedVersion) {
     return getDocuments(os, entries, releasedVersion);
   }
 
@@ -618,21 +621,21 @@ public class FileDocumentListTest {
    * @param isDeletionEvent if the objects are DeletionEvents
    * @param releasedVersion if the objects should refer to released versions
    */
-  private IObjectSet getObjects(MockObjectStore os, String[][] entries,
-      boolean isDeletionEvent, boolean releasedVersion) {
-    List<FnBaseObject> objectList = new ArrayList<>(entries.length);
-    for (String[] line : entries) {
+  private IndependentObjectSet getObjects(MockObjectStore os,
+      String[][] entries, boolean isDeletionEvent, boolean releasedVersion) {
+    List<IndependentObject> objectList = new ArrayList<>(entries.length);
+    for (String[] entry : entries) {
       objectList.add(
           (isDeletionEvent)
-          ? newDeletionEvent(os, line[0], line[1], line[2], releasedVersion)
-          : newBaseObject(os, line[0], line[1], releasedVersion));
+          ? mockDeletionEvent(os, entry[0], entry[1], entry[2], releasedVersion)
+          : mockDocument(os, entry[0], entry[1], releasedVersion));
     }
-    return new FnObjectList(objectList);
+    return new IndependentObjectSetMock(objectList);
   }
 
-  private DocumentList getObjectUnderTest(IObjectStore os, IObjectSet docSet,
-      IObjectSet customDeletionSet, IObjectSet deletionEventSet)
-      throws RepositoryException {
+  private DocumentList getObjectUnderTest(IObjectStore os,
+      IndependentObjectSet docSet, IndependentObjectSet customDeletionSet,
+      IndependentObjectSet deletionEventSet) throws RepositoryException {
     return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
         os, connec, getTraversalContext(), new Checkpoint(CHECKPOINT));
   }

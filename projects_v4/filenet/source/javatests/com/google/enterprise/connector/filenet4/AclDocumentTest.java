@@ -14,15 +14,14 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import static com.google.enterprise.connector.filenet4.ObjectMocks.newBaseObject;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.mockDocument;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
-import com.google.enterprise.connector.filenet4.api.FnBaseObject;
-import com.google.enterprise.connector.filenet4.api.FnObjectList;
+import com.google.enterprise.connector.filenet4.EngineSetMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -35,6 +34,7 @@ import com.google.enterprise.connector.spiimpl.PrincipalValue;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.PermissionSource;
+import com.filenet.api.core.IndependentObject;
 import com.filenet.api.security.AccessPermission;
 
 import org.junit.Before;
@@ -76,21 +76,23 @@ public class AclDocumentTest {
   private final DocumentList getDocumentList(String[][] entries,
       List<AccessPermission>... perms) throws Exception {
     MockObjectStore objectStore = newObjectStore(DatabaseType.MSSQL);
-    FnObjectList objectSet = getObjectSet(objectStore, entries, perms);
+    IndependentObjectSetMock objectSet =
+        getObjectSet(objectStore, entries, perms);
     return new FileDocumentList(objectSet, new EmptyObjectSet(),
         new EmptyObjectSet(), objectStore, connector,
         new SimpleTraversalContext(), null);
   }
 
   @SafeVarargs
-  private final FnObjectList getObjectSet(MockObjectStore objectStore,
-      String[][] entries, List<AccessPermission>... perms) {
-    List<FnBaseObject> objectList = new ArrayList<>(entries.length);
+  private final IndependentObjectSetMock getObjectSet(
+      MockObjectStore objectStore, String[][] entries,
+      List<AccessPermission>... perms) {
+    List<IndependentObject> objectList = new ArrayList<>(entries.length);
     for (String[] entry : entries) {
-      objectList.add(newBaseObject(objectStore, entry[0], entry[1], true,
+      objectList.add(mockDocument(objectStore, entry[0], entry[1], true,
               TestObjectFactory.newPermissionList(perms)));
     }
-    return new FnObjectList(objectList);
+    return new IndependentObjectSetMock(objectList);
   }
 
   /**

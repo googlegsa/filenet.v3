@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.FnBaseObject;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -25,7 +24,9 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SkippedDocumentException;
 import com.google.enterprise.connector.spi.TraversalContext;
 
+import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.constants.DatabaseType;
+import com.filenet.api.core.IndependentObject;
 import com.filenet.api.util.Id;
 
 import java.util.ArrayList;
@@ -57,8 +58,9 @@ public class FileDocumentList implements DocumentList {
   private Id docIdToDelete;
   private Id docIdToDeleteDocs;
 
-  public FileDocumentList(IObjectSet objectSet,
-      IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
+  public FileDocumentList(IndependentObjectSet objectSet,
+      IndependentObjectSet objectSetToDeleteDocs,
+      IndependentObjectSet objectSetToDelete,
       IObjectStore objectStore, FileConnector connector,
       TraversalContext traversalContext, Checkpoint checkpoint) {
     this.objectStore = objectStore;
@@ -83,8 +85,8 @@ public class FileDocumentList implements DocumentList {
   }
 
   private Iterator<ObjectWrapper> mergeAndSortObjects(
-      IObjectSet objectSet, IObjectSet objectSetToDelete,
-      IObjectSet objectSetToDeleteDocs) {
+      IndependentObjectSet objectSet, IndependentObjectSet objectSetToDelete,
+      IndependentObjectSet objectSetToDeleteDocs) {
     List<ObjectWrapper> objectList = new ArrayList<>();
 
     // Adding documents, deletion events and custom deletion to the object list
@@ -103,11 +105,13 @@ public class FileDocumentList implements DocumentList {
   }
 
   /** Adds FnBaseObjects from the object set to the list. */
-  private void addToList(List<ObjectWrapper> objectList, IObjectSet objectSet,
-      ObjectType type) {
+  private void addToList(List<ObjectWrapper> objectList,
+      IndependentObjectSet objectSet, ObjectType type) {
     Iterator<?> iter = objectSet.iterator();
     while (iter.hasNext()) {
-      objectList.add(new ObjectWrapper((FnBaseObject) iter.next(), type));
+      FnBaseObject baseObject =
+          new FnBaseObject((IndependentObject) iter.next());
+      objectList.add(new ObjectWrapper(baseObject, type));
     }
   }
 

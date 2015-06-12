@@ -15,11 +15,13 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.Iterators;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
+
+import com.filenet.api.collection.IndependentObjectSet;
+import com.filenet.api.collection.PageIterator;
 
 import java.util.Iterator;
 
-public class EmptyObjectSet implements IObjectSet {
+public class EmptyObjectSet implements IndependentObjectSet {
   @Override
   public boolean isEmpty() {
     return true;
@@ -29,5 +31,10 @@ public class EmptyObjectSet implements IObjectSet {
   @SuppressWarnings("rawtypes")
   public Iterator iterator() {
     return Iterators.emptyIterator();
+  }
+
+  @Override
+  public PageIterator pageIterator() {
+    throw new UnsupportedOperationException();
   }
 }

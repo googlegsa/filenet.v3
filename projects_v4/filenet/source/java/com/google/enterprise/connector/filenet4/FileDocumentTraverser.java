@@ -19,15 +19,16 @@ import com.google.common.base.Strings;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.TraversalContext;
 
+import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.exception.EngineRuntimeException;
 
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -119,44 +120,50 @@ public class FileDocumentTraverser implements Traverser {
 
     ISearch search = fileObjectFactory.getSearch(objectStore);
 
-    // to add
-    String query = buildQueryString(checkPoint);
-    LOGGER.log(Level.FINE, "Query for added or updated documents: {0}", query);
-    IObjectSet objectSet = search.execute(query);
-    LOGGER.fine((objectSet.isEmpty()) ? "Found no documents to add or update"
-        : "Found documents to add or update");
+    try {
+      // to add
+      String query = buildQueryString(checkPoint);
+      LOGGER.log(Level.FINE, "Query for added or updated documents: {0}",
+          query);
+      IndependentObjectSet objectSet = search.execute(query);
+      LOGGER.fine((objectSet.isEmpty()) ? "Found no documents to add or update"
+          : "Found documents to add or update");
 
-    // to delete for deleted documents
-    String queryStringToDelete = buildQueryToDelete(checkPoint);
-    LOGGER.log(Level.FINE, "Query for deleted documents: {0}",
-        queryStringToDelete);
-    IObjectSet objectSetToDelete = search.execute(queryStringToDelete);
-    LOGGER.fine((objectSetToDelete.isEmpty()) ? "Found no documents to delete"
-        : "Found documents to delete");
+      // to delete for deleted documents
+      String queryStringToDelete = buildQueryToDelete(checkPoint);
+      LOGGER.log(Level.FINE, "Query for deleted documents: {0}",
+          queryStringToDelete);
+      IndependentObjectSet objectSetToDelete =
+          search.execute(queryStringToDelete);
+      LOGGER.fine((objectSetToDelete.isEmpty()) ? "Found no documents to delete"
+          : "Found documents to delete");
 
-    // to delete for additional delete clause
-    IObjectSet objectSetToDeleteDocs;
-    if (Strings.isNullOrEmpty(connector.getDeleteAdditionalWhereClause())) {
-      objectSetToDeleteDocs = new EmptyObjectSet();
-    } else {
-      String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(checkPoint,
-          connector.getDeleteAdditionalWhereClause());
-      LOGGER.log(Level.FINE,
-          "Query for documents satisfying the delete WHERE clause: {0}",
-          queryStringToDeleteDocs);
-      objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
-      LOGGER.fine((objectSetToDeleteDocs.isEmpty())
-          ? "Found no documents to delete using WHERE clause"
-          : "Found documents to delete using WHERE clause");
-    }
+      // to delete for additional delete clause
+      IndependentObjectSet objectSetToDeleteDocs;
+      if (Strings.isNullOrEmpty(connector.getDeleteAdditionalWhereClause())) {
+        objectSetToDeleteDocs = new EmptyObjectSet();
+      } else {
+        String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(
+            checkPoint, connector.getDeleteAdditionalWhereClause());
+        LOGGER.log(Level.FINE,
+            "Query for documents satisfying the delete WHERE clause: {0}",
+            queryStringToDeleteDocs);
+        objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
+        LOGGER.fine((objectSetToDeleteDocs.isEmpty())
+            ? "Found no documents to delete using WHERE clause"
+            : "Found documents to delete using WHERE clause");
+      }
 
-    if (!objectSet.isEmpty() || !objectSetToDeleteDocs.isEmpty()
-        || !objectSetToDelete.isEmpty()) {
-      return new FileDocumentList(objectSet, objectSetToDeleteDocs,
-          objectSetToDelete, objectStore, connector, traversalContext,
-          checkPoint);
-    } else {
-      return null;
+      if (!objectSet.isEmpty() || !objectSetToDeleteDocs.isEmpty()
+          || !objectSetToDelete.isEmpty()) {
+        return new FileDocumentList(objectSet, objectSetToDeleteDocs,
+            objectSetToDelete, objectStore, connector, traversalContext,
+            checkPoint);
+      } else {
+        return null;
+      }
+    } catch (EngineRuntimeException e) {
+      throw new RepositoryException(e);
     }
   }
 

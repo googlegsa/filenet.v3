@@ -18,10 +18,12 @@ import com.filenet.api.collection.DocumentSet;
 import com.filenet.api.collection.EngineSet;
 import com.filenet.api.collection.FolderSet;
 import com.filenet.api.collection.GroupSet;
+import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.collection.PageIterator;
 import com.filenet.api.collection.SecurityPolicySet;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
+import com.filenet.api.core.IndependentObject;
 import com.filenet.api.security.Group;
 import com.filenet.api.security.SecurityPolicy;
 
@@ -48,6 +50,15 @@ class EngineSetMocks {
       extends EngineSetMock<Group> implements GroupSet {
     public GroupSetMock() { super(); }
     public GroupSetMock(Collection<? extends Group> values) { super(values); }
+  }
+
+  public static class IndependentObjectSetMock
+      extends EngineSetMock<IndependentObject> implements IndependentObjectSet {
+    public IndependentObjectSetMock() { super(); }
+    public IndependentObjectSetMock(
+        Collection<? extends IndependentObject> values) {
+      super(values);
+    }
   }
 
   public static class SecurityPolicySetMock

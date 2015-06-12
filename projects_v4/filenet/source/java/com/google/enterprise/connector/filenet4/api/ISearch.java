@@ -14,14 +14,10 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.enterprise.connector.spi.RepositoryException;
-
 import com.filenet.api.collection.IndependentObjectSet;
 
 public interface ISearch {
-
-  /* TODO(jlacey): Migrate all callers to the IndependentObjectSet overload. */
-  public IObjectSet execute(String query) throws RepositoryException;
+  IndependentObjectSet execute(String query);
 
   IndependentObjectSet execute(String query, int pageSize, int maxRecursion);
 }

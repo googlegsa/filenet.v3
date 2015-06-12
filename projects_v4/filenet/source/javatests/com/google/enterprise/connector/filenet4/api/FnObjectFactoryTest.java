@@ -26,8 +26,10 @@ import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.spi.RepositoryException;
 
+import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.constants.RefreshMode;
+import com.filenet.api.core.Document;
 import com.filenet.api.core.Factory;
 import com.filenet.api.security.SecurityPolicy;
 
@@ -121,14 +123,14 @@ public class FnObjectFactoryTest {
   @Test
   public void testGetSearch() throws RepositoryException {
     ISearch is = iof.getSearch(ios);
-    IObjectSet test = is.execute(
+    IndependentObjectSet test = is.execute(
         "SELECT TOP 50 d.Id, d.DateLastModified FROM Document AS d WHERE d.Id='"
         + TestConnection.docId1 + "' and VersionStatus=1 "
         + "and ContentSize IS NOT NULL  AND (ISCLASS(d, Document) " 
         + "OR ISCLASS(d, WorkflowDefinition))  ORDER BY DateLastModified,Id");
     Iterator<?> it = test.iterator();
     assertTrue(it.hasNext());
-    IBaseObject ibo = (IBaseObject) it.next();
+    Document ibo = (Document) it.next();
     assertEquals("{" + TestConnection.docId1 + "}", ibo.get_Id().toString());
     assertFalse(it.hasNext());
   }

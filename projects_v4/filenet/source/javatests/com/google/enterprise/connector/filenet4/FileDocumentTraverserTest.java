@@ -14,7 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import static com.google.enterprise.connector.filenet4.ObjectMocks.newBaseObject;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.mockDocument;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
@@ -26,8 +26,7 @@ import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.api.FnBaseObject;
-import com.google.enterprise.connector.filenet4.api.FnObjectList;
+import com.google.enterprise.connector.filenet4.EngineSetMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -37,6 +36,7 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.PermissionSource;
+import com.filenet.api.core.IndependentObject;
 import com.filenet.api.util.Id;
 
 import org.easymock.Capture;
@@ -134,10 +134,10 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
     MockObjectStore objectStore = newObjectStore(DatabaseType.ORACLE);
     String id = "{AAAAAAAA-0000-0000-0000-000000000000}";
     String lastModified = dateFormatter.format(new Date());
-    FnBaseObject doc = newBaseObject(objectStore, id, lastModified, true,
+    IndependentObject doc = mockDocument(objectStore, id, lastModified, true,
         getPermissions(PermissionSource.SOURCE_DIRECT));
     Traverser traverser = getFileDocumentTraverser(connec, objectStore,
-        new FnObjectList(ImmutableList.of(doc)),
+        new IndependentObjectSetMock(ImmutableList.of(doc)),
         new Capture<String>(CaptureType.NONE));
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
 

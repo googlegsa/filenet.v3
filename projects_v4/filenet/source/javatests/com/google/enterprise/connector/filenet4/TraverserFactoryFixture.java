@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySetMock;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
@@ -129,8 +128,9 @@ public class TraverserFactoryFixture {
   }
 
   protected FileDocumentTraverser getFileDocumentTraverser(
-      FileConnector connector, MockObjectStore os, IObjectSet objectSet,
-      Capture<String> capture) throws RepositoryException {
+      FileConnector connector, MockObjectStore os,
+      IndependentObjectSet objectSet, Capture<String> capture)
+      throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
 
     // The first search result is for added and update documents, and
@@ -210,7 +210,7 @@ public class TraverserFactoryFixture {
     }
 
     @Override
-    public IObjectSet execute(String query) {
+    public IndependentObjectSet execute(String query) {
       throw new UnsupportedOperationException();
     }
 
