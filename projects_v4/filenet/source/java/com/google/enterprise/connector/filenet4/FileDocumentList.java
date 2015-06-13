@@ -42,29 +42,30 @@ public class FileDocumentList implements DocumentList {
   private static final Logger logger = 
       Logger.getLogger(FileDocumentList.class.getName());
 
-  private static final long serialVersionUID = 1L;
   private final IObjectStore objectStore;
+  private final FileConnector connector;
+  private final TraversalContext traversalContext;
+  private final Checkpoint checkpoint;
+
   private final DatabaseType databaseType;
   private final Iterator<? extends IBaseObject> objects;
   private final LinkedList<Document> acls;
-  private final FileConnector connector;
-  private final TraversalContext traversalContext;
+
   private Date fileDocumentDate;
   private Date fileDocumentToDeleteDate;
   private Date fileDocumentToDeleteDocsDate;
   private Id docId;
-  private Checkpoint lastCheckPoint;
   private Id docIdToDelete;
   private Id docIdToDeleteDocs;
 
   public FileDocumentList(IObjectSet objectSet,
       IObjectSet objectSetToDeleteDocs, IObjectSet objectSetToDelete,
       IObjectStore objectStore, FileConnector connector,
-      TraversalContext traversalContext, Checkpoint checkPoint) {
+      TraversalContext traversalContext, Checkpoint checkpoint) {
     this.objectStore = objectStore;
     this.connector = connector;
     this.traversalContext = traversalContext;
-    this.lastCheckPoint = checkPoint;
+    this.checkpoint = checkpoint;
 
     this.databaseType = getDatabaseType(objectStore);
     this.objects = mergeAndSortObjects(objectSet, objectSetToDelete,
@@ -103,9 +104,6 @@ public class FileDocumentList implements DocumentList {
     return objectList.iterator();
   }
 
-  /*
-   * Helper method to retrieve database type
-   */
   private DatabaseType getDatabaseType(IObjectStore os) {
     try {
       return os.get_DatabaseType();
@@ -116,9 +114,7 @@ public class FileDocumentList implements DocumentList {
     }
   }
 
-  /*
-   * Helper method to add objects to list.
-   */
+  /** Adds IBaseObjects from the object set to the list. */
   private void addToList(List<IBaseObject> objectList, IObjectSet objectSet) {
     Iterator<?> iter = objectSet.iterator();
     while (iter.hasNext()) {
@@ -126,9 +122,9 @@ public class FileDocumentList implements DocumentList {
     }
   }
 
-  /*
-   * Helper method to add deleted objects returned from the custom query to
-   * list.  It also wraps the deleted object using FileDeletionObject class.
+  /**
+   * Adds DeletionEvents wrapped as IBaseObjects from the object set to the
+   * list, wrapped again as FileDeletionObjects for later identification.
    */
   private void addCustomDeletionToList(List<IBaseObject> objectList,
       IObjectSet objectSet) {
@@ -138,12 +134,6 @@ public class FileDocumentList implements DocumentList {
     }
   }
 
-  /***
-   * The nextDocument method gets the next document from the document list
-   * that the connector acquires from the FileNet repository.
-   *
-   * @return com.google.enterprise.connector.spi.Document
-   */
   @Override
   public Document nextDocument() throws RepositoryException {
     logger.entering("FileDocumentList", "nextDocument()");
@@ -182,9 +172,6 @@ public class FileDocumentList implements DocumentList {
     return fileDocument;
   }
 
-  /*
-   * Helper method to create add document.
-   */
   private Document createAddDocument(IBaseObject object)
       throws RepositoryException {
     Id id = object.get_Id();
@@ -195,9 +182,6 @@ public class FileDocumentList implements DocumentList {
     return doc;
   }
 
-  /*
-   * Helper method to create delete document.
-   */
   private Document createDeleteDocument(IBaseObject object)
       throws RepositoryDocumentException {
     Id id = object.get_Id();
@@ -207,29 +191,17 @@ public class FileDocumentList implements DocumentList {
     return new FileDeleteDocument(versionSeriesId, object.getModifyDate());
   }
 
-  /***
-   * Checkpoint method indicates the current position within the document
-   * list, that is where to start a resumeTraversal method. The checkpoint
-   * method returns information that allows the resumeTraversal method to
-   * resume on the document that would have been returned by the next call to
-   * the nextDocument method.
-   *
-   * @return String checkPoint - information that allows the resumeTraversal
-   *         method to resume on the document
-   */
   @Override
   public String checkpoint() throws RepositoryException {
-    logger.log(Level.FINEST, "Last checkpoint: {0}", lastCheckPoint);
-
-    lastCheckPoint.setTimeAndUuid(
+    checkpoint.setTimeAndUuid(
         JsonField.LAST_MODIFIED_TIME, fileDocumentDate,
         JsonField.UUID, docId);
-    lastCheckPoint.setTimeAndUuid(
+    checkpoint.setTimeAndUuid(
         JsonField.LAST_CUSTOM_DELETION_TIME, fileDocumentToDeleteDocsDate,
         JsonField.UUID_CUSTOM_DELETED_DOC, docIdToDeleteDocs);
-    lastCheckPoint.setTimeAndUuid(
+    checkpoint.setTimeAndUuid(
         JsonField.LAST_DELETION_EVENT_TIME, fileDocumentToDeleteDate,
         JsonField.UUID_DELETION_EVENT, docIdToDelete);
-    return lastCheckPoint.toString();
+    return checkpoint.toString();
   }
 }

@@ -129,7 +129,8 @@ class SecurityFolderTraverser implements Traverser {
     return aclDocs;
   }
 
-  /* Recursively adds an AclDocument for each descendant Document of the
+  /**
+   * Recursively adds an AclDocument for each descendant Document of the
    * Folder to the list.
    *
    * Changing the ACL on a folder changes the ACL on all its descendant
@@ -219,6 +220,7 @@ class SecurityFolderTraverser implements Traverser {
   private static class SecurityFolderDocumentList implements DocumentList {
     private final LinkedList<AclDocument> acls;
     private final Checkpoint checkpoint;
+
     private Date folderLastModified;
     private Id folderLastUuid;
 
@@ -244,9 +246,6 @@ class SecurityFolderTraverser implements Traverser {
         checkpoint.setTimeAndUuid(
             JsonField.LAST_FOLDER_TIME, folderLastModified,
             JsonField.UUID_FOLDER, folderLastUuid);
-        LOGGER.log(Level.FINEST, "Saving folder's last modified time [{0}] and "
-            + "UUID [{1}] to the checkpoint",
-            new Object[] {folderLastModified, folderLastUuid});
       }
       return checkpoint.toString();
     }

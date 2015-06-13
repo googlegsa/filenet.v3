@@ -233,6 +233,7 @@ class SecurityPolicyTraverser implements Traverser {
   private static class SecurityPolicyDocumentList implements DocumentList {
     private final LinkedList<AclDocument> acls;
     private final Checkpoint checkpoint;
+
     private Date lastModified;
     private Id secPolicyId;
 
@@ -258,8 +259,9 @@ class SecurityPolicyTraverser implements Traverser {
     @Override
     public String checkpoint() throws RepositoryException {
       if (lastModified != null && secPolicyId != null) {
-        checkpoint.setTimeAndUuid(JsonField.LAST_SECURITY_POLICY_TIME,
-             lastModified, JsonField.UUID_SECURITY_POLICY, secPolicyId);
+        checkpoint.setTimeAndUuid(
+            JsonField.LAST_SECURITY_POLICY_TIME, lastModified,
+            JsonField.UUID_SECURITY_POLICY, secPolicyId);
       }
       return checkpoint.toString();
     }
