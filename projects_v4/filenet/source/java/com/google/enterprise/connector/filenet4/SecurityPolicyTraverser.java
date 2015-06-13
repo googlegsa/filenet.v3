@@ -54,14 +54,14 @@ class SecurityPolicyTraverser implements Traverser {
       Logger.getLogger(SecurityPolicyTraverser.class.getName());
 
   private static final String SEC_POLICY_QUERY_WITH_UUID =
-      "SELECT TOP {0} * FROM '" + GuidConstants.Class_SecurityPolicy
+      "SELECT TOP {0,number,#} * FROM '" + GuidConstants.Class_SecurityPolicy
       + "' WHERE ((" + PropertyNames.DATE_LAST_MODIFIED + " = {1}) AND ("
       + PropertyNames.ID + " > {2})) OR ("
       + PropertyNames.DATE_LAST_MODIFIED + " > {1}) ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
   private static final String SEC_POLICY_QUERY_WITHOUT_UUID =
-      "SELECT TOP {0} * FROM '" + GuidConstants.Class_SecurityPolicy
+      "SELECT TOP {0,number,#} * FROM '" + GuidConstants.Class_SecurityPolicy
       + "' WHERE " + PropertyNames.DATE_LAST_MODIFIED + " > {1} ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 

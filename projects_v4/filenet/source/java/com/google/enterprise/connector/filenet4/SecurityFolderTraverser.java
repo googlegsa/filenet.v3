@@ -50,14 +50,14 @@ class SecurityFolderTraverser implements Traverser {
       Logger.getLogger(SecurityFolderTraverser.class.getName());
 
   private static final String FOLDER_QUERY_WITH_UUID =
-      "SELECT TOP {0} * FROM '" + GuidConstants.Class_Folder
+      "SELECT TOP {0,number,#} * FROM '" + GuidConstants.Class_Folder
       + "' WHERE ((" + PropertyNames.DATE_LAST_MODIFIED + " = {1}) AND ("
       + PropertyNames.ID + " > {2})) OR ("
       + PropertyNames.DATE_LAST_MODIFIED + " > {1}) ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
   private static final String FOLDER_QUERY_WITHOUT_UUID =
-      "SELECT TOP {0} * FROM '" + GuidConstants.Class_Folder
+      "SELECT TOP {0,number,#} * FROM '" + GuidConstants.Class_Folder
       + "' WHERE " + PropertyNames.DATE_LAST_MODIFIED + " > {1} ORDER BY "
       + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
 
