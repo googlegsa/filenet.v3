@@ -185,6 +185,12 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
     List<String> queries = capture.getValues();
     assertEquals(queries.toString(), 3, queries.size());
 
+    // Smoke test the executed queries.
+    SearchMock search = new SearchMock();
+    for (String query : queries) {
+      search.executeSql(query);
+    }
+
     // The document query should be unconstrained, but the two delete
     // queries should have a WHERE clause date restriction.
     assertFalse(queries.get(0), queries.get(0).contains(

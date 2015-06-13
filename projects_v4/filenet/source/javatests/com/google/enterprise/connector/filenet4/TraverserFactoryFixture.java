@@ -18,12 +18,13 @@ import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createMockBuilder;
 import static org.easymock.EasyMock.createNiceMock;
-import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.fail;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySetMock;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IConnection;
@@ -37,8 +38,12 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.DocumentSet;
 import com.filenet.api.collection.FolderSet;
+import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.constants.AccessRight;
+import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
+import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.AccessPermission;
 import com.filenet.api.util.Id;
@@ -46,7 +51,11 @@ import com.filenet.api.util.Id;
 import org.easymock.Capture;
 import org.easymock.CaptureType;
 import org.junit.After;
+import org.junit.Before;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -67,6 +76,48 @@ public class TraverserFactoryFixture {
   protected void replayAndVerify(Object... mocks) {
     replay(mocks);
     Collections.addAll(mocksToVerify, mocks);
+  }
+
+  private static final String CREATE_TABLE_DELETION_EVENT =
+      "create table DeletionEvent("
+      + PropertyNames.ID + " varchar, "
+      + PropertyNames.DATE_CREATED + " timestamp, "
+      + PropertyNames.SOURCE_OBJECT_ID + " varchar, "
+      + PropertyNames.VERSION_SERIES_ID + " varchar)";
+
+  private static final String CREATE_TABLE_DOCUMENT =
+      "create table Document("
+      + PropertyNames.ID + " varchar, "
+      + PropertyNames.DATE_LAST_MODIFIED + " timestamp, "
+      + PropertyNames.CONTENT_SIZE + " int, "
+      + PropertyNames.NAME + " varchar, "
+      + PropertyNames.RELEASED_VERSION + " varchar, "
+      + PropertyNames.SECURITY_FOLDER + " varchar, "
+      + PropertyNames.SECURITY_POLICY + " varchar, "
+      + PropertyNames.VERSION_STATUS + " int)";
+
+  private static final String CREATE_TABLE_FOLDER =
+      "create table Folder("
+      + PropertyNames.ID + " varchar, "
+      + PropertyNames.DATE_LAST_MODIFIED + " timestamp)";
+
+  private static final String CREATE_TABLE_SECURITY_POLICY =
+      "create table SecurityPolicy("
+      + PropertyNames.ID + " varchar, "
+      + PropertyNames.DATE_LAST_MODIFIED + " timestamp)";
+
+  protected JdbcFixture jdbcFixture = new JdbcFixture();
+
+  @Before
+  public void createTables() throws SQLException {
+    jdbcFixture.executeUpdate(CREATE_TABLE_DELETION_EVENT,
+        CREATE_TABLE_DOCUMENT, CREATE_TABLE_FOLDER,
+        CREATE_TABLE_SECURITY_POLICY);
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    jdbcFixture.tearDown();
   }
 
   protected FileDocumentTraverser getFileDocumentTraverser(
@@ -125,12 +176,10 @@ public class TraverserFactoryFixture {
       throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
-    ISearch searcher = createMock(ISearch.class);
-    expect(searcher.execute(isA(String.class), eq(100), eq(0)))
-        .andReturn(folderSet).atLeastOnce();
+    ISearch searcher = new SearchMock(ImmutableMap.of("Folder", folderSet));
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
-    replayAndVerify(connection, os, searcher, objectFactory);
+    replayAndVerify(connection, os, objectFactory);
 
     return new SecurityFolderTraverser(connection, objectFactory, os,
         connector);
@@ -141,17 +190,13 @@ public class TraverserFactoryFixture {
       DocumentSet docSet) throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
-    ISearch searcher = createMock(ISearch.class);
-    expect(searcher.execute(isA(String.class), eq(100), eq(0)))
-        .andReturn(secPolicySet).atLeastOnce();
-    if (!secPolicySet.isEmpty()) {
-      expect(searcher.execute(isA(String.class), eq(100), eq(1)))
-          .andReturn(docSet)
-          .times(secPolicySet.size(), secPolicySet.size() * 2);
-    }
+    ISearch searcher = new SearchMock(
+        (secPolicySet.isEmpty())
+        ? ImmutableMap.of("SecurityPolicy", secPolicySet)
+        : ImmutableMap.of("SecurityPolicy", secPolicySet, "Document", docSet));
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
-    replayAndVerify(connection, objectFactory, os, searcher);
+    replayAndVerify(connection, os, objectFactory);
 
     return new SecurityPolicyTraverser(connection, objectFactory, os,
         connector);
@@ -162,5 +207,73 @@ public class TraverserFactoryFixture {
         1, 1, 1, 1, (AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT),
         0, source);
     return TestObjectFactory.newPermissionList(aces);
+  }
+
+  /**
+   * Smoke tests the queries against H2 but returns mock results.
+   */
+  protected static class SearchMock implements ISearch {
+    /** A map with case-insensitive keys for natural table name matching. */
+    private final ImmutableSortedMap<String, IndependentObjectSet> results;
+
+    /** Used by FileDocumentTraverser to just smoke test the queries. */
+    protected SearchMock() {
+      this.results = ImmutableSortedMap.of();
+    }
+
+    /**
+     * Constructs a mock to return the given results for each table.
+     *
+     * @param results a map from table names to the object sets to
+     *     return as results for queries against those tables
+     */
+    protected SearchMock(Map<String, ? extends IndependentObjectSet> results) {
+      this.results = ImmutableSortedMap.<String, IndependentObjectSet>orderedBy(
+          String.CASE_INSENSITIVE_ORDER).putAll(results).build();
+    }
+
+    @Override
+    public IObjectSet execute(String query) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public IndependentObjectSet execute(String query, int pageSize,
+        int maxRecursion) {
+      return executeSql(query);
+    }
+
+    public IndependentObjectSet executeSql(String query) {
+      // Rewrite queries for H2. Replace GUIDs with table names. Quote
+      // timestamps. Rewrite Object(guid) as 'guid'.
+      String h2Query = query
+          .replace(
+              GuidConstants.Class_DeletionEvent.toString(), "DeletionEvent")
+          .replace(GuidConstants.Class_Document.toString(), "Document")
+          .replace(GuidConstants.Class_Folder.toString(), "Folder")
+          .replace(
+              GuidConstants.Class_SecurityPolicy.toString(), "SecurityPolicy")
+          .replaceAll("([-:0-9]{10}T[-:\\.0-9]{18})", "'$1'")
+          .replaceAll("Object\\((\\{[-0-9A-F]{36}\\})\\)", "'$1'");
+
+      // Execute the queries.
+      try (Statement stmt = JdbcFixture.getConnection().createStatement();
+          ResultSet rs = stmt.executeQuery(h2Query)) {
+        // Look up the results to return by table name.
+        String tableName = rs.getMetaData().getTableName(1);
+        IndependentObjectSet set = results.get(tableName);
+
+        // If we results map is empty, this is a pure smoke test, but
+        // otherwise we expect the map to contain an object set to
+        // return.
+        if (set == null && !results.isEmpty()) {
+          fail("Unexpected query for " + tableName + ": " + query);
+        }
+        return set;
+      } catch (SQLException e) {
+        // TODO(jlacey): Test this with null arguments.
+        throw new EngineRuntimeException(e, null, null);
+      }
+    }
   }
 }
