@@ -17,7 +17,6 @@ package com.google.enterprise.connector.filenet4;
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertDateNearly;
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertNullField;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +24,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
@@ -64,6 +64,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -176,6 +177,7 @@ public class FileDocumentListTest {
     assertTrue(isTested);
   }
 
+  @Test
   public void testTimeSorting() throws Exception {
     String[][] entries = {
         {"AAAAAAAA-0000-0000-0000-000000000000", "2014-02-11T08:15:30.129"},
@@ -193,7 +195,7 @@ public class FileDocumentListTest {
   }
 
   @Test
-  public void testTimeAndGUIDSorting() throws Exception {
+  public void testGUIDSorting() throws Exception {
     String[][] entries = {
         {"AAAAAA01-0000-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
         {"BBBBBBCC-0000-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
@@ -208,14 +210,14 @@ public class FileDocumentListTest {
     testSorting(new int[]{0, 1, 3, 4, 2, 6, 5}, entries, DatabaseType.MSSQL);
   }
 
+  // TODO(jlacey): Add a test with mixed time and GUID sorting.
+  // TODO(jlacey): Add a test with multiple non-empty object sets.
   private void testSorting(int[] expectedOrder, String[][] entries,
       DatabaseType dbType) throws Exception {
-    MockObjectStore os = new MockObjectStore("objectstore", dbType,
-        generateObjectMap(entries, false, true));
-    DocumentList docList =
-        getObjectUnderTest(os, getDocuments(os.getObjects()),
-            getCustomDeletion(os.getObjects()),
-            getDeletionEvents(os.getObjects()));
+    IObjectSet documents = getDocuments(entries, true);
+    MockObjectStore os = newObjectStore("objectstore", dbType, documents);
+    DocumentList docList = getObjectUnderTest(os, documents,
+        new EmptyObjectSet(), new EmptyObjectSet());
 
     // Test the order
     for (int index : expectedOrder) {
@@ -224,15 +226,6 @@ public class FileDocumentListTest {
       assertEquals("[" + dbType + "] Incorrect id sorting order",
           "{" + entries[index][0] + "}", fid.nextValue().toString());
     }
-  }
-
-  private String[][] getEntries() {
-    return new String[][] {
-      {"AAAAAAA1-0000-0000-0000-000000000000", "2014-02-01T08:00:00.100"},
-      {"AAAAAAA2-0000-0000-0000-000000000000", "2014-02-02T08:00:00.100"},
-      {"BBBBBBB1-0000-0000-0000-000000000000", "2014-03-01T08:00:00.100"},
-      {"BBBBBBB2-0000-0000-0000-000000000000", "2014-03-02T08:00:00.100"}
-    };
   }
 
   @Test
@@ -257,8 +250,9 @@ public class FileDocumentListTest {
       SkipPosition expectedPosition) throws Exception {
     String[][] unreleasedEntries =
           { {"AAAAAAA3-0000-0000-0000-000000000000", timeStamp} };
-    testUnreleasedNextDocument(getEntries(),
-        generateObjectMap(unreleasedEntries, true, false), expectedPosition);
+    testUnreleasedNextDocument(new Id(unreleasedEntries[0][0]),
+        new EmptyObjectSet(), getDeletionEvents(unreleasedEntries, false),
+        expectedPosition);
   }
 
   @Test
@@ -283,30 +277,27 @@ public class FileDocumentListTest {
       SkipPosition position) throws Exception {
     String[][] unreleasedEntries =
         { {"AAAAAAA3-0000-0000-0000-000000000000", timeStamp} };
-    testUnreleasedNextDocument(getEntries(),
-        generateCustomDeletion(unreleasedEntries, false), position);
+    testUnreleasedNextDocument(new Id(unreleasedEntries[0][0]),
+        getCustomDeletions(unreleasedEntries, false), new EmptyObjectSet(),
+        position);
   }
 
-  private void testUnreleasedNextDocument(String[][] docEntries,
-      Map<Id, IBaseObject> unreleasedEntries,
+  private void testUnreleasedNextDocument(Id unreleasedGuid,
+      IObjectSet customDeletionSet, IObjectSet deletionEventSet,
       SkipPosition expectedPosition) throws Exception {
-    Id unreleasedGuid = unreleasedEntries.keySet().iterator().next();
-    Map<Id, IBaseObject> entries =
-        generateObjectMap(docEntries, false, true);
-    entries.putAll(unreleasedEntries);
-    testUnreleasedNextDocument(entries, unreleasedGuid, expectedPosition);
-  }
+    String[][] docEntries = new String[][] {
+        {"AAAAAAA1-0000-0000-0000-000000000000", "2014-02-01T08:00:00.100"},
+        {"AAAAAAA2-0000-0000-0000-000000000000", "2014-02-02T08:00:00.100"},
+        {"BBBBBBB1-0000-0000-0000-000000000000", "2014-03-01T08:00:00.100"},
+        {"BBBBBBB2-0000-0000-0000-000000000000", "2014-03-02T08:00:00.100"}};
 
-  private void testUnreleasedNextDocument(Map<Id, IBaseObject> entries,
-      Id unreleasedGuid, SkipPosition expectedPosition) throws Exception {
-    // Setup object store
-    @SuppressWarnings("unchecked")
-    MockObjectStore os =
-        newObjectStore("MockObjectStore", DatabaseType.MSSQL, entries);
+    IObjectSet docSet = getDocuments(docEntries, true);
+    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
+        docSet, customDeletionSet, deletionEventSet);
 
     // Begin testing nextDocument for exception
-    DocumentList docList = getObjectUnderTest(os, getDocuments(os.getObjects()),
-        getCustomDeletion(os.getObjects()), getDeletionEvents(os.getObjects()));
+    DocumentList docList =
+        getObjectUnderTest(os, docSet, customDeletionSet, deletionEventSet);
 
     SkipPosition actualPosition = SkipPosition.FIRST;
     try {
@@ -326,30 +317,29 @@ public class FileDocumentListTest {
     assertEquals(expectedPosition, actualPosition);
   }
 
+  private String[][] docEntries = {
+    { "AAAAAAA1-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+    { "AAAAAAA2-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+    { "AAAAAAA3-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+    { "AAAAAAA4-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+  };
+
+  private String[][] deEntries = {
+    { "DE000001-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+    { "DE000002-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+  };
+
+  private String[][] cdEntries = {
+    { "CD000001-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+    { "CD000002-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+    { "CD000003-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
+  };
+
   private MockObjectStore getCheckpointObjectStore()
       throws ParseException, RepositoryDocumentException {
-    String[][] docEntries = {
-        { "AAAAAAA1-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-        { "AAAAAAA2-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-        { "AAAAAAA3-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-        { "AAAAAAA4-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-    };
-    String[][] deEntries = {
-        { "DE000001-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-        { "DE000002-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-    };
-    String[][] cdEntries = {
-        { "CD000001-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-        { "CD000002-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-        { "CD000003-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-    };
-
-    // Setup object store
-    @SuppressWarnings("unchecked")
     MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-        generateObjectMap(docEntries, false, true),
-        generateObjectMap(deEntries, true, true),
-        generateCustomDeletion(cdEntries, true));
+        getDocuments(docEntries, true), getCustomDeletions(cdEntries, true),
+        getDeletionEvents(deEntries, true));
     return os;
   }
 
@@ -377,32 +367,35 @@ public class FileDocumentListTest {
   @Test
   public void testMockCheckpoint() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
-    testMockCheckpoint(os, getDocuments(os.getObjects()),
-        getCustomDeletion(os.getObjects()),
-        getDeletionEvents(os.getObjects()));
+    testMockCheckpoint(os, getDocuments(docEntries, true),
+        getCustomDeletions(cdEntries, true),
+        getDeletionEvents(deEntries, true));
   }
 
   @Test
   public void testMockCheckpoint_emptyDocuments() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
     testMockCheckpoint(os, new EmptyObjectSet(),
-        getCustomDeletion(os.getObjects()), getDeletionEvents(os.getObjects()));
+        getCustomDeletions(cdEntries, true),
+        getDeletionEvents(deEntries, true));
   }
 
   @Test
   public void testMockCheckpoint_emptyCustomDeletes() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
-    testMockCheckpoint(os, getDocuments(os.getObjects()),
-        new EmptyObjectSet(), getDeletionEvents(os.getObjects()));
+    testMockCheckpoint(os, getDocuments(docEntries, true),
+        new EmptyObjectSet(), getDeletionEvents(deEntries, true));
   }
 
   @Test
   public void testMockCheckpoint_emptyDeletionEvents() throws Exception {
     MockObjectStore os = getCheckpointObjectStore();
-    testMockCheckpoint(os, getDocuments(os.getObjects()),
-        getCustomDeletion(os.getObjects()), new EmptyObjectSet());
+    testMockCheckpoint(os, getDocuments(docEntries, true),
+        getCustomDeletions(cdEntries, true), new EmptyObjectSet());
   }
 
+  // TODO(jlacey): Move these methods, which got inserted in the
+  // middle of the checkpoint tests.
   @Test
   public void testMimeTypesAndSizes() throws Exception {
     testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 32, true);
@@ -412,18 +405,16 @@ public class FileDocumentListTest {
 
   private void testMimeTypeAndContentSize(String mimeType, int size,
       boolean expectNotNull) throws Exception {
-    Map<Id, IBaseObject> docs = new HashMap<Id, IBaseObject>();
     MockBaseObject doc1 = (MockBaseObject) createObject(
         "AAAAAAA1-0000-0000-0000-000000000000",
         CHECKPOINT_TIMESTAMP, false, false);
     doc1.setProperty(PropertyNames.MIME_TYPE, mimeType);
     doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(size));
-    docs.put(doc1.get_Id(), doc1);
+    IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
 
-    @SuppressWarnings("unchecked")
     MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-        docs);
-    DocumentList docList = getObjectUnderTest(os, getDocuments(os.getObjects()),
+        docSet);
+    DocumentList docList = getObjectUnderTest(os, docSet,
         new EmptyObjectSet(), new EmptyObjectSet());
     Document doc = docList.nextDocument();
     assertNotNull(doc);
@@ -437,13 +428,12 @@ public class FileDocumentListTest {
 
   @Test
   public void testExcludedMimeType() throws Exception {
-    Map<Id, IBaseObject> docs = new HashMap<Id, IBaseObject>();
     MockBaseObject doc1 = (MockBaseObject) createObject(
         "AAAAAAA1-0000-0000-0000-000000000000",
         CHECKPOINT_TIMESTAMP, false, false);
     doc1.setProperty(PropertyNames.MIME_TYPE, "text/plain");
     doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(1024));
-    docs.put(doc1.get_Id(), doc1);
+    IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
 
     TraversalContext traversalContext = new SimpleTraversalContext() {
       @Override public int mimeTypeSupportLevel(String mimeType) {
@@ -451,10 +441,9 @@ public class FileDocumentListTest {
       }
     };
 
-    @SuppressWarnings("unchecked")
     MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-        docs);
-    DocumentList docList = new FileDocumentList(getDocuments(os.getObjects()),
+        docSet);
+    DocumentList docList = new FileDocumentList(docSet,
         new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
         traversalContext, new Checkpoint(CHECKPOINT));
     Document doc = docList.nextDocument();
@@ -490,7 +479,6 @@ public class FileDocumentListTest {
           doc.findProperty(SpiConstants.PROPNAME_DOCID).nextValue().toString();
       if (ActionType.ADD.equals(actionType)) {
         IBaseObject object = os.getObject(null, id);
-        assertFalse(object instanceof FileDeletionObject);
         assertTrue(checkpointContains(docList.checkpoint(),
             doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
             JsonField.LAST_MODIFIED_TIME));
@@ -535,10 +523,9 @@ public class FileDocumentListTest {
     assertCheckpointEquals(expectedCheckpoint, docList.checkpoint());
   }
 
+  @Test
   public void testCheckpointWithoutNextDocument() throws Exception {
-    @SuppressWarnings("unchecked") IObjectStore os =
-        newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-            new HashMap<Id, IBaseObject>());
+    IObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL);
     DocumentList docList = getObjectUnderTest(os, new EmptyObjectSet(),
         new EmptyObjectSet(), new EmptyObjectSet());
 
@@ -551,9 +538,7 @@ public class FileDocumentListTest {
    */
   @Test
   public void testEmptyCheckpointWithoutNextDocument() throws Exception {
-    @SuppressWarnings("unchecked") IObjectStore os =
-        newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-            new HashMap<Id, IBaseObject>());
+    IObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL);
     DocumentList docList = new FileDocumentList(new EmptyObjectSet(),
         new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
         new SimpleTraversalContext(), new Checkpoint());
@@ -570,14 +555,10 @@ public class FileDocumentListTest {
     assertEquals("", cp.getString(JsonField.UUID_CUSTOM_DELETED_DOC));
   }
 
-  @SafeVarargs
+  // TODO(jlacey): Reorder the rest of these methods more naturally.
   private final MockObjectStore newObjectStore(String name, DatabaseType dbType,
-      Map<Id, IBaseObject>... objectMaps) {
-    Map<Id, IBaseObject> data = new HashMap<Id, IBaseObject>();
-    for (Map<Id, IBaseObject> objectMap : objectMaps) {
-      data.putAll(objectMap);
-    }
-    return new MockObjectStore(name, dbType, data);
+      IObjectSet... objectSets) throws RepositoryDocumentException {
+    return new MockObjectStore(name, dbType, generateObjectMap(objectSets));
   }
 
   private DocumentList getObjectUnderTest(IObjectStore os, IObjectSet docSet,
@@ -628,10 +609,9 @@ public class FileDocumentListTest {
     }
   }
 
-  // Helper method to create object
   private IBaseObject createObject(String guid, String timeStr,
       boolean isDeletionEvent, boolean isReleasedVersion)
-          throws ParseException, RepositoryDocumentException {
+      throws ParseException {
     Date createdTime = dateFormatter.parse(timeStr);
     Id id = new Id(guid);
     return new MockBaseObject(id, id,
@@ -641,103 +621,68 @@ public class FileDocumentListTest {
   /**
    * Generate a map of IBaseObject objects.
    * 
-   * @param entries - a 2D array of object ID and created time.
-   * @param isDeleteEvent - deletion event flag
-   * @param releasedVersion - released version flag
-   * @param cal - setting object's creation time.  The creation time will be
-   *              incremented by timeIncrement before setting the object.
-   * @param timeIncrement - time increment between objects in milliseconds.
-   * @return Map<Id, IBaseObject>
-   * @throws ParseException 
+   * @param objectSets zero or more object sets
+   * @return a map from ID to object for all objects in the given sets
    */
-  private Map<Id, IBaseObject> generateObjectMap(String[][] entries,
-      boolean isDeleteEvent, boolean releasedVersion)
-          throws ParseException, RepositoryDocumentException {
+  private Map<Id, IBaseObject> generateObjectMap(IObjectSet... objectSets)
+          throws RepositoryDocumentException {
     Map<Id, IBaseObject> objectMap = new HashMap<Id, IBaseObject>();
-    for (String[] line : entries) {
-      objectMap.put(new Id(line[0]), createObject(line[0], line[1],
-          isDeleteEvent, releasedVersion));
-    }
-    return objectMap;
-  }
-
-  private Map<Id, IBaseObject> generateObjectMap(String[] entries,
-      boolean isDeleteEvent, boolean releasedVersion)
-          throws ParseException, RepositoryDocumentException {
-    Map<Id, IBaseObject> objectMap = new HashMap<Id, IBaseObject>();
-    Calendar cal = Calendar.getInstance();
-    for (String entry : entries) {
-      objectMap.put(new Id(entry), createObject(entry,
-          Value.calendarToIso8601(cal), isDeleteEvent, releasedVersion));
+    for (IObjectSet objectSet : objectSets) {
+      Iterator<?> iter = objectSet.iterator();
+      while (iter.hasNext()) {
+        IBaseObject object = (IBaseObject) iter.next();
+        objectMap.put(object.get_Id(), object);
+      }
     }
     return objectMap;
   }
 
   /**
-   * Generate a map of FileDeletionObject objects for custom deletion.
-   * 
-   * @param ids - an array of objects' ID to be generated.
-   * @param releasedVersion - released version flag
-   * @param cal - setting object's creation time.  The creation time will be
-   *              incremented by timeIncrement before setting the object.
-   * @param timeIncrement - time increment between objects in milliseconds.
-   * @return Map<String, IBaseObject>
-   * @throws ParseException 
+   * Creates an object set of documents.
+   *
+   * @param entries an array of arrays of IDs and timestamps
+   * @param releasedVersion if the documents should be released versions
    */
-  private Map<Id, IBaseObject> generateCustomDeletion(
-      String[] entries, boolean releasedVersion)
-          throws ParseException, RepositoryDocumentException {
-    Map<Id, IBaseObject> objectMap = new HashMap<Id, IBaseObject>();
-    Calendar cal = Calendar.getInstance();
-    for (String entry : entries) {
-      IBaseObject object = createObject(entry, Value.calendarToIso8601(cal),
-          false, releasedVersion);
-      objectMap.put(new Id(entry), new FileDeletionObject(object));
-    }
-    return objectMap;
+  private IObjectSet getDocuments(String[][] entries, boolean releasedVersion)
+      throws ParseException {
+    return getObjects(entries, false, releasedVersion);
   }
 
-  private Map<Id, IBaseObject> generateCustomDeletion(String[][] entries,
-      boolean releasedVersion)
-          throws ParseException, RepositoryDocumentException {
-    Map<Id, IBaseObject> objectMap = new HashMap<Id, IBaseObject>();
+  /**
+   * Creates an object set of deletion events.
+   *
+   * @param entries an array of arrays of IDs and timestamps
+   * @param releasedVersion if the deleted documents should be released versions
+   */
+  private IObjectSet getDeletionEvents(String[][] entries,
+      boolean releasedVersion) throws ParseException {
+    return getObjects(entries, true, releasedVersion);
+  }
+
+  /**
+   * Creates an object set of custom deletion documents.
+   *
+   * @param entries an array of arrays of IDs and timestamps
+   * @param releasedVersion if the deleted documents should be released versions
+   */
+  private IObjectSet getCustomDeletions(String[][] entries,
+      boolean releasedVersion) throws ParseException {
+    return getDocuments(entries, releasedVersion);
+  }
+
+  /**
+   * Creates an object set.
+   *
+   * @param entries an array of arrays of IDs and timestamps
+   * param isDeletionEvent if the objects are DeletionEvents
+   * @param releasedVersion if the objects should refer to released versions
+   */
+  private IObjectSet getObjects(String[][] entries, boolean isDeletionEvent,
+      boolean releasedVersion) throws ParseException {
+    List<IBaseObject> objectList = new ArrayList<>(entries.length);
     for (String[] line : entries) {
-      IBaseObject object =
-          createObject(line[0], line[1], false, releasedVersion);
-      objectMap.put(new Id(line[0]), new FileDeletionObject(object));
-    }
-    return objectMap;
-  }
-
-  private IObjectSet getDocuments(Map<Id, IBaseObject> objects)
-      throws RepositoryDocumentException {
-    List<IBaseObject> objectList = new ArrayList<IBaseObject>(objects.size());
-    for (IBaseObject obj : objects.values()) {
-      if (!obj.isDeletionEvent() && !(obj instanceof FileDeletionObject)) {
-        objectList.add(obj);
-      }
-    }
-    return new FnObjectList(objectList);
-  }
-
-  private IObjectSet getDeletionEvents(Map<Id, IBaseObject> objects)
-      throws RepositoryDocumentException {
-    List<IBaseObject> objectList = new ArrayList<IBaseObject>();
-    for (IBaseObject obj : objects.values()) {
-      if (obj.isDeletionEvent()) {
-        objectList.add(obj);
-      }
-    }
-    return new FnObjectList(objectList);
-  }
-
-  private IObjectSet getCustomDeletion(Map<Id, IBaseObject> objects)
-      throws RepositoryDocumentException {
-    List<IBaseObject> objectList = new ArrayList<IBaseObject>();
-    for (IBaseObject obj : objects.values()) {
-      if (obj instanceof FileDeletionObject) {
-        objectList.add(obj);
-      }
+      objectList.add(
+          createObject(line[0], line[1], isDeletionEvent, releasedVersion));
     }
     return new FnObjectList(objectList);
   }

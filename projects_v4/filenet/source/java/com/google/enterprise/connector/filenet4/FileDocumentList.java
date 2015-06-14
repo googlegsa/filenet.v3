@@ -30,7 +30,6 @@ import com.filenet.api.util.Id;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -48,7 +47,7 @@ public class FileDocumentList implements DocumentList {
   private final Checkpoint checkpoint;
 
   private final DatabaseType databaseType;
-  private final Iterator<? extends IBaseObject> objects;
+  private final Iterator<ObjectWrapper> objects;
   private final LinkedList<Document> acls;
 
   private Date fileDocumentDate;
@@ -73,37 +72,60 @@ public class FileDocumentList implements DocumentList {
     this.acls = new LinkedList<Document>();
   }
 
-  private Iterator<? extends IBaseObject> mergeAndSortObjects(
+  private Iterator<ObjectWrapper> mergeAndSortObjects(
       IObjectSet objectSet, IObjectSet objectSetToDelete,
       IObjectSet objectSetToDeleteDocs) {
-    List<IBaseObject> objectList = new ArrayList<>();
+    List<ObjectWrapper> objectList = new ArrayList<>();
 
     // Adding documents, deletion events and custom deletion to the object list
-    addToList(objectList, objectSet);
-    addToList(objectList, objectSetToDelete);
-    addCustomDeletionToList(objectList, objectSetToDeleteDocs);
+    addToList(objectList, objectSet, ObjectType.ADD);
+    addToList(objectList, objectSetToDelete, ObjectType.DELETE);
+    addToList(objectList, objectSetToDeleteDocs, ObjectType.DELETE);
 
     // Sort list by last modified time and ID.
-    Collections.sort(objectList, new Comparator<IBaseObject>() {
-        @Override public int compare(IBaseObject obj0, IBaseObject obj1) {
-          try {
-            int val = obj0.getModifyDate().compareTo(obj1.getModifyDate());
-            if (val == 0) {
-              val = obj0.get_Id().compareTo(obj1.get_Id(), databaseType);
-            }
-            return val;
-          } catch (RepositoryDocumentException e) {
-            logger.log(Level.WARNING, "Unable to compare time", e);
-            return 0;
-          }
-        }
-    });
+    Collections.sort(objectList);
     logger.log(Level.INFO, "Number of documents to add, update, or delete: {0}",
         objectList.size());
 
     return objectList.iterator();
   }
 
+  public static enum ObjectType { ADD, DELETE };
+
+  /**
+   * A {@code Comparable} wrapper on IBaseObject that includes the type,
+   * so that added and updated documents can be distinguished from the
+   * deleted documents returned by the additional delete query.
+   *
+   * Note: this class has a natural ordering that is inconsistent with equals.
+   */
+  private class ObjectWrapper implements Comparable<ObjectWrapper> {
+    private final IBaseObject object;
+    private final ObjectType type;
+
+    ObjectWrapper(IBaseObject object, ObjectType type) {
+      this.object = object;
+      this.type = type;
+    }
+
+    @Override
+    public int compareTo(ObjectWrapper wrapper) {
+      IBaseObject other = wrapper.object;
+      try {
+        int val = object.getModifyDate().compareTo(other.getModifyDate());
+        if (val == 0) {
+          val = object.get_Id().compareTo(other.get_Id(), databaseType);
+        }
+        return val;
+      } catch (RepositoryDocumentException e) {
+        logger.log(Level.WARNING, "Unable to compare time", e);
+        return 0;
+      }
+    }
+  }
+
+  // TODO(jlacey): Move these two methods up before and after
+  // mergeAndSortObjects, respectively.
   private DatabaseType getDatabaseType(IObjectStore os) {
     try {
       return os.get_DatabaseType();
@@ -115,22 +137,11 @@ public class FileDocumentList implements DocumentList {
   }
 
   /** Adds IBaseObjects from the object set to the list. */
-  private void addToList(List<IBaseObject> objectList, IObjectSet objectSet) {
+  private void addToList(List<ObjectWrapper> objectList, IObjectSet objectSet,
+      ObjectType type) {
     Iterator<?> iter = objectSet.iterator();
     while (iter.hasNext()) {
-      objectList.add((IBaseObject) iter.next());
-    }
-  }
-
-  /**
-   * Adds DeletionEvents wrapped as IBaseObjects from the object set to the
-   * list, wrapped again as FileDeletionObjects for later identification.
-   */
-  private void addCustomDeletionToList(List<IBaseObject> objectList,
-      IObjectSet objectSet) {
-    Iterator<?> iter = objectSet.iterator();
-    while (iter.hasNext()) {
-      objectList.add(new FileDeletionObject((IBaseObject) iter.next()));
+      objectList.add(new ObjectWrapper((IBaseObject) iter.next(), type));
     }
   }
 
@@ -140,8 +151,9 @@ public class FileDocumentList implements DocumentList {
 
     Document fileDocument;
     if (objects.hasNext()) {
-      IBaseObject object = objects.next();
-      if (object.isDeletionEvent()) {
+      ObjectWrapper wrapper = objects.next();
+      IBaseObject object = wrapper.object;
+      if (wrapper.type == ObjectType.DELETE && object.isDeletionEvent()) {
         fileDocumentToDeleteDate = object.getModifyDate();
         docIdToDelete = object.get_Id();
         if (object.isReleasedVersion()) {
@@ -150,7 +162,7 @@ public class FileDocumentList implements DocumentList {
           throw new SkippedDocumentException("Skip a deletion event [ID: "
               + docIdToDelete + "] of an unreleased document.");
         }
-      } else if (object instanceof FileDeletionObject) {
+      } else if (wrapper.type == ObjectType.DELETE) {
         fileDocumentToDeleteDocsDate = object.getModifyDate();
         docIdToDeleteDocs = object.get_Id();
         if (object.isReleasedVersion()) {
