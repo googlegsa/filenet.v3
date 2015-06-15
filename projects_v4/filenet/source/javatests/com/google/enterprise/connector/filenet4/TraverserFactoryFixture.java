@@ -227,7 +227,8 @@ public class TraverserFactoryFixture {
      * @param results a map from table names to the object sets to
      *     return as results for queries against those tables
      */
-    protected SearchMock(Map<String, ? extends IndependentObjectSet> results) {
+    protected SearchMock(
+        ImmutableMap<String, ? extends IndependentObjectSet> results) {
       this.results = ImmutableSortedMap.<String, IndependentObjectSet>orderedBy(
           String.CASE_INSENSITIVE_ORDER).putAll(results).build();
     }
