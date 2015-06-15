@@ -14,8 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import static com.google.enterprise.connector.filenet4.Mocks.mockDocument;
-import static com.google.enterprise.connector.filenet4.Mocks.mockTraverser;
+import static com.google.enterprise.connector.filenet4.SpiMocks.mockDocument;
+import static com.google.enterprise.connector.filenet4.SpiMocks.mockTraverser;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.isA;

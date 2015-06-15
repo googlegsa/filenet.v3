@@ -12,15 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.enterprise.connector.filenet4.api;
+package com.google.enterprise.connector.filenet4;
 
 import com.google.common.collect.ImmutableList;
-import com.google.enterprise.connector.filenet4.TestConnection;
 
 import com.filenet.api.security.Group;
 import com.filenet.api.security.User;
 
-public class MockUtil {
+public class SecurityPrincipalMocks {
 
   public static String getDistinguishedName(String dnsUserName) {
     String shortName;
@@ -106,7 +105,7 @@ public class MockUtil {
   }
 
   /** Prevents instantiation */
-  private MockUtil() {
+  private SecurityPrincipalMocks() {
     throw new AssertionError();
   }
 }

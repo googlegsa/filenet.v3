@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.enterprise.connector.filenet4.api;
+package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.EngineSetMocks.GroupSetMock;
 
@@ -22,7 +22,7 @@ import com.filenet.api.security.User;
 
 import java.util.Collection;
 
-public class UserMock extends SecurityPrincipalMock implements User {
+class UserMock extends SecurityPrincipalMock implements User {
   private final String shortName;
   private final String userName;
   private final String distinguishedName;

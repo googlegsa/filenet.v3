@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
+import com.google.enterprise.connector.filenet4.AccessPermissionListMock;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 

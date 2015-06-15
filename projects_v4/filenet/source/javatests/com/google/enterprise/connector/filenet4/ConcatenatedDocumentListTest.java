@@ -14,8 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import static com.google.enterprise.connector.filenet4.Mocks.mockDocument;
-import static com.google.enterprise.connector.filenet4.Mocks.mockDocumentList;
+import static com.google.enterprise.connector.filenet4.SpiMocks.mockDocument;
+import static com.google.enterprise.connector.filenet4.SpiMocks.mockDocumentList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 

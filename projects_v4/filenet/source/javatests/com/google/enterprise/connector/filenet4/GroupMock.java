@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.enterprise.connector.filenet4.api;
+package com.google.enterprise.connector.filenet4;
 
 import com.filenet.api.collection.GroupSet;
 import com.filenet.api.collection.UserSet;
 import com.filenet.api.security.Group;
 
-public class GroupMock extends SecurityPrincipalMock implements Group {
+class GroupMock extends SecurityPrincipalMock implements Group {
   private final String name;
   private final String shortName;
   private final String distinguishedName;

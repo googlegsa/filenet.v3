@@ -24,7 +24,7 @@ import com.google.enterprise.connector.spi.Value;
 import java.util.Collections;
 import java.util.List;
 
-class Mocks {
+class SpiMocks {
   public static Document mockDocument() {
     return new SimpleDocument(Collections.<String, List<Value>>emptyMap());
   }
@@ -65,5 +65,9 @@ class Mocks {
     public DocumentList getDocumentList(Checkpoint startCheckpoint) {
       return mockDocumentList(documents.subList(0, batchHint), checkpoint);
     }
+  }
+
+  /** Prevent instantiation. */
+  private SpiMocks() {
   }
 }

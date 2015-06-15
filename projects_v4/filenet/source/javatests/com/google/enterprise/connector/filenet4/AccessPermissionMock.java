@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.enterprise.connector.filenet4.api;
+package com.google.enterprise.connector.filenet4;
 
 import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
@@ -22,7 +22,7 @@ import com.filenet.api.meta.ClassDescription;
 import com.filenet.api.property.Properties;
 import com.filenet.api.security.AccessPermission;
 
-public class AccessPermissionMock implements AccessPermission {
+class AccessPermissionMock implements AccessPermission {
   private static final long serialVersionUID = 1L;
 
   private final PermissionSource permSource;

@@ -23,7 +23,6 @@ import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.MockUtil;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleTraversalContext;
@@ -72,7 +71,7 @@ public class FileDocumentTest {
     IConnection conn = iof.getConnection(TestConnection.uri, TestConnection.adminUsername, TestConnection.adminPassword);
     ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.username, TestConnection.password);
 
-    adminUser = MockUtil.createAdministratorUser();
+    adminUser = SecurityPrincipalMocks.createAdministratorUser();
   }
 
   /*

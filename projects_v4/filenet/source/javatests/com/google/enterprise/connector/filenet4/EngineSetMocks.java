@@ -29,11 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-/*
- * TODO(jlacey): Remove all public modifiers when FileNet API mocks
- * are moved from the filenet4.api package to this package (filenet4).
- */
-public class EngineSetMocks {
+class EngineSetMocks {
   public static class DocumentSetMock
       extends EngineSetMock<Document> implements DocumentSet {
     public DocumentSetMock() { super(); }

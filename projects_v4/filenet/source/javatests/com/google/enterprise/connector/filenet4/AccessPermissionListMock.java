@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.enterprise.connector.filenet4.api;
+package com.google.enterprise.connector.filenet4;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.security.AccessPermission;

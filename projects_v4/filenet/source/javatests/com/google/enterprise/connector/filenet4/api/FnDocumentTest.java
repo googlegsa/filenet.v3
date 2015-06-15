@@ -25,6 +25,7 @@ import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.filenet4.MarkingPermissions;
 import com.google.enterprise.connector.filenet4.Permissions;
+import com.google.enterprise.connector.filenet4.SecurityPrincipalMocks;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
@@ -156,7 +157,8 @@ public class FnDocumentTest {
   public void testGetPermissions() throws RepositoryException {
     Permissions perms = new Permissions(fd.get_Permissions());
     assertNotNull(perms);
-    boolean authorized = perms.authorize(MockUtil.createAdministratorUser());
+    boolean authorized =
+        perms.authorize(SecurityPrincipalMocks.createAdministratorUser());
     assertTrue("User is not authorized", authorized);
   }
 
