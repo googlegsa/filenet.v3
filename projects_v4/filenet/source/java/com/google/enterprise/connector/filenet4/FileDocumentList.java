@@ -72,6 +72,16 @@ public class FileDocumentList implements DocumentList {
     this.acls = new LinkedList<Document>();
   }
 
+  private DatabaseType getDatabaseType(IObjectStore os) {
+    try {
+      return os.get_DatabaseType();
+    } catch (RepositoryException e) {
+      logger.log(Level.WARNING,
+          "Unable to retrieve database type from object store", e);
+      return null;
+    }
+  }
+
   private Iterator<ObjectWrapper> mergeAndSortObjects(
       IObjectSet objectSet, IObjectSet objectSetToDelete,
       IObjectSet objectSetToDeleteDocs) {
@@ -88,6 +98,15 @@ public class FileDocumentList implements DocumentList {
         objectList.size());
 
     return objectList.iterator();
+  }
+
+  /** Adds IBaseObjects from the object set to the list. */
+  private void addToList(List<ObjectWrapper> objectList, IObjectSet objectSet,
+      ObjectType type) {
+    Iterator<?> iter = objectSet.iterator();
+    while (iter.hasNext()) {
+      objectList.add(new ObjectWrapper((IBaseObject) iter.next(), type));
+    }
   }
 
   public static enum ObjectType { ADD, DELETE };
@@ -121,27 +140,6 @@ public class FileDocumentList implements DocumentList {
         logger.log(Level.WARNING, "Unable to compare time", e);
         return 0;
       }
-    }
-  }
-
-  // TODO(jlacey): Move these two methods up before and after
-  // mergeAndSortObjects, respectively.
-  private DatabaseType getDatabaseType(IObjectStore os) {
-    try {
-      return os.get_DatabaseType();
-    } catch (RepositoryException e) {
-      logger.log(Level.WARNING,
-          "Unable to retrieve database type from object store", e);
-      return null;
-    }
-  }
-
-  /** Adds IBaseObjects from the object set to the list. */
-  private void addToList(List<ObjectWrapper> objectList, IObjectSet objectSet,
-      ObjectType type) {
-    Iterator<?> iter = objectSet.iterator();
-    while (iter.hasNext()) {
-      objectList.add(new ObjectWrapper((IBaseObject) iter.next(), type));
     }
   }
 

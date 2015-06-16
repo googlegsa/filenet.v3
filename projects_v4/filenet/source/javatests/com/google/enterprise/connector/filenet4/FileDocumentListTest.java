@@ -210,14 +210,43 @@ public class FileDocumentListTest {
     testSorting(new int[]{0, 1, 3, 4, 2, 6, 5}, entries, DatabaseType.MSSQL);
   }
 
-  // TODO(jlacey): Add a test with mixed time and GUID sorting.
-  // TODO(jlacey): Add a test with multiple non-empty object sets.
+  @Test
+  public void testMergeSorting() throws Exception {
+    String[][] entries = {
+        {"BBBBBBBB-BBBB-0000-0000-000000000000", "2014-11-11T00:55:00.320"},
+        {"AAAAAAAA-0000-0000-0000-000000000000", "2014-11-11T22:55:00.320"},
+        {"BBBBBBBB-0000-0000-0000-000000000000", "2014-11-11T22:55:00.320"},
+        {"EEEEEEEE-0000-0000-0000-000000000000", "2014-11-11T22:55:00.320"},
+        {"AAAAAAAA-BBBB-0000-0000-000000000000", "2014-11-11T22:55:00.321"},
+        {"DDDDDDDD-0000-0000-0000-000000000000", "2014-12-12T11:11:11.000"},
+        {"DDDDDDDD-0000-0000-0000-000000000000", "2014-12-12T11:11:11.123"},
+        {"FFFFFFFF-0000-0000-0000-000000000000", "2014-12-12T11:11:11.123"},
+        {"CCCCCCCC-0000-0000-0000-000000000000", "2014-12-22T12:12:12.000"},
+        {"DDDDDDDD-0000-0000-0000-000000000000", "2014-12-31T23:59:59.999"}
+    };
+    String[][] docEntries = { entries[0], entries[5], entries[7], entries[8] };
+    String[][] cdEntries = { entries[2], entries[3], entries[6] };
+    String[][] deEntries = { entries[1], entries[4], entries[9] };
+    testSorting(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, entries,
+        DatabaseType.MSSQL, getDocuments(docEntries, true),
+        getCustomDeletions(cdEntries, true),
+        getDeletionEvents(deEntries, true));
+  }
+
   private void testSorting(int[] expectedOrder, String[][] entries,
       DatabaseType dbType) throws Exception {
     IObjectSet documents = getDocuments(entries, true);
-    MockObjectStore os = newObjectStore("objectstore", dbType, documents);
-    DocumentList docList = getObjectUnderTest(os, documents,
-        new EmptyObjectSet(), new EmptyObjectSet());
+    testSorting(expectedOrder, entries, dbType,
+        documents, new EmptyObjectSet(), new EmptyObjectSet());
+  }
+
+  private void testSorting(int[] expectedOrder, String[][] entries,
+      DatabaseType dbType, IObjectSet documents, IObjectSet customDeletions,
+      IObjectSet deletionEvents) throws Exception {
+    MockObjectStore os = newObjectStore("objectstore", dbType,
+        documents, customDeletions, deletionEvents);
+    DocumentList docList =
+        getObjectUnderTest(os, documents, customDeletions, deletionEvents);
 
     // Test the order
     for (int index : expectedOrder) {
@@ -394,68 +423,6 @@ public class FileDocumentListTest {
         getCustomDeletions(cdEntries, true), new EmptyObjectSet());
   }
 
-  // TODO(jlacey): Move these methods, which got inserted in the
-  // middle of the checkpoint tests.
-  @Test
-  public void testMimeTypesAndSizes() throws Exception {
-    testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 32, true);
-    testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 50, false);
-    testMimeTypeAndContentSize("video/3gpp", 1024 * 1024 * 32, false);
-  }
-
-  private void testMimeTypeAndContentSize(String mimeType, int size,
-      boolean expectNotNull) throws Exception {
-    MockBaseObject doc1 = (MockBaseObject) createObject(
-        "AAAAAAA1-0000-0000-0000-000000000000",
-        CHECKPOINT_TIMESTAMP, false, false);
-    doc1.setProperty(PropertyNames.MIME_TYPE, mimeType);
-    doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(size));
-    IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
-
-    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-        docSet);
-    DocumentList docList = getObjectUnderTest(os, docSet,
-        new EmptyObjectSet(), new EmptyObjectSet());
-    Document doc = docList.nextDocument();
-    assertNotNull(doc);
-    if (expectNotNull) {
-      assertNotNull(SpiConstants.PROPNAME_CONTENT + " is null",
-          doc.findProperty(SpiConstants.PROPNAME_CONTENT));
-    } else {
-      assertNull(doc.findProperty(SpiConstants.PROPNAME_CONTENT));
-    }
-  }
-
-  @Test
-  public void testExcludedMimeType() throws Exception {
-    MockBaseObject doc1 = (MockBaseObject) createObject(
-        "AAAAAAA1-0000-0000-0000-000000000000",
-        CHECKPOINT_TIMESTAMP, false, false);
-    doc1.setProperty(PropertyNames.MIME_TYPE, "text/plain");
-    doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(1024));
-    IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
-
-    TraversalContext traversalContext = new SimpleTraversalContext() {
-      @Override public int mimeTypeSupportLevel(String mimeType) {
-        return -1;
-      }
-    };
-
-    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-        docSet);
-    DocumentList docList = new FileDocumentList(docSet,
-        new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
-        traversalContext, new Checkpoint(CHECKPOINT));
-    Document doc = docList.nextDocument();
-    assertNotNull(doc);
-    try {
-      doc.findProperty(SpiConstants.PROPNAME_CONTENT);
-      fail("Expected SkippedDocumentException was not thrown.");
-    } catch (SkippedDocumentException ex) {
-      // Expected
-    }
-  }
-
   private void testMockCheckpoint(IObjectStore os, IObjectSet docSet,
       IObjectSet customDeletionSet, IObjectSet deletionEventSet)
           throws Exception {
@@ -555,86 +522,64 @@ public class FileDocumentListTest {
     assertEquals("", cp.getString(JsonField.UUID_CUSTOM_DELETED_DOC));
   }
 
-  // TODO(jlacey): Reorder the rest of these methods more naturally.
-  private final MockObjectStore newObjectStore(String name, DatabaseType dbType,
-      IObjectSet... objectSets) throws RepositoryDocumentException {
-    return new MockObjectStore(name, dbType, generateObjectMap(objectSets));
+  @Test
+  public void testMimeTypesAndSizes() throws Exception {
+    testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 32, true);
+    testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 50, false);
+    testMimeTypeAndContentSize("video/3gpp", 1024 * 1024 * 32, false);
   }
 
-  private DocumentList getObjectUnderTest(IObjectStore os, IObjectSet docSet,
-      IObjectSet customDeletionSet, IObjectSet deletionEventSet)
-      throws RepositoryException {
-    return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
-        os, connec, getTraversalContext(), new Checkpoint(CHECKPOINT));
-  }
+  private void testMimeTypeAndContentSize(String mimeType, int size,
+      boolean expectNotNull) throws Exception {
+    MockBaseObject doc1 = (MockBaseObject) createObject(
+        "AAAAAAA1-0000-0000-0000-000000000000",
+        CHECKPOINT_TIMESTAMP, false, false);
+    doc1.setProperty(PropertyNames.MIME_TYPE, mimeType);
+    doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(size));
+    IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
 
-  private TraversalContext getTraversalContext() {
-    Set<String> supportedMimeTypes = new HashSet<String>();
-    supportedMimeTypes.add("text/plain");
-    supportedMimeTypes.add("text/html");
-
-    SimpleTraversalContext context = new SimpleTraversalContext();
-    context.setMaxDocumentSize(1024 * 1024 * 32);
-    context.setMimeTypeSet(supportedMimeTypes);
-    return context;
-  }
-
-  private boolean checkpointContains(String checkpoint, Property lastModified,
-      JsonField jsonField) throws JSONException, RepositoryException {
-    if (Strings.isNullOrEmpty(checkpoint) || lastModified == null
-        || jsonField == null) {
-      return false;
-    }
-    JSONObject json = new JSONObject(checkpoint);
-    String checkpointTime = (String) json.get(jsonField.toString());
-    String docLastModifiedTime = lastModified.nextValue().toString();
-
-    return checkpointTime.equals(docLastModifiedTime);
-  }
-
-  private void assertCheckpointEquals(String expected, String actual)
-      throws JSONException {
-    JSONObject expectedJson = new JSONObject(expected);
-    JSONObject actualJson = new JSONObject(actual);
-
-    ImmutableSet<String> expectedKeys =
-        ImmutableSet.copyOf(JSONObject.getNames(expectedJson));
-    ImmutableSet<String> actualKeys =
-        ImmutableSet.copyOf(JSONObject.getNames(actualJson));
-
-    assertEquals("Checkpoint keys", expectedKeys, actualKeys);
-    for (String key : expectedKeys) {
-      assertEquals("Checkpoint key " + key,
-          expectedJson.getString(key), actualJson.getString(key));
+    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
+        docSet);
+    DocumentList docList = getObjectUnderTest(os, docSet,
+        new EmptyObjectSet(), new EmptyObjectSet());
+    Document doc = docList.nextDocument();
+    assertNotNull(doc);
+    if (expectNotNull) {
+      assertNotNull(SpiConstants.PROPNAME_CONTENT + " is null",
+          doc.findProperty(SpiConstants.PROPNAME_CONTENT));
+    } else {
+      assertNull(doc.findProperty(SpiConstants.PROPNAME_CONTENT));
     }
   }
 
-  private IBaseObject createObject(String guid, String timeStr,
-      boolean isDeletionEvent, boolean isReleasedVersion)
-      throws ParseException {
-    Date createdTime = dateFormatter.parse(timeStr);
-    Id id = new Id(guid);
-    return new MockBaseObject(id, id,
-        createdTime, isDeletionEvent, isReleasedVersion);
-  }
+  @Test
+  public void testExcludedMimeType() throws Exception {
+    MockBaseObject doc1 = (MockBaseObject) createObject(
+        "AAAAAAA1-0000-0000-0000-000000000000",
+        CHECKPOINT_TIMESTAMP, false, false);
+    doc1.setProperty(PropertyNames.MIME_TYPE, "text/plain");
+    doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(1024));
+    IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
 
-  /**
-   * Generate a map of IBaseObject objects.
-   * 
-   * @param objectSets zero or more object sets
-   * @return a map from ID to object for all objects in the given sets
-   */
-  private Map<Id, IBaseObject> generateObjectMap(IObjectSet... objectSets)
-          throws RepositoryDocumentException {
-    Map<Id, IBaseObject> objectMap = new HashMap<Id, IBaseObject>();
-    for (IObjectSet objectSet : objectSets) {
-      Iterator<?> iter = objectSet.iterator();
-      while (iter.hasNext()) {
-        IBaseObject object = (IBaseObject) iter.next();
-        objectMap.put(object.get_Id(), object);
+    TraversalContext traversalContext = new SimpleTraversalContext() {
+      @Override public int mimeTypeSupportLevel(String mimeType) {
+        return -1;
       }
+    };
+
+    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
+        docSet);
+    DocumentList docList = new FileDocumentList(docSet,
+        new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
+        traversalContext, new Checkpoint(CHECKPOINT));
+    Document doc = docList.nextDocument();
+    assertNotNull(doc);
+    try {
+      doc.findProperty(SpiConstants.PROPNAME_CONTENT);
+      fail("Expected SkippedDocumentException was not thrown.");
+    } catch (SkippedDocumentException ex) {
+      // Expected
     }
-    return objectMap;
   }
 
   /**
@@ -685,5 +630,86 @@ public class FileDocumentListTest {
           createObject(line[0], line[1], isDeletionEvent, releasedVersion));
     }
     return new FnObjectList(objectList);
+  }
+
+  private IBaseObject createObject(String guid, String timeStr,
+      boolean isDeletionEvent, boolean isReleasedVersion)
+      throws ParseException {
+    Date createdTime = dateFormatter.parse(timeStr);
+    Id id = new Id(guid);
+    return new MockBaseObject(id, id,
+        createdTime, isDeletionEvent, isReleasedVersion);
+  }
+
+  private final MockObjectStore newObjectStore(String name, DatabaseType dbType,
+      IObjectSet... objectSets) throws RepositoryDocumentException {
+    return new MockObjectStore(name, dbType, generateObjectMap(objectSets));
+  }
+
+  /**
+   * Generate a map of IBaseObject objects.
+   *
+   * @param objectSets zero or more object sets
+   * @return a map from ID to object for all objects in the given sets
+   */
+  private Map<Id, IBaseObject> generateObjectMap(IObjectSet... objectSets)
+          throws RepositoryDocumentException {
+    Map<Id, IBaseObject> objectMap = new HashMap<Id, IBaseObject>();
+    for (IObjectSet objectSet : objectSets) {
+      Iterator<?> iter = objectSet.iterator();
+      while (iter.hasNext()) {
+        IBaseObject object = (IBaseObject) iter.next();
+        objectMap.put(object.get_Id(), object);
+      }
+    }
+    return objectMap;
+  }
+
+  private DocumentList getObjectUnderTest(IObjectStore os, IObjectSet docSet,
+      IObjectSet customDeletionSet, IObjectSet deletionEventSet)
+      throws RepositoryException {
+    return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
+        os, connec, getTraversalContext(), new Checkpoint(CHECKPOINT));
+  }
+
+  private TraversalContext getTraversalContext() {
+    Set<String> supportedMimeTypes = new HashSet<String>();
+    supportedMimeTypes.add("text/plain");
+    supportedMimeTypes.add("text/html");
+
+    SimpleTraversalContext context = new SimpleTraversalContext();
+    context.setMaxDocumentSize(1024 * 1024 * 32);
+    context.setMimeTypeSet(supportedMimeTypes);
+    return context;
+  }
+
+  private boolean checkpointContains(String checkpoint, Property lastModified,
+      JsonField jsonField) throws JSONException, RepositoryException {
+    if (Strings.isNullOrEmpty(checkpoint) || lastModified == null
+        || jsonField == null) {
+      return false;
+    }
+    JSONObject json = new JSONObject(checkpoint);
+    String checkpointTime = (String) json.get(jsonField.toString());
+    String docLastModifiedTime = lastModified.nextValue().toString();
+
+    return checkpointTime.equals(docLastModifiedTime);
+  }
+
+  private void assertCheckpointEquals(String expected, String actual)
+      throws JSONException {
+    JSONObject expectedJson = new JSONObject(expected);
+    JSONObject actualJson = new JSONObject(actual);
+
+    ImmutableSet<String> expectedKeys =
+        ImmutableSet.copyOf(JSONObject.getNames(expectedJson));
+    ImmutableSet<String> actualKeys =
+        ImmutableSet.copyOf(JSONObject.getNames(actualJson));
+
+    assertEquals("Checkpoint keys", expectedKeys, actualKeys);
+    for (String key : expectedKeys) {
+      assertEquals("Checkpoint key " + key,
+          expectedJson.getString(key), actualJson.getString(key));
+    }
   }
 }
