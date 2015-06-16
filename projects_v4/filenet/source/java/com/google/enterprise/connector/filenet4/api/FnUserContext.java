@@ -28,8 +28,6 @@ import javax.security.auth.Subject;
 
 /**
  * FileNet user context
- *
- * @author amit_kagrawal
  */
 public class FnUserContext implements IUserContext {
   private static final Logger logger =
@@ -52,20 +50,8 @@ public class FnUserContext implements IUserContext {
   @Override
   public User authenticate(String username, String password)
           throws RepositoryLoginException {
-    if (FnCredentialMap.isNull()) {
-      logger.info("Initializing the FileNet credentials...");
-      FnCredentialMap.init();
-    }
-
     if (password == null) {
-      if (FnCredentialMap.containsUserCred(username)) {
-        // TODO(jlacey) remove password cache
-        password = FnCredentialMap.getUserCred(username);
-      }
-    }
-    if (password == null) {
-      logger.log(Level.WARNING, "Password is NULL");
-      throw new RepositoryLoginException();
+      throw new RepositoryLoginException("Password is null");
     }
 
     UserContext uc = UserContext.get();
@@ -77,8 +63,6 @@ public class FnUserContext implements IUserContext {
       User u = Factory.User.fetchCurrent(((FnConnection) conn).getConnection(),
           null);
       logger.info("User: " + u.get_Name() + " is authenticated");
-
-      FnCredentialMap.putUserCred(username, password);
       return u;
     } catch (Throwable e) {
       logger.log(Level.WARNING,
