@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static com.google.enterprise.connector.filenet4.ObjectMocks.generateObjectMap;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createMockBuilder;
@@ -60,8 +61,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 // Some JVMs require this class to be public in order for JUnit to
 // call newInstance on the subclasses.
@@ -164,24 +165,17 @@ public class TraverserFactoryFixture {
 
   /** Partial mock for IObjectStore since fetchObject is not trivial. */
   private static abstract class PartialObjectStore implements IObjectStore {
-    private final IObjectSet objectSet;
+    private final Map<Id, IBaseObject> objects;
 
-    PartialObjectStore(IObjectSet objectSet) {
-      this.objectSet = objectSet;
+    PartialObjectStore(IObjectSet objectSet)
+        throws RepositoryDocumentException {
+      this.objects = generateObjectMap(objectSet);
     }
 
     @Override
     public IBaseObject fetchObject(String type, Id id, PropertyFilter filter)
         throws RepositoryDocumentException {
-      Iterator<?> it = objectSet.iterator();
-      while (it.hasNext()) {
-        IBaseObject obj = (IBaseObject) it.next();
-        if (obj.get_Id().equals(id)) {
-          return obj;
-        }
-      }
-      // TODO(jlacey): Does the real implementation throw an exception instead?
-      return null;
+      return objects.get(id);
     }
   }
 

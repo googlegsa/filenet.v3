@@ -14,36 +14,16 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
-import com.google.enterprise.connector.filenet4.api.MockBaseObject;
-import com.google.enterprise.connector.spi.RepositoryException;
-
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.SecurityPrincipalType;
 import com.filenet.api.security.AccessPermission;
-import com.filenet.api.util.Id;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 class TestObjectFactory {
-  private static final DateFormat dateFormatter =
-      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-
-  public static IBaseObject newBaseObject(String guid, String timeStr,
-      boolean isReleasedVersion, AccessPermissionList perms)
-          throws ParseException, RepositoryException {
-    Date createdTime = dateFormatter.parse(timeStr);
-    return new MockBaseObject(new Id(guid), new Id(guid), createdTime,
-        false, isReleasedVersion, perms);
-  }
-
   public static FileConnector newFileConnector() {
     FileConnector connector = new FileConnector();
     connector.setUsername(TestConnection.adminUsername);

@@ -14,12 +14,12 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static com.google.enterprise.connector.filenet4.ObjectMocks.newBaseObject;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
@@ -27,6 +27,7 @@ import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
+import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SimpleTraversalContext;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
@@ -36,14 +37,12 @@ import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.security.AccessPermission;
-import com.filenet.api.util.Id;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class AclDocumentTest {
@@ -77,38 +76,27 @@ public class AclDocumentTest {
   @SafeVarargs
   private final DocumentList getDocumentList(String[][] entries,
       List<AccessPermission>... perms) throws Exception {
-    MockObjectStore objectStore = getObjectStore(entries, perms);
-    FnObjectList objectSet = getObjectSet(objectStore);
-    assertNotNull(objectStore);
-    assertEquals(entries.length, objectSet.size());
+    FnObjectList objectSet = getObjectSet(entries, perms);
+    MockObjectStore objectStore = getObjectStore(objectSet);
     return new FileDocumentList(objectSet, new EmptyObjectSet(),
         new EmptyObjectSet(), objectStore, connector,
         new SimpleTraversalContext(), null);
   }
 
-  @SafeVarargs
-  private final MockObjectStore getObjectStore(String[][] entries,
-      List<AccessPermission>... perms) throws Exception {
-    return new MockObjectStore("TestObjectStore", DatabaseType.MSSQL,
-        getObjectMap(entries, perms));
-  }
-
-  private FnObjectList getObjectSet(MockObjectStore mockOs) {
-    List<IBaseObject> objectList = new ImmutableList.Builder<IBaseObject>()
-        .addAll(mockOs.getObjects().values().iterator()).build();
-    return new FnObjectList(objectList);
+  private MockObjectStore getObjectStore(FnObjectList objectSet)
+      throws RepositoryDocumentException {
+    return newObjectStore("TestObjectStore", DatabaseType.MSSQL, objectSet);
   }
 
   @SafeVarargs
-  private final Map<Id, IBaseObject> getObjectMap(String[][] entries,
-      List<AccessPermission>... perms) throws Exception {
-    Map<Id, IBaseObject> data = new HashMap<Id, IBaseObject>();
+  private final FnObjectList getObjectSet(String[][] entries,
+      List<AccessPermission>... perms) {
+    List<IBaseObject> objectList = new ArrayList<>(entries.length);
     for (String[] entry : entries) {
-      data.put(new Id(entry[0]),
-          TestObjectFactory.newBaseObject(entry[0], entry[1], true,
+      objectList.add(newBaseObject(entry[0], entry[1], true,
               TestObjectFactory.newPermissionList(perms)));
     }
-    return data;
+    return new FnObjectList(objectList);
   }
 
   /**

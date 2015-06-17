@@ -70,8 +70,4 @@ public class MockObjectStore implements IObjectStore {
   public DatabaseType get_DatabaseType() {
     return this.dbType;
   }
-
-  public Map<Id, IBaseObject> getObjects() {
-    return objects;
-  }
 }

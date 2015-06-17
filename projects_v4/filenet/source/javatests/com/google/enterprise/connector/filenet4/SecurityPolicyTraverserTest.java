@@ -80,9 +80,9 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private static class MockSecurityTemplateList
+  private static class SecurityTemplateListMock
       extends ArrayList implements SecurityTemplateList {
-    MockSecurityTemplateList(SecurityTemplate... templates) {
+    SecurityTemplateListMock(SecurityTemplate... templates) {
       Collections.addAll(this, templates);
     }
   }
@@ -209,7 +209,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
         getPermissions(PermissionSource.SOURCE_DIRECT);
     SecurityTemplate secTemplate = getSecurityTemplate(permList);
     SecurityTemplateList secTemplateList =
-        new MockSecurityTemplateList(secTemplate);
+        new SecurityTemplateListMock(secTemplate);
     SecurityPolicy secPolicy = getSecurityPolicy(secPolicyId, Jan_1_1970,
         secTemplateList);
     return new SecurityPolicySetMock(Collections.singletonList(secPolicy));

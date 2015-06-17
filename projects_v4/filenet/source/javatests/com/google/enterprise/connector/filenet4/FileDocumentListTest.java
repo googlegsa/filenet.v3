@@ -16,6 +16,9 @@ package com.google.enterprise.connector.filenet4;
 
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertDateNearly;
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertNullField;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.newBaseObject;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.newDeletionEvent;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -62,11 +65,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -633,36 +633,12 @@ public class FileDocumentListTest {
   }
 
   private IBaseObject createObject(String guid, String timeStr,
-      boolean isDeletionEvent, boolean isReleasedVersion)
-      throws ParseException {
-    Date createdTime = dateFormatter.parse(timeStr);
-    Id id = new Id(guid);
-    return new MockBaseObject(id, id,
-        createdTime, isDeletionEvent, isReleasedVersion);
-  }
-
-  private final MockObjectStore newObjectStore(String name, DatabaseType dbType,
-      IObjectSet... objectSets) throws RepositoryDocumentException {
-    return new MockObjectStore(name, dbType, generateObjectMap(objectSets));
-  }
-
-  /**
-   * Generate a map of IBaseObject objects.
-   *
-   * @param objectSets zero or more object sets
-   * @return a map from ID to object for all objects in the given sets
-   */
-  private Map<Id, IBaseObject> generateObjectMap(IObjectSet... objectSets)
-          throws RepositoryDocumentException {
-    Map<Id, IBaseObject> objectMap = new HashMap<Id, IBaseObject>();
-    for (IObjectSet objectSet : objectSets) {
-      Iterator<?> iter = objectSet.iterator();
-      while (iter.hasNext()) {
-        IBaseObject object = (IBaseObject) iter.next();
-        objectMap.put(object.get_Id(), object);
-      }
+      boolean isDeletionEvent, boolean isReleasedVersion) {
+    if (isDeletionEvent) {
+      return newDeletionEvent(guid, timeStr, isReleasedVersion);
+    } else {
+      return newBaseObject(guid, timeStr, isReleasedVersion);
     }
-    return objectMap;
   }
 
   private DocumentList getObjectUnderTest(IObjectStore os, IObjectSet docSet,
