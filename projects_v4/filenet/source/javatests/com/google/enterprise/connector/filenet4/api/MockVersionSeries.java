@@ -29,7 +29,7 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public Id get_Id() throws RepositoryDocumentException {
+  public Id get_Id() {
     return object.get_Id();
   }
 
@@ -39,7 +39,7 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public Id getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() {
     return object.getVersionSeriesId();
   }
 
@@ -50,12 +50,12 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public boolean isDeletionEvent() throws RepositoryDocumentException {
+  public boolean isDeletionEvent() {
     return false;
   }
 
   @Override
-  public boolean isReleasedVersion() throws RepositoryDocumentException {
+  public boolean isReleasedVersion() {
     return object.isReleasedVersion();
   }
 

@@ -53,37 +53,36 @@ public class MockBaseObject implements IBaseObject {
   }
 
   @Override
-  public Id get_Id() throws RepositoryDocumentException {
+  public Id get_Id() {
     return id;
   }
 
   @Override
-  public Date getModifyDate() throws RepositoryDocumentException {
+  public Date getModifyDate() {
     return lastModified;
   }
 
   @Override
-  public Id getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() {
     return versionSeriesId;
   }
 
   @Override
-  public Date getPropertyDateValueDelete(String name)
-          throws RepositoryDocumentException {
+  public Date getPropertyDateValueDelete(String name) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public boolean isDeletionEvent() throws RepositoryDocumentException {
+  public boolean isDeletionEvent() {
     return isDeleteEvent;
   }
 
   @Override
-  public boolean isReleasedVersion() throws RepositoryDocumentException {
+  public boolean isReleasedVersion() {
     return releasedVersion;
   }
 
-  AccessPermissionList get_Permissions() throws RepositoryException {
+  AccessPermissionList get_Permissions() {
     return permissions;
   }
 

@@ -31,15 +31,15 @@ import java.util.Set;
  */
 public interface IDocument extends IBaseObject {
 
-  AccessPermissionList get_Permissions() throws RepositoryException;
+  AccessPermissionList get_Permissions();
 
-  String get_Owner() throws RepositoryException;
+  String get_Owner();
 
-  InputStream getContent() throws RepositoryDocumentException;
+  InputStream getContent();
 
-  IVersionSeries getVersionSeries() throws RepositoryDocumentException;
+  IVersionSeries getVersionSeries();
 
-  Set<String> getPropertyNames() throws RepositoryDocumentException;
+  Set<String> getPropertyNames();
 
   void getProperty(String name, List<Value> list)
       throws RepositoryDocumentException;

@@ -37,7 +37,7 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public Id get_Id() throws RepositoryDocumentException {
+  public Id get_Id() {
     return versionSeries.get_Id();
   }
 
@@ -52,12 +52,12 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public boolean isDeletionEvent() throws RepositoryDocumentException {
+  public boolean isDeletionEvent() {
     return false;
   }
 
   @Override
-  public boolean isReleasedVersion() throws RepositoryDocumentException {
+  public boolean isReleasedVersion() {
     if (versionSeries instanceof DeletionEvent) {
       return false;
     } else {
@@ -67,18 +67,17 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public Date getPropertyDateValueDelete(String name)
-      throws RepositoryDocumentException {
+  public Date getPropertyDateValueDelete(String name) {
     return new Date();
   }
 
   @Override
-  public Id getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() {
     return get_Id();
   }
 
   @Override
-  public IDocument get_ReleasedVersion() throws RepositoryException {
+  public IDocument get_ReleasedVersion() {
     return new FnDocument(
         (Document) this.versionSeries.get_ReleasedVersion());
   }

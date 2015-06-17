@@ -140,7 +140,7 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public Id get_Id() throws RepositoryDocumentException {
+  public Id get_Id() {
     return doc.get_Id();
   }
 
@@ -166,12 +166,12 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public boolean isDeletionEvent() throws RepositoryDocumentException {
+  public boolean isDeletionEvent() {
     return (doc instanceof DeletionEvent);
   }
 
   @Override
-  public boolean isReleasedVersion() throws RepositoryDocumentException {
+  public boolean isReleasedVersion() {
     if (doc != null && doc instanceof Document) {
       return VersionStatus.RELEASED.equals(doc.get_VersionStatus());
     } else {
@@ -180,7 +180,7 @@ public class FnDocument implements IDocument {
   }
 
   @Override
-  public Id getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() {
     if (doc instanceof DeletionEvent) {
       return ((DeletionEvent) doc).get_VersionSeriesId();
     } else {

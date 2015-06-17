@@ -22,16 +22,16 @@ import java.util.Date;
 
 public interface IBaseObject {
 
-  Id get_Id() throws RepositoryDocumentException;
+  Id get_Id();
 
   Date getModifyDate() throws RepositoryDocumentException;
 
-  Id getVersionSeriesId() throws RepositoryDocumentException;
+  Id getVersionSeriesId();
 
   Date getPropertyDateValueDelete(String name)
       throws RepositoryDocumentException;
 
-  boolean isDeletionEvent() throws RepositoryDocumentException;
+  boolean isDeletionEvent();
 
-  boolean isReleasedVersion() throws RepositoryDocumentException;
+  boolean isReleasedVersion();
 }

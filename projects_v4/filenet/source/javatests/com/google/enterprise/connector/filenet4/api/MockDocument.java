@@ -51,7 +51,7 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public Id get_Id() throws RepositoryDocumentException {
+  public Id get_Id() {
     return doc.get_Id();
   }
 
@@ -61,7 +61,7 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public Id getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() {
     return doc.getVersionSeriesId();
   }
 
@@ -72,17 +72,17 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public boolean isDeletionEvent() throws RepositoryDocumentException {
+  public boolean isDeletionEvent() {
     return false;
   }
 
   @Override
-  public boolean isReleasedVersion() throws RepositoryDocumentException {
+  public boolean isReleasedVersion() {
     return doc.isReleasedVersion();
   }
 
   @Override
-  public AccessPermissionList get_Permissions() throws RepositoryException {
+  public AccessPermissionList get_Permissions() {
     return ((MockBaseObject) doc).get_Permissions();
   }
 
@@ -92,18 +92,18 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public InputStream getContent() throws RepositoryDocumentException {
+  public InputStream getContent() {
     return new ByteArrayInputStream(
         "sample content".getBytes(StandardCharsets.UTF_8));
   }
 
   @Override
-  public IVersionSeries getVersionSeries() throws RepositoryDocumentException {
+  public IVersionSeries getVersionSeries() {
     return new MockVersionSeries(this.doc);
   }
 
   @Override
-  public Set<String> getPropertyNames() throws RepositoryDocumentException {
+  public Set<String> getPropertyNames() {
     return props.keySet();
   }
 

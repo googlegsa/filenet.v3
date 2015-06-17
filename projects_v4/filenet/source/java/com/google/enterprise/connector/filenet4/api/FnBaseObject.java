@@ -44,12 +44,12 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public boolean isDeletionEvent() throws RepositoryDocumentException {
+  public boolean isDeletionEvent() {
     return (object instanceof DeletionEvent);
   }
 
   @Override
-  public boolean isReleasedVersion() throws RepositoryDocumentException {
+  public boolean isReleasedVersion() {
     if (object instanceof DeletionEvent) {
       // Lookup VersionSeries of the deleted document.  If an exception is
       // thrown, the deleted document is the last document in the series;
@@ -83,7 +83,7 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public Id get_Id() throws RepositoryDocumentException {
+  public Id get_Id() {
     if (object instanceof DeletionEvent) {
       return ((DeletionEvent) object).get_Id();
     } else {
@@ -92,7 +92,7 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public Date getModifyDate() throws RepositoryDocumentException {
+  public Date getModifyDate() {
     Date modifiedDate;
     if (object instanceof DeletionEvent) {
       modifiedDate = ((DeletionEvent) object).get_DateCreated();
@@ -130,7 +130,7 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public Id getVersionSeriesId() throws RepositoryDocumentException {
+  public Id getVersionSeriesId() {
     if (object instanceof DeletionEvent) {
       return ((DeletionEvent) this.object).get_VersionSeriesId();
     } else {
