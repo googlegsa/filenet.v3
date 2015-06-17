@@ -21,6 +21,8 @@ import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
@@ -66,16 +68,28 @@ import java.util.List;
 public class TraverserFactoryFixture {
   private final List<Object> mocksToVerify = new ArrayList<>();
 
-  @After
-  public void verifyMocks() {
+  protected void replayAndSave(Object... mocks) {
+    replay(mocks);
+    Collections.addAll(mocksToVerify, mocks);
+  }
+
+  /**
+   * Verify all saved mocks. It is an error if there are no saved
+   * mocks to verify (this method should just not be called), and also
+   * an error if there are saved mocks but this method is not called.
+   */
+  protected void verifyAll() {
+    assertFalse("No mocks to verify!", mocksToVerify.isEmpty());
     for (Object mock : mocksToVerify) {
       verify(mock);
     }
+    mocksToVerify.clear();
   }
 
-  protected void replayAndVerify(Object... mocks) {
-    replay(mocks);
-    Collections.addAll(mocksToVerify, mocks);
+  /** Ensures that all saved mocks have been verified. */
+  @After
+  public void quisCustodietIpsosCustodes() {
+    assertTrue("Unverified mocks: " + mocksToVerify, mocksToVerify.isEmpty());
   }
 
   private static final String CREATE_TABLE_DELETION_EVENT =
@@ -143,7 +157,7 @@ public class TraverserFactoryFixture {
 
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher);
-    replayAndVerify(connection, os, searcher, objectFactory);
+    replayAndSave(connection, os, searcher, objectFactory);
 
     return new FileDocumentTraverser(connection, objectFactory, os, connector);
   }
@@ -179,7 +193,7 @@ public class TraverserFactoryFixture {
     ISearch searcher = new SearchMock(ImmutableMap.of("Folder", folderSet));
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
-    replayAndVerify(connection, os, objectFactory);
+    replayAndSave(connection, os, objectFactory);
 
     return new SecurityFolderTraverser(connection, objectFactory, os,
         connector);
@@ -196,7 +210,7 @@ public class TraverserFactoryFixture {
         : ImmutableMap.of("SecurityPolicy", secPolicySet, "Document", docSet));
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
-    replayAndVerify(connection, os, objectFactory);
+    replayAndSave(connection, os, objectFactory);
 
     return new SecurityPolicyTraverser(connection, objectFactory, os,
         connector);

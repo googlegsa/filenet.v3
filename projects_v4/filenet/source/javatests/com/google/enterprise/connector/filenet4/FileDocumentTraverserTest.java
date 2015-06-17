@@ -123,6 +123,7 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
         getFileDocumentTraverser(connec, new EmptyObjectSet());
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNull(docList);
+    verifyAll();
   }
 
   @Test
@@ -140,6 +141,7 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
     assertTrue(checkpoint, checkpoint.contains(id));
     assertTrue(checkpoint,
         checkpoint.contains(dateFormatter.format(lastModified)));
+    verifyAll();
   }
 
   protected IDocument getDocument(String id, Date lastModified)
@@ -157,7 +159,7 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
         .atLeastOnce();
     expect(doc.getVersionSeries()).andReturn(version).atLeastOnce();
 
-    replayAndVerify(version, doc);
+    replayAndSave(version, doc);
     return doc;
   }
 
@@ -199,6 +201,7 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
         prefix(FileDocumentTraverser.WHERE_CLAUSE_TO_DELETE_ONLY_DATE)));
     assertTrue(queries.get(2), queries.get(2).contains(
         prefix(FileDocumentTraverser.WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE)));
+    verifyAll();
   }
 
   private String prefix(String whereClause) {

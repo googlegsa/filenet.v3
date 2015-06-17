@@ -138,6 +138,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
           checkpoint.getString(JsonField.LAST_FOLDER_TIME));
     }
     assertEquals(folderSet.size(), index);
+    verifyAll();
   }
 
   @Test
@@ -151,6 +152,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
 
     consumeDocumentList(first, folderSet.size());
     consumeDocumentList(second, folderSet.size());
+    verifyAll();
   }
 
   private void consumeDocumentList(DocumentList docList, int expectedSize)
@@ -230,7 +232,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
     expect(folder.get_DateLastModified()).andReturn(lastModified).anyTimes();
     expect(folder.get_ContainedDocuments()).andReturn(docSet).atLeastOnce();
     expect(folder.get_SubFolders()).andReturn(subFolders).atLeastOnce();
-    replayAndVerify(folder);
+    replayAndSave(folder);
     return folder;
   }
 
@@ -245,7 +247,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
       expect(doc.get_Id()).andReturn(id).atLeastOnce();
       expect(doc.get_Permissions()).andReturn(createACL(createACEs()))
           .atLeastOnce();
-      replayAndVerify(doc);
+      replayAndSave(doc);
       docs.add(doc);
     }
     return new DocumentSetMock(docs.build());
@@ -265,7 +267,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
   private AccessPermissionList createACL(final AccessPermission[] aces) {
     AccessPermissionList acl = createMock(AccessPermissionList.class);
     expect(acl.iterator()).andReturn(Iterators.forArray(aces)).atLeastOnce();
-    replayAndVerify(acl);
+    replayAndSave(acl);
     return acl;
   }
 
@@ -278,7 +280,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
     expect(ace.get_PermissionSource()).andReturn(permSrc);
     expect(ace.get_GranteeType()).andReturn(granteeType);
     expect(ace.get_GranteeName()).andReturn(grantee);
-    replayAndVerify(ace);
+    replayAndSave(ace);
     return ace;
   }
 
@@ -337,6 +339,7 @@ public class SecurityFolderTraverserTest extends TraverserFactoryFixture {
     }
 
     assertEquals(expectedDocids, actualDocids.build());
+    verifyAll();
   }
 
   private void testAclDocument(Document doc) throws RepositoryException {

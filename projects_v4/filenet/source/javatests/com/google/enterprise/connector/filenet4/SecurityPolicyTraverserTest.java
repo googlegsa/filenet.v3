@@ -75,7 +75,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     expect(secPolicy.get_DateLastModified()).andReturn(lastModified).anyTimes();
     expect(secPolicy.get_SecurityTemplates()).andReturn(securityTemplates)
         .atLeastOnce();
-    replayAndVerify(secPolicy);
+    replayAndSave(secPolicy);
     return secPolicy;
   }
 
@@ -93,7 +93,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
         .atLeastOnce();
     expect(secTemplate.get_ApplyStateID()).andReturn(VersionStatusId.RELEASED)
         .atLeastOnce();
-    replayAndVerify(secTemplate);
+    replayAndSave(secTemplate);
     return secTemplate;
   }
 
@@ -105,7 +105,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
         createMock(com.filenet.api.core.Document.class);
     expect(doc.get_Id()).andReturn(iid).anyTimes();
     expect(doc.get_SecurityFolder()).andReturn(folder).atLeastOnce();
-    replayAndVerify(doc);
+    replayAndSave(doc);
     return doc;
   }
 
@@ -117,6 +117,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     traverser.setBatchHint(TestConnection.batchSize);
     DocumentList acls = traverser.getDocumentList(new Checkpoint());
     assertNull(acls);
+    verifyAll();
   }
 
   private DocumentList getDocumentList_Live(Checkpoint checkpoint)
@@ -188,6 +189,7 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
 
     assertNotNull("Got null Document on second pass", second.nextDocument());
     assertNull(second.nextDocument());
+    verifyAll();
   }
 
   @Test
@@ -248,5 +250,6 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
     assertEquals(secPolicyId, ck.getString(JsonField.UUID_SECURITY_POLICY));
 
     assertNull(doclist.nextDocument());
+    verifyAll();
   }
 }
