@@ -32,7 +32,5 @@ public interface IObjectStore {
   public IBaseObject fetchObject(String type, Id id,
       PropertyFilter filter) throws RepositoryDocumentException;
 
-  String get_Name() throws RepositoryException;
-
   public DatabaseType get_DatabaseType() throws RepositoryException;
 }

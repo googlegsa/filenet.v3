@@ -89,16 +89,6 @@ public class FnObjectStore implements IObjectStore {
     }
   }
 
-  @Override
-  public String get_Name() throws RepositoryException {
-    try {
-      return this.objectStore.get_Name();
-    } catch (Exception e) {
-      logger.log(Level.WARNING, "Unable to get Object Store name");
-      throw new RepositoryException(e);
-    }
-  }
-
   ObjectStore getObjectStore() {
     return objectStore;
   }

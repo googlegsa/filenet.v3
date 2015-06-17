@@ -61,9 +61,9 @@ class ObjectMocks {
         true, isReleasedVersion);
   }
 
-  public static MockObjectStore newObjectStore(String name, DatabaseType dbType,
+  public static MockObjectStore newObjectStore(DatabaseType dbType,
       IObjectSet... objectSets) throws RepositoryDocumentException {
-    return new MockObjectStore(name, dbType, generateObjectMap(objectSets));
+    return new MockObjectStore(dbType, generateObjectMap(objectSets));
   }
 
   /**

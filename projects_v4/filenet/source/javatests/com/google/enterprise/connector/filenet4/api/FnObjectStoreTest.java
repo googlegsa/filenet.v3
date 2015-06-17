@@ -77,12 +77,9 @@ public class FnObjectStoreTest {
   }
 
   @Test
-  public void testGetName() throws RepositoryException {
-    assertEquals(TestConnection.objectStore, ios.get_Name());
-  }
-
-  @Test
   public void testGetObjectStore() throws RepositoryException {
-    assertNotNull(((FnObjectStore) ios).getObjectStore());
+    assertNotNull(ios);
+    assertEquals(TestConnection.objectStore,
+        ((FnObjectStore) ios).getObjectStore().get_Name());
   }
 }

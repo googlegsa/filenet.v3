@@ -85,7 +85,7 @@ public class AclDocumentTest {
 
   private MockObjectStore getObjectStore(FnObjectList objectSet)
       throws RepositoryDocumentException {
-    return newObjectStore("TestObjectStore", DatabaseType.MSSQL, objectSet);
+    return newObjectStore(DatabaseType.MSSQL, objectSet);
   }
 
   @SafeVarargs

@@ -243,8 +243,8 @@ public class FileDocumentListTest {
   private void testSorting(int[] expectedOrder, String[][] entries,
       DatabaseType dbType, IObjectSet documents, IObjectSet customDeletions,
       IObjectSet deletionEvents) throws Exception {
-    MockObjectStore os = newObjectStore("objectstore", dbType,
-        documents, customDeletions, deletionEvents);
+    MockObjectStore os =
+        newObjectStore(dbType, documents, customDeletions, deletionEvents);
     DocumentList docList =
         getObjectUnderTest(os, documents, customDeletions, deletionEvents);
 
@@ -321,7 +321,7 @@ public class FileDocumentListTest {
         {"BBBBBBB2-0000-0000-0000-000000000000", "2014-03-02T08:00:00.100"}};
 
     IObjectSet docSet = getDocuments(docEntries, true);
-    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL,
         docSet, customDeletionSet, deletionEventSet);
 
     // Begin testing nextDocument for exception
@@ -366,7 +366,7 @@ public class FileDocumentListTest {
 
   private MockObjectStore getCheckpointObjectStore()
       throws ParseException, RepositoryDocumentException {
-    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL,
         getDocuments(docEntries, true), getCustomDeletions(cdEntries, true),
         getDeletionEvents(deEntries, true));
     return os;
@@ -492,7 +492,7 @@ public class FileDocumentListTest {
 
   @Test
   public void testCheckpointWithoutNextDocument() throws Exception {
-    IObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL);
+    IObjectStore os = newObjectStore(DatabaseType.MSSQL);
     DocumentList docList = getObjectUnderTest(os, new EmptyObjectSet(),
         new EmptyObjectSet(), new EmptyObjectSet());
 
@@ -505,7 +505,7 @@ public class FileDocumentListTest {
    */
   @Test
   public void testEmptyCheckpointWithoutNextDocument() throws Exception {
-    IObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL);
+    IObjectStore os = newObjectStore(DatabaseType.MSSQL);
     DocumentList docList = new FileDocumentList(new EmptyObjectSet(),
         new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
         new SimpleTraversalContext(), new Checkpoint());
@@ -538,8 +538,7 @@ public class FileDocumentListTest {
     doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(size));
     IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
 
-    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-        docSet);
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL, docSet);
     DocumentList docList = getObjectUnderTest(os, docSet,
         new EmptyObjectSet(), new EmptyObjectSet());
     Document doc = docList.nextDocument();
@@ -567,8 +566,7 @@ public class FileDocumentListTest {
       }
     };
 
-    MockObjectStore os = newObjectStore("MockObjectStore", DatabaseType.MSSQL,
-        docSet);
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL, docSet);
     DocumentList docList = new FileDocumentList(docSet,
         new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
         traversalContext, new Checkpoint(CHECKPOINT));

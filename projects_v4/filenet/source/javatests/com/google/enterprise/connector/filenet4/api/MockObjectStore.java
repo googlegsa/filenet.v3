@@ -25,15 +25,13 @@ import com.filenet.api.util.Id;
 import java.util.Map;
 
 public class MockObjectStore implements IObjectStore {
-  private final Map<Id, IBaseObject> objects;
-  private final String name;
   private final DatabaseType dbType;
+  private final Map<Id, IBaseObject> objects;
 
-  public MockObjectStore(String name, DatabaseType databaseType,
+  public MockObjectStore(DatabaseType databaseType,
       Map<Id, IBaseObject> objects) {
-    this.name = name;
-    this.objects = objects;
     this.dbType = databaseType;
+    this.objects = objects;
   }
 
   @Override
@@ -59,11 +57,6 @@ public class MockObjectStore implements IObjectStore {
     } else {
       return obj;
     }
-  }
-
-  @Override
-  public String get_Name() throws RepositoryException {
-    return this.name;
   }
 
   @Override

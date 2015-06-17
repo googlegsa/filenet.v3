@@ -81,10 +81,10 @@ public class FnObjectFactoryTest {
    * IConnection, String, String)'
    */
   @Test
-  public void testGetObjectStore() throws RepositoryLoginException,
-          RepositoryException {
+  public void testGetObjectStore() throws RepositoryException {
     assertNotNull(ios);
-    assertEquals(TestConnection.objectStore, ios.get_Name());
+    assertEquals(TestConnection.objectStore,
+        ((FnObjectStore) ios).getObjectStore().get_Name());
   }
 
   /**
