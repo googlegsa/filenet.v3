@@ -35,15 +35,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /*
- * These mocks make a terrible but convenient assumption that the
- * VersionSeries ID is the same as the ID of the Document or
- * DeletionEvent that refers to it. That means that we can check the
- * PROPNAME_DOCID of a DocumentList against the Document or
- * DeletionEvent ID. On the downside, it means that we can't have a
- * Document and a DeletionEvent referring to the same VersionSeries in
- * the object store at the same time. The {@link #generateObjectMap}
- * enforces that by preferring existing keys, which in practice means
- * preferring documents over deletion events.
+ * These mocks make the assumption that the VersionSeries ID is the
+ * same as the Document ID. DeletionEvents have a separate ID.
  */
 class ObjectMocks {
   private static final SimpleDateFormat dateFormatter =
@@ -55,6 +48,24 @@ class ObjectMocks {
     } catch (ParseException e) {
       throw new AssertionError(e);
     }
+  }
+
+  private static final String ZERO_ID = "00000000-0000-0000-0000-000000000000";
+
+  /**
+   * Create a new {@code Id} from a possibly truncated string. The
+   * string is zero-extended to the proper length, 32 hex digits or 16 bytes.
+   *
+   * @param guid a full or partial GUID string
+   */
+  public static Id newId(String guid) {
+    if (guid.startsWith("{")) {
+      guid = guid.substring(1, guid.length() - 1);
+    }
+    if (guid.length() > ZERO_ID.length()) {
+      throw new AssertionError("GUID is too long: " + guid);
+    }
+    return new Id(guid + ZERO_ID.substring(guid.length()));
   }
 
   public static IBaseObject newBaseObject(MockObjectStore objectStore,
@@ -74,8 +85,9 @@ class ObjectMocks {
   }
 
   public static IBaseObject newDeletionEvent(MockObjectStore objectStore,
-      String guid, String timeStr, boolean isReleasedVersion) {
-    IBaseObject object = new MockBaseObject(mockDeletionEvent(guid, timeStr),
+      String vsId, String eventId, String timeStr, boolean isReleasedVersion) {
+    IBaseObject object = new MockBaseObject(
+        mockDeletionEvent(vsId, eventId, timeStr),
         isReleasedVersion);
     objectStore.addObject(object);
     return object;
@@ -84,9 +96,9 @@ class ObjectMocks {
   private static Document mockDocument(String guid, String timeStr,
       boolean isReleasedVersion, AccessPermissionList perms) {
     VersionSeries vs = createMock(VersionSeries.class);
-    expect(vs.get_Id()).andStubReturn(new Id(guid));
+    expect(vs.get_Id()).andStubReturn(newId(guid));
     Document doc = createMock(Document.class);
-    expect(doc.get_Id()).andStubReturn(new Id(guid));
+    expect(doc.get_Id()).andStubReturn(newId(guid));
     expect(doc.get_VersionSeries()).andStubReturn(vs);
     expect(doc.get_DateLastModified()).andStubReturn(parseTime(timeStr));
     expect(doc.get_CurrentVersion()).andStubReturn(doc);
@@ -99,10 +111,11 @@ class ObjectMocks {
     return doc;
   }
 
-  private static DeletionEvent mockDeletionEvent(String guid, String timeStr) {
+  private static DeletionEvent mockDeletionEvent(String vsId, String eventId,
+      String timeStr) {
     DeletionEvent event = createMock(DeletionEvent.class);
-    expect(event.get_Id()).andStubReturn(new Id(guid));
-    expect(event.get_VersionSeriesId()).andStubReturn(new Id(guid));
+    expect(event.get_Id()).andStubReturn(newId(eventId));
+    expect(event.get_VersionSeriesId()).andStubReturn(newId(vsId));
     expect(event.get_DateCreated()).andStubReturn(parseTime(timeStr));
     replay(event);
     return event;
