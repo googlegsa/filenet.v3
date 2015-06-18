@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4.api;
 
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.Document;

@@ -25,7 +25,6 @@ import com.google.enterprise.connector.filenet4.FileConnector;
 import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.constants.RefreshMode;
