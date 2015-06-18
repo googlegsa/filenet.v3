@@ -14,57 +14,29 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.enterprise.connector.filenet4.AccessPermissionListMock;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
-import com.google.enterprise.connector.spi.RepositoryException;
-
 import com.filenet.api.collection.AccessPermissionList;
-import com.filenet.api.util.Id;
+import com.filenet.api.core.Document;
+import com.filenet.api.events.DeletionEvent;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MockBaseObject implements IBaseObject {
-  private final Id id;
-  private final Id versionSeriesId;
-  private final Date lastModified;
-  private final boolean isDeleteEvent;
+public class MockBaseObject extends FnBaseObject {
   private final boolean releasedVersion;
-  private final AccessPermissionList permissions;
-  private final Map<String, Object> props;
+  private final Document doc;
+  private final Map<String, Object> props = new HashMap<>();
 
-  public MockBaseObject(Id id, Id versionSeriesId, Date lastModified,
-     boolean isDeletionEvent, boolean releasedVersion) {
-    this(id, versionSeriesId, lastModified, isDeletionEvent, releasedVersion,
-        new AccessPermissionListMock());
-  }
-
-  public MockBaseObject(Id id, Id versionSeriesId, Date lastModified,
-      boolean isDeletionEvent, boolean releasedVersion,
-      AccessPermissionList perms) {
-    this.id = id;
-    this.versionSeriesId = versionSeriesId;
-    this.lastModified = lastModified;
-    this.isDeleteEvent = isDeletionEvent;
+  public MockBaseObject(DeletionEvent object, boolean releasedVersion) {
+    super(object);
     this.releasedVersion = releasedVersion;
-    this.permissions = perms;
-    this.props = new HashMap<String, Object>();
+    this.doc = null;
   }
 
-  @Override
-  public Id get_Id() {
-    return id;
-  }
-
-  @Override
-  public Date getModifyDate() {
-    return lastModified;
-  }
-
-  @Override
-  public Id getVersionSeriesId() {
-    return versionSeriesId;
+  public MockBaseObject(Document object, boolean releasedVersion) {
+    super(object);
+    this.releasedVersion = releasedVersion;
+    this.doc = object;
   }
 
   @Override
@@ -73,17 +45,18 @@ public class MockBaseObject implements IBaseObject {
   }
 
   @Override
-  public boolean isDeletionEvent() {
-    return isDeleteEvent;
-  }
-
-  @Override
   public boolean isReleasedVersion() {
-    return releasedVersion;
+    if (isDeletionEvent()) {
+      // TODO(jlacey): This object may not be in the object store.
+      // See ObjectMocks details.
+      return releasedVersion;
+    } else {
+      return super.isReleasedVersion();
+    }
   }
 
   AccessPermissionList get_Permissions() {
-    return permissions;
+    return doc.get_Permissions();
   }
 
   public void setProperty(String name, Object value) {

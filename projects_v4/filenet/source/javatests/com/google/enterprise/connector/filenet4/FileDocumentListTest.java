@@ -617,7 +617,7 @@ public class FileDocumentListTest {
    * Creates an object set.
    *
    * @param entries an array of arrays of IDs and timestamps
-   * param isDeletionEvent if the objects are DeletionEvents
+   * @param isDeletionEvent if the objects are DeletionEvents
    * @param releasedVersion if the objects should refer to released versions
    */
   private IObjectSet getObjects(String[][] entries, boolean isDeletionEvent,

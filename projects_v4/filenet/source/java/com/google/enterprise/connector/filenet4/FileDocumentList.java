@@ -92,7 +92,9 @@ public class FileDocumentList implements DocumentList {
     addToList(objectList, objectSetToDelete, ObjectType.DELETE);
     addToList(objectList, objectSetToDeleteDocs, ObjectType.DELETE);
 
-    // Sort list by last modified time and ID.
+    // Sort list by last modified time and ID. We depend on this being
+    // a stable sort, because an updated document may appear in both
+    // objectSet and objectSetToDeleteDocs with the same modified date.
     Collections.sort(objectList);
     logger.log(Level.INFO, "Number of documents to add, update, or delete: {0}",
         objectList.size());
