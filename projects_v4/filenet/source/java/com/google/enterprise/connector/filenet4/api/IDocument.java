@@ -46,22 +46,7 @@ public interface IDocument extends IBaseObject {
   void getPropertyStringValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
-  void getPropertyGuidValue(String name, List<Value> list)
-      throws RepositoryDocumentException;
-
-  void getPropertyLongValue(String name, List<Value> list)
-      throws RepositoryDocumentException;
-
-  void getPropertyDoubleValue(String name, List<Value> list)
-      throws RepositoryDocumentException;
-
   void getPropertyDateValue(String name, List<Value> list)
-      throws RepositoryDocumentException;
-
-  void getPropertyBooleanValue(String name, List<Value> list)
-      throws RepositoryDocumentException;
-
-  void getPropertyBinaryValue(String name, List<Value> list)
       throws RepositoryDocumentException;
 
   ActiveMarkingList get_ActiveMarkings() throws RepositoryDocumentException;

@@ -104,7 +104,8 @@ public class MockDocument implements IDocument {
   public void getProperty(String name, List<Value> list)
       throws RepositoryDocumentException {
     if (FN_ID.equalsIgnoreCase(name)) {
-      getPropertyGuidValue(name, list);
+      String val = (String) props.get(name);
+      list.add(Value.getStringValue(val));
     } else if (FN_LAST_MODIFIED.equalsIgnoreCase(name)) {
       getPropertyDateValue(name, list);
     } else {
@@ -121,12 +122,6 @@ public class MockDocument implements IDocument {
       getPropertyStringValue(name, list);
     } else if (obj instanceof Date) {
       getPropertyDateValue(name, list);
-    } else if (obj instanceof Long) {
-      getPropertyLongValue(name, list);
-    } else if (obj instanceof Double) {
-      getPropertyDoubleValue(name, list);
-    } else if (obj instanceof Boolean) {
-      getPropertyBooleanValue(name, list);
     }
   }
 
@@ -138,21 +133,6 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public void getPropertyGuidValue(String name, List<Value> list)
-      throws RepositoryDocumentException {
-    String val = (String) props.get(name);
-    list.add(Value.getStringValue(val));
-  }
-
-  @Override
-  public void getPropertyLongValue(String name, List<Value> list)
-      throws RepositoryDocumentException {}
-
-  @Override
-  public void getPropertyDoubleValue(String name, List<Value> list)
-      throws RepositoryDocumentException {}
-
-  @Override
   public void getPropertyDateValue(String name, List<Value> list)
       throws RepositoryDocumentException {
     Date val = (Date) props.get(name);
@@ -160,14 +140,6 @@ public class MockDocument implements IDocument {
     cal.setTime(val);
     list.add(Value.getDateValue(cal));
   }
-
-  @Override
-  public void getPropertyBooleanValue(String name, List<Value> list)
-      throws RepositoryDocumentException {}
-
-  @Override
-  public void getPropertyBinaryValue(String name, List<Value> list)
-      throws RepositoryDocumentException {}
 
   @Override
   public ActiveMarkingList get_ActiveMarkings()

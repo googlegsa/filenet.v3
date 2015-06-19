@@ -20,8 +20,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
-import com.google.enterprise.connector.filenet4.FileConnector;
-import com.google.enterprise.connector.filenet4.FileSession;
 import com.google.enterprise.connector.filenet4.FileUtil;
 import com.google.enterprise.connector.filenet4.MarkingPermissions;
 import com.google.enterprise.connector.filenet4.Permissions;
@@ -50,12 +48,8 @@ import java.util.Set;
  * @author pankaj_chouhan
  */
 public class FnDocumentTest {
-  FileSession fs;
   IObjectStore ios;
-  IConnection conn;
-  IObjectFactory iof;
-  IDocument fd, fd2;
-  IVersionSeries vs;
+  FnDocument fd;
   IUserContext uc;
   User user;
 
@@ -63,36 +57,19 @@ public class FnDocumentTest {
   public void setUp() throws Exception {
     assumeTrue(TestConnection.isLiveConnection());
 
-    FileConnector connec = new FileConnector();
-    connec.setUsername(TestConnection.adminUsername);
-    connec.setPassword(TestConnection.adminPassword);
-    connec.setObject_store(TestConnection.objectStore);
-    connec.setWorkplace_display_url(TestConnection.displayURL);
-    connec.setObject_factory(TestConnection.objectFactory);
-    connec.setContent_engine_url(TestConnection.uri);
-
-    fs = (FileSession) connec.login();
-
-    iof = (IObjectFactory) Class.forName(TestConnection.objectFactory).newInstance();
+    IObjectFactory iof = (IObjectFactory) Class.forName(
+        TestConnection.objectFactory).newInstance();
     IConnection conn = iof.getConnection(TestConnection.uri, TestConnection.adminUsername, TestConnection.adminPassword);
-    // Domain domain = Factory.Domain.getInstance(conn.getConnection(),
-    // null);
     ios = iof.getObjectStore(TestConnection.objectStore, conn, TestConnection.adminUsername, TestConnection.adminPassword);
 
-    fd = (IDocument) ios.fetchObject(ClassNames.DOCUMENT,
+    fd = (FnDocument) ios.fetchObject(ClassNames.DOCUMENT,
         new Id(TestConnection.docId1),
         FileUtil.getDocumentPropertyFilter(TestConnection.included_meta));
 
     uc = new FnUserContext(conn);
     user = uc.authenticate(TestConnection.username, TestConnection.password);
-    vs = fd.getVersionSeries();
-    fd2 = vs.get_ReleasedVersion();
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.api.FnDocument.getPropertyName()'
-   */
   @Test
   public void testGetPropertyNames() throws RepositoryException {
     Set<String> propNames = fd.getPropertyNames();
@@ -174,13 +151,8 @@ public class FnDocumentTest {
         new MarkingPermissions(activeMarkingList).authorize(user));
   }
 
-  /*
-   * Test method for
-   * 'com.google.enterprise.connector.file.api.FnDocument.getContent()'
-   */
   @Test
   public void testGetContent() throws RepositoryException {
-    uc.authenticate(TestConnection.adminUsername, TestConnection.adminPassword);
     InputStream is = fd.getContent();
     assertNotNull(is);
     assertTrue(is instanceof InputStream);
@@ -197,7 +169,6 @@ public class FnDocumentTest {
     return fieldNames;
   }
 
-  /* Test FnDocument.getPropertyStringValue method */
   @Test
   public void testGetPropertyStringValue() throws RepositoryException {
     Set<String> fieldNames = getFieldNames("STRING");

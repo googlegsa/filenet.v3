@@ -14,8 +14,6 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
-
 import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Factory;
@@ -23,12 +21,9 @@ import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.VersionSeries;
 import com.filenet.api.core.Versionable;
 import com.filenet.api.events.DeletionEvent;
-import com.filenet.api.property.Properties;
-import com.filenet.api.property.Property;
 import com.filenet.api.util.Id;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

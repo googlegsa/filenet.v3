@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.Value;
 
@@ -259,8 +260,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  @Override
-  public void getPropertyGuidValue(String propertyName, List<Value> valuesList)
+  @VisibleForTesting
+  void getPropertyGuidValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
     if (prop == null) {
@@ -307,8 +308,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  @Override
-  public void getPropertyLongValue(String propertyName, List<Value> valuesList)
+  @VisibleForTesting
+  void getPropertyLongValue(String propertyName, List<Value> valuesList)
       throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
     if (prop == null) {
@@ -349,8 +350,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  @Override
-  public void getPropertyDoubleValue(String propertyName,
+  @VisibleForTesting
+  void getPropertyDoubleValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
     if (prop == null) {
@@ -436,8 +437,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  @Override
-  public void getPropertyBooleanValue(String propertyName,
+  @VisibleForTesting
+  void getPropertyBooleanValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
     if (prop == null) {
@@ -477,8 +478,8 @@ public class FnDocument implements IDocument {
    * value fetched from FileNet is of instance type List then it is
    * multi-valued else it is single-valued.
    */
-  @Override
-  public void getPropertyBinaryValue(String propertyName,
+  @VisibleForTesting
+  void getPropertyBinaryValue(String propertyName,
       List<Value> valuesList) throws RepositoryDocumentException {
     Property prop = metas.get(propertyName);
     if (prop == null) {

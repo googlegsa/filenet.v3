@@ -18,7 +18,6 @@ import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.core.Document;
 import com.filenet.api.events.DeletionEvent;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
