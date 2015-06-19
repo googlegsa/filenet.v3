@@ -14,7 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import static org.easymock.EasyMock.createNiceMock;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.newBaseObject;
+import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,14 +27,15 @@ import static org.junit.Assume.assumeTrue;
 import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
-import com.google.enterprise.connector.filenet4.api.IDocument;
-import com.google.enterprise.connector.filenet4.api.IVersionSeries;
+import com.google.enterprise.connector.filenet4.api.IBaseObject;
+import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.util.Id;
 
@@ -119,8 +121,9 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
 
   @Test
   public void testGetDocumentList_empty() throws Exception {
-    Traverser traverser =
-        getFileDocumentTraverser(connec, new EmptyObjectSet());
+    MockObjectStore objectStore = newObjectStore(DatabaseType.ORACLE);
+    Traverser traverser = getFileDocumentTraverser(connec, objectStore,
+        new EmptyObjectSet(), new Capture<String>(CaptureType.NONE));
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNull(docList);
     verifyAll();
@@ -128,39 +131,21 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
 
   @Test
   public void testGetDocumentList_nonEmpty() throws RepositoryException {
+    MockObjectStore objectStore = newObjectStore(DatabaseType.ORACLE);
     String id = "{AAAAAAAA-0000-0000-0000-000000000000}";
-    Date lastModified = new Date();
-    IDocument doc = getDocument(id, lastModified);
-
-    Traverser traverser = getFileDocumentTraverser(connec,
-        new FnObjectList(ImmutableList.of(doc)));
+    String lastModified = dateFormatter.format(new Date());
+    IBaseObject doc = newBaseObject(objectStore, id, lastModified, true,
+        getPermissions(PermissionSource.SOURCE_DIRECT));
+    Traverser traverser = getFileDocumentTraverser(connec, objectStore,
+        new FnObjectList(ImmutableList.of(doc)),
+        new Capture<String>(CaptureType.NONE));
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
 
     assertEquals(ImmutableList.of(id), getDocids(docList));
     String checkpoint = docList.checkpoint();
     assertTrue(checkpoint, checkpoint.contains(id));
-    assertTrue(checkpoint,
-        checkpoint.contains(dateFormatter.format(lastModified)));
+    assertTrue(checkpoint, checkpoint.contains(lastModified));
     verifyAll();
-  }
-
-  protected IDocument getDocument(String id, Date lastModified)
-      throws RepositoryException {
-    Id iid = new Id(id);
-
-    IVersionSeries version = createNiceMock(IVersionSeries.class);
-    expect(version.get_Id()).andReturn(iid).anyTimes();
-
-    IDocument doc = createNiceMock(IDocument.class);
-    expect(doc.get_Id()).andReturn(iid).atLeastOnce();
-    expect(doc.getModifyDate()).andReturn(lastModified).atLeastOnce();
-    expect(doc.get_Permissions())
-        .andReturn(getPermissions(PermissionSource.SOURCE_DIRECT))
-        .atLeastOnce();
-    expect(doc.getVersionSeries()).andReturn(version).atLeastOnce();
-
-    replayAndSave(version, doc);
-    return doc;
   }
 
   private ImmutableList<String> getDocids(DocumentList docList)
@@ -178,9 +163,10 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
   public void testGetDocumentList_initialCheckpoint() throws Exception {
     connec.setDelete_additional_where_clause("and 1=1");
 
+    MockObjectStore objectStore = newObjectStore(DatabaseType.ORACLE);
     Capture<String> capture = new Capture<>(CaptureType.ALL);
-    Traverser traverser =
-        getFileDocumentTraverser(connec, new EmptyObjectSet(), capture);
+    Traverser traverser = getFileDocumentTraverser(connec, objectStore,
+        new EmptyObjectSet(), capture);
     DocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNull(docList);
     assertTrue(capture.toString(), capture.hasCaptured());

@@ -39,7 +39,6 @@ import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleTraversalContext;
 import com.google.enterprise.connector.spi.SkippedDocumentException;
@@ -227,24 +226,24 @@ public class FileDocumentListTest {
     String[][] docEntries = { entries[0], entries[5], entries[7], entries[8] };
     String[][] cdEntries = { entries[2], entries[3], entries[6] };
     String[][] deEntries = { entries[1], entries[4], entries[9] };
-    testSorting(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, entries,
-        DatabaseType.MSSQL, getDocuments(docEntries, true),
-        getCustomDeletions(cdEntries, true),
-        getDeletionEvents(deEntries, true));
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    testSorting(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, entries, os,
+        getDocuments(os, docEntries, true),
+        getCustomDeletions(os, cdEntries, true),
+        getDeletionEvents(os, deEntries, true));
   }
 
   private void testSorting(int[] expectedOrder, String[][] entries,
       DatabaseType dbType) throws Exception {
-    IObjectSet documents = getDocuments(entries, true);
-    testSorting(expectedOrder, entries, dbType,
+    MockObjectStore os = newObjectStore(dbType);
+    IObjectSet documents = getDocuments(os, entries, true);
+    testSorting(expectedOrder, entries, os,
         documents, new EmptyObjectSet(), new EmptyObjectSet());
   }
 
   private void testSorting(int[] expectedOrder, String[][] entries,
-      DatabaseType dbType, IObjectSet documents, IObjectSet customDeletions,
+      MockObjectStore os, IObjectSet documents, IObjectSet customDeletions,
       IObjectSet deletionEvents) throws Exception {
-    MockObjectStore os =
-        newObjectStore(dbType, documents, customDeletions, deletionEvents);
     DocumentList docList =
         getObjectUnderTest(os, documents, customDeletions, deletionEvents);
 
@@ -252,7 +251,7 @@ public class FileDocumentListTest {
     for (int index : expectedOrder) {
       Document doc = docList.nextDocument();
       Property fid = doc.findProperty(SpiConstants.PROPNAME_DOCID);
-      assertEquals("[" + dbType + "] Incorrect id sorting order",
+      assertEquals("[" + os.get_DatabaseType() + "] Incorrect id sorting order",
           "{" + entries[index][0] + "}", fid.nextValue().toString());
     }
   }
@@ -279,8 +278,9 @@ public class FileDocumentListTest {
       SkipPosition expectedPosition) throws Exception {
     String[][] unreleasedEntries =
           { {"AAAAAAA3-0000-0000-0000-000000000000", timeStamp} };
-    testUnreleasedNextDocument(new Id(unreleasedEntries[0][0]),
-        new EmptyObjectSet(), getDeletionEvents(unreleasedEntries, false),
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    testUnreleasedNextDocument(new Id(unreleasedEntries[0][0]), os,
+        new EmptyObjectSet(), getDeletionEvents(os, unreleasedEntries, false),
         expectedPosition);
   }
 
@@ -306,23 +306,23 @@ public class FileDocumentListTest {
       SkipPosition position) throws Exception {
     String[][] unreleasedEntries =
         { {"AAAAAAA3-0000-0000-0000-000000000000", timeStamp} };
-    testUnreleasedNextDocument(new Id(unreleasedEntries[0][0]),
-        getCustomDeletions(unreleasedEntries, false), new EmptyObjectSet(),
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    testUnreleasedNextDocument(new Id(unreleasedEntries[0][0]), os,
+        getCustomDeletions(os, unreleasedEntries, false), new EmptyObjectSet(),
         position);
   }
 
   private void testUnreleasedNextDocument(Id unreleasedGuid,
-      IObjectSet customDeletionSet, IObjectSet deletionEventSet,
-      SkipPosition expectedPosition) throws Exception {
+      MockObjectStore os, IObjectSet customDeletionSet,
+      IObjectSet deletionEventSet, SkipPosition expectedPosition)
+      throws Exception {
     String[][] docEntries = new String[][] {
         {"AAAAAAA1-0000-0000-0000-000000000000", "2014-02-01T08:00:00.100"},
         {"AAAAAAA2-0000-0000-0000-000000000000", "2014-02-02T08:00:00.100"},
         {"BBBBBBB1-0000-0000-0000-000000000000", "2014-03-01T08:00:00.100"},
         {"BBBBBBB2-0000-0000-0000-000000000000", "2014-03-02T08:00:00.100"}};
 
-    IObjectSet docSet = getDocuments(docEntries, true);
-    MockObjectStore os = newObjectStore(DatabaseType.MSSQL,
-        docSet, customDeletionSet, deletionEventSet);
+    IObjectSet docSet = getDocuments(os, docEntries, true);
 
     // Begin testing nextDocument for exception
     DocumentList docList =
@@ -364,63 +364,58 @@ public class FileDocumentListTest {
     { "CD000003-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
   };
 
-  private MockObjectStore getCheckpointObjectStore()
-      throws ParseException, RepositoryDocumentException {
-    MockObjectStore os = newObjectStore(DatabaseType.MSSQL,
-        getDocuments(docEntries, true), getCustomDeletions(cdEntries, true),
-        getDeletionEvents(deEntries, true));
-    return os;
-  }
-
   @Test
   public void testNullObjectSet_nullDocuments() throws Exception {
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
     thrown.expect(NullPointerException.class);
-    DocumentList docList = getObjectUnderTest(getCheckpointObjectStore(),
+    DocumentList docList = getObjectUnderTest(os,
         null, new EmptyObjectSet(), new EmptyObjectSet());
   }
 
   @Test
   public void testNullObjectSet_nullCustomDeletes() throws Exception {
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
     thrown.expect(NullPointerException.class);
-    DocumentList docList = getObjectUnderTest(getCheckpointObjectStore(),
+    DocumentList docList = getObjectUnderTest(os,
         new EmptyObjectSet(), null, new EmptyObjectSet());
   }
 
   @Test
   public void testNullObjectSet_nullDeletionEvents() throws Exception {
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
     thrown.expect(NullPointerException.class);
-    DocumentList docList = getObjectUnderTest(getCheckpointObjectStore(),
+    DocumentList docList = getObjectUnderTest(os,
         new EmptyObjectSet(), new EmptyObjectSet(), null);
   }
 
   @Test
   public void testMockCheckpoint() throws Exception {
-    MockObjectStore os = getCheckpointObjectStore();
-    testMockCheckpoint(os, getDocuments(docEntries, true),
-        getCustomDeletions(cdEntries, true),
-        getDeletionEvents(deEntries, true));
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    testMockCheckpoint(os, getDocuments(os, docEntries, true),
+        getCustomDeletions(os, cdEntries, true),
+        getDeletionEvents(os, deEntries, true));
   }
 
   @Test
   public void testMockCheckpoint_emptyDocuments() throws Exception {
-    MockObjectStore os = getCheckpointObjectStore();
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
     testMockCheckpoint(os, new EmptyObjectSet(),
-        getCustomDeletions(cdEntries, true),
-        getDeletionEvents(deEntries, true));
+        getCustomDeletions(os, cdEntries, true),
+        getDeletionEvents(os, deEntries, true));
   }
 
   @Test
   public void testMockCheckpoint_emptyCustomDeletes() throws Exception {
-    MockObjectStore os = getCheckpointObjectStore();
-    testMockCheckpoint(os, getDocuments(docEntries, true),
-        new EmptyObjectSet(), getDeletionEvents(deEntries, true));
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    testMockCheckpoint(os, getDocuments(os, docEntries, true),
+        new EmptyObjectSet(), getDeletionEvents(os, deEntries, true));
   }
 
   @Test
   public void testMockCheckpoint_emptyDeletionEvents() throws Exception {
-    MockObjectStore os = getCheckpointObjectStore();
-    testMockCheckpoint(os, getDocuments(docEntries, true),
-        getCustomDeletions(cdEntries, true), new EmptyObjectSet());
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    testMockCheckpoint(os, getDocuments(os, docEntries, true),
+        getCustomDeletions(os, cdEntries, true), new EmptyObjectSet());
   }
 
   private void testMockCheckpoint(IObjectStore os, IObjectSet docSet,
@@ -531,14 +526,14 @@ public class FileDocumentListTest {
 
   private void testMimeTypeAndContentSize(String mimeType, int size,
       boolean expectNotNull) throws Exception {
-    MockBaseObject doc1 = (MockBaseObject) createObject(
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    MockBaseObject doc1 = (MockBaseObject) createObject(os,
         "AAAAAAA1-0000-0000-0000-000000000000",
         CHECKPOINT_TIMESTAMP, false, false);
     doc1.setProperty(PropertyNames.MIME_TYPE, mimeType);
     doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(size));
     IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
 
-    MockObjectStore os = newObjectStore(DatabaseType.MSSQL, docSet);
     DocumentList docList = getObjectUnderTest(os, docSet,
         new EmptyObjectSet(), new EmptyObjectSet());
     Document doc = docList.nextDocument();
@@ -553,7 +548,8 @@ public class FileDocumentListTest {
 
   @Test
   public void testExcludedMimeType() throws Exception {
-    MockBaseObject doc1 = (MockBaseObject) createObject(
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    MockBaseObject doc1 = (MockBaseObject) createObject(os,
         "AAAAAAA1-0000-0000-0000-000000000000",
         CHECKPOINT_TIMESTAMP, false, false);
     doc1.setProperty(PropertyNames.MIME_TYPE, "text/plain");
@@ -566,7 +562,6 @@ public class FileDocumentListTest {
       }
     };
 
-    MockObjectStore os = newObjectStore(DatabaseType.MSSQL, docSet);
     DocumentList docList = new FileDocumentList(docSet,
         new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
         traversalContext, new Checkpoint(CHECKPOINT));
@@ -586,9 +581,9 @@ public class FileDocumentListTest {
    * @param entries an array of arrays of IDs and timestamps
    * @param releasedVersion if the documents should be released versions
    */
-  private IObjectSet getDocuments(String[][] entries, boolean releasedVersion)
-      throws ParseException {
-    return getObjects(entries, false, releasedVersion);
+  private IObjectSet getDocuments(MockObjectStore os, String[][] entries,
+      boolean releasedVersion) {
+    return getObjects(os, entries, false, releasedVersion);
   }
 
   /**
@@ -597,9 +592,9 @@ public class FileDocumentListTest {
    * @param entries an array of arrays of IDs and timestamps
    * @param releasedVersion if the deleted documents should be released versions
    */
-  private IObjectSet getDeletionEvents(String[][] entries,
-      boolean releasedVersion) throws ParseException {
-    return getObjects(entries, true, releasedVersion);
+  private IObjectSet getDeletionEvents(MockObjectStore os, String[][] entries,
+      boolean releasedVersion) {
+    return getObjects(os, entries, true, releasedVersion);
   }
 
   /**
@@ -608,34 +603,35 @@ public class FileDocumentListTest {
    * @param entries an array of arrays of IDs and timestamps
    * @param releasedVersion if the deleted documents should be released versions
    */
-  private IObjectSet getCustomDeletions(String[][] entries,
-      boolean releasedVersion) throws ParseException {
-    return getDocuments(entries, releasedVersion);
+  private IObjectSet getCustomDeletions(MockObjectStore os, String[][] entries,
+      boolean releasedVersion) {
+    return getDocuments(os, entries, releasedVersion);
   }
 
   /**
-   * Creates an object set.
+   * Creates an object set of new objects.
    *
+   * @param os the object store to create the objects in
    * @param entries an array of arrays of IDs and timestamps
    * @param isDeletionEvent if the objects are DeletionEvents
    * @param releasedVersion if the objects should refer to released versions
    */
-  private IObjectSet getObjects(String[][] entries, boolean isDeletionEvent,
-      boolean releasedVersion) throws ParseException {
+  private IObjectSet getObjects(MockObjectStore os, String[][] entries,
+      boolean isDeletionEvent, boolean releasedVersion) {
     List<IBaseObject> objectList = new ArrayList<>(entries.length);
     for (String[] line : entries) {
       objectList.add(
-          createObject(line[0], line[1], isDeletionEvent, releasedVersion));
+          createObject(os, line[0], line[1], isDeletionEvent, releasedVersion));
     }
     return new FnObjectList(objectList);
   }
 
-  private IBaseObject createObject(String guid, String timeStr,
-      boolean isDeletionEvent, boolean isReleasedVersion) {
+  private IBaseObject createObject(MockObjectStore os, String guid,
+      String timeStr, boolean isDeletionEvent, boolean isReleasedVersion) {
     if (isDeletionEvent) {
-      return newDeletionEvent(guid, timeStr, isReleasedVersion);
+      return newDeletionEvent(os, guid, timeStr, isReleasedVersion);
     } else {
-      return newBaseObject(guid, timeStr, isReleasedVersion);
+      return newBaseObject(os, guid, timeStr, isReleasedVersion);
     }
   }
 

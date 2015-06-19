@@ -27,7 +27,6 @@ import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.SimpleTraversalContext;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.Value;
@@ -76,24 +75,19 @@ public class AclDocumentTest {
   @SafeVarargs
   private final DocumentList getDocumentList(String[][] entries,
       List<AccessPermission>... perms) throws Exception {
-    FnObjectList objectSet = getObjectSet(entries, perms);
-    MockObjectStore objectStore = getObjectStore(objectSet);
+    MockObjectStore objectStore = newObjectStore(DatabaseType.MSSQL);
+    FnObjectList objectSet = getObjectSet(objectStore, entries, perms);
     return new FileDocumentList(objectSet, new EmptyObjectSet(),
         new EmptyObjectSet(), objectStore, connector,
         new SimpleTraversalContext(), null);
   }
 
-  private MockObjectStore getObjectStore(FnObjectList objectSet)
-      throws RepositoryDocumentException {
-    return newObjectStore(DatabaseType.MSSQL, objectSet);
-  }
-
   @SafeVarargs
-  private final FnObjectList getObjectSet(String[][] entries,
-      List<AccessPermission>... perms) {
+  private final FnObjectList getObjectSet(MockObjectStore objectStore,
+      String[][] entries, List<AccessPermission>... perms) {
     List<IBaseObject> objectList = new ArrayList<>(entries.length);
     for (String[] entry : entries) {
-      objectList.add(newBaseObject(entry[0], entry[1], true,
+      objectList.add(newBaseObject(objectStore, entry[0], entry[1], true,
               TestObjectFactory.newPermissionList(perms)));
     }
     return new FnObjectList(objectList);

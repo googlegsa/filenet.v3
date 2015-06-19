@@ -19,10 +19,8 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.replay;
 
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
-import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.MockBaseObject;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.constants.DatabaseType;
@@ -35,9 +33,6 @@ import com.filenet.api.util.Id;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /*
  * These mocks make a terrible but convenient assumption that the
@@ -62,24 +57,28 @@ class ObjectMocks {
     }
   }
 
-  public static IBaseObject newBaseObject(String guid, String timeStr,
-      boolean isReleasedVersion) {
-    return new MockBaseObject(mockDocument(guid, timeStr, isReleasedVersion,
-            new AccessPermissionListMock()),
-        isReleasedVersion);
+  public static IBaseObject newBaseObject(MockObjectStore objectStore,
+      String guid, String timeStr, boolean isReleasedVersion) {
+    return newBaseObject(objectStore, guid, timeStr, isReleasedVersion,
+        new AccessPermissionListMock());
   }
 
-  public static IBaseObject newBaseObject(String guid, String timeStr,
-      boolean isReleasedVersion, AccessPermissionList perms) {
-    return new MockBaseObject(
+  public static IBaseObject newBaseObject(MockObjectStore objectStore,
+      String guid, String timeStr, boolean isReleasedVersion,
+      AccessPermissionList perms) {
+    IBaseObject object = new MockBaseObject(
         mockDocument(guid, timeStr, isReleasedVersion, perms),
         isReleasedVersion);
+    objectStore.addObject(object);
+    return object;
   }
 
-  public static IBaseObject newDeletionEvent(String guid, String timeStr,
-      boolean isReleasedVersion) {
-    return new MockBaseObject(mockDeletionEvent(guid, timeStr),
+  public static IBaseObject newDeletionEvent(MockObjectStore objectStore,
+      String guid, String timeStr, boolean isReleasedVersion) {
+    IBaseObject object = new MockBaseObject(mockDeletionEvent(guid, timeStr),
         isReleasedVersion);
+    objectStore.addObject(object);
+    return object;
   }
 
   private static Document mockDocument(String guid, String timeStr,
@@ -109,36 +108,7 @@ class ObjectMocks {
     return event;
   }
 
-  public static MockObjectStore newObjectStore(DatabaseType dbType,
-      IObjectSet... objectSets) throws RepositoryDocumentException {
-    return new MockObjectStore(dbType, generateObjectMap(objectSets));
-  }
-
-  /**
-   * Generate a map of IBaseObject objects.
-   *
-   * @param objectSets zero or more object sets
-   * @return a map from ID to object for all objects in the given sets
-   */
-  public static Map<Id, IBaseObject> generateObjectMap(IObjectSet... objectSets)
-      throws RepositoryDocumentException {
-    Map<Id, IBaseObject> objectMap = new HashMap<Id, IBaseObject>();
-    for (IObjectSet objectSet : objectSets) {
-      Iterator<?> iter = objectSet.iterator();
-      while (iter.hasNext()) {
-        IBaseObject object = (IBaseObject) iter.next();
-        Id id = object.get_Id();
-
-        // Since Documents and DeletionEvents share the VersionSeries
-        // ID, we can't have both in the object store at once, or we
-        // might pull the wrong type of object out. We keep the first
-        // one we add, which means an added or updated Document will
-        // be added rather than a DeletionEvent for the same document.
-        if (!objectMap.containsKey(id)) {
-          objectMap.put(id, object);
-        }
-      }
-    }
-    return objectMap;
+  public static MockObjectStore newObjectStore(DatabaseType dbType)  {
+    return new MockObjectStore(dbType);
   }
 }

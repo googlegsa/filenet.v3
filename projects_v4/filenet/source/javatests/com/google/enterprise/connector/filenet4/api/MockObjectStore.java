@@ -21,16 +21,30 @@ import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.util.Id;
 
-import java.util.Map;
+import java.util.HashMap;
 
 public class MockObjectStore implements IObjectStore {
   private final DatabaseType dbType;
-  private final Map<Id, IBaseObject> objects;
+  private final HashMap<Id, IBaseObject> objects = new HashMap<>();
 
-  public MockObjectStore(DatabaseType databaseType,
-      Map<Id, IBaseObject> objects) {
+  public MockObjectStore(DatabaseType databaseType) {
     this.dbType = databaseType;
-    this.objects = objects;
+  }
+
+  /**
+   * Adds an object to the store.
+   *
+   * Since Documents and DeletionEvents share the VersionSeries
+   * ID, we can't have both in the object store at once, or we
+   * might pull the wrong type of object out. We keep the first
+   * one we add, which means an added or updated Document will
+   * be added rather than a DeletionEvent for the same document.
+   */
+  public void addObject(IBaseObject object) {
+    Id id = object.get_Id();
+    if (!objects.containsKey(id)) {
+      objects.put(id, object);
+    }
   }
 
   @Override
