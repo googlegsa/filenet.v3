@@ -384,17 +384,6 @@ public class FnDocument implements IDocument {
     }
   }
 
-  @Override
-  public Date getPropertyDateValueDelete(String name)
-      throws RepositoryDocumentException {
-    // Currently the dummy Date instance is returned. If required then
-    // modify it to
-    // support you requirement. It can be used in future. currently this
-    // method is
-    // used nowhere.
-    return new Date();
-  }
-
   /**
    * Fetches the Date type metadata from FileNet. Responsible for
    * distinguishing between single-valued and multi-valued metadata. If the

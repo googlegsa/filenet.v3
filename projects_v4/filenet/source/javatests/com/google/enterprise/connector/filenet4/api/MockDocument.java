@@ -65,12 +65,6 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public Date getPropertyDateValueDelete(String name)
-      throws RepositoryDocumentException {
-    return doc.getPropertyDateValueDelete(name);
-  }
-
-  @Override
   public boolean isDeletionEvent() {
     return false;
   }

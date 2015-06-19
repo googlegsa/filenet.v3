@@ -66,11 +66,6 @@ public class FnVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public Date getPropertyDateValueDelete(String name) {
-    return new Date();
-  }
-
-  @Override
   public Id getVersionSeriesId() {
     return get_Id();
   }

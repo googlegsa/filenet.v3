@@ -28,9 +28,6 @@ public interface IBaseObject {
 
   Id getVersionSeriesId();
 
-  Date getPropertyDateValueDelete(String name)
-      throws RepositoryDocumentException;
-
   boolean isDeletionEvent();
 
   boolean isReleasedVersion();

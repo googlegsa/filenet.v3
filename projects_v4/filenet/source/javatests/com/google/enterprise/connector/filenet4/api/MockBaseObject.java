@@ -40,11 +40,6 @@ public class MockBaseObject extends FnBaseObject {
   }
 
   @Override
-  public Date getPropertyDateValueDelete(String name) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
   public boolean isReleasedVersion() {
     if (isDeletionEvent()) {
       // TODO(jlacey): This object may not be in the object store.

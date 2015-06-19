@@ -105,31 +105,6 @@ public class FnBaseObject implements IBaseObject {
   }
 
   @Override
-  public Date getPropertyDateValueDelete(String name)
-      throws RepositoryDocumentException {
-    try {
-      Properties props = ((DeletionEvent) this.object).getProperties();
-      Iterator it = props.iterator();
-      while (it.hasNext()) {
-        Property prop = (Property) it.next();
-        String propName = prop.getPropertyName();
-        if (propName.equalsIgnoreCase(name)) {
-          return prop.getDateTimeValue();
-        }
-      }
-    } catch (Exception e) {
-      logger.log(Level.WARNING, "Error while trying to get the property "
-          + name
-          + " of the file "
-          + ((DeletionEvent) this.object).get_Id()
-          + " " + e.getMessage());
-      RepositoryDocumentException re = new RepositoryDocumentException(e);
-      throw re;
-    }
-    return null;
-  }
-
-  @Override
   public Id getVersionSeriesId() {
     if (object instanceof DeletionEvent) {
       return ((DeletionEvent) this.object).get_VersionSeriesId();

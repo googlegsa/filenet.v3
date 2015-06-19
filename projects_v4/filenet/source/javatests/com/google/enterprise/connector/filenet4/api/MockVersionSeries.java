@@ -44,12 +44,6 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public Date getPropertyDateValueDelete(String name)
-      throws RepositoryDocumentException {
-    return object.getPropertyDateValueDelete(name);
-  }
-
-  @Override
   public boolean isDeletionEvent() {
     return false;
   }
