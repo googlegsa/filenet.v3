@@ -22,31 +22,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MockBaseObject extends FnBaseObject {
-  private final boolean releasedVersion;
   private final Document doc;
   private final Map<String, Object> props = new HashMap<>();
 
-  public MockBaseObject(DeletionEvent object, boolean releasedVersion) {
+  public MockBaseObject(DeletionEvent object) {
     super(object);
-    this.releasedVersion = releasedVersion;
     this.doc = null;
   }
 
-  public MockBaseObject(Document object, boolean releasedVersion) {
+  public MockBaseObject(Document object) {
     super(object);
-    this.releasedVersion = releasedVersion;
     this.doc = object;
-  }
-
-  @Override
-  public boolean isReleasedVersion() {
-    if (isDeletionEvent()) {
-      // TODO(jlacey): This object may not be in the object store.
-      // See ObjectMocks details.
-      return releasedVersion;
-    } else {
-      return super.isReleasedVersion();
-    }
   }
 
   AccessPermissionList get_Permissions() {

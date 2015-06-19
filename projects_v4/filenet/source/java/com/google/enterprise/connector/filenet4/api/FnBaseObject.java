@@ -21,6 +21,7 @@ import com.filenet.api.core.IndependentObject;
 import com.filenet.api.core.VersionSeries;
 import com.filenet.api.core.Versionable;
 import com.filenet.api.events.DeletionEvent;
+import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.util.Id;
 
 import java.util.Date;
@@ -59,7 +60,7 @@ public class FnBaseObject implements IBaseObject {
             "The version series {0} for deleted document [{1}] is found",
             new Object[] {vs.get_Id(), de.get_SourceObjectId()});
         return false;
-      } catch (Exception e) {
+      } catch (EngineRuntimeException e) {
         logger.log(Level.FINEST,
             "The version series {0} for deleted document [{1}] is NOT found",
             new Object[] {de.get_VersionSeriesId(), de.get_SourceObjectId()});

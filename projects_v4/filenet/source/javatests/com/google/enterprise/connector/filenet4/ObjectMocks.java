@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4;
 
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
@@ -23,11 +24,14 @@ import com.google.enterprise.connector.filenet4.api.MockBaseObject;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.Document;
+import com.filenet.api.core.ObjectStore;
 import com.filenet.api.core.VersionSeries;
 import com.filenet.api.events.DeletionEvent;
+import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.util.Id;
 
 import java.text.ParseException;
@@ -78,8 +82,7 @@ class ObjectMocks {
       String guid, String timeStr, boolean isReleasedVersion,
       AccessPermissionList perms) {
     IBaseObject object = new MockBaseObject(
-        mockDocument(guid, timeStr, isReleasedVersion, perms),
-        isReleasedVersion);
+        mockDocument(guid, timeStr, isReleasedVersion, perms));
     objectStore.addObject(object);
     return object;
   }
@@ -87,8 +90,7 @@ class ObjectMocks {
   public static IBaseObject newDeletionEvent(MockObjectStore objectStore,
       String vsId, String eventId, String timeStr, boolean isReleasedVersion) {
     IBaseObject object = new MockBaseObject(
-        mockDeletionEvent(vsId, eventId, timeStr),
-        isReleasedVersion);
+        mockDeletionEvent(vsId, eventId, timeStr, isReleasedVersion));
     objectStore.addObject(object);
     return object;
   }
@@ -112,12 +114,23 @@ class ObjectMocks {
   }
 
   private static DeletionEvent mockDeletionEvent(String vsId, String eventId,
-      String timeStr) {
+      String timeStr, boolean isReleasedVersion) {
+    VersionSeries vs = createMock(VersionSeries.class);
+    expect(vs.get_Id()).andStubReturn(newId(vsId));
+    ObjectStore os = createMock(ObjectStore.class);
+    expect(os.fetchObject(ClassNames.VERSION_SERIES, newId(vsId), null));
+    if (isReleasedVersion) {
+      expectLastCall().andThrow(new EngineRuntimeException()).anyTimes();
+    } else {
+      expectLastCall().andStubReturn(vs);
+    }
     DeletionEvent event = createMock(DeletionEvent.class);
     expect(event.get_Id()).andStubReturn(newId(eventId));
     expect(event.get_VersionSeriesId()).andStubReturn(newId(vsId));
     expect(event.get_DateCreated()).andStubReturn(parseTime(timeStr));
-    replay(event);
+    expect(event.getObjectStore()).andStubReturn(os);
+    expect(event.get_SourceObjectId()).andStubReturn(newId(vsId));
+    replay(vs, os, event);
     return event;
   }
 
