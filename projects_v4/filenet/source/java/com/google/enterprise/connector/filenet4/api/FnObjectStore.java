@@ -59,8 +59,10 @@ public class FnObjectStore implements IObjectStore {
         doc.refresh();
         return new FnDocument(doc);
       } else {
-        obj.refresh();
-        return new FnBaseObject(obj);
+        // TODO(jlacey): This exception may not be caught if we
+        // refactor this to throw EngineRuntimeException, but that
+        // doesn't have a String constructor.
+        throw new IllegalArgumentException("Unexpected object type: " + type);
       }
     } catch (Exception e) {
       logger.log(Level.WARNING,
@@ -80,7 +82,10 @@ public class FnObjectStore implements IObjectStore {
       } else if (type.equals(ClassNames.DOCUMENT)) {
         return new FnDocument((Document) obj);
       } else {
-        return new FnBaseObject(obj);
+        // TODO(jlacey): This exception may not be caught if we
+        // refactor this to throw EngineRuntimeException, but that
+        // doesn't have a String constructor.
+        throw new IllegalArgumentException("Unexpected object type: " + type);
       }
     } catch (Exception e) {
       logger.log(Level.WARNING,

@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.EngineSetMocks.IndependentObjectSetMock;
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
@@ -426,8 +425,8 @@ public class FileDocumentListTest {
         getCustomDeletions(os, cdEntries, true), new EmptyObjectSet());
   }
 
-  private void testMockCheckpoint(IObjectStore os, IndependentObjectSet docSet,
-      IndependentObjectSet customDeletionSet,
+  private void testMockCheckpoint(MockObjectStore os,
+      IndependentObjectSet docSet, IndependentObjectSet customDeletionSet,
       IndependentObjectSet deletionEventSet) throws Exception {
     boolean expectAddTested = !docSet.isEmpty();
     boolean expectCustomDeletionTested = !customDeletionSet.isEmpty();
@@ -448,15 +447,14 @@ public class FileDocumentListTest {
       String id =
           doc.findProperty(SpiConstants.PROPNAME_DOCID).nextValue().toString();
       if (ActionType.ADD.equals(actionType)) {
-        IBaseObject object = os.getObject(ClassNames.DOCUMENT, id);
-        assertNotNull(id.toString(), object);
+        assertTrue(os.containsObject(ClassNames.DOCUMENT, new Id(id)));
         assertTrue(checkpointContains(docList.checkpoint(),
             doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
             JsonField.LAST_MODIFIED_TIME));
         isAddTested = true;
       } else if (ActionType.DELETE.equals(actionType)) {
-        IBaseObject object = os.getObject(ClassNames.DOCUMENT, id);
-        if (object == null) { // Proxy for a DeletionEvent.
+        if (!os.containsObject(ClassNames.DOCUMENT, new Id(id))) {
+          // Proxy for a DeletionEvent.
           assertTrue(checkpointContains(docList.checkpoint(),
               doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
               JsonField.LAST_DELETION_EVENT_TIME));

@@ -39,17 +39,26 @@ public class MockObjectStore implements IObjectStore {
     objects.put(object.get_Id(), object);
   }
 
+  /** Verifies that the given object is in the store. */
+  public boolean containsObject(String type, Id id)
+      throws RepositoryDocumentException {
+    if (ClassNames.DOCUMENT.equals(type)) {
+      return objects.containsKey(id);
+    } else {
+      throw new AssertionError("Unexpected type " + type);
+    }
+  }
+
   @Override
   public IBaseObject getObject(String type, String id)
       throws RepositoryDocumentException {
-    return getObject(type, new Id(id));
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public IBaseObject getObject(String type, Id id)
       throws RepositoryDocumentException {
-    Document obj = objects.get(id);
-    return (obj == null) ? null : new FnBaseObject(obj);
+    throw new UnsupportedOperationException();
   }
 
   @Override

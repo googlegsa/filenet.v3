@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.api.FnBaseObject;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -48,7 +47,7 @@ public class FileDocumentList implements DocumentList {
   private final Checkpoint checkpoint;
 
   private final DatabaseType databaseType;
-  private final Iterator<ObjectWrapper> objects;
+  private final Iterator<SearchObject> objects;
   private final LinkedList<Document> acls;
 
   private Date fileDocumentDate;
@@ -84,15 +83,17 @@ public class FileDocumentList implements DocumentList {
     }
   }
 
-  private Iterator<ObjectWrapper> mergeAndSortObjects(
+  /** Sort the objects by modify date and ID. */
+  private Iterator<SearchObject> mergeAndSortObjects(
       IndependentObjectSet objectSet, IndependentObjectSet objectSetToDelete,
       IndependentObjectSet objectSetToDeleteDocs) {
-    List<ObjectWrapper> objectList = new ArrayList<>();
+    List<SearchObject> objectList = new ArrayList<>();
 
     // Adding documents, deletion events and custom deletion to the object list
-    addToList(objectList, objectSet, ObjectType.ADD);
-    addToList(objectList, objectSetToDelete, ObjectType.DELETION_EVENT);
-    addToList(objectList, objectSetToDeleteDocs, ObjectType.CUSTOM_DELETE);
+    addToList(objectList, objectSet, SearchObject.Type.ADD);
+    addToList(objectList, objectSetToDelete, SearchObject.Type.DELETION_EVENT);
+    addToList(objectList, objectSetToDeleteDocs,
+        SearchObject.Type.CUSTOM_DELETE);
 
     // Sort list by last modified time and ID. We depend on this being
     // a stable sort, because an updated document may appear in both
@@ -104,43 +105,16 @@ public class FileDocumentList implements DocumentList {
     return objectList.iterator();
   }
 
-  /** Adds FnBaseObjects from the object set to the list. */
-  private void addToList(List<ObjectWrapper> objectList,
-      IndependentObjectSet objectSet, ObjectType type) {
+  /**
+   * Wraps elements of the object set as SearchObjects and adds them
+   * to the list.
+   */
+  private void addToList(List<SearchObject> objectList,
+      IndependentObjectSet objectSet, SearchObject.Type searchType) {
     Iterator<?> iter = objectSet.iterator();
     while (iter.hasNext()) {
-      FnBaseObject baseObject =
-          new FnBaseObject((IndependentObject) iter.next());
-      objectList.add(new ObjectWrapper(baseObject, type));
-    }
-  }
-
-  public static enum ObjectType { ADD, CUSTOM_DELETE, DELETION_EVENT };
-
-  /**
-   * A {@code Comparable} wrapper on FnBaseObject that includes the type,
-   * so that added and updated documents can be distinguished from the
-   * deleted documents returned by the additional delete query.
-   *
-   * Note: this class has a natural ordering that is inconsistent with equals.
-   */
-  private class ObjectWrapper implements Comparable<ObjectWrapper> {
-    private final FnBaseObject object;
-    private final ObjectType type;
-
-    ObjectWrapper(FnBaseObject object, ObjectType type) {
-      this.object = object;
-      this.type = type;
-    }
-
-    @Override
-    public int compareTo(ObjectWrapper wrapper) {
-      FnBaseObject other = wrapper.object;
-      int val = object.getModifyDate().compareTo(other.getModifyDate());
-      if (val == 0) {
-        val = object.get_Id().compareTo(other.get_Id(), databaseType);
-      }
-      return val;
+      objectList.add(new SearchObject((IndependentObject) iter.next(),
+              databaseType, searchType));
     }
   }
 
@@ -150,31 +124,36 @@ public class FileDocumentList implements DocumentList {
 
     Document fileDocument;
     if (objects.hasNext()) {
-      ObjectWrapper wrapper = objects.next();
-      FnBaseObject object = wrapper.object;
-      if (wrapper.type == ObjectType.DELETION_EVENT) {
-        fileDocumentToDeleteDate = object.getModifyDate();
-        docIdToDelete = object.get_Id();
-        if (object.isReleasedVersion()) {
-          fileDocument = createDeleteDocument(object);
-        } else {
-          throw new SkippedDocumentException("Skip a deletion event [ID: "
-              + docIdToDelete + "] of an unreleased document.");
-        }
-      } else if (wrapper.type == ObjectType.CUSTOM_DELETE) {
-        fileDocumentToDeleteDocsDate = object.getModifyDate();
-        docIdToDeleteDocs = object.get_Id();
-        if (object.isReleasedVersion()) {
-          fileDocument = createDeleteDocument(object);
-        } else {
-          throw new SkippedDocumentException("Skip custom deletion [ID: "
-              + docIdToDeleteDocs + "] because document is not a released "
-              + "version.");
-        }
-      } else {
-        fileDocumentDate = object.getModifyDate();
-        docId = object.get_Id();
-        fileDocument = createAddDocument(object);
+      SearchObject object = objects.next();
+      switch (object.getType()) {
+        case DELETION_EVENT:
+          fileDocumentToDeleteDate = object.getModifyDate();
+          docIdToDelete = object.get_Id();
+          if (object.isReleasedVersion()) {
+            fileDocument = createDeleteDocument(object);
+          } else {
+            throw new SkippedDocumentException("Skip a deletion event [ID: "
+                + docIdToDelete + "] of an unreleased document.");
+          }
+          break;
+        case CUSTOM_DELETE:
+          fileDocumentToDeleteDocsDate = object.getModifyDate();
+          docIdToDeleteDocs = object.get_Id();
+          if (object.isReleasedVersion()) {
+            fileDocument = createDeleteDocument(object);
+          } else {
+            throw new SkippedDocumentException("Skip custom deletion [ID: "
+                + docIdToDeleteDocs + "] because document is not a released "
+                + "version.");
+          }
+          break;
+        case ADD:
+          fileDocumentDate = object.getModifyDate();
+          docId = object.get_Id();
+          fileDocument = createAddDocument(object);
+          break;
+        default:
+          throw new NullPointerException();
       }
     } else {
       logger.finest("Processing ACL document");
@@ -183,7 +162,7 @@ public class FileDocumentList implements DocumentList {
     return fileDocument;
   }
 
-  private Document createAddDocument(FnBaseObject object)
+  private Document createAddDocument(SearchObject object)
       throws RepositoryException {
     Id id = object.get_Id();
     logger.log(Level.FINEST, "Add document [ID: {0}]", id);
@@ -193,7 +172,7 @@ public class FileDocumentList implements DocumentList {
     return doc;
   }
 
-  private Document createDeleteDocument(FnBaseObject object)
+  private Document createDeleteDocument(SearchObject object)
       throws RepositoryDocumentException {
     Id id = object.get_Id();
     Id versionSeriesId = object.getVersionSeriesId();

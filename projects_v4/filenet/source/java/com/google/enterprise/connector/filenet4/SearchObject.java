@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.enterprise.connector.filenet4.api;
+package com.google.enterprise.connector.filenet4;
 
+import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Factory;
@@ -28,15 +29,41 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@SuppressWarnings("rawtypes")
-public class FnBaseObject implements IBaseObject {
+/**
+ * A {@code Comparable} wrapper on IndependentObject that includes the type,
+ * so that added and updated documents can be distinguished from the
+ * deleted documents returned by the additional delete query.
+ *
+ * Note: this class has a natural ordering that is inconsistent with equals.
+ */
+class SearchObject implements Comparable<SearchObject> {
   private static final Logger logger =
-      Logger.getLogger(FnBaseObject.class.getName());
+      Logger.getLogger(SearchObject.class.getName());
+
+  public static enum Type { ADD, CUSTOM_DELETE, DELETION_EVENT };
 
   private final IndependentObject object;
+  private final DatabaseType databaseType;
+  private final Type type;
 
-  public FnBaseObject(IndependentObject object) {
+  public SearchObject(IndependentObject object, DatabaseType databaseType,
+      Type type) {
     this.object = object;
+    this.databaseType = databaseType;
+    this.type = type;
+  }
+
+  @Override
+  public int compareTo(SearchObject that) {
+    int val = this.getModifyDate().compareTo(that.getModifyDate());
+    if (val == 0) {
+      val = this.get_Id().compareTo(that.get_Id(), databaseType);
+    }
+    return val;
+  }
+
+  public Type getType() {
+    return type;
   }
 
   public boolean isReleasedVersion() {
@@ -61,18 +88,14 @@ public class FnBaseObject implements IBaseObject {
         return true;
       }
     } else {
-      Versionable versionable = null;
-      if (object instanceof VersionSeries) {
-        versionable = ((VersionSeries) object).get_CurrentVersion();
-      } else if (object instanceof Document) {
-        versionable = ((Document) object).get_CurrentVersion();
-      }
+      // TODO(jlacey): I think the check for null is obsolete, but I'm
+      // not sure whether get_CurrentVersion can return null.
+      Versionable versionable = ((Document) object).get_CurrentVersion();
       return versionable != null
           && VersionStatus.RELEASED.equals(versionable.get_VersionStatus());
     }
   }
 
-  @Override
   public Id get_Id() {
     if (object instanceof DeletionEvent) {
       return ((DeletionEvent) object).get_Id();
