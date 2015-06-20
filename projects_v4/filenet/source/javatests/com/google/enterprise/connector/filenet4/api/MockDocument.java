@@ -19,6 +19,7 @@ import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.ActiveMarkingList;
+import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.core.Folder;
 import com.filenet.api.util.Id;
 
@@ -33,20 +34,15 @@ import java.util.Map;
 import java.util.Set;
 
 public class MockDocument implements IDocument {
-  public final static String FN_ID = "Id";
-  public final static String FN_LAST_MODIFIED = "DateLastModified";
-
-  private final IBaseObject doc;
+  private final MockBaseObject doc;
   private final Map<String, Object> props;
 
-  public MockDocument(IBaseObject object) throws RepositoryDocumentException {
+  public MockDocument(MockBaseObject object) {
     this.doc = object;
     this.props = new HashMap<String, Object>();
-    props.put(FN_ID, doc.get_Id());
-    props.put(FN_LAST_MODIFIED, doc.getModifyDate());
-    if (doc instanceof MockBaseObject) {
-      props.putAll(((MockBaseObject) doc).getProperties());
-    }
+    props.put(PropertyNames.ID, doc.get_Id());
+    props.put(PropertyNames.DATE_LAST_MODIFIED, doc.getModifyDate());
+    props.putAll(doc.getProperties());
   }
 
   @Override
@@ -55,28 +51,8 @@ public class MockDocument implements IDocument {
   }
 
   @Override
-  public Date getModifyDate() throws RepositoryDocumentException {
-    return doc.getModifyDate();
-  }
-
-  @Override
-  public Id getVersionSeriesId() {
-    return doc.getVersionSeriesId();
-  }
-
-  @Override
-  public boolean isDeletionEvent() {
-    return false;
-  }
-
-  @Override
-  public boolean isReleasedVersion() {
-    return doc.isReleasedVersion();
-  }
-
-  @Override
   public AccessPermissionList get_Permissions() {
-    return ((MockBaseObject) doc).get_Permissions();
+    return doc.get_Permissions();
   }
 
   @Override
@@ -103,10 +79,10 @@ public class MockDocument implements IDocument {
   @Override
   public void getProperty(String name, List<Value> list)
       throws RepositoryDocumentException {
-    if (FN_ID.equalsIgnoreCase(name)) {
+    if (PropertyNames.ID.equalsIgnoreCase(name)) {
       String val = (String) props.get(name);
       list.add(Value.getStringValue(val));
-    } else if (FN_LAST_MODIFIED.equalsIgnoreCase(name)) {
+    } else if (PropertyNames.DATE_LAST_MODIFIED.equalsIgnoreCase(name)) {
       getPropertyDateValue(name, list);
     } else {
       getPropertyValue(name, list);

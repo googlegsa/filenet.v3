@@ -14,15 +14,10 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
-
-import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.VersionSeries;
-import com.filenet.api.events.DeletionEvent;
 import com.filenet.api.util.Id;
 
-import java.util.Date;
 import java.util.logging.Logger;
 
 public class FnVersionSeries implements IVersionSeries {
@@ -38,36 +33,6 @@ public class FnVersionSeries implements IVersionSeries {
   @Override
   public Id get_Id() {
     return versionSeries.get_Id();
-  }
-
-  @Override
-  public Date getModifyDate() throws RepositoryDocumentException {
-    try {
-      return versionSeries.get_CurrentVersion().get_DateCheckedIn();
-    } catch (Exception e) {
-      throw new RepositoryDocumentException(
-          "Failed to retrieve the last modified or checked-in date.", e);
-    }
-  }
-
-  @Override
-  public boolean isDeletionEvent() {
-    return false;
-  }
-
-  @Override
-  public boolean isReleasedVersion() {
-    if (versionSeries instanceof DeletionEvent) {
-      return false;
-    } else {
-      return VersionStatus.RELEASED.equals(
-          versionSeries.get_CurrentVersion().get_VersionStatus());
-    }
-  }
-
-  @Override
-  public Id getVersionSeriesId() {
-    return get_Id();
   }
 
   @Override

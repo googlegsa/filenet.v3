@@ -26,11 +26,9 @@ import com.filenet.api.collection.Float64List;
 import com.filenet.api.collection.IdList;
 import com.filenet.api.collection.Integer32List;
 import com.filenet.api.collection.StringList;
-import com.filenet.api.constants.VersionStatus;
 import com.filenet.api.core.ContentTransfer;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
-import com.filenet.api.events.DeletionEvent;
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
@@ -143,50 +141,6 @@ public class FnDocument implements IDocument {
   @Override
   public Id get_Id() {
     return doc.get_Id();
-  }
-
-  @Override
-  public Date getModifyDate() throws RepositoryDocumentException {
-    Date modifiedDate;
-    try {
-      if (doc instanceof DeletionEvent) {
-        modifiedDate = ((DeletionEvent) doc).get_DateCreated();
-        logger.log(Level.FINEST, "[DeletionEvent] Created on {0}",
-            modifiedDate);
-      } else if (doc instanceof Document) {
-        modifiedDate = doc.get_DateLastModified();
-        logger.log(Level.FINEST, "[Document] Last modified on {0}",
-            modifiedDate);
-      } else {
-        modifiedDate = new Date();
-      }
-    } catch (Exception e) {
-      throw new RepositoryDocumentException(e);
-    }
-    return modifiedDate;
-  }
-
-  @Override
-  public boolean isDeletionEvent() {
-    return (doc instanceof DeletionEvent);
-  }
-
-  @Override
-  public boolean isReleasedVersion() {
-    if (doc != null && doc instanceof Document) {
-      return VersionStatus.RELEASED.equals(doc.get_VersionStatus());
-    } else {
-      return false;
-    }
-  }
-
-  @Override
-  public Id getVersionSeriesId() {
-    if (doc instanceof DeletionEvent) {
-      return ((DeletionEvent) doc).get_VersionSeriesId();
-    } else {
-      return doc.get_VersionSeries().get_Id();
-    }
   }
 
   @Override

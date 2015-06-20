@@ -18,9 +18,9 @@ import java.util.Iterator;
 import java.util.List;
 
 public class FnObjectList implements IObjectSet {
-  private final List<? extends IBaseObject> objectList;
+  private final List<? extends FnBaseObject> objectList;
 
-  public FnObjectList(List<? extends IBaseObject> objectList) {
+  public FnObjectList(List<? extends FnBaseObject> objectList) {
     this.objectList = objectList;
   }
 

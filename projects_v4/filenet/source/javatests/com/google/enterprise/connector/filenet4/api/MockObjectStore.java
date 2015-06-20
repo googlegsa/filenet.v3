@@ -25,7 +25,7 @@ import java.util.HashMap;
 
 public class MockObjectStore implements IObjectStore {
   private final DatabaseType dbType;
-  private final HashMap<Id, IBaseObject> objects = new HashMap<>();
+  private final HashMap<Id, MockBaseObject> objects = new HashMap<>();
 
   public MockObjectStore(DatabaseType databaseType) {
     this.dbType = databaseType;
@@ -34,7 +34,7 @@ public class MockObjectStore implements IObjectStore {
   /**
    * Adds an object to the store.
    */
-  public void addObject(IBaseObject object) {
+  public void addObject(MockBaseObject object) {
     objects.put(object.get_Id(), object);
   }
 
@@ -53,7 +53,7 @@ public class MockObjectStore implements IObjectStore {
   @Override
   public IBaseObject fetchObject(String type, Id id, PropertyFilter filter)
           throws RepositoryDocumentException {
-    IBaseObject obj = objects.get(id);
+    MockBaseObject obj = objects.get(id);
     if (ClassNames.DOCUMENT.equals(type)) {
       return new MockDocument(obj);
     } else if (ClassNames.VERSION_SERIES.equals(type)) {

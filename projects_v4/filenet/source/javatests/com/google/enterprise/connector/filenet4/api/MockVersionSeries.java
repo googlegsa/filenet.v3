@@ -14,43 +14,20 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.util.Id;
 
-import java.util.Date;
-
 public class MockVersionSeries implements IVersionSeries {
-  private final IBaseObject object;
+  private final MockBaseObject object;
 
-  public MockVersionSeries(IBaseObject object) {
+  public MockVersionSeries(MockBaseObject object) {
     this.object = object;
   }
 
   @Override
   public Id get_Id() {
     return object.get_Id();
-  }
-
-  @Override
-  public Date getModifyDate() throws RepositoryDocumentException {
-    return object.getModifyDate();
-  }
-
-  @Override
-  public Id getVersionSeriesId() {
-    return object.getVersionSeriesId();
-  }
-
-  @Override
-  public boolean isDeletionEvent() {
-    return false;
-  }
-
-  @Override
-  public boolean isReleasedVersion() {
-    return object.isReleasedVersion();
   }
 
   @Override

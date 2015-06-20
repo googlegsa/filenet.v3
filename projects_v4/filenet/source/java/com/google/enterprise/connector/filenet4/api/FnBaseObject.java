@@ -39,12 +39,6 @@ public class FnBaseObject implements IBaseObject {
     this.object = object;
   }
 
-  @Override
-  public boolean isDeletionEvent() {
-    return (object instanceof DeletionEvent);
-  }
-
-  @Override
   public boolean isReleasedVersion() {
     if (object instanceof DeletionEvent) {
       // Lookup VersionSeries of the deleted document.  If an exception is
@@ -87,7 +81,6 @@ public class FnBaseObject implements IBaseObject {
     }
   }
 
-  @Override
   public Date getModifyDate() {
     Date modifiedDate;
     if (object instanceof DeletionEvent) {
@@ -100,7 +93,6 @@ public class FnBaseObject implements IBaseObject {
     return modifiedDate;
   }
 
-  @Override
   public Id getVersionSeriesId() {
     if (object instanceof DeletionEvent) {
       return ((DeletionEvent) this.object).get_VersionSeriesId();

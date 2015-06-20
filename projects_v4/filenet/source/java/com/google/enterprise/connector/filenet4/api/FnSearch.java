@@ -63,7 +63,7 @@ public class FnSearch implements ISearch {
       IndependentObjectSet myObjects = execute(query, 100, 1);
 
       Iterator<?> it = myObjects.iterator();
-      LinkedList<IBaseObject> objectList = new LinkedList<IBaseObject>();
+      LinkedList<FnBaseObject> objectList = new LinkedList<>();
       while (it.hasNext()) {
         IndependentObject object = (IndependentObject) it.next();
         objectList.add(new FnBaseObject(object));

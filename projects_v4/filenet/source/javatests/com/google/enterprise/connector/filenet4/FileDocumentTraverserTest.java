@@ -26,8 +26,8 @@ import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.api.FnBaseObject;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -134,7 +134,7 @@ public class FileDocumentTraverserTest extends TraverserFactoryFixture {
     MockObjectStore objectStore = newObjectStore(DatabaseType.ORACLE);
     String id = "{AAAAAAAA-0000-0000-0000-000000000000}";
     String lastModified = dateFormatter.format(new Date());
-    IBaseObject doc = newBaseObject(objectStore, id, lastModified, true,
+    FnBaseObject doc = newBaseObject(objectStore, id, lastModified, true,
         getPermissions(PermissionSource.SOURCE_DIRECT));
     Traverser traverser = getFileDocumentTraverser(connec, objectStore,
         new FnObjectList(ImmutableList.of(doc)),

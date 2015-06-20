@@ -43,10 +43,6 @@ public class MockBaseObject extends FnBaseObject {
     props.put(name, value);
   }
 
-  public Object getProperty(String name) {
-    return props.get(name);
-  }
-
   public Map<String, Object> getProperties() {
     return props;
   }

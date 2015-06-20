@@ -31,6 +31,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.api.FnBaseObject;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
@@ -623,7 +624,7 @@ public class FileDocumentListTest {
    */
   private IObjectSet getObjects(MockObjectStore os, String[][] entries,
       boolean isDeletionEvent, boolean releasedVersion) {
-    List<IBaseObject> objectList = new ArrayList<>(entries.length);
+    List<FnBaseObject> objectList = new ArrayList<>(entries.length);
     for (String[] line : entries) {
       objectList.add(
           (isDeletionEvent)

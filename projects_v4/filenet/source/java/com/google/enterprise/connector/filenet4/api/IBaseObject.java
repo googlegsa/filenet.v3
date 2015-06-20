@@ -14,21 +14,9 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
-
 import com.filenet.api.util.Id;
-
-import java.util.Date;
 
 public interface IBaseObject {
 
   Id get_Id();
-
-  Date getModifyDate() throws RepositoryDocumentException;
-
-  Id getVersionSeriesId();
-
-  boolean isDeletionEvent();
-
-  boolean isReleasedVersion();
 }

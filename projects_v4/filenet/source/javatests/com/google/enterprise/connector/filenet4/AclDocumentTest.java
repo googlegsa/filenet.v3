@@ -21,8 +21,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
+import com.google.enterprise.connector.filenet4.api.FnBaseObject;
 import com.google.enterprise.connector.filenet4.api.FnObjectList;
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -85,7 +85,7 @@ public class AclDocumentTest {
   @SafeVarargs
   private final FnObjectList getObjectSet(MockObjectStore objectStore,
       String[][] entries, List<AccessPermission>... perms) {
-    List<IBaseObject> objectList = new ArrayList<>(entries.length);
+    List<FnBaseObject> objectList = new ArrayList<>(entries.length);
     for (String[] entry : entries) {
       objectList.add(newBaseObject(objectStore, entry[0], entry[1], true,
               TestObjectFactory.newPermissionList(perms)));

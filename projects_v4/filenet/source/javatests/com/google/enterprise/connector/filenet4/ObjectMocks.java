@@ -19,7 +19,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 
-import com.google.enterprise.connector.filenet4.api.IBaseObject;
+import com.google.enterprise.connector.filenet4.api.FnBaseObject;
 import com.google.enterprise.connector.filenet4.api.MockBaseObject;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 
@@ -72,24 +72,24 @@ class ObjectMocks {
     return new Id(guid + ZERO_ID.substring(guid.length()));
   }
 
-  public static IBaseObject newBaseObject(MockObjectStore objectStore,
+  public static FnBaseObject newBaseObject(MockObjectStore objectStore,
       String guid, String timeStr, boolean isReleasedVersion) {
     return newBaseObject(objectStore, guid, timeStr, isReleasedVersion,
         new AccessPermissionListMock());
   }
 
-  public static IBaseObject newBaseObject(MockObjectStore objectStore,
+  public static FnBaseObject newBaseObject(MockObjectStore objectStore,
       String guid, String timeStr, boolean isReleasedVersion,
       AccessPermissionList perms) {
-    IBaseObject object = new MockBaseObject(
+    MockBaseObject object = new MockBaseObject(
         mockDocument(guid, timeStr, isReleasedVersion, perms));
     objectStore.addObject(object);
     return object;
   }
 
-  public static IBaseObject newDeletionEvent(MockObjectStore objectStore,
+  public static FnBaseObject newDeletionEvent(MockObjectStore objectStore,
       String vsId, String eventId, String timeStr, boolean isReleasedVersion) {
-    IBaseObject object = new MockBaseObject(
+    MockBaseObject object = new MockBaseObject(
         mockDeletionEvent(vsId, eventId, timeStr, isReleasedVersion));
     objectStore.addObject(object);
     return object;
