@@ -18,6 +18,7 @@ import com.google.enterprise.connector.spi.RepositoryDocumentException;
 
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.DatabaseType;
+import com.filenet.api.core.Document;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.util.Id;
 
@@ -25,7 +26,7 @@ import java.util.HashMap;
 
 public class MockObjectStore implements IObjectStore {
   private final DatabaseType dbType;
-  private final HashMap<Id, MockBaseObject> objects = new HashMap<>();
+  private final HashMap<Id, Document> objects = new HashMap<>();
 
   public MockObjectStore(DatabaseType databaseType) {
     this.dbType = databaseType;
@@ -34,7 +35,7 @@ public class MockObjectStore implements IObjectStore {
   /**
    * Adds an object to the store.
    */
-  public void addObject(MockBaseObject object) {
+  public void addObject(Document object) {
     objects.put(object.get_Id(), object);
   }
 
@@ -47,19 +48,23 @@ public class MockObjectStore implements IObjectStore {
   @Override
   public IBaseObject getObject(String type, Id id)
       throws RepositoryDocumentException {
-    return objects.get(id);
+    Document obj = objects.get(id);
+    return (obj == null) ? null : new FnBaseObject(obj);
   }
 
   @Override
   public IBaseObject fetchObject(String type, Id id, PropertyFilter filter)
           throws RepositoryDocumentException {
-    MockBaseObject obj = objects.get(id);
     if (ClassNames.DOCUMENT.equals(type)) {
-      return new MockDocument(obj);
-    } else if (ClassNames.VERSION_SERIES.equals(type)) {
-      return new MockVersionSeries(obj);
+      Document obj = objects.get(id);
+      if (obj == null) {
+        throw new RepositoryDocumentException("Unable to fetch document "
+            + id);
+      } else {
+        return new MockDocument(obj);
+      }
     } else {
-      return obj;
+      throw new AssertionError("Unexpected type " + type);
     }
   }
 

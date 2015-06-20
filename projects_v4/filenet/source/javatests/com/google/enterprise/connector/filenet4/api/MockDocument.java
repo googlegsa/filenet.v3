@@ -20,6 +20,7 @@ import com.google.enterprise.connector.spi.Value;
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
 import com.filenet.api.util.Id;
 
@@ -34,15 +35,17 @@ import java.util.Map;
 import java.util.Set;
 
 public class MockDocument implements IDocument {
-  private final MockBaseObject doc;
+  private final Document doc;
   private final Map<String, Object> props;
 
-  public MockDocument(MockBaseObject object) {
+  public MockDocument(Document object) {
     this.doc = object;
     this.props = new HashMap<String, Object>();
     props.put(PropertyNames.ID, doc.get_Id());
-    props.put(PropertyNames.DATE_LAST_MODIFIED, doc.getModifyDate());
-    props.putAll(doc.getProperties());
+    props.put(PropertyNames.DATE_LAST_MODIFIED, doc.get_DateLastModified());
+    props.put(PropertyNames.MIME_TYPE, doc.get_MimeType());
+    props.put(PropertyNames.CONTENT_SIZE,
+        String.valueOf(doc.get_ContentSize()));
   }
 
   @Override

@@ -14,14 +14,13 @@
 
 package com.google.enterprise.connector.filenet4.api;
 
-import com.google.enterprise.connector.spi.RepositoryException;
-
+import com.filenet.api.core.Document;
 import com.filenet.api.util.Id;
 
 public class MockVersionSeries implements IVersionSeries {
-  private final MockBaseObject object;
+  private final Document object;
 
-  public MockVersionSeries(MockBaseObject object) {
+  public MockVersionSeries(Document object) {
     this.object = object;
   }
 
@@ -31,7 +30,7 @@ public class MockVersionSeries implements IVersionSeries {
   }
 
   @Override
-  public IDocument get_ReleasedVersion() throws RepositoryException {
+  public IDocument get_ReleasedVersion() {
     return new MockDocument(object);
   }
 }

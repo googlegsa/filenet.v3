@@ -36,7 +36,6 @@ import com.google.enterprise.connector.filenet4.api.FnObjectList;
 import com.google.enterprise.connector.filenet4.api.IBaseObject;
 import com.google.enterprise.connector.filenet4.api.IObjectSet;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.MockBaseObject;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -49,8 +48,8 @@ import com.google.enterprise.connector.spi.SpiConstants.ActionType;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
+import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.DatabaseType;
-import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.util.Id;
 
 import org.json.JSONException;
@@ -448,13 +447,14 @@ public class FileDocumentListTest {
       String id =
           doc.findProperty(SpiConstants.PROPNAME_DOCID).nextValue().toString();
       if (ActionType.ADD.equals(actionType)) {
-        IBaseObject object = os.getObject(null, id);
+        IBaseObject object = os.getObject(ClassNames.DOCUMENT, id);
+        assertNotNull(id.toString(), object);
         assertTrue(checkpointContains(docList.checkpoint(),
             doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
             JsonField.LAST_MODIFIED_TIME));
         isAddTested = true;
       } else if (ActionType.DELETE.equals(actionType)) {
-        IBaseObject object = os.getObject(null, id);
+        IBaseObject object = os.getObject(ClassNames.DOCUMENT, id);
         if (object == null) { // Proxy for a DeletionEvent.
           assertTrue(checkpointContains(docList.checkpoint(),
               doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
@@ -532,13 +532,11 @@ public class FileDocumentListTest {
     testMimeTypeAndContentSize("video/3gpp", 1024 * 1024 * 32, false);
   }
 
-  private void testMimeTypeAndContentSize(String mimeType, int size,
+  private void testMimeTypeAndContentSize(String mimeType, double size,
       boolean expectNotNull) throws Exception {
     MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    MockBaseObject doc1 = (MockBaseObject) newBaseObject(os,
-        "AAAAAAA1", CHECKPOINT_TIMESTAMP, false);
-    doc1.setProperty(PropertyNames.MIME_TYPE, mimeType);
-    doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(size));
+    FnBaseObject doc1 = newBaseObject(os,
+        "AAAAAAA1", CHECKPOINT_TIMESTAMP, false, size, mimeType);
     IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
 
     DocumentList docList = getObjectUnderTest(os, docSet,
@@ -556,10 +554,8 @@ public class FileDocumentListTest {
   @Test
   public void testExcludedMimeType() throws Exception {
     MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    MockBaseObject doc1 = (MockBaseObject) newBaseObject(os,
-        "AAAAAAA1", CHECKPOINT_TIMESTAMP, false);
-    doc1.setProperty(PropertyNames.MIME_TYPE, "text/plain");
-    doc1.setProperty(PropertyNames.CONTENT_SIZE, String.valueOf(1024));
+    FnBaseObject doc1 = newBaseObject(os,
+        "AAAAAAA1", CHECKPOINT_TIMESTAMP, false, 1024.0, "text/plain");
     IObjectSet docSet = new FnObjectList(ImmutableList.of(doc1));
 
     TraversalContext traversalContext = new SimpleTraversalContext() {
