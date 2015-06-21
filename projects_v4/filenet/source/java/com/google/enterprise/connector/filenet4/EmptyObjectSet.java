@@ -28,8 +28,7 @@ public class EmptyObjectSet implements IndependentObjectSet {
   }
 
   @Override
-  @SuppressWarnings("rawtypes")
-  public Iterator iterator() {
+  public Iterator<?> iterator() {
     return Iterators.emptyIterator();
   }
 

@@ -86,8 +86,7 @@ class EngineSetMocks {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
-    public Iterator iterator() {
+    public Iterator<?> iterator() {
       return values.iterator();
     }
 

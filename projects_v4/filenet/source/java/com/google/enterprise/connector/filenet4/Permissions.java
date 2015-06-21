@@ -38,7 +38,6 @@ import java.util.logging.Logger;
  * responsible to authorize a target user against all the Access Control Entries
  * of a target document.
  */
-@SuppressWarnings("rawtypes")
 public class Permissions {
   private static final Logger LOGGER =
       Logger.getLogger(Permissions.class.getName());
@@ -81,7 +80,7 @@ public class Permissions {
    */
   public boolean authorize(User user) {
     boolean isAuthorized = false;
-    Iterator iter = perms.iterator();
+    Iterator<?> iter = perms.iterator();
 
     LOGGER.log(Level.FINE, "Authorizing user:[" + user.get_Name() + "]");
 
@@ -133,7 +132,7 @@ public class Permissions {
   public boolean authorizeMarking(User user, Integer constraintMask) {
     boolean hasUseRight = false;
 
-    Iterator iter = perms.iterator();
+    Iterator<?> iter = perms.iterator();
     while (iter.hasNext()) {
       try {
         AccessPermission perm = (AccessPermission) iter.next();
@@ -257,7 +256,7 @@ public class Permissions {
   }
 
   private void processPermissions() {
-    Iterator iter = perms.iterator();
+    Iterator<?> iter = perms.iterator();
     while (iter.hasNext()) {
       AccessPermission perm = (AccessPermission) iter.next();
       int mask = perm.get_AccessMask();

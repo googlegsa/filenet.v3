@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
-public class AccessPermissionListMock implements AccessPermissionList {
+class AccessPermissionListMock implements AccessPermissionList {
 
   private List<AccessPermission> perms;
 

@@ -63,7 +63,6 @@ import java.util.logging.Logger;
  * Core document class, which directly interacts with the core FileNet APIs
  * related to Documents.
  */
-@SuppressWarnings("rawtypes")
 public class FnDocument implements IDocument {
   private static final Logger logger =
       Logger.getLogger(FnDocument.class.getName());
@@ -157,7 +156,7 @@ public class FnDocument implements IDocument {
   public InputStream getContent() {
     InputStream ip = null;
     try {
-      List contentList = doc.get_ContentElements();
+      List<?> contentList = doc.get_ContentElements();
       ContentTransfer content = (ContentTransfer) contentList.get(0);
       ip = content.accessContentStream();
     } catch (Exception er) {
@@ -191,7 +190,7 @@ public class FnDocument implements IDocument {
       }
     } else if (prop instanceof PropertyStringList) {
       StringList slist = prop.getStringListValue();
-      Iterator iter = slist.iterator();
+      Iterator<?> iter = slist.iterator();
       while (iter.hasNext()) {
         String val = (String) iter.next();
         if (val != null) {
@@ -233,7 +232,7 @@ public class FnDocument implements IDocument {
       }
     } else if (prop instanceof PropertyIdList) {
       IdList idList = prop.getIdListValue();
-      Iterator iter = idList.iterator();
+      Iterator<?> iter = idList.iterator();
       while (iter.hasNext()) {
         Id val = (Id) iter.next();
         if (val != null) {
@@ -281,7 +280,7 @@ public class FnDocument implements IDocument {
       }
     } else if (prop instanceof PropertyInteger32List) {
       Integer32List int32List = prop.getInteger32ListValue();
-      Iterator iter = int32List.iterator();
+      Iterator<?> iter = int32List.iterator();
       while (iter.hasNext()) {
         Integer val = (Integer) iter.next();
         if (val != null) {
@@ -322,7 +321,7 @@ public class FnDocument implements IDocument {
       }
     } else if (prop instanceof PropertyFloat64List) {
       Float64List float64List = prop.getFloat64ListValue();
-      Iterator iter = float64List.iterator();
+      Iterator<?> iter = float64List.iterator();
       while (iter.hasNext()) {
         Double val = (Double) iter.next();
         if (val != null) {
@@ -366,7 +365,7 @@ public class FnDocument implements IDocument {
       }
     } else if (prop instanceof PropertyDateTimeList) {
       DateTimeList dtList = prop.getDateTimeListValue();
-      Iterator iter = dtList.iterator();
+      Iterator<?> iter = dtList.iterator();
       while (iter.hasNext()) {
         Date val = (Date) iter.next();
         if (val != null) {
@@ -409,7 +408,7 @@ public class FnDocument implements IDocument {
       }
     } else if (prop instanceof PropertyBooleanList) {
       BooleanList booleanList = prop.getBooleanListValue();
-      Iterator iter = booleanList.iterator();
+      Iterator<?> iter = booleanList.iterator();
       while (iter.hasNext()) {
         Boolean val = (Boolean) iter.next();
         if (val != null) {

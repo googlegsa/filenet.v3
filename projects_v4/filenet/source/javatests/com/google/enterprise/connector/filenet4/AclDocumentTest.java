@@ -101,8 +101,7 @@ public class AclDocumentTest {
   @Test
   public void documentContainsDirectDefaultAcls() throws Exception {
     String[][] data = {{expectedId, timeStr}};
-    @SuppressWarnings("unchecked") DocumentList doclist =
-        getDocumentList(data, directAces, defaultAces);
+    DocumentList doclist = getDocumentList(data, directAces, defaultAces);
 
     Document doc = doclist.nextDocument();
     assertTrue(doc instanceof FileDocument);
@@ -122,7 +121,7 @@ public class AclDocumentTest {
   @Test
   public void documentContainsDirectDefaultTemplateAcls() throws Exception {
     String[][] data = {{expectedId, timeStr}};
-    @SuppressWarnings("unchecked") DocumentList doclist =
+    DocumentList doclist =
         getDocumentList(data, directAces, defaultAces, templateAces);
 
     Document doc = doclist.nextDocument();
@@ -146,7 +145,7 @@ public class AclDocumentTest {
   @Test
   public void documentContainsDirectDefaultParentAcls() throws Exception {
     String[][] data = {{expectedId, timeStr}};
-    @SuppressWarnings("unchecked") DocumentList doclist =
+    DocumentList doclist =
         getDocumentList(data, directAces, defaultAces, parentAces);
 
     Document doc = doclist.nextDocument();
@@ -171,9 +170,8 @@ public class AclDocumentTest {
   public void documentContainsDirectDefaultTemplateParentAcls()
       throws Exception {
     String[][] data = {{expectedId, timeStr}};
-    @SuppressWarnings("unchecked") DocumentList doclist =
-        getDocumentList(data, directAces, defaultAces, templateAces,
-            parentAces);
+    DocumentList doclist = getDocumentList(data, directAces, defaultAces,
+        templateAces, parentAces);
 
     Document doc = doclist.nextDocument();
     assertTrue(doc instanceof FileDocument);
