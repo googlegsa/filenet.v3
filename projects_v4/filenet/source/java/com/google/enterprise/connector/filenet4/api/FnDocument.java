@@ -86,6 +86,65 @@ public class FnDocument implements IDocument {
   }
 
   @Override
+  public Id get_Id() {
+    return doc.get_Id();
+  }
+
+  @Override
+  public AccessPermissionList get_Permissions() {
+    return doc.get_Permissions();
+  }
+
+  @Override
+  public String get_Owner() {
+    return doc.get_Owner();
+  }
+
+  @Override
+  public InputStream getContent() {
+    InputStream ip = null;
+    try {
+      List<?> contentList = doc.get_ContentElements();
+      ContentTransfer content = (ContentTransfer) contentList.get(0);
+      ip = content.accessContentStream();
+    } catch (Exception er) {
+      logger.log(Level.WARNING, "Unable to retrieve the content of file for "
+          + this.doc.get_Id() + " " + er.getLocalizedMessage(), er);
+    }
+    return ip;
+  }
+
+  @Override
+  public IVersionSeries getVersionSeries() {
+    return new FnVersionSeries(doc.get_VersionSeries());
+  }
+
+  @Override
+  public ActiveMarkingList get_ActiveMarkings()
+      throws RepositoryDocumentException {
+    try {
+      if (doc.get_ActiveMarkings().isEmpty()) {
+        return null;
+      } else {
+        return doc.get_ActiveMarkings();
+      }
+    } catch (EngineRuntimeException e) {
+      throw new RepositoryDocumentException(e);
+    }
+  }
+
+  @Override
+  public Folder get_SecurityFolder() {
+    try {
+      return doc.get_SecurityFolder();
+    } catch (EngineRuntimeException e) {
+      logger.log(Level.WARNING,
+          "Unable to get security folder for document {0}", doc.get_Id());
+      return null;
+    }
+  }
+
+  @Override
   public Set<String> getPropertyNames() {
     return metas.keySet();
   }
@@ -130,40 +189,6 @@ public class FnDocument implements IDocument {
       logger.log(Level.FINEST, "Property type for {0} is not determined: ",
           prop.getClass().getName());
     }
-  }
-
-  @Override
-  public IVersionSeries getVersionSeries() {
-    return new FnVersionSeries(doc.get_VersionSeries());
-  }
-
-  @Override
-  public Id get_Id() {
-    return doc.get_Id();
-  }
-
-  @Override
-  public AccessPermissionList get_Permissions() {
-    return doc.get_Permissions();
-  }
-
-  @Override
-  public String get_Owner() {
-    return doc.get_Owner();
-  }
-
-  @Override
-  public InputStream getContent() {
-    InputStream ip = null;
-    try {
-      List<?> contentList = doc.get_ContentElements();
-      ContentTransfer content = (ContentTransfer) contentList.get(0);
-      ip = content.accessContentStream();
-    } catch (Exception er) {
-      logger.log(Level.WARNING, "Unable to retrieve the content of file for "
-          + this.doc.get_Id() + " " + er.getLocalizedMessage(), er);
-    }
-    return ip;
   }
 
   /**
@@ -453,31 +478,6 @@ public class FnDocument implements IDocument {
     } else {
       throw new RepositoryDocumentException("Invalid data type: "
           + propertyName + " property is not a Binary type");
-    }
-  }
-
-  @Override
-  public ActiveMarkingList get_ActiveMarkings()
-      throws RepositoryDocumentException {
-    try {
-      if (doc.get_ActiveMarkings().isEmpty()) {
-        return null;
-      } else {
-        return doc.get_ActiveMarkings();
-      }
-    } catch (EngineRuntimeException e) {
-      throw new RepositoryDocumentException(e);
-    }
-  }
-
-  @Override
-  public Folder get_SecurityFolder() {
-    try {
-      return doc.get_SecurityFolder();
-    } catch (EngineRuntimeException e) {
-      logger.log(Level.WARNING,
-          "Unable to get security folder for document {0}", doc.get_Id());
-      return null;
     }
   }
 }

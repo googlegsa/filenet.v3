@@ -38,6 +38,10 @@ public interface IDocument extends IBaseObject {
 
   IVersionSeries getVersionSeries();
 
+  ActiveMarkingList get_ActiveMarkings() throws RepositoryDocumentException;
+
+  Folder get_SecurityFolder();
+
   Set<String> getPropertyNames();
 
   void getProperty(String name, List<Value> list)
@@ -48,8 +52,4 @@ public interface IDocument extends IBaseObject {
 
   void getPropertyDateValue(String name, List<Value> list)
       throws RepositoryDocumentException;
-
-  ActiveMarkingList get_ActiveMarkings() throws RepositoryDocumentException;
-
-  Folder get_SecurityFolder();
 }

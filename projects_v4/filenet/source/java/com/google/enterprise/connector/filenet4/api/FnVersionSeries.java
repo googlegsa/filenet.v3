@@ -18,12 +18,7 @@ import com.filenet.api.core.Document;
 import com.filenet.api.core.VersionSeries;
 import com.filenet.api.util.Id;
 
-import java.util.logging.Logger;
-
 public class FnVersionSeries implements IVersionSeries {
-  private static final Logger logger =
-      Logger.getLogger(FnVersionSeries.class.getName());
-
   private final VersionSeries versionSeries;
 
   public FnVersionSeries(VersionSeries versionSeries) {

@@ -75,6 +75,15 @@ public class MockDocument implements IDocument {
   }
 
   @Override
+  public ActiveMarkingList get_ActiveMarkings()
+      throws RepositoryDocumentException { return null; }
+
+  @Override
+  public Folder get_SecurityFolder() {
+    return null;
+  }
+
+  @Override
   public Set<String> getPropertyNames() {
     return props.keySet();
   }
@@ -118,14 +127,5 @@ public class MockDocument implements IDocument {
     Calendar cal = Calendar.getInstance();
     cal.setTime(val);
     list.add(Value.getDateValue(cal));
-  }
-
-  @Override
-  public ActiveMarkingList get_ActiveMarkings()
-      throws RepositoryDocumentException { return null; }
-
-  @Override
-  public Folder get_SecurityFolder() {
-    return null;
   }
 }
