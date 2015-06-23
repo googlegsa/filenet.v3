@@ -19,7 +19,7 @@ import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.ISearch;
+import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -128,10 +128,11 @@ class SecurityPolicyTraverser implements Traverser {
 
   private LinkedList<AclDocument> getDocuments(Checkpoint checkpoint)
       throws RepositoryException {
-    ISearch searcher = objectFactory.getSearch(os);
+    SearchWrapper searcher = objectFactory.getSearch(os);
     LinkedList<AclDocument> docs = new LinkedList<AclDocument>();
-    IndependentObjectSet secPolicySet =
-        searcher.execute(buildSecurityPolicyQuery(checkpoint), 100, 0);
+    IndependentObjectSet secPolicySet = searcher.fetchObjects(
+        buildSecurityPolicyQuery(checkpoint), batchHint, SearchWrapper.noFilter,
+        SearchWrapper.ALL_ROWS);
     Iterator<?> secPolicyIter = secPolicySet.iterator();
     int docCount = 0;
     while (secPolicyIter.hasNext() && (docCount < batchHint)) {
@@ -152,8 +153,11 @@ class SecurityPolicyTraverser implements Traverser {
           Permissions permissions =
               new Permissions(secTemplate.get_TemplatePermissions());
           if (hasPermissions(permissions)) {
-            IndependentObjectSet docSet = searcher.execute(
-                buildDocumentSearchQuery(secPolicy), 100, 1);
+            // The query isn't limited to batchHint documents, but
+            // it's probably not a bad page size.
+            IndependentObjectSet docSet = searcher.fetchObjects(
+                buildDocumentSearchQuery(secPolicy), batchHint,
+                SearchWrapper.dereferenceObjects, SearchWrapper.ALL_ROWS);
             Iterator<?> docIter = docSet.iterator();
             while (docIter.hasNext()) {
               // Document collides with the SPI class of the same name.

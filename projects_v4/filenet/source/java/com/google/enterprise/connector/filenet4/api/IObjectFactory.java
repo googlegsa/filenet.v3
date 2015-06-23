@@ -41,5 +41,5 @@ public interface IObjectFactory {
       IObjectStore objectStore, Id objectId, PropertyFilter filter)
       throws RepositoryException;
 
-  ISearch getSearch(IObjectStore objectStore);
+  SearchWrapper getSearch(IObjectStore objectStore);
 }

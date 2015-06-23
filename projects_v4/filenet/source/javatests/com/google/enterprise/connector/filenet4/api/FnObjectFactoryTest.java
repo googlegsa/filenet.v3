@@ -122,12 +122,13 @@ public class FnObjectFactoryTest {
    */
   @Test
   public void testGetSearch() throws RepositoryException {
-    ISearch is = iof.getSearch(ios);
-    IndependentObjectSet test = is.execute(
+    SearchWrapper is = iof.getSearch(ios);
+    IndependentObjectSet test = is.fetchObjects(
         "SELECT TOP 50 d.Id, d.DateLastModified FROM Document AS d WHERE d.Id='"
         + TestConnection.docId1 + "' and VersionStatus=1 "
         + "and ContentSize IS NOT NULL  AND (ISCLASS(d, Document) " 
-        + "OR ISCLASS(d, WorkflowDefinition))  ORDER BY DateLastModified,Id");
+        + "OR ISCLASS(d, WorkflowDefinition)) ORDER BY DateLastModified,Id",
+        100, null, true);
     Iterator<?> it = test.iterator();
     assertTrue(it.hasNext());
     Document ibo = (Document) it.next();

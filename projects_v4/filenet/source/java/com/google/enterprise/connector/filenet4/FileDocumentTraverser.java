@@ -20,7 +20,7 @@ import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.ISearch;
+import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.TraversalContext;
@@ -118,14 +118,15 @@ public class FileDocumentTraverser implements Traverser {
     connection.refreshSUserContext();
     LOGGER.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
 
-    ISearch search = fileObjectFactory.getSearch(objectStore);
+    SearchWrapper search = fileObjectFactory.getSearch(objectStore);
 
     try {
       // to add
       String query = buildQueryString(checkPoint);
       LOGGER.log(Level.FINE, "Query for added or updated documents: {0}",
           query);
-      IndependentObjectSet objectSet = search.execute(query);
+      IndependentObjectSet objectSet = search.fetchObjects(query, batchHint,
+          SearchWrapper.dereferenceObjects, SearchWrapper.ALL_ROWS);
       LOGGER.fine((objectSet.isEmpty()) ? "Found no documents to add or update"
           : "Found documents to add or update");
 
@@ -133,8 +134,9 @@ public class FileDocumentTraverser implements Traverser {
       String queryStringToDelete = buildQueryToDelete(checkPoint);
       LOGGER.log(Level.FINE, "Query for deleted documents: {0}",
           queryStringToDelete);
-      IndependentObjectSet objectSetToDelete =
-          search.execute(queryStringToDelete);
+      IndependentObjectSet objectSetToDelete = search.fetchObjects(
+          queryStringToDelete, batchHint, SearchWrapper.dereferenceObjects,
+          SearchWrapper.ALL_ROWS);
       LOGGER.fine((objectSetToDelete.isEmpty()) ? "Found no documents to delete"
           : "Found documents to delete");
 
@@ -148,7 +150,9 @@ public class FileDocumentTraverser implements Traverser {
         LOGGER.log(Level.FINE,
             "Query for documents satisfying the delete WHERE clause: {0}",
             queryStringToDeleteDocs);
-        objectSetToDeleteDocs = search.execute(queryStringToDeleteDocs);
+        objectSetToDeleteDocs = search.fetchObjects(queryStringToDeleteDocs,
+            batchHint, SearchWrapper.dereferenceObjects,
+            SearchWrapper.ALL_ROWS);
         LOGGER.fine((objectSetToDeleteDocs.isEmpty())
             ? "Found no documents to delete using WHERE clause"
             : "Found documents to delete using WHERE clause");

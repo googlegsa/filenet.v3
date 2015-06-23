@@ -14,10 +14,13 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import static org.easymock.EasyMock.anyBoolean;
+import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertFalse;
@@ -30,8 +33,8 @@ import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySet
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.ISearch;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
+import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.collection.AccessPermissionList;
@@ -43,6 +46,7 @@ import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.exception.EngineRuntimeException;
+import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.AccessPermission;
 
 import org.easymock.Capture;
@@ -136,9 +140,10 @@ public class TraverserFactoryFixture {
     // The first search result is for added and update documents, and
     // the second and optional third results (both empty) are for
     // deleted documents.
-    ISearch searcher = createMock(ISearch.class);
-    expect(searcher.execute(capture(capture))).andReturn(objectSet)
-        .andReturn(new EmptyObjectSet()).times(1, 2);
+    SearchWrapper searcher = createMock(SearchWrapper.class);
+    expect(searcher.fetchObjects(capture(capture), anyInt(),
+            isA(PropertyFilter.class), anyBoolean()))
+        .andReturn(objectSet).andReturn(new EmptyObjectSet()).times(1, 2);
 
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher);
@@ -152,7 +157,8 @@ public class TraverserFactoryFixture {
       throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
-    ISearch searcher = new SearchMock(ImmutableMap.of("Folder", folderSet));
+    SearchWrapper searcher =
+        new SearchMock(ImmutableMap.of("Folder", folderSet));
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher).atLeastOnce();
     replayAndSave(connection, os, objectFactory);
@@ -166,7 +172,7 @@ public class TraverserFactoryFixture {
       DocumentSet docSet) throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
     IObjectStore os = createNiceMock(IObjectStore.class);
-    ISearch searcher = new SearchMock(
+    SearchWrapper searcher = new SearchMock(
         (secPolicySet.isEmpty())
         ? ImmutableMap.of("SecurityPolicy", secPolicySet)
         : ImmutableMap.of("SecurityPolicy", secPolicySet, "Document", docSet));
@@ -188,7 +194,7 @@ public class TraverserFactoryFixture {
   /**
    * Smoke tests the queries against H2 but returns mock results.
    */
-  protected static class SearchMock implements ISearch {
+  protected static class SearchMock extends SearchWrapper {
     /** A map with case-insensitive keys for natural table name matching. */
     private final ImmutableSortedMap<String, IndependentObjectSet> results;
 
@@ -210,13 +216,8 @@ public class TraverserFactoryFixture {
     }
 
     @Override
-    public IndependentObjectSet execute(String query) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public IndependentObjectSet execute(String query, int pageSize,
-        int maxRecursion) {
+    public IndependentObjectSet fetchObjects(String query, Integer pageSize,
+        PropertyFilter filter, Boolean continuable) {
       return executeSql(query);
     }
 

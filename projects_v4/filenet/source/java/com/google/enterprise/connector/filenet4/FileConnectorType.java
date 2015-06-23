@@ -14,7 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.api.ISearch;
+import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.ConfigureResponse;
 import com.google.enterprise.connector.spi.ConnectorFactory;
 import com.google.enterprise.connector.spi.ConnectorType;
@@ -300,8 +300,9 @@ public class FileConnectorType implements ConnectorType {
 
         try {
           if (session != null) {
-            ISearch search = session.getSearch();
-            search.execute(query.toString());
+            SearchWrapper search = session.getSearch();
+            search.fetchObjects(query.toString(),
+                1, SearchWrapper.noFilter, SearchWrapper.FIRST_ROWS);
           }
         } catch (EngineRuntimeException e) {
           if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {
@@ -364,8 +365,9 @@ public class FileConnectorType implements ConnectorType {
 
         try {
           if (session != null) {
-            ISearch search = session.getSearch();
-            search.execute(deleteuery.toString());
+            SearchWrapper search = session.getSearch();
+            search.fetchObjects(deleteuery.toString(),
+                1, SearchWrapper.noFilter, SearchWrapper.FIRST_ROWS);
           }
         } catch (EngineRuntimeException e) {
           if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {

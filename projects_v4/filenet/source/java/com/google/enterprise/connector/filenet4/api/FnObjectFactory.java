@@ -116,10 +116,10 @@ public class FnObjectFactory implements IObjectFactory {
   }
 
   @Override
-  public ISearch getSearch(IObjectStore objectStore) {
+  public SearchWrapper getSearch(IObjectStore objectStore) {
     SearchScope search =
         new SearchScope(((FnObjectStore) objectStore).getObjectStore());
 
-    return new FnSearch(search);
+    return new SearchWrapper(search);
   }
 }

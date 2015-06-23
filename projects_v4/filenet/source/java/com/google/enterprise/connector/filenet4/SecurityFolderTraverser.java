@@ -19,7 +19,7 @@ import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.ISearch;
+import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -117,9 +117,10 @@ class SecurityFolderTraverser implements Traverser {
   private LinkedList<AclDocument> searchDocs(Checkpoint checkpoint)
       throws RepositoryException {
     LinkedList<AclDocument> aclDocs = new LinkedList<AclDocument>();
-    ISearch searcher = objectFactory.getSearch(os);
-    IndependentObjectSet folderSet =
-        searcher.execute(getQuery(checkpoint), 100, 0);
+    SearchWrapper searcher = objectFactory.getSearch(os);
+    IndependentObjectSet folderSet = searcher.fetchObjects(
+        getQuery(checkpoint), batchHint, SearchWrapper.noFilter,
+        SearchWrapper.ALL_ROWS);
     Iterator<?> folderIter = folderSet.iterator();
     while (folderIter.hasNext()) {
       Folder folder = (Folder) folderIter.next();

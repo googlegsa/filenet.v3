@@ -18,7 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
-import com.google.enterprise.connector.filenet4.api.ISearch;
+import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.AuthenticationManager;
 import com.google.enterprise.connector.spi.AuthorizationManager;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -59,9 +59,6 @@ public class FileSession implements Session {
             connection, connector.getUsername(), connector.getPassword());
   }
 
-  /**
-   * Gets FileNet objectFactory.
-   */
   private IObjectFactory getFileObjectFactory(String objectFactoryName)
       throws RepositoryException {
     try {
@@ -95,18 +92,12 @@ public class FileSession implements Session {
         objectStore, connector);
   }
 
-  /**
-   * To return the TraversalManager class object
-   */
   @Override
   public TraversalManager getTraversalManager() throws RepositoryException {
     return new FileTraversalManager(getFileDocumentTraverser(),
         getSecurityPolicyTraverser(), getSecurityFolderTraverser());
   }
 
-  /**
-   * To return the AuthenticationManager class object.
-   */
   @Override
   public AuthenticationManager getAuthenticationManager()
           throws RepositoryException {
@@ -114,9 +105,6 @@ public class FileSession implements Session {
         connector.getGoogleGlobalNamespace());
   }
 
-  /**
-   * To returns the AuthorizationManager class object.
-   */
   @Override
   public AuthorizationManager getAuthorizationManager()
           throws RepositoryException {
@@ -125,13 +113,7 @@ public class FileSession implements Session {
             connector.checkMarking()));
   }
 
-  /**
-   * To return the Search object for searching.
-   *
-   * @return
-   * @throws RepositoryException
-   */
-  public ISearch getSearch() throws RepositoryException {
+  public SearchWrapper getSearch() {
     return fileObjectFactory.getSearch(objectStore);
   }
 }
