@@ -82,7 +82,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
       return null;
     }
 
-    boolean checkMarkings = handler.hasMarkings();
+    boolean authorizeMarkings = handler.hasMarkings();
     handler.popSubject();
 
     // Compute thread pool size
@@ -104,7 +104,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
     Iterator<String> iterator = docids.iterator();
     for (int i = 0; i < poolSize; i++) {
       AuthorizationTask task = new AuthorizationTask(handler,
-          checkMarkings, iterator, user, responses);
+          authorizeMarkings, iterator, user, responses);
       threadPool.execute(task);
     }
     threadPool.shutdown();
@@ -126,17 +126,17 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
   private static class AuthorizationTask implements Runnable {
     private final AuthorizationHandler handler;
-    private final boolean checkMarkings;
+    private final boolean authorizeMarkings;
     // Iterator instance is shared among worker threads.
     private final Iterator<String> iterator;
     private final User user;
     private final Map<String, AuthorizationResponse> responses;
 
     public AuthorizationTask(AuthorizationHandler handler,
-        boolean checkMarkings, Iterator<String> docidsIterator, User user,
+        boolean authorizeMarkings, Iterator<String> docidsIterator, User user,
         Map<String, AuthorizationResponse> responses) {
       this.handler = handler;
-      this.checkMarkings = checkMarkings;
+      this.authorizeMarkings = authorizeMarkings;
       this.iterator = docidsIterator;
       this.user = user;
       this.responses = responses;
@@ -144,7 +144,7 @@ public class FileAuthorizationManager implements AuthorizationManager {
 
     private AuthorizationResponse getResponse(String docId)
         throws RepositoryException {
-      return handler.authorizeDocid(docId, user, checkMarkings);
+      return handler.authorizeDocid(docId, user, authorizeMarkings);
     }
 
     private String pollIterator() {

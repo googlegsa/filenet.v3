@@ -45,7 +45,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
   private final IConnection conn;
   private final IObjectFactory objectFactory;
   private final IObjectStore objectStore;
-  private boolean checkMarkings;
+  private final boolean checkMarkings;
 
   public FileAuthorizationHandler(IConnection conn,
       IObjectFactory objectFactory, IObjectStore objectStore,
@@ -79,15 +79,31 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
     }
   }
 
-  /** TODO(jlacey): Cleanup checkMarkings and hasMarkings. */
+  /*
+   * TODO(jlacey): It looked like there was partial caching when this
+   * code was introduced (on the trunk) in commit 4fab233. Can the answer
+   * vary by user, or should we rather be checking as a privileged user
+   * (view access to an attribute with a marking set might be constrained
+   * by a modification access mask)? If it can't vary, then we should
+   * call this once in the constructor, rather than call this method on
+   * each call to authorizeDocids.
+   */
   @Override
   public boolean hasMarkings() {
+    if (checkMarkings) {
+      logger.info("Connector is configured to check marking sets "
+          + "for authorization");
+    } else {
+      logger.info("Connector is configured to not check marking sets "
+          + "for authorization");
+      return false;
+    }
+
     // check for the marking sets applied over the document class
     try {
       Iterator<PropertyDefinition> propertyDefinitionIterator =
           objectFactory.getPropertyDefinitions(objectStore,
               GuidConstants.Class_Document, null);
-      boolean hasMarkings = false;
 
       while (propertyDefinitionIterator.hasNext()) {
         PropertyDefinition propertyDefinition = propertyDefinitionIterator.next();
@@ -95,31 +111,25 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
         if (propertyDefinition instanceof PropertyDefinitionString) {
           MarkingSet markingSet = ((PropertyDefinitionString) propertyDefinition).get_MarkingSet();
           if (markingSet != null) {
-            logger.log(Level.INFO, "Document class has property associated with Markings set");
-            hasMarkings = true;
-            break;
+            logger.info("Document class has a property with a marking set");
+            return true;
           }
         }
       }
-      if (hasMarkings == true) {
-        if (this.checkMarkings == true) {
-          logger.log(Level.INFO, "Connector is configured to perform marking set's check for authorization");
-        } else {
-          logger.log(Level.INFO, "Connector is not configured to perform marking set's check for authorization");
-        }
-      } else {
-        logger.log(Level.INFO, "Document class does not have properties associated with Markings set hence; Marking set's check is  not required for authorization");
-        this.checkMarkings = false;
-      }
+
+      logger.info("Document class has no properties with a marking set");
+      return false;
     } catch (Exception ecp) {
-      logger.log(Level.SEVERE, ecp.getStackTrace().toString());
+      logger.log(Level.SEVERE, "Failure checking for a marking set", ecp);
+      // This was the existing behavior when an exception was thrown, to
+      // use checkMarkings, and if we're here then checkMarkings is true.
+      return true;
     }
-    return this.checkMarkings;
   }
 
   @Override
   public AuthorizationResponse authorizeDocid(String docId, User user,
-      boolean checkMarkings) throws RepositoryException {
+      boolean authorizeMarkings) throws RepositoryException {
     AuthorizationResponse authorizationResponse = null;
     IVersionSeries versionSeries = null;
     try {
@@ -153,7 +163,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
         authorizationResponse = new AuthorizationResponse(true,
             docId);
 
-        if (checkMarkings) {
+        if (authorizeMarkings) {
           logger.log(Level.INFO, "Authorizing DocID: " + docId
               + " for user: " + user.get_Name()
               + " for Marking sets ");
