@@ -110,7 +110,7 @@ public class FileSession implements Session {
           throws RepositoryException {
     return new FileAuthorizationManager(
         new FileAuthorizationHandler(connection, fileObjectFactory, objectStore,
-            connector.checkMarking()));
+            connector.checkMarking(), Permissions.getFactory()));
   }
 
   public SearchWrapper getSearch() {

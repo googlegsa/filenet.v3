@@ -46,14 +46,16 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
   private final IObjectFactory objectFactory;
   private final IObjectStore objectStore;
   private final boolean checkMarkings;
+  private final Permissions.Factory permissionsFactory;
 
   public FileAuthorizationHandler(IConnection conn,
       IObjectFactory objectFactory, IObjectStore objectStore,
-      boolean checkMarkings) {
+      boolean checkMarkings, Permissions.Factory permissionsFactory) {
     this.conn = conn;
     this.objectFactory = objectFactory;
     this.objectStore = objectStore;
     this.checkMarkings = checkMarkings;
+    this.permissionsFactory = permissionsFactory;
   }
 
   @Override
@@ -154,7 +156,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
       // contents or
       // not.
       IDocument releasedVersion = versionSeries.get_ReleasedVersion();
-      Permissions permissions = new Permissions(
+      Permissions permissions = permissionsFactory.getInstance(
           releasedVersion.get_Permissions(), releasedVersion.get_Owner());
       if (permissions.authorize(user)) {
         logger.log(Level.INFO, "As per the ACLS User "
@@ -181,7 +183,8 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
             // document as per the Marking set security applied
             // over it.
             MarkingPermissions markingPermissions =
-                new MarkingPermissions(releasedVersion.get_ActiveMarkings());
+                new MarkingPermissions(releasedVersion.get_ActiveMarkings(),
+                    permissionsFactory);
             if (markingPermissions.authorize(user)) {
               logger.log(Level.INFO, "As per the Marking Sets User "
                   + user.get_Name()

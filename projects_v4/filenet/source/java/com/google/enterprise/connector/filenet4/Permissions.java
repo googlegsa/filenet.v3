@@ -42,6 +42,25 @@ public class Permissions {
   private static final Logger LOGGER =
       Logger.getLogger(Permissions.class.getName());
 
+  public static interface Factory {
+    Permissions getInstance(AccessPermissionList perms, String owner);
+    Permissions getInstance(AccessPermissionList perms);
+  }
+
+  public static Factory getFactory() {
+    return new Factory() {
+      @Override
+      public Permissions getInstance(AccessPermissionList perms, String owner) {
+        return new Permissions(perms, owner);
+      }
+
+      @Override
+      public Permissions getInstance(AccessPermissionList perms) {
+        return getInstance(perms, null);
+      }
+    };
+  }
+
   public static final String AUTHENTICATED_USERS = "#AUTHENTICATED-USERS";
   private static final String CREATOR_OWNER = "#CREATOR-OWNER";
 

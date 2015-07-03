@@ -31,9 +31,12 @@ public class MarkingPermissions {
       Logger.getLogger(MarkingPermissions.class.getName());
 
   private final ActiveMarkingList activeMarkings;
+  private final Permissions.Factory permissionsFactory;
 
-  public MarkingPermissions(ActiveMarkingList activeMarkings) {
+  public MarkingPermissions(ActiveMarkingList activeMarkings,
+    Permissions.Factory permissionsFactory) {
     this.activeMarkings = activeMarkings;
+    this.permissionsFactory = permissionsFactory;
   }
 
   /**
@@ -55,7 +58,8 @@ public class MarkingPermissions {
           new Object[] {user.get_Name(), marking.get_MarkingValue(),
                         marking.get_ConstraintMask()});
 
-      Permissions perms = new Permissions(marking.get_Permissions());
+      Permissions perms =
+          permissionsFactory.getInstance(marking.get_Permissions());
       if (!perms.authorizeMarking(user, marking.get_ConstraintMask())) {
         LOGGER.log(Level.FINER,
             "User {0} is not authorized for Marking value: {1}",

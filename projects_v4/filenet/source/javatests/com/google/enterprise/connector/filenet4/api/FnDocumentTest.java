@@ -148,7 +148,8 @@ public class FnDocumentTest {
     ActiveMarkingList activeMarkingList = doc.get_ActiveMarkings();
     assertNotNull("Active marking is null", activeMarkingList);
     assertTrue(user.get_Name() + " is not authorized by document's marking",
-        new MarkingPermissions(activeMarkingList).authorize(user));
+        new MarkingPermissions(activeMarkingList, Permissions.getFactory())
+        .authorize(user));
   }
 
   @Test
