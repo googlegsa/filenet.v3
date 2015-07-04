@@ -132,105 +132,48 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
   @Override
   public AuthorizationResponse authorizeDocid(String docId, User user,
       boolean authorizeMarkings) throws RepositoryException {
-    AuthorizationResponse authorizationResponse = null;
-    IVersionSeries versionSeries = null;
+    IVersionSeries versionSeries;
     try {
-      logger.config("Getting version series for document DocID: "
-          + docId);
+      logger.log(Level.FINE, "Getting version series for document: {0}", docId);
       versionSeries = (IVersionSeries) objectStore.getObject(ClassNames.VERSION_SERIES, URLDecoder.decode(docId, "UTF-8"));
     } catch (UnsupportedEncodingException e) {
-      logger.log(Level.WARNING, "Unable to Decode: Encoding is not supported for the document with DocID: "
-          + docId);
-      versionSeries = null;
-    } catch (RepositoryException e) {
-      logger.log(Level.WARNING, "Error : document Version Series Id "
-          + docId + " may no longer exist. Message: "
-          + e.getLocalizedMessage());
-      versionSeries = null;
+      throw new RepositoryException("UTF-8 encoding not supported.", e);
     }
 
-    if (versionSeries != null) {
-      logger.config("Authorizing DocID: " + docId + " for user: "
-          + user.get_Name());
-      // Check whether the search user is authorized to view document
-      // contents or
-      // not.
-      IDocument releasedVersion = versionSeries.get_ReleasedVersion();
-      Permissions permissions = permissionsFactory.getInstance(
-          releasedVersion.get_Permissions(), releasedVersion.get_Owner());
-      if (permissions.authorize(user)) {
-        logger.log(Level.INFO, "As per the ACLS User "
-            + user.get_Name()
-            + " is authorized for document DocID " + docId);
-        authorizationResponse = new AuthorizationResponse(true,
-            docId);
-
-        if (authorizeMarkings) {
-          logger.log(Level.INFO, "Authorizing DocID: " + docId
-              + " for user: " + user.get_Name()
-              + " for Marking sets ");
-
-          // check whether current document has property values
-          // set for properties associated with marking sets or
-          // not.
-          // TODO(jlacey): Cleanup get_ActiveMarkings here and in
-          // FnDocument for null vs. empty and the logging here and in
-          // MarkingPermissions.
-          if (releasedVersion.get_ActiveMarkings() != null) {
-            logger.log(Level.INFO, "Document has property associated with Markings set");
-
-            // check whether USER is authorized to view the
-            // document as per the Marking set security applied
-            // over it.
-            MarkingPermissions markingPermissions =
-                new MarkingPermissions(releasedVersion.get_ActiveMarkings(),
-                    permissionsFactory);
-            if (markingPermissions.authorize(user)) {
-              logger.log(Level.INFO, "As per the Marking Sets User "
-                  + user.get_Name()
-                  + " is authorized for document DocID "
-                  + docId);
-              authorizationResponse = new AuthorizationResponse(
-                  true, docId);
-            } else {
-              logger.log(Level.INFO, "As per the Marking Sets User "
-                  + user.get_Name()
-                  + " is NOT authorized for document DocID "
-                  + docId);
-              authorizationResponse = new AuthorizationResponse(
-                  false, docId);
-            }
-
-          } else {
-            logger.log(Level.INFO, "Document does not have property associated with Marking Sets "
-                + docId);
-            logger.log(Level.INFO, "User "
-                + user.get_Name()
-                + " is authorized for document DocID "
-                + docId);
-            authorizationResponse = new AuthorizationResponse(
-                true, docId);
-          }
-        } else {
-          logger.log(Level.INFO, "Either Document class does not have property associated with Marking Sets or Connector is not configured to check Marking Sets ");
-          logger.log(Level.INFO, "User " + user.get_Name()
-              + " is authorized for document DocID " + docId);
-          authorizationResponse = new AuthorizationResponse(true,
+    boolean isAuthorized;
+    logger.log(Level.FINE, "Authorizing document: {0} for user: {1}",
+        new Object[] { docId, user.get_Name() });
+    IDocument releasedVersion = versionSeries.get_ReleasedVersion();
+    Permissions permissions = permissionsFactory.getInstance(
+        releasedVersion.get_Permissions(), releasedVersion.get_Owner());
+    if (permissions.authorize(user)) {
+      if (authorizeMarkings) {
+        logger.log(Level.FINE,
+            "Authorizing document: {0} for user: {1} for Marking sets",
+            new Object[] { docId, user.get_Name() });
+        // TODO(jlacey): Cleanup get_ActiveMarkings here and in
+        // FnDocument for null vs. empty.
+        if (releasedVersion.get_ActiveMarkings() != null) {
+          logger.log(Level.FINE, "Document {0} has an active marking set",
               docId);
+          MarkingPermissions markingPermissions =
+              new MarkingPermissions(releasedVersion.get_ActiveMarkings(),
+                  permissionsFactory);
+          isAuthorized = markingPermissions.authorize(user);
+        } else {
+          logger.log(Level.FINE,
+              "Document {0} does not have an active marking set", docId);
+          isAuthorized = true;
         }
       } else {
-        authorizationResponse = new AuthorizationResponse(false,
-            docId);
-        logger.log(Level.INFO, "As per the ACLS User "
-            + user.get_Name()
-            + " is NOT authorized for document DocID " + docId);
+        isAuthorized = true;
       }
     } else {
-      authorizationResponse = new AuthorizationResponse(false, docId);
-      logger.log(Level.INFO, "User " + user.get_Name()
-          + " is NOT authorized for document DocID " + docId
-          + "version series null");
+      isAuthorized = false;
     }
-    return authorizationResponse;
+    logger.log(Level.FINE,
+        "User {1} is {2}authorized for document DocID {0}",
+        new Object[] { docId, user.get_Name(), isAuthorized ? "" : "NOT " });
+    return new AuthorizationResponse(isAuthorized, docId);
   }
 }

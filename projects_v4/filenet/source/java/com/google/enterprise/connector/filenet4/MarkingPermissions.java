@@ -48,8 +48,6 @@ public class MarkingPermissions {
    *         authorization.
    */
   public boolean authorize(User user) {
-    LOGGER.log(Level.FINER, "Authorizing user:[{0}] for Marking Sets",
-        user.get_Name());
     for (Object activeMarking : activeMarkings) {
       Marking marking = ((ActiveMarking) activeMarking).get_Marking();
 
@@ -67,8 +65,6 @@ public class MarkingPermissions {
         return false;
       }
     }
-    LOGGER.log(Level.FINER, "User " + user.get_Name()
-        + " is authorized to view the document");
     return true;
   }
 }

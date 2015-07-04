@@ -67,8 +67,6 @@ public class FileAuthorizationManager implements AuthorizationManager {
       return null;
     }
 
-    logger.info("Authorizing docids for user: " + identity.getUsername());
-
     // In some cases current FileNet connection loses UserContext
     // object associated with it; hence need to fetch userContext for
     // each and every AuthZ request.

@@ -19,7 +19,6 @@ import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.isA;
 import static org.easymock.EasyMock.isNull;
 import static org.easymock.EasyMock.replay;
@@ -194,37 +193,29 @@ public class FileAuthorizationHandlerTest {
     testAuthorizeDocid(false, true, false, true, true);
   }
 
-  private void testAuthorizeDocid_fetchError(Exception exception)
-      throws RepositoryException {
+  @Test
+  public void testAuthorizeDocid_fetchException() throws RepositoryException {
     String docid = "{AAAAAAAA-0000-0000-0000-000000000000}";
+    RepositoryException thrown =
+        new RepositoryDocumentException("pretend something bad happened");
 
     IObjectStore objectStore = createMock(IObjectStore.class);
-    expect(objectStore.getObject(ClassNames.VERSION_SERIES, docid));
-    if (exception != null) {
-      expectLastCall().andThrow(exception);
-    } else {
-      expectLastCall().andReturn(null);
-    }
+    expect(objectStore.getObject(ClassNames.VERSION_SERIES, docid))
+        .andThrow(thrown);
     User user = createNiceMock(User.class);
     replay(objectStore, user);
 
     FileAuthorizationHandler out = new FileAuthorizationHandler(null, null,
         objectStore, true, null);
 
-    assertEquals(new AuthorizationResponse(false, docid),
-        out.authorizeDocid(docid, user, true));
+    try {
+      out.authorizeDocid(docid, user, true);
+    } catch (RepositoryException caught) {
+      if (caught != thrown) {
+        throw caught;
+      }
+    }
     verify(objectStore, user);
-  }
-
-  @Test
-  public void testAuthorizeDocid_fetchNull() throws RepositoryException {
-    testAuthorizeDocid_fetchError(null);
-  }
-
-  @Test
-  public void testAuthorizeDocid_fetchException() throws RepositoryException {
-    testAuthorizeDocid_fetchError(
-        new RepositoryDocumentException("pretend something bad happened"));
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
