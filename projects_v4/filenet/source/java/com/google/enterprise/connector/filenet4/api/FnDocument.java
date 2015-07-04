@@ -123,11 +123,7 @@ public class FnDocument implements IDocument {
   public ActiveMarkingList get_ActiveMarkings()
       throws RepositoryDocumentException {
     try {
-      if (doc.get_ActiveMarkings().isEmpty()) {
-        return null;
-      } else {
-        return doc.get_ActiveMarkings();
-      }
+      return doc.get_ActiveMarkings();
     } catch (EngineRuntimeException e) {
       throw new RepositoryDocumentException(e);
     }

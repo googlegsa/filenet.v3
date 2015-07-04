@@ -26,6 +26,7 @@ import com.google.enterprise.connector.spi.RepositoryException;
 
 import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.admin.PropertyDefinitionString;
+import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.security.MarkingSet;
@@ -151,14 +152,12 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
         logger.log(Level.FINE,
             "Authorizing document: {0} for user: {1} for Marking sets",
             new Object[] { docId, user.get_Name() });
-        // TODO(jlacey): Cleanup get_ActiveMarkings here and in
-        // FnDocument for null vs. empty.
-        if (releasedVersion.get_ActiveMarkings() != null) {
+        ActiveMarkingList activeMarkings = releasedVersion.get_ActiveMarkings();
+        if (!activeMarkings.isEmpty()) {
           logger.log(Level.FINE, "Document {0} has an active marking set",
               docId);
           MarkingPermissions markingPermissions =
-              new MarkingPermissions(releasedVersion.get_ActiveMarkings(),
-                  permissionsFactory);
+              new MarkingPermissions(activeMarkings, permissionsFactory);
           isAuthorized = markingPermissions.authorize(user);
         } else {
           logger.log(Level.FINE,

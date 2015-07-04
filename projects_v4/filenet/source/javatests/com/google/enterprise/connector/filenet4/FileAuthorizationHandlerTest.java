@@ -137,9 +137,9 @@ public class FileAuthorizationHandlerTest {
     ActiveMarking activeMarking = createMock(ActiveMarking.class);
     IDocument doc = createNiceMock(IDocument.class);
     expect(activeMarking.get_Marking()).andStubReturn(marking);
-    // TODO(jlacey): Switch to andReturn when this is only called once.
-    expect(doc.get_ActiveMarkings()).andStubReturn(
-        hasMarking ? new ActiveMarkingListMock(activeMarking) : null);
+    expect(doc.get_ActiveMarkings()).andStubReturn(hasMarking
+        ? new ActiveMarkingListMock(activeMarking)
+        : new ActiveMarkingListMock());
 
     IVersionSeries vs = createMock(IVersionSeries.class);
     expect(vs.get_ReleasedVersion()).andStubReturn(doc);
