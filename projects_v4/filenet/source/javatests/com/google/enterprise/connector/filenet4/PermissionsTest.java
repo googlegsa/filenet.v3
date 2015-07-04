@@ -265,7 +265,7 @@ public class PermissionsTest extends TestCase {
 
   public void testEmptyPermissionList() {
     assertEquals("Access permission list is not empty", 0, perms.size());
-    Permissions emptyPerms = new Permissions(perms);
+    Permissions.Acl emptyPerms = new Permissions(perms).getAcl();
     assertEquals(0, emptyPerms.getAllowUsers().size());
     assertEquals(0, emptyPerms.getAllowGroups().size());
     assertEquals(0, emptyPerms.getDenyUsers().size());
@@ -322,7 +322,7 @@ public class PermissionsTest extends TestCase {
 
   public void testEmptyAllowUsers() {
     populateAces(10, false, true, true, true, PermissionSource.SOURCE_DIRECT);
-    Permissions testPerms = new Permissions(perms);
+    Permissions.Acl testPerms = new Permissions(perms).getAcl();
     assertEquals(0, testPerms.getAllowUsers().size());
     assertEquals(10, testPerms.getDenyUsers().size());
     assertEquals(10, testPerms.getAllowGroups().size());
@@ -331,7 +331,7 @@ public class PermissionsTest extends TestCase {
 
   public void testEmptyDenyUsers() {
     populateAces(10, true, false, true, true, PermissionSource.SOURCE_DIRECT);
-    Permissions testPerms = new Permissions(perms);
+    Permissions.Acl testPerms = new Permissions(perms).getAcl();
     assertEquals(10, testPerms.getAllowUsers().size());
     assertEquals(0, testPerms.getDenyUsers().size());
     assertEquals(10, testPerms.getAllowGroups().size());
@@ -340,7 +340,7 @@ public class PermissionsTest extends TestCase {
 
   public void testEmptyAllowGroups() {
     populateAces(10, true, true, false, true, PermissionSource.SOURCE_DIRECT);
-    Permissions testPerms = new Permissions(perms);
+    Permissions.Acl testPerms = new Permissions(perms).getAcl();
     assertEquals(10, testPerms.getAllowUsers().size());
     assertEquals(10, testPerms.getDenyUsers().size());
     assertEquals(0, testPerms.getAllowGroups().size());
@@ -349,14 +349,14 @@ public class PermissionsTest extends TestCase {
 
   public void testEmptyDenyGroups() {
     populateAces(10, true, true, true, false, PermissionSource.SOURCE_DIRECT);
-    Permissions testPerms = new Permissions(perms);
+    Permissions.Acl testPerms = new Permissions(perms).getAcl();
     assertEquals(10, testPerms.getAllowUsers().size());
     assertEquals(10, testPerms.getAllowGroups().size());
     assertEquals(10, testPerms.getDenyUsers().size());
     assertEquals(0, testPerms.getDenyGroups().size());
   }
 
-  private Permissions getObjectUnderTest(int maxAllowUsers,
+  private Permissions.Acl getObjectUnderTest(int maxAllowUsers,
       int maxAllowGroups, int maxDenyUsers, int maxDenyGroups,
       PermissionSource... permSrcs) {
     addAces(maxAllowUsers, AccessType.ALLOW, SecurityPrincipalType.USER,
@@ -369,7 +369,7 @@ public class PermissionsTest extends TestCase {
         AccessLevel.VIEW_AS_INT, 0, permSrcs);
     Collections.shuffle(perms);
 
-    return new Permissions(perms);
+    return new Permissions(perms).getAcl();
   }
 
   private void assertSetContains(Set<String> theSet, String prefix, int size) {
@@ -379,7 +379,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testGetAllowUsers() {
-    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions.Acl testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT);
     Set<String> actualAllowUsers = testPerms.getAllowUsers();
     assertEquals(8, actualAllowUsers.size());
@@ -388,7 +388,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testGetAllowUsersBySource() {
-    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions.Acl testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT, PermissionSource.SOURCE_DEFAULT);
     Set<String> inheritAllowUsers =
         testPerms.getAllowUsers(PermissionSource.SOURCE_PARENT);
@@ -402,7 +402,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testGetDenyUsers() {
-    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions.Acl testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT);
     Set<String> actualDenyUsers = testPerms.getDenyUsers();
     assertEquals(6, actualDenyUsers.size());
@@ -411,7 +411,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testGetDenyUsersBySource() {
-    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions.Acl testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_PARENT, PermissionSource.SOURCE_DEFAULT);
     Set<String> directDenyUsers =
         testPerms.getDenyUsers(PermissionSource.SOURCE_DIRECT);
@@ -425,7 +425,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testGetAllowGroups() {
-    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions.Acl testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT);
     Set<String> actualAllowGroups = testPerms.getAllowGroups();
     assertEquals(7, actualAllowGroups.size());
@@ -434,7 +434,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testGetAllowGroupsBySource() {
-    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions.Acl testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT, PermissionSource.SOURCE_DEFAULT);
     Set<String> inheritAllowGroups =
         testPerms.getAllowGroups(PermissionSource.SOURCE_PARENT);
@@ -448,7 +448,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testGetDenyGroups() {
-    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions.Acl testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_DIRECT);
     Set<String> actualDenyGroups = testPerms.getDenyGroups();
     assertEquals(5, actualDenyGroups.size());
@@ -457,7 +457,7 @@ public class PermissionsTest extends TestCase {
   }
 
   public void testGetDenyGroupsBySource() {
-    Permissions testPerms = getObjectUnderTest(8, 7, 6, 5,
+    Permissions.Acl testPerms = getObjectUnderTest(8, 7, 6, 5,
         PermissionSource.SOURCE_PARENT, PermissionSource.SOURCE_DEFAULT);
     Set<String> directDenyGroups =
         testPerms.getDenyGroups(PermissionSource.SOURCE_DIRECT);

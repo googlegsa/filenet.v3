@@ -156,7 +156,8 @@ class SecurityFolderTraverser implements Traverser {
       com.filenet.api.core.Document doc =
           (com.filenet.api.core.Document) docIter.next();
       count++;
-      Permissions permissions = new Permissions(doc.get_Permissions());
+      Permissions.Acl permissions =
+          new Permissions(doc.get_Permissions()).getAcl();
       AclDocument aclDoc = new AclDocument(
           doc.get_Id().toString() + AclDocument.SEC_FOLDER_POSTFIX, null,
           AclInheritanceType.CHILD_OVERRIDES,

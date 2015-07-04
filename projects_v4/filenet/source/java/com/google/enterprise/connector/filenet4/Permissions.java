@@ -70,19 +70,10 @@ public class Permissions {
 
   private final AccessPermissionList perms;
   private final String owner;
-  private final SetMultimap<PermissionSource, String> allowUsers;
-  private final SetMultimap<PermissionSource, String> allowGroups;
-  private final SetMultimap<PermissionSource, String> denyUsers;
-  private final SetMultimap<PermissionSource, String> denyGroups;
 
   public Permissions(AccessPermissionList perms, String owner) {
     this.perms = perms;
     this.owner = owner;
-    this.allowUsers = HashMultimap.create();
-    this.allowGroups = HashMultimap.create();
-    this.denyUsers = HashMultimap.create();
-    this.denyGroups = HashMultimap.create();
-    processPermissions();
   }
 
   public Permissions(AccessPermissionList perms) {
@@ -274,59 +265,79 @@ public class Permissions {
     return false;
   }
 
-  private void processPermissions() {
-    Iterator<?> iter = perms.iterator();
-    while (iter.hasNext()) {
-      AccessPermission perm = (AccessPermission) iter.next();
-      int mask = perm.get_AccessMask();
-      if ((mask & VIEW_ACCESS_RIGHTS) != VIEW_ACCESS_RIGHTS) {
-        continue;
-      }
-      if (perm.get_AccessType() == AccessType.ALLOW) {
-        if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
-          allowUsers.put(perm.get_PermissionSource(), perm.get_GranteeName());
-        } else {
-          allowGroups.put(perm.get_PermissionSource(), perm.get_GranteeName());
+  public Permissions.Acl getAcl() {
+    return new Acl();
+  }
+
+  public class Acl {
+    private final SetMultimap<PermissionSource, String> allowUsers;
+    private final SetMultimap<PermissionSource, String> allowGroups;
+    private final SetMultimap<PermissionSource, String> denyUsers;
+    private final SetMultimap<PermissionSource, String> denyGroups;
+
+    private Acl() {
+      this.allowUsers = HashMultimap.create();
+      this.allowGroups = HashMultimap.create();
+      this.denyUsers = HashMultimap.create();
+      this.denyGroups = HashMultimap.create();
+      processPermissions();
+    }
+
+    private void processPermissions() {
+      Iterator<?> iter = perms.iterator();
+      while (iter.hasNext()) {
+        AccessPermission perm = (AccessPermission) iter.next();
+        int mask = perm.get_AccessMask();
+        if ((mask & VIEW_ACCESS_RIGHTS) != VIEW_ACCESS_RIGHTS) {
+          continue;
         }
-      } else {
-        if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
-          denyUsers.put(perm.get_PermissionSource(), perm.get_GranteeName());
+        if (perm.get_AccessType() == AccessType.ALLOW) {
+          if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
+            allowUsers.put(perm.get_PermissionSource(), perm.get_GranteeName());
+          } else {
+            allowGroups.put(perm.get_PermissionSource(),
+                perm.get_GranteeName());
+          }
         } else {
-          denyGroups.put(perm.get_PermissionSource(), perm.get_GranteeName());
+          if (perm.get_GranteeType() == SecurityPrincipalType.USER) {
+            denyUsers.put(perm.get_PermissionSource(), perm.get_GranteeName());
+          } else {
+            denyGroups.put(perm.get_PermissionSource(), perm.get_GranteeName());
+          }
         }
       }
     }
-  }
 
-  public Set<String> getAllowUsers() {
-    return new HashSet<String>(allowUsers.values());
-  }
+    public Set<String> getAllowUsers() {
+      return new HashSet<String>(allowUsers.values());
+    }
 
-  public Set<String> getAllowUsers(PermissionSource permSrc) {
-    return allowUsers.get(permSrc);
-  }
+    public Set<String> getAllowUsers(PermissionSource permSrc) {
+      return allowUsers.get(permSrc);
+    }
 
-  public Set<String> getAllowGroups() {
-    return new HashSet<String>(allowGroups.values());
-  }
+    public Set<String> getAllowGroups() {
+      return new HashSet<String>(allowGroups.values());
+    }
 
-  public Set<String> getAllowGroups(PermissionSource permSrc) {
-    return allowGroups.get(permSrc);
-  }
+    public Set<String> getAllowGroups(PermissionSource permSrc) {
+      return allowGroups.get(permSrc);
+    }
 
-  public Set<String> getDenyUsers() {
-    return new HashSet<String>(denyUsers.values());
-  }
+    public Set<String> getDenyUsers() {
+      return new HashSet<String>(denyUsers.values());
+    }
 
-  public Set<String> getDenyUsers(PermissionSource permSrc) {
-    return denyUsers.get(permSrc);
-  }
+    public Set<String> getDenyUsers(PermissionSource permSrc) {
+      return denyUsers.get(permSrc);
+    }
 
-  public Set<String> getDenyGroups() {
-    return new HashSet<String>(denyGroups.values());
-  }
+    public Set<String> getDenyGroups() {
+      return new HashSet<String>(denyGroups.values());
+    }
 
-  public Set<String> getDenyGroups(PermissionSource permSrc) {
-    return denyGroups.get(permSrc);
+    public Set<String> getDenyGroups(PermissionSource permSrc) {
+      return denyGroups.get(permSrc);
+    }
   }
 }

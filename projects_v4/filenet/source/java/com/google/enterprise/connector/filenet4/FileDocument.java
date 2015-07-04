@@ -54,7 +54,7 @@ public class FileDocument implements Document {
 
   private IDocument document = null;
   private String vsDocId;
-  private Permissions permissions;
+  private Permissions.Acl permissions;
 
   public FileDocument(Id docId, IObjectStore objectStore,
       FileConnector connector, TraversalContext traversalContext) {
@@ -73,8 +73,8 @@ public class FileDocument implements Document {
     logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
     vsDocId = document.getVersionSeries().get_Id().toString();
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
-    permissions =
-        new Permissions(document.get_Permissions(), document.get_Owner());
+    permissions = new Permissions(document.get_Permissions(),
+        document.get_Owner()).getAcl();
   }
 
   private boolean hasSupportedMimeType() throws RepositoryException {

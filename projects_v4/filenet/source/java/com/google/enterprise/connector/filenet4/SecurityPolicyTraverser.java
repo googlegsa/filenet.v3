@@ -150,8 +150,8 @@ class SecurityPolicyTraverser implements Traverser {
         SecurityTemplate secTemplate = (SecurityTemplate) o;
         if (VersionStatusId.RELEASED.toString().equals(
                 secTemplate.get_ApplyStateID().toString())) {
-          Permissions permissions =
-              new Permissions(secTemplate.get_TemplatePermissions());
+          Permissions.Acl permissions =
+              new Permissions(secTemplate.get_TemplatePermissions()).getAcl();
           if (hasPermissions(permissions)) {
             // The query isn't limited to batchHint documents, but
             // it's probably not a bad page size.
@@ -227,7 +227,7 @@ class SecurityPolicyTraverser implements Traverser {
     return MessageFormat.format(DOCS_BY_SEC_POLICY_QUERY, secPolicy.get_Id());
   }
 
-  private boolean hasPermissions(Permissions permissions) {
+  private boolean hasPermissions(Permissions.Acl permissions) {
     return permissions.getAllowUsers().size() > 0
             || permissions.getDenyUsers().size() > 0
             || permissions.getAllowGroups().size() > 0
