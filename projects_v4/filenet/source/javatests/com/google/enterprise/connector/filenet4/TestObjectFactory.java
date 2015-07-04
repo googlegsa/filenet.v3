@@ -14,6 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.AccessPermissionListMock;
+
 import com.filenet.api.collection.AccessPermissionList;
 import com.filenet.api.constants.AccessType;
 import com.filenet.api.constants.PermissionSource;
@@ -50,6 +52,7 @@ class TestObjectFactory {
   }
 
   @SafeVarargs
+  @SuppressWarnings({"unchecked"})
   public static AccessPermissionList newPermissionList(
       List<AccessPermission>... aceLists) {
     AccessPermissionListMock perms = new AccessPermissionListMock();

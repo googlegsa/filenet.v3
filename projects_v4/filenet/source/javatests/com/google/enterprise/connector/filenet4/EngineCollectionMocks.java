@@ -14,24 +14,71 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.filenet.api.admin.PropertyDefinition;
+import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.collection.DocumentSet;
 import com.filenet.api.collection.EngineSet;
 import com.filenet.api.collection.FolderSet;
 import com.filenet.api.collection.GroupSet;
 import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.collection.PageIterator;
+import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.collection.SecurityPolicySet;
+import com.filenet.api.collection.SecurityTemplateList;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
 import com.filenet.api.core.IndependentObject;
+import com.filenet.api.security.AccessPermission;
+import com.filenet.api.security.ActiveMarking;
 import com.filenet.api.security.Group;
 import com.filenet.api.security.SecurityPolicy;
+import com.filenet.api.security.SecurityTemplate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-class EngineSetMocks {
+/**
+ * Contains mocks for subtypes of {@code EngineCollection} in two
+ * groups: subtypes of {@code DependentEngineList}, which extend
+ * {@code java.util.List}, and subtypes of {@code IndependentObjectSet}
+ * and {@code EngineSet}.
+ */
+class EngineCollectionMocks {
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static class AccessPermissionListMock
+      extends ArrayList implements AccessPermissionList {
+    AccessPermissionListMock(AccessPermission... markings) {
+      Collections.addAll(this, markings);
+    }
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static class ActiveMarkingListMock
+      extends ArrayList implements ActiveMarkingList {
+    ActiveMarkingListMock(ActiveMarking... markings) {
+      Collections.addAll(this, markings);
+    }
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static class PropertyDefinitionListMock
+      extends ArrayList implements PropertyDefinitionList {
+    PropertyDefinitionListMock(PropertyDefinition... markings) {
+      Collections.addAll(this, markings);
+    }
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static class SecurityTemplateListMock
+      extends ArrayList implements SecurityTemplateList {
+    SecurityTemplateListMock(SecurityTemplate... templates) {
+      Collections.addAll(this, templates);
+    }
+  }
+
   public static class DocumentSetMock
       extends EngineSetMock<Document> implements DocumentSet {
     public DocumentSetMock() { super(); }

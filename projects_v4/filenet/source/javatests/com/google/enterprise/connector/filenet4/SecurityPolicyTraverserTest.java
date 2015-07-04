@@ -23,8 +23,9 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.EngineSetMocks.DocumentSetMock;
-import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySetMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.DocumentSetMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.SecurityPolicySetMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.SecurityTemplateListMock;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -46,7 +47,6 @@ import org.junit.Test;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
@@ -77,14 +77,6 @@ public class SecurityPolicyTraverserTest extends TraverserFactoryFixture {
         .atLeastOnce();
     replayAndSave(secPolicy);
     return secPolicy;
-  }
-
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private static class SecurityTemplateListMock
-      extends ArrayList implements SecurityTemplateList {
-    SecurityTemplateListMock(SecurityTemplate... templates) {
-      Collections.addAll(this, templates);
-    }
   }
 
   private SecurityTemplate getSecurityTemplate(AccessPermissionList perms) {

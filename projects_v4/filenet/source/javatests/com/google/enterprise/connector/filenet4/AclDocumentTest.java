@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
-import com.google.enterprise.connector.filenet4.EngineSetMocks.IndependentObjectSetMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;

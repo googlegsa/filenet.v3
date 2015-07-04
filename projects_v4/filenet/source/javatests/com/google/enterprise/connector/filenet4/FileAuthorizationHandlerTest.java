@@ -25,7 +25,8 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Iterators;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.ActiveMarkingListMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.PropertyDefinitionListMock;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
@@ -37,7 +38,6 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.admin.PropertyDefinitionString;
 import com.filenet.api.collection.AccessPermissionList;
-import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.ActiveMarking;
@@ -47,9 +47,6 @@ import com.filenet.api.security.User;
 import com.filenet.api.util.Id;
 
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class FileAuthorizationHandlerTest {
   /** A more readable way to specify the connector check_markings config. */
@@ -75,7 +72,8 @@ public class FileAuthorizationHandlerTest {
       // We expect these calls iff we are going to check for marking sets.
       expect(factory.getPropertyDefinitions(isNull(IObjectStore.class),
               isA(Id.class), isNull(PropertyFilter.class)))
-          .andReturn(Iterators.forArray(otherProperty, stringProperty));
+          .andReturn(
+              new PropertyDefinitionListMock(otherProperty, stringProperty));
       expect(stringProperty.get_MarkingSet()).andReturn(markingSet);
     }
     replay(factory, otherProperty, stringProperty);
@@ -216,14 +214,6 @@ public class FileAuthorizationHandlerTest {
       }
     }
     verify(objectStore, user);
-  }
-
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  private static class ActiveMarkingListMock
-      extends ArrayList implements ActiveMarkingList {
-    ActiveMarkingListMock(ActiveMarking... markings) {
-      Collections.addAll(this, markings);
-    }
   }
 
   private static class MockPermissionsFactory implements Permissions.Factory {

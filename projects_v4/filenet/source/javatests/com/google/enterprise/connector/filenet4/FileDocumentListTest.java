@@ -31,7 +31,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.EngineSetMocks.IndependentObjectSetMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;

@@ -17,11 +17,9 @@ package com.google.enterprise.connector.filenet4.api;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
-import com.filenet.api.admin.PropertyDefinition;
+import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.util.Id;
-
-import java.util.Iterator;
 
 /**
  * Interface to set FileNet objectFactory and perform operations with
@@ -37,7 +35,7 @@ public interface IObjectFactory {
           IConnection connection, String userId, String password)
           throws RepositoryException, RepositoryLoginException;
 
-  Iterator<PropertyDefinition> getPropertyDefinitions(
+  PropertyDefinitionList getPropertyDefinitions(
       IObjectStore objectStore, Id objectId, PropertyFilter filter)
       throws RepositoryException;
 

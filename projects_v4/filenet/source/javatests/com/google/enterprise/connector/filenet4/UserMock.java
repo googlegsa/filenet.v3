@@ -14,7 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import com.google.enterprise.connector.filenet4.EngineSetMocks.GroupSetMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.GroupSetMock;
 
 import com.filenet.api.collection.GroupSet;
 import com.filenet.api.security.Group;

@@ -24,9 +24,9 @@ import com.google.enterprise.connector.spi.AuthenticationIdentity;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryException;
 
-import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.admin.PropertyDefinitionString;
 import com.filenet.api.collection.ActiveMarkingList;
+import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.security.MarkingSet;
@@ -104,13 +104,14 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
 
     // check for the marking sets applied over the document class
     try {
-      Iterator<PropertyDefinition> propertyDefinitionIterator =
+      PropertyDefinitionList propertyDefinitions =
           objectFactory.getPropertyDefinitions(objectStore,
               GuidConstants.Class_Document, null);
-
-      while (propertyDefinitionIterator.hasNext()) {
-        PropertyDefinition propertyDefinition = propertyDefinitionIterator.next();
-
+      Iterator<?> iter = propertyDefinitions.iterator();
+      while (iter.hasNext()) {
+        Object propertyDefinition = iter.next();
+        // Only string properties can have a marking set, and
+        // get_MarkingSet is defined directly on PropertyDefinitionString.
         if (propertyDefinition instanceof PropertyDefinitionString) {
           MarkingSet markingSet = ((PropertyDefinitionString) propertyDefinition).get_MarkingSet();
           if (markingSet != null) {

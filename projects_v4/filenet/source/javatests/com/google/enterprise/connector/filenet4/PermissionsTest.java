@@ -14,6 +14,8 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.AccessPermissionListMock;
+
 import com.filenet.api.constants.AccessLevel;
 import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.AccessType;
@@ -24,6 +26,7 @@ import com.filenet.api.security.User;
 
 import junit.framework.TestCase;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -71,6 +74,7 @@ public class PermissionsTest extends TestCase {
         false);
   }
 
+  @SuppressWarnings({"unchecked"})
   private void testCreatorOwnerAccess(AccessType accessType, int accessRights,
       boolean expectedResult) {
     AccessPermissionMock perm =
@@ -85,6 +89,7 @@ public class PermissionsTest extends TestCase {
     assertEquals(expectedResult, testPerms.authorize(user));
   }
 
+  @SuppressWarnings({"unchecked"})
   public void testCreatorOwnerWithBothAllowAndDeny() {
     AccessPermissionMock creatorOwnerPermDeny =
         new AccessPermissionMock(PermissionSource.SOURCE_DIRECT);
@@ -145,6 +150,7 @@ public class PermissionsTest extends TestCase {
         granteeName, testUser, expectedResult);
   }
 
+  @SuppressWarnings({"unchecked"})
   private void testAccess(AccessType accessType, int accessRights,
       SecurityPrincipalType granteeType, String granteeName, User testUser,
       boolean expectedResult) {
@@ -218,6 +224,7 @@ public class PermissionsTest extends TestCase {
         everyone.get_DistinguishedName(), jsmith, true);
   }
 
+  @SuppressWarnings({"unchecked"})
   public void testUserGroupAccess_HavingBothAllowAndDeny() {
     Set<String> userGroups = getGroupNames(user);
     assertTrue(userGroups.contains("administrators@" + TestConnection.domain));
@@ -284,9 +291,10 @@ public class PermissionsTest extends TestCase {
       addAces(maxPerGroup, AccessType.DENY, SecurityPrincipalType.GROUP,
           AccessLevel.VIEW_AS_INT, 0, permSrc);
     }
-    perms.shuffle();
+    Collections.shuffle(perms);
   }
 
+  @SuppressWarnings({"unchecked"})
   private void addAce(PermissionSource permSrc,
       SecurityPrincipalType secPrincipalType, AccessType accessType,
       int accessMask, int inheritableDepth, String ace) {
@@ -359,7 +367,7 @@ public class PermissionsTest extends TestCase {
         AccessLevel.VIEW_AS_INT, 0, permSrcs);
     addAces(maxDenyGroups, AccessType.DENY, SecurityPrincipalType.GROUP,
         AccessLevel.VIEW_AS_INT, 0, permSrcs);
-    perms.shuffle();
+    Collections.shuffle(perms);
 
     return new Permissions(perms);
   }
@@ -490,6 +498,7 @@ public class PermissionsTest extends TestCase {
         expectedResult, constraintMask(allowRights));
   }
 
+  @SuppressWarnings({"unchecked"})
   private void testMarking(AccessType accessType, int accessMask,
       SecurityPrincipalType secType, String granteeName, User testUser,
       boolean expectedResult, int constraintMask) {
@@ -570,6 +579,7 @@ public class PermissionsTest extends TestCase {
         AccessRight.DELETE, AccessRight.WRITE, AccessRight.WRITE_ACL);
   }
 
+  @SuppressWarnings({"unchecked"})
   public void testMarking_NoUseRight_HavingBothAllowAndDeny() {
     User user1 =
         SecurityPrincipalMocks.createUserWithDomain("user1", "foo.example.com");
@@ -597,6 +607,7 @@ public class PermissionsTest extends TestCase {
         constraintMask(AccessRight.VIEW_CONTENT, AccessRight.READ)));
   }
 
+  @SuppressWarnings({"unchecked"})
   public void testMarking_HavingBothAllowAndDenyUseRights() {
     User user1 =
         SecurityPrincipalMocks.createUserWithDomain("user1", "foo.example.com");

@@ -29,7 +29,7 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
-import com.google.enterprise.connector.filenet4.EngineSetMocks.SecurityPolicySetMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.SecurityPolicySetMock;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;

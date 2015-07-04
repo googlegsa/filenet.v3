@@ -19,6 +19,7 @@ import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.replay;
 
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.AccessPermissionListMock;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 
 import com.filenet.api.collection.AccessPermissionList;

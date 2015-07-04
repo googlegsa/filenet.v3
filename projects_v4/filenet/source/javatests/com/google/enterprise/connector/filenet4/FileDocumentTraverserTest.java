@@ -26,7 +26,7 @@ import static org.junit.Assume.assumeTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
-import com.google.enterprise.connector.filenet4.EngineSetMocks.IndependentObjectSetMock;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;

@@ -19,7 +19,6 @@ import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.RepositoryLoginException;
 
 import com.filenet.api.admin.DocumentClassDefinition;
-import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.core.Connection;
 import com.filenet.api.core.Domain;
@@ -31,7 +30,6 @@ import com.filenet.api.query.SearchScope;
 import com.filenet.api.util.Id;
 import com.filenet.api.util.UserContext;
 
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -97,18 +95,15 @@ public class FnObjectFactory implements IObjectFactory {
     return os;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public Iterator<PropertyDefinition> getPropertyDefinitions(
+  public PropertyDefinitionList getPropertyDefinitions(
       IObjectStore objectStore, Id objectId, PropertyFilter filter)
       throws RepositoryException {
     try {
       DocumentClassDefinition documentClassDefinition =
           Factory.DocumentClassDefinition.fetchInstance(
               ((FnObjectStore) objectStore).getObjectStore(), objectId, filter);
-      PropertyDefinitionList propertyDefinitionList =
-          documentClassDefinition.get_PropertyDefinitions();
-      return propertyDefinitionList.iterator();
+      return documentClassDefinition.get_PropertyDefinitions();
     } catch (EngineRuntimeException e) {
       throw new RepositoryException("Unable to fetch property definition for "
           + objectId.toString(), e);
