@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
@@ -29,6 +30,8 @@ import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
+import com.filenet.api.security.ActiveMarking;
+import com.filenet.api.security.Marking;
 import com.filenet.api.security.MarkingSet;
 import com.filenet.api.security.User;
 import com.filenet.api.util.UserContext;
@@ -131,9 +134,8 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
     }
   }
 
-  @Override
-  public AuthorizationResponse authorizeDocid(String docId, User user,
-      boolean authorizeMarkings) throws RepositoryException {
+  @VisibleForTesting
+  IDocument getReleasedVersion(String docId) throws RepositoryException {
     IVersionSeries versionSeries;
     try {
       logger.log(Level.FINE, "Getting version series for document: {0}", docId);
@@ -141,11 +143,16 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
     } catch (UnsupportedEncodingException e) {
       throw new RepositoryException("UTF-8 encoding not supported.", e);
     }
+    return versionSeries.get_ReleasedVersion();
+  }
 
+  @Override
+  public AuthorizationResponse authorizeDocid(String docId, User user,
+      boolean authorizeMarkings) throws RepositoryException {
     boolean isAuthorized;
     logger.log(Level.FINE, "Authorizing document: {0} for user: {1}",
         new Object[] { docId, user.get_Name() });
-    IDocument releasedVersion = versionSeries.get_ReleasedVersion();
+    IDocument releasedVersion = getReleasedVersion(docId);
     Permissions permissions = permissionsFactory.getInstance(
         releasedVersion.get_Permissions(), releasedVersion.get_Owner());
     if (permissions.authorize(user)) {
@@ -157,9 +164,7 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
         if (!activeMarkings.isEmpty()) {
           logger.log(Level.FINE, "Document {0} has an active marking set",
               docId);
-          MarkingPermissions markingPermissions =
-              new MarkingPermissions(activeMarkings, permissionsFactory);
-          isAuthorized = markingPermissions.authorize(user);
+          isAuthorized = authorizeMarking(user, activeMarkings);
         } else {
           logger.log(Level.FINE,
               "Document {0} does not have an active marking set", docId);
@@ -175,5 +180,28 @@ public class FileAuthorizationHandler implements AuthorizationHandler {
         "User {1} is {2}authorized for document DocID {0}",
         new Object[] { docId, user.get_Name(), isAuthorized ? "" : "NOT " });
     return new AuthorizationResponse(isAuthorized, docId);
+  }
+
+  /** Authorizes the given user against the ACLs of the active markings. */
+  @VisibleForTesting
+  boolean authorizeMarking(User user, ActiveMarkingList activeMarkings) {
+    for (Object activeMarking : activeMarkings) {
+      Marking marking = ((ActiveMarking) activeMarking).get_Marking();
+
+      logger.log(Level.FINEST,
+          "Authorizing user: {0} [Marking: {1}, Constraint Mask: {2}]",
+          new Object[] {user.get_Name(), marking.get_MarkingValue(),
+                        marking.get_ConstraintMask()});
+
+      Permissions perms =
+          permissionsFactory.getInstance(marking.get_Permissions());
+      if (!perms.authorizeMarking(user, marking.get_ConstraintMask())) {
+        logger.log(Level.FINER,
+            "User {0} is not authorized for Marking value: {1}",
+            new Object[] {user.get_Name(), marking.get_MarkingValue()});
+        return false;
+      }
+    }
+    return true;
   }
 }

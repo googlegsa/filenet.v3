@@ -24,6 +24,7 @@ import static org.easymock.EasyMock.isNull;
 import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.EngineCollectionMocks.ActiveMarkingListMock;
 import com.google.enterprise.connector.filenet4.EngineCollectionMocks.PropertyDefinitionListMock;
@@ -34,10 +35,12 @@ import com.google.enterprise.connector.filenet4.api.IVersionSeries;
 import com.google.enterprise.connector.spi.AuthorizationResponse;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
+import com.google.enterprise.connector.spi.SimpleAuthenticationIdentity;
 
 import com.filenet.api.admin.PropertyDefinition;
 import com.filenet.api.admin.PropertyDefinitionString;
 import com.filenet.api.collection.AccessPermissionList;
+import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.ActiveMarking;
@@ -214,6 +217,28 @@ public class FileAuthorizationHandlerTest {
       }
     }
     verify(objectStore, user);
+  }
+
+  @Test
+  public void testAuthorizeMarking() throws RepositoryException {
+    assumeTrue(TestConnection.isLiveConnection());
+
+    FileConnector connec = new FileConnector();
+    connec.setUsername(TestConnection.adminUsername);
+    connec.setPassword(TestConnection.adminPassword);
+    connec.setObject_store(TestConnection.objectStore);
+    connec.setWorkplace_display_url(TestConnection.displayURL);
+    connec.setObject_factory(TestConnection.objectFactory);
+    connec.setContent_engine_url(TestConnection.uri);
+
+    FileSession fs = (FileSession) connec.login();
+    FileAuthorizationHandler out = fs.getFileAuthorizationHandler();
+    User user = out.getUser(new SimpleAuthenticationIdentity(
+        TestConnection.adminUsername, TestConnection.adminPassword));
+    IDocument doc = out.getReleasedVersion(TestConnection.docVsId1);
+    ActiveMarkingList activeMarkingList = doc.get_ActiveMarkings();
+
+    assertEquals(true, out.authorizeMarking(user, activeMarkingList));
   }
 
   private static class MockPermissionsFactory implements Permissions.Factory {

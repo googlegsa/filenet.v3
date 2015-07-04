@@ -21,14 +21,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.filenet4.FileUtil;
-import com.google.enterprise.connector.filenet4.MarkingPermissions;
 import com.google.enterprise.connector.filenet4.Permissions;
 import com.google.enterprise.connector.filenet4.SecurityPrincipalMocks;
 import com.google.enterprise.connector.filenet4.TestConnection;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.Value;
 
-import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.security.User;
 import com.filenet.api.util.Id;
@@ -137,19 +135,6 @@ public class FnDocumentTest {
     boolean authorized =
         perms.authorize(SecurityPrincipalMocks.createAdministratorUser());
     assertTrue("User is not authorized", authorized);
-  }
-
-  @Test
-  public void testMarkingPermissions() throws RepositoryException {
-    IVersionSeries versionSeries =
-        (IVersionSeries) ios.getObject(ClassNames.VERSION_SERIES,
-            TestConnection.docVsId1);
-    IDocument doc = versionSeries.get_ReleasedVersion();
-    ActiveMarkingList activeMarkingList = doc.get_ActiveMarkings();
-    assertNotNull("Active marking is null", activeMarkingList);
-    assertTrue(user.get_Name() + " is not authorized by document's marking",
-        new MarkingPermissions(activeMarkingList, Permissions.getFactory())
-        .authorize(user));
   }
 
   @Test

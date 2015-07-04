@@ -92,6 +92,12 @@ public class FileSession implements Session {
         objectStore, connector);
   }
 
+  @VisibleForTesting
+  FileAuthorizationHandler getFileAuthorizationHandler() {
+    return new FileAuthorizationHandler(connection, fileObjectFactory,
+        objectStore, connector.checkMarking(), Permissions.getFactory());
+  }
+
   @Override
   public TraversalManager getTraversalManager() throws RepositoryException {
     return new FileTraversalManager(getFileDocumentTraverser(),
@@ -108,9 +114,7 @@ public class FileSession implements Session {
   @Override
   public AuthorizationManager getAuthorizationManager()
           throws RepositoryException {
-    return new FileAuthorizationManager(
-        new FileAuthorizationHandler(connection, fileObjectFactory, objectStore,
-            connector.checkMarking(), Permissions.getFactory()));
+    return new FileAuthorizationManager(getFileAuthorizationHandler());
   }
 
   public SearchWrapper getSearch() {
