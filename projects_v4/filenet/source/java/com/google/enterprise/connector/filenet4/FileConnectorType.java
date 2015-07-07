@@ -72,10 +72,6 @@ public class FileConnectorType implements ConnectorType {
   private static final String CONTENT_ENGINE_URL = "content_engine_url";
   private static final String WORKPLACE_URL = "workplace_display_url";
 
-  private static final String FNCLASS = "object_factory";
-  private static final String FILEPATH = "path_to_WcmApiConfig";
-  private static final String AUTHENTICATIONTYPE = "authentication_type";
-
   private static final String WHERECLAUSE = "additional_where_clause";
   private static final String DELETEWHERECLAUSE = "delete_additional_where_clause";
   private static final String CHECKMARKING = "check_marking";
@@ -92,7 +88,6 @@ public class FileConnectorType implements ConnectorType {
       OBJECT_STORE,
       CONTENT_ENGINE_URL,
       WORKPLACE_URL,
-      FNCLASS,
       WHERECLAUSE,
       DELETEWHERECLAUSE,
       CHECKMARKING);
@@ -143,11 +138,7 @@ public class FileConnectorType implements ConnectorType {
   private String validateConfigMap(Map<String, String> configData) {
     for (String key : keys) {
       String val = configData.get(key);
-      if (!key.equals(FNCLASS)
-              && !key.equals(AUTHENTICATIONTYPE)
-              && !key.equals(WHERECLAUSE)
-              && !key.equals(DELETEWHERECLAUSE)
-              && !key.equals(CHECKMARKING)
+      if (requiredKeys.contains(key)
               && (val == null || val.length() == 0)) {
         return key;
       }
@@ -459,26 +450,24 @@ public class FileConnectorType implements ConnectorType {
 
       if (key.equals(CHECKMARKING)) {
         appendMarkingCheckBox(buf, key, resource.getString(key), value);
-        appendStartHiddenRow(buf);
+        buf.append(TR_START_HIDDEN);
+        buf.append(TD_START);
         buf.append(OPEN_ELEMENT);
         buf.append(INPUT);
         appendAttribute(buf, TYPE, HIDDEN);
         appendAttribute(buf, VALUE, "off");
         appendAttribute(buf, NAME, key);
         buf.append(CLOSE_ELEMENT);
-        appendEndRow(buf);
+        buf.append(TD_END);
+        buf.append(TR_END);
       } else {
-        if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
-            && !key.equals(FILEPATH)) {
-          if (validate.equals(key)) {
-            appendStartRow(buf, key, validate, resource);
-          } else {
-            appendStartRow(buf, key, "", resource);
-          }
+        buf.append(TR_START);
+        if (validate.equals(key)) {
+          appendLabel(buf, key, validate, resource);
         } else {
-          appendStartHiddenRow(buf);
+          appendLabel(buf, key, "", resource);
         }
-
+        buf.append(TD_START);
         if (key.equals(WHERECLAUSE) || key.equals(DELETEWHERECLAUSE)) {
           buf.append(OPEN_ELEMENT);
           buf.append(TEXTAREA);
@@ -497,54 +486,24 @@ public class FileConnectorType implements ConnectorType {
           buf.append(INPUT);
           if (key.equalsIgnoreCase(PASSWORD_KEY)) {
             appendAttribute(buf, TYPE, PASSWORD);
-          } else if (key.equals(FNCLASS)
-                  || key.equals(AUTHENTICATIONTYPE)) {
-            appendAttribute(buf, TYPE, HIDDEN);
           } else {
             appendAttribute(buf, TYPE, TEXT);
-            appendAttribute(buf, SIZE, "50");
           }
+          appendAttribute(buf, SIZE, "50");
           appendAttribute(buf, NAME, key);
           appendAttribute(buf, VALUE, value);
           buf.append(CLOSE_ELEMENT);
         }
-        appendEndRow(buf);
+        buf.append(TD_END);
+        buf.append(TR_END);
       }
-    }
-    if (!configMap.isEmpty()) {
-      appendStartHiddenRow(buf);
-      for (String key : configMap.keySet()) {
-        if (!keys.contains(key)) {
-          // add another hidden field to preserve this data
-          String value = configMap.get(key);
-          buf.append(OPEN_ELEMENT);
-          buf.append(INPUT);
-          appendAttribute(buf, TYPE, HIDDEN);
-          appendAttribute(buf, VALUE, value);
-          appendAttribute(buf, NAME, key);
-          buf.append(CLOSE_ELEMENT);
-        }
-      }
-      appendEndRow(buf);
     }
     return buf.toString();
   }
 
-  /**
-   * To append table row start (TR_START) and table column start (TD_START)
-   * tags to the configuration form for the hidden form elements.
-   */
-  private void appendStartHiddenRow(StringBuilder buf) {
-    buf.append(TR_START_HIDDEN);
-    buf.append(TD_START);
-  }
-
-  /**
-   * To creates a new table row in the configuration form.
-   */
-  private void appendStartRow(StringBuilder buf, String key, String validate,
+  /** Appends a translated control label for the given key. */
+  private void appendLabel(StringBuilder buf, String key, String validate,
       ResourceBundle resource) {
-    buf.append(TR_START);
     buf.append("<td style='white-space: nowrap'>");
     if (requiredKeys.contains(key)) {
       buf.append("<div style='float: left;");
@@ -564,16 +523,6 @@ public class FileConnectorType implements ConnectorType {
       buf.append(resource.getString(key));
     }
     buf.append(TD_END);
-    buf.append(TD_START);
-  }
-
-  /**
-   * To append table column end (TD_END), and
-   * table row end (TR_END) tags to the current table row.
-   */
-  private void appendEndRow(StringBuilder buf) {
-    buf.append(TD_END);
-    buf.append(TR_END);
   }
 
   private void appendAttribute(StringBuilder buf, String attrName,
