@@ -15,11 +15,13 @@
 package com.google.enterprise.connector.filenet4;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import com.google.enterprise.connector.spi.ConfigureResponse;
+import com.google.enterprise.connector.util.XmlParseUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +38,6 @@ public class FileConnectorTypeTest {
 
   @Before
   public void setUp() {
-    assumeTrue(TestConnection.isLiveConnection());
-
     map = new HashMap<>();
     map.put("username", TestConnection.adminUsername);
     map.put("Password", TestConnection.adminPassword);
@@ -48,14 +48,77 @@ public class FileConnectorTypeTest {
     map.put("additional_where_clause", "");//NOT COMPULSORY
     map.put("delete_additional_where_clause", "");
     map.put("check_marking", "");
-    String[] fields = map.keySet().toArray(new String[0]);
     map.put("googleGlobalNamespace", "Default");
     testConnectorType = new FileConnectorType();
-    testConnectorType.setConfigKeys(fields);
+  }
+
+  private void assertResponseContains(String expected, String label,
+      ConfigureResponse response) {
+    assertEquals("", response.getMessage());
+    assertEquals(null, response.getConfigData());
+    assertTrue(label + ": " + response.getFormSnippet(),
+        response.getFormSnippet().contains(expected));
+  }
+
+  private void assertResponseNotContains(String expected, String label,
+      ConfigureResponse response) {
+    assertFalse(label + ": " + response.getFormSnippet(),
+        response.getFormSnippet().contains(expected));
+    }
+
+  @Test
+  public void testGetConfigForm() throws Exception {
+    ConfigureResponse response = testConnectorType.getConfigForm(Locale.US);
+    System.out.println("testGetConfgForm:\n" + response.getFormSnippet());
+    assertEquals("", response.getMessage());
+    assertEquals(null, response.getConfigData());
+    XmlParseUtil.validateXhtml(response.getFormSnippet());
+  }
+
+  @Test
+  public void testGetConfigForm_invalidLocale() {
+    ConfigureResponse response =
+        testConnectorType.getConfigForm(new Locale("klingon"));
+    assertResponseContains("Object Store", "Did not find English", response);
+  }
+
+  @Test
+  public void testGetConfigForm_cachedLocale() {
+    ConfigureResponse response = testConnectorType.getConfigForm(Locale.US);
+    assertResponseContains("Object Store", "Did not find English", response);
+    assertResponseNotContains("Banque d'objets",
+        "Found French instead of English", response);
+
+    response = testConnectorType.getConfigForm(Locale.FRANCE);
+    assertResponseContains("Banque d'objets", "Did not find French", response);
+    assertResponseNotContains("Object Store",
+        "Found English instead of French", response);
+  }
+
+  @Test
+  public void testGetPopulatedConfigForm() throws Exception {
+    ConfigureResponse response =
+        testConnectorType.getPopulatedConfigForm(map, Locale.US);
+    System.out.println("testGetPopulatedConfgForm:\n"
+        + response.getFormSnippet());
+    assertEquals("", response.getMessage());
+    assertEquals(null, response.getConfigData());
+    XmlParseUtil.validateXhtml(response.getFormSnippet());
+  }
+
+  @Test
+  public void testGetPopulatedConfigForm_hidden() {
+    ConfigureResponse response =
+        testConnectorType.getPopulatedConfigForm(map, Locale.US);
+    assertResponseContains("<input type=\"hidden\" value=\"Default\" "
+        + "name=\"googleGlobalNamespace\"/>", "Did not find hidden field",
+        response);
   }
 
   @Test
   public void testValidateConfigWithBlankWhereClause() {
+    assumeTrue(TestConnection.isLiveConnection());
+
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
     if (resp != null) {
       fail(resp.getMessage());
@@ -64,6 +127,8 @@ public class FileConnectorTypeTest {
 
   @Test
   public void testValidateConfigIncorrectWhereClause() {
+    assumeTrue(TestConnection.isLiveConnection());
+
     map.put("additional_where_clause", "and Document.this INSUBFOLDER");
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
     assertTrue(resp.getMessage(),
@@ -72,6 +137,8 @@ public class FileConnectorTypeTest {
 
   @Test
   public void testValidateConfigCorrectWhereClause() {
+    assumeTrue(TestConnection.isLiveConnection());
+
     map.put("additional_where_clause",
         "and Document.this INSUBFOLDER '/TestFolder'");
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
@@ -82,6 +149,8 @@ public class FileConnectorTypeTest {
 
   @Test
   public void testInvalidWorkplaceURL() throws MalformedURLException {
+    assumeTrue(TestConnection.isLiveConnection());
+
     URL displayUrl = new URL(TestConnection.displayURL);
     map.put("workplace_display_url",
         displayUrl.toString().replace(displayUrl.getPath(), "/xyggy"));
@@ -92,6 +161,8 @@ public class FileConnectorTypeTest {
 
   @Test
   public void testRepeatedSlashContentEngineURL() {
+    assumeTrue(TestConnection.isLiveConnection());
+
     map.put("content_engine_url", TestConnection.uri + "///////");
     ConfigureResponse resp = testConnectorType.validateConfig(map, Locale.US, new FileNetConnectorFactory());
     if (resp != null) {

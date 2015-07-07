@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.ConfigureResponse;
 import com.google.enterprise.connector.spi.ConnectorFactory;
@@ -25,10 +26,7 @@ import com.google.enterprise.connector.util.UrlValidator;
 import com.filenet.api.exception.EngineRuntimeException;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -39,12 +37,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *Represents FileNet connector type information. Contains methods for creating
- * and validating user form.
- *
- * @author pankaj_chouhan
+ * Represents the FileNet connector configuration form.
  **/
 public class FileConnectorType implements ConnectorType {
+  private static Logger LOGGER =
+      Logger.getLogger(FileConnectorType.class.getName());
 
   private static final String HIDDEN = "hidden";
   private static final String VALUE = "value";
@@ -87,103 +84,53 @@ public class FileConnectorType implements ConnectorType {
   private static final String CHECKMARKING = "check_marking";
   private static final String MARKINGCHECKBOX = "checkbox";
   private static final String MARKINGCHECKED = "checked='checked'";
-  private static final String LOCALE_FILE = "FileConnectorResources";
   private static final String SELECT = "SELECT";
   private static final String QUERYFORMAT = "SELECT ID,DATELASTMODIFIED FROM ";
   private static final String VERSIONQUERY = "WHERE VersionStatus=1 and ContentSize IS NOT NULL";
   private static final String ACCESS_DENIED_EXCEPTION = "com.filenet.api.exception.EngineRuntimeException: E_ACCESS_DENIED:";
   private static final String RETRIEVE_SQL_SYNTAX_ERROR = "com.filenet.api.exception.EngineRuntimeException: RETRIEVE_SQL_SYNTAX_ERROR:";
-  private static Logger LOGGER = Logger.getLogger(FileConnectorType.class.getName());
-  private List<String> keys = null;
-  private Set<String> keySet = null;
-  private String initialConfigForm = null;
-  private ResourceBundle resource;
+
+  private static final Set<String> keys = ImmutableSet.of(
+      "username",
+      "Password",
+      "object_store",
+      "content_engine_url",
+      "workplace_display_url",
+      "object_factory",
+      "additional_where_clause",
+      "delete_additional_where_clause",
+      "check_marking");
+
   private String validation = "";
-
-  /**
-   * Set the keys that are required for configuration. One of the overloadings
-   * of this method must be called exactly once before the SPI methods are
-   * used.
-   *
-   * @param keys A list of String keys
-   */
-  public void setConfigKeys(List<String> keys) {
-    if (this.keys != null) {
-      throw new IllegalStateException();
-    }
-    this.keys = keys;
-    this.keySet = new HashSet<String>(keys);
-  }
-
-  /**
-   * Set the keys that are required for configuration. One of the overloadings
-   * of this method must be called exactly once before the SPI methods are
-   * used.
-   *
-   * @param keys An array of String keys
-   */
-  public void setConfigKeys(String[] keys) {
-    setConfigKeys(Arrays.asList(keys));
-  }
-
-  /**
-   * Sets the form to be used by this configurer. This is optional. If this
-   * method is used, it must be called before the SPI methods are used.
-   *
-   * @param formSnippet A String snippet of html - see the Configurer
-   *            interface
-   */
-  public void setInitialConfigForm(String formSnippet) {
-    if (this.initialConfigForm != null) {
-      throw new IllegalStateException();
-    }
-    this.initialConfigForm = formSnippet;
-  }
 
   /**
    * Supply rows in an HTML table as a connector configuration form to the
    * Admin Console so that an administrator can specify parameter values for a
    * connector
-   *
-   * @return com.google.enterprise.connector.spi.ConfigureResponse;
    */
   @Override
-  public ConfigureResponse getConfigForm(Locale language) {
-    try {
-      LOGGER.info("Language used " + language.getLanguage());
-      resource = ResourceBundle.getBundle(LOCALE_FILE, language);
-    } catch (MissingResourceException e) {
-      resource = ResourceBundle.getBundle(LOCALE_FILE);
-    }
-    if (initialConfigForm != null) {
-      return new ConfigureResponse("", initialConfigForm);
-    }
-    if (keys == null) {
-      throw new IllegalStateException();
-    }
-    this.initialConfigForm = makeConfigForm(null, this.validation);
-    return new ConfigureResponse("", initialConfigForm);
+  public ConfigureResponse getConfigForm(Locale locale) {
+    return getPopulatedConfigForm(null, locale);
   }
 
   /**
    * Supply rows in an HTML table as a connector configuration form to the
    * Admin Console so that an administrator can change parameter values for a
    * connector
-   *
-   * @return com.google.enterprise.connector.spi.ConfigureResponse;
    */
   @Override
   public ConfigureResponse getPopulatedConfigForm(Map<String, String> configMap,
-          Locale language) {
+      Locale locale) {
+    ResourceBundle resource;
     try {
-      resource = ResourceBundle.getBundle(LOCALE_FILE, language);
-
+      resource = ResourceBundle.getBundle("FileConnectorResources", locale);
     } catch (MissingResourceException e) {
-      resource = ResourceBundle.getBundle(LOCALE_FILE);
+      LOGGER.log(Level.SEVERE,
+          "Unable to find the resource bundle file for locale " + locale, e);
+      return new ConfigureResponse(e.getMessage(), "");
     }
-    ConfigureResponse response = new ConfigureResponse("",
-            makeConfigForm(configMap, this.validation));
-    return response;
+    return new ConfigureResponse("",
+        makeConfigForm(configMap, this.validation, resource));
   }
 
   /**
@@ -210,19 +157,17 @@ public class FileConnectorType implements ConnectorType {
    * The validateConfig method ensures that the administrator fills in all
    * required information. This method also instantiates the connector to
    * ensure that the connector instance is available for access.
-   *
-   * @return com.google.enterprise.connector.spi.ConfigureResponse;
    */
   @Override
   public ConfigureResponse validateConfig(Map<String, String> configData,
-      Locale language, ConnectorFactory connectorFactory) {
-    LOGGER.log(Level.FINEST, "Entering into function validateConfig(Map configData, Locale language, ConnectorFactory connectorFactory)");
+      Locale locale, ConnectorFactory connectorFactory) {
+    ResourceBundle resource;
     try {
-      resource = ResourceBundle.getBundle(LOCALE_FILE, language);
+      resource = ResourceBundle.getBundle("FileConnectorResources", locale);
     } catch (MissingResourceException e) {
-      LOGGER.log(Level.SEVERE, "Unable to find the resource bundle file for language "
-              + language, e);
-      resource = ResourceBundle.getBundle(LOCALE_FILE);
+      LOGGER.log(Level.SEVERE,
+          "Unable to find the resource bundle file for locale " + locale, e);
+      return new ConfigureResponse(e.getMessage(), "");
     }
 
     if (configData == null) {
@@ -258,15 +203,15 @@ public class FileConnectorType implements ConnectorType {
 
         if (session != null) {
           LOGGER.log(Level.INFO, "Connection to Content Engine URL is Successful");
-          session.getTraversalManager();// test on the objectStore
-          // name
+          session.getTraversalManager();
           LOGGER.log(Level.INFO, "Connection to Object Store "
               + configData.get("object_store") + " is Successful");
         } else {
           LOGGER.log(Level.INFO, "Connection to Content Engine URL Failed");
         }
 
-        testWorkplaceUrl(configData.get("workplace_display_url").trim());
+        testWorkplaceUrl(configData.get("workplace_display_url").trim(),
+            resource);
 
         StringBuffer query = new StringBuffer();
 
@@ -281,14 +226,14 @@ public class FileConnectorType implements ConnectorType {
                   + configData.get(WHERECLAUSE).trim() + "]");
             } else {
               this.validation = WHERECLAUSE;
-              form = makeConfigForm(configData, this.validation);
+              form = makeConfigForm(configData, this.validation, resource);
               return new ConfigureResponse(
                       resource.getString("query_not_having_versionstatus_condition"),
                       form);
             }
           } else {
             this.validation = WHERECLAUSE;
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
             return new ConfigureResponse(
                     resource.getString("query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND"),
                     form);
@@ -308,7 +253,7 @@ public class FileConnectorType implements ConnectorType {
           if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = OBJECT_STORE;
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
 
             return new ConfigureResponse(
                     resource.getString("object_store_access_error"),
@@ -316,7 +261,7 @@ public class FileConnectorType implements ConnectorType {
           } else if (e.toString().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = WHERECLAUSE;
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
 
             return new ConfigureResponse(
                     resource.getString("additional_where_clause_invalid"),
@@ -324,7 +269,7 @@ public class FileConnectorType implements ConnectorType {
           } else {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = "FileNet exception";
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
 
             return new ConfigureResponse(e.getLocalizedMessage(),
                     form);
@@ -346,14 +291,14 @@ public class FileConnectorType implements ConnectorType {
                       + "]");
             } else {
               this.validation = DELETEWHERECLAUSE;
-              form = makeConfigForm(configData, this.validation);
+              form = makeConfigForm(configData, this.validation, resource);
               return new ConfigureResponse(
                       resource.getString("delete_query_not_having_versionstatus_condition"),
                       form);
             }
           } else {
             this.validation = DELETEWHERECLAUSE;
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
             return new ConfigureResponse(
                     resource.getString("delete_query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND"),
                     form);
@@ -373,7 +318,7 @@ public class FileConnectorType implements ConnectorType {
           if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = OBJECT_STORE;
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
 
             return new ConfigureResponse(
                     resource.getString("object_store_access_error"),
@@ -381,7 +326,7 @@ public class FileConnectorType implements ConnectorType {
           } else if (e.toString().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = DELETEWHERECLAUSE;
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
 
             return new ConfigureResponse(
                     resource.getString("delete_additional_where_clause_invalid"),
@@ -389,7 +334,7 @@ public class FileConnectorType implements ConnectorType {
           } else {
             LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
             this.validation = "FileNet exception";
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
 
             return new ConfigureResponse(e.getLocalizedMessage(),
                     form);
@@ -400,13 +345,12 @@ public class FileConnectorType implements ConnectorType {
                 || !configData.get(DELETEWHERECLAUSE).trim().equalsIgnoreCase("")) {
           if ((configData.get(WHERECLAUSE).trim()).equalsIgnoreCase(configData.get(DELETEWHERECLAUSE).trim())) {
             this.validation = DELETEWHERECLAUSE;
-            form = makeConfigForm(configData, this.validation);
+            form = makeConfigForm(configData, this.validation, resource);
             return new ConfigureResponse(
                     resource.getString("same_additional_where_clause_and_additional_delete_clause"),
                     form);
           }
         }
-
       } catch (EngineRuntimeException e) {
         String errorKey = e.getExceptionCode().getKey();
         String bundleMessage;
@@ -415,20 +359,14 @@ public class FileConnectorType implements ConnectorType {
             bundleMessage = resource.getString("content_engine_url_invalid");
             LOGGER.log(Level.SEVERE, bundleMessage, e);
           } else {
-            // bundleMessage =
-            // resource.getString("required_field_error") +" "+
-            // e.getLocalizedMessage();
             bundleMessage = e.getLocalizedMessage();
             LOGGER.log(Level.SEVERE, bundleMessage);
           }
         } catch (MissingResourceException mre) {
-          // bundleMessage =
-          // resource.getString("required_field_error") +" "+
-          // e.getLocalizedMessage();
           bundleMessage = e.getLocalizedMessage();
           LOGGER.log(Level.SEVERE, bundleMessage, mre);
         }
-        form = makeConfigForm(configData, validation);
+        form = makeConfigForm(configData, validation, resource);
         return new ConfigureResponse(bundleMessage, form);
       } catch (RepositoryException e) {
         String bundleMessage;
@@ -470,12 +408,8 @@ public class FileConnectorType implements ConnectorType {
         } catch (MissingResourceException mre) {
           bundleMessage = resource.getString("required_field_error")
                   + " " + mre.getLocalizedMessage();
-          // logger.severe(bundleMessage);
           LOGGER.log(Level.SEVERE, bundleMessage, mre);
         } catch (NullPointerException npe) {
-          // bundleMessage =
-          // resource.getString("required_field_error") +" "+
-          // e.getMessage();
           bundleMessage = npe.getLocalizedMessage();
           LOGGER.log(Level.SEVERE, "Unable to connect to FileNet server. Got exception: ", npe);
         } catch (Throwable th) {
@@ -484,24 +418,21 @@ public class FileConnectorType implements ConnectorType {
         }
 
         LOGGER.info("request to make configuration form..");
-        form = makeConfigForm(configData, validation);
+        form = makeConfigForm(configData, validation, resource);
         return new ConfigureResponse(bundleMessage, form);
       }
       return null;
     }
-    form = makeConfigForm(configData, validation);
+    form = makeConfigForm(configData, validation, resource);
     return new ConfigureResponse(resource.getString(validation + "_error"),
             form);
   }
 
   /**
    * This method validates WorkPlace URL used to configure connector.
-   *
-   * @param workplaceServerUrl
-   * @throws RepositoryException
    */
-  private void testWorkplaceUrl(String workplaceServerUrl)
-          throws RepositoryException {
+  private void testWorkplaceUrl(String workplaceServerUrl,
+      ResourceBundle resource) throws RepositoryException {
     try {
       new UrlValidator().validate(workplaceServerUrl);
       LOGGER.log(Level.INFO, "Connection to Workplace URL is Successful");
@@ -516,11 +447,10 @@ public class FileConnectorType implements ConnectorType {
    * Make a config form snippet using the keys (in the supplied order) and, if
    * passed a non-null config map, pre-filling values in from that map
    *
-   * @param configMap
    * @return config form snippet
    */
   private String makeConfigForm(Map<String, String> configMap,
-      String validate) {
+      String validate, ResourceBundle resource) {
     StringBuffer buf = new StringBuffer(2048);
     String value = " ";
     for (Iterator<String> i = keys.iterator(); i.hasNext();) {
@@ -542,13 +472,12 @@ public class FileConnectorType implements ConnectorType {
         value = "";
       } else {
         if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
-                        /* && !key.equals(WHERECLAUSE) */&& !key.equals(FILEPATH)) {
+            && !key.equals(FILEPATH)) {
           if (validate.equals(key)) {
-            appendStartRow(buf, key, validate);
+            appendStartRow(buf, key, validate, resource);
           } else {
-            appendStartRow(buf, key, "");
+            appendStartRow(buf, key, "", resource);
           }
-
         } else {
           appendStartHiddenRow(buf);
         }
@@ -557,9 +486,7 @@ public class FileConnectorType implements ConnectorType {
         if (key.equals(WHERECLAUSE) || key.equals(DELETEWHERECLAUSE)) {
           buf.append(TEXTAREA);
           appendAttribute(buf, TYPE, TEXTAREA);
-          // buf.append(" ");
           appendAttribute(buf, NAME, key);
-          // appendAttribute(buf, VALUE, value);
           buf.append(CLOSE_TAG);
           if (value == null) {
             value = "";
@@ -574,9 +501,7 @@ public class FileConnectorType implements ConnectorType {
           buf.append(OPEN_ELEMENT);
           buf.append("/" + TEXTAREA);
           buf.append(CLOSE_TAG);
-
         } else {
-
           buf.append(INPUT);
           if (key.equalsIgnoreCase(PASSWORD_KEY)) {
             appendAttribute(buf, TYPE, PASSWORD);
@@ -596,10 +521,11 @@ public class FileConnectorType implements ConnectorType {
       }
     }
     if (configMap != null) {
+      appendStartHiddenRow(buf);
       Iterator<String> i = new TreeSet<String>(configMap.keySet()).iterator();
       while (i.hasNext()) {
         String key = i.next();
-        if (!keySet.contains(key)) {
+        if (!keys.contains(key)) {
           // add another hidden field to preserve this data
           String val = configMap.get(key);
           buf.append("<input type=\"hidden\" value=\"");
@@ -609,6 +535,7 @@ public class FileConnectorType implements ConnectorType {
           buf.append("\"/>\r\n");
         }
       }
+      appendEndRow(buf);
     }
     return buf.toString();
   }
@@ -616,30 +543,21 @@ public class FileConnectorType implements ConnectorType {
   /**
    * To append table row start (TR_START) and table column start (TD_START)
    * tags to the configuration form for the hidden form elements.
-   *
-   * @param buf
    */
   private void appendStartHiddenRow(StringBuffer buf) {
-    // buf.append(TR_START);
     buf.append(TR_START_HIDDEN);
     buf.append(TD_START);
-
   }
 
   /**
    * To creates a new table row in the configuration form.
-   *
-   * @param buf
-   * @param key
-   * @param validate
    */
-  private void appendStartRow(StringBuffer buf, String key, String validate) {
+  private void appendStartRow(StringBuffer buf, String key, String validate,
+      ResourceBundle resource) {
     buf.append(TR_START);
-    // buf.append(TD_START);
     buf.append(TD_START_LABEL);
     buf.append(TD_WHITE_SPACE);
     if (isRequired(key)) {
-
       buf.append(TD_END_START_LABEL);
       buf.append(DIV_START_LABEL);
       buf.append(TD_FLOAT_LEFT);
@@ -672,29 +590,20 @@ public class FileConnectorType implements ConnectorType {
   }
 
   /**
-   * To append close element (CLOSE_ELEMENT), table column end (TD_END), and
+   * To append table column end (TD_END), and
    * table row end (TR_END) tags to the current table row.
-   *
-   * @param buf
    */
   private void appendEndRow(StringBuffer buf) {
-    // buf.append(CLOSE_ELEMENT);
     buf.append(TD_END);
     buf.append(TR_END);
   }
 
   /**
    * To append an attribute to the connector configuration form.
-   *
-   * @param buf
-   * @param attrName
-   * @param attrValue
    */
   private void appendAttribute(StringBuffer buf, String attrName,
           String attrValue) {
     buf.append(" ");
-    // LOGGER.log(Level.WARNING, "attrName : " + attrName + " attrName= : "
-    // + attrValue);
     if (attrName == TYPE && attrValue == TEXTAREA) {
       buf.append(" cols=\"50\"");
       buf.append(" rows=\"5\"");
@@ -722,11 +631,6 @@ public class FileConnectorType implements ConnectorType {
 
   /**
    * To add a 'Check Marking Set' check box to the form
-   *
-   * @param buf
-   * @param key
-   * @param label
-   * @param value
    */
   private void appendMarkingCheckBox(StringBuffer buf, String key,
           String label, String value) {
@@ -741,16 +645,11 @@ public class FileConnectorType implements ConnectorType {
     }
     buf.append(CLOSE_ELEMENT);
     buf.append(label + TD_END);
-
     buf.append(TR_END);
-
   }
 
   /**
    * To check all the required field are entered or not.
-   *
-   * @param configKey
-   * @return
    */
   private boolean isRequired(final String configKey) {
     final boolean bValue = false;
