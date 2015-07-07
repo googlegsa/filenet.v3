@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.ConfigureResponse;
@@ -26,13 +27,11 @@ import com.google.enterprise.connector.util.UrlValidator;
 import com.filenet.api.exception.EngineRuntimeException;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,47 +42,44 @@ public class FileConnectorType implements ConnectorType {
   private static Logger LOGGER =
       Logger.getLogger(FileConnectorType.class.getName());
 
+  private static final String CHECKBOX = "checkbox";
+  private static final String CHECKED = "checked";
+  private static final String COLS = "cols";
   private static final String HIDDEN = "hidden";
-  private static final String VALUE = "value";
+  private static final String INPUT = "input";
   private static final String NAME = "name";
+  private static final String PASSWORD = "password";
+  private static final String ROWS = "rows";
+  private static final String SIZE = "size";
   private static final String TEXT = "text";
   private static final String TEXTAREA = "textarea";
   private static final String TYPE = "type";
-  private static final String INPUT = "input";
-  private static final String CLOSE_TAG = ">";
+  private static final String VALUE = "value";
+
   private static final String CLOSE_ELEMENT = "/>";
+  private static final String CLOSE_TAG = ">";
   private static final String OPEN_ELEMENT = "<";
-  private static final String PASSWORD = "password";
-  private static final String PASSWORD_KEY = "Password";
-  private static final String USERNAME = "username";
-  private static final String OBJECT_STORE = "object_store";
-  private static final String WORKPLACE_URL = "workplace_display_url";
-  private static final String CONTENT_ENGINE_URL = "content_engine_url";
-  private static final String DIV_START_LABEL = "<div style='";
-  private static final String DIV_END = "</div>\r\n";
-  private static final String TR_END = "</tr>\r\n";
   private static final String TD_END = "</td>\r\n";
   private static final String TD_START = "<td>";
-  private static final String TD_START_LABEL = "<td style='";
-  private static final String TD_END_START_LABEL = "'>";
-  private static final String TD_WHITE_SPACE = "white-space: nowrap";
-  private static final String TD_DELIMITER = ";";
-  private static final String TD_FONT_WEIGHT = "font-weight: bold";
-  private static final String ASTERISK = "*";
-  private static final String TD_FONT_COLOR = "color: red";
-  private static final String TD_TEXT_ALIGN_RIGHT = "text-align: right";
-  private static final String TD_FLOAT_LEFT = "float: left";
   private static final String TD_START_COLSPAN = "<td colspan='2'>";
+  private static final String TR_END = "</tr>\r\n";
   private static final String TR_START = "<tr>\r\n";
   private static final String TR_START_HIDDEN = "<tr style='display: none'>\r\n";
+
+  private static final String USERNAME = "username";
+  private static final String PASSWORD_KEY = "Password";
+  private static final String OBJECT_STORE = "object_store";
+  private static final String CONTENT_ENGINE_URL = "content_engine_url";
+  private static final String WORKPLACE_URL = "workplace_display_url";
+
   private static final String FNCLASS = "object_factory";
   private static final String FILEPATH = "path_to_WcmApiConfig";
   private static final String AUTHENTICATIONTYPE = "authentication_type";
+
   private static final String WHERECLAUSE = "additional_where_clause";
   private static final String DELETEWHERECLAUSE = "delete_additional_where_clause";
   private static final String CHECKMARKING = "check_marking";
-  private static final String MARKINGCHECKBOX = "checkbox";
-  private static final String MARKINGCHECKED = "checked='checked'";
+
   private static final String SELECT = "SELECT";
   private static final String QUERYFORMAT = "SELECT ID,DATELASTMODIFIED FROM ";
   private static final String VERSIONQUERY = "WHERE VersionStatus=1 and ContentSize IS NOT NULL";
@@ -91,15 +87,22 @@ public class FileConnectorType implements ConnectorType {
   private static final String RETRIEVE_SQL_SYNTAX_ERROR = "com.filenet.api.exception.EngineRuntimeException: RETRIEVE_SQL_SYNTAX_ERROR:";
 
   private static final Set<String> keys = ImmutableSet.of(
-      "username",
-      "Password",
-      "object_store",
-      "content_engine_url",
-      "workplace_display_url",
-      "object_factory",
-      "additional_where_clause",
-      "delete_additional_where_clause",
-      "check_marking");
+      USERNAME,
+      PASSWORD_KEY,
+      OBJECT_STORE,
+      CONTENT_ENGINE_URL,
+      WORKPLACE_URL,
+      FNCLASS,
+      WHERECLAUSE,
+      DELETEWHERECLAUSE,
+      CHECKMARKING);
+
+  private static final Set<String> requiredKeys = ImmutableSet.of(
+      USERNAME,
+      PASSWORD_KEY,
+      OBJECT_STORE,
+      CONTENT_ENGINE_URL,
+      WORKPLACE_URL);
 
   private String validation = "";
 
@@ -110,7 +113,7 @@ public class FileConnectorType implements ConnectorType {
    */
   @Override
   public ConfigureResponse getConfigForm(Locale locale) {
-    return getPopulatedConfigForm(null, locale);
+    return getPopulatedConfigForm(ImmutableMap.<String, String>of(), locale);
   }
 
   /**
@@ -138,8 +141,7 @@ public class FileConnectorType implements ConnectorType {
    * key with a null or blank value.
    */
   private String validateConfigMap(Map<String, String> configData) {
-    for (Iterator<String> i = keys.iterator(); i.hasNext();) {
-      String key = i.next();
+    for (String key : keys) {
       String val = configData.get(key);
       if (!key.equals(FNCLASS)
               && !key.equals(AUTHENTICATIONTYPE)
@@ -205,15 +207,15 @@ public class FileConnectorType implements ConnectorType {
           LOGGER.log(Level.INFO, "Connection to Content Engine URL is Successful");
           session.getTraversalManager();
           LOGGER.log(Level.INFO, "Connection to Object Store "
-              + configData.get("object_store") + " is Successful");
+              + configData.get(OBJECT_STORE) + " is Successful");
         } else {
           LOGGER.log(Level.INFO, "Connection to Content Engine URL Failed");
         }
 
-        testWorkplaceUrl(configData.get("workplace_display_url").trim(),
+        testWorkplaceUrl(configData.get(WORKPLACE_URL).trim(),
             resource);
 
-        StringBuffer query = new StringBuffer();
+        StringBuilder query = new StringBuilder();
 
         if (configData.get(WHERECLAUSE).trim().toUpperCase()
             .startsWith(SELECT)) {
@@ -221,7 +223,7 @@ public class FileConnectorType implements ConnectorType {
               .startsWith(QUERYFORMAT)) {
             if (configData.get(WHERECLAUSE).trim().toUpperCase()
                 .contains(VERSIONQUERY.toUpperCase())) {
-              query = new StringBuffer(configData.get(WHERECLAUSE).trim());
+              query = new StringBuilder(configData.get(WHERECLAUSE).trim());
               LOGGER.fine("Using Custom Query["
                   + configData.get(WHERECLAUSE).trim() + "]");
             } else {
@@ -276,7 +278,7 @@ public class FileConnectorType implements ConnectorType {
           }
         }
 
-        StringBuffer deleteuery = new StringBuffer();
+        StringBuilder deleteuery = new StringBuilder();
 
         if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase()
             .startsWith(SELECT)) {
@@ -284,7 +286,7 @@ public class FileConnectorType implements ConnectorType {
               .startsWith(QUERYFORMAT)) {
             if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase()
                 .contains(((VERSIONQUERY)).toUpperCase())) {
-              deleteuery = new StringBuffer(
+              deleteuery = new StringBuilder(
                       configData.get(DELETEWHERECLAUSE).trim());
               LOGGER.fine("Using Custom Query["
                       + configData.get(DELETEWHERECLAUSE).trim()
@@ -451,13 +453,9 @@ public class FileConnectorType implements ConnectorType {
    */
   private String makeConfigForm(Map<String, String> configMap,
       String validate, ResourceBundle resource) {
-    StringBuffer buf = new StringBuffer(2048);
-    String value = " ";
-    for (Iterator<String> i = keys.iterator(); i.hasNext();) {
-      String key = i.next();
-      if (configMap != null) {
-        value = configMap.get(key);
-      }
+    StringBuilder buf = new StringBuilder(2048);
+    for (String key : keys) {
+      String value = configMap.get(key);
 
       if (key.equals(CHECKMARKING)) {
         appendMarkingCheckBox(buf, key, resource.getString(key), value);
@@ -469,7 +467,6 @@ public class FileConnectorType implements ConnectorType {
         appendAttribute(buf, NAME, key);
         buf.append(CLOSE_ELEMENT);
         appendEndRow(buf);
-        value = "";
       } else {
         if (!key.equals(FNCLASS) && !key.equals(AUTHENTICATIONTYPE)
             && !key.equals(FILEPATH)) {
@@ -481,27 +478,22 @@ public class FileConnectorType implements ConnectorType {
         } else {
           appendStartHiddenRow(buf);
         }
-        buf.append(OPEN_ELEMENT);
 
         if (key.equals(WHERECLAUSE) || key.equals(DELETEWHERECLAUSE)) {
+          buf.append(OPEN_ELEMENT);
           buf.append(TEXTAREA);
-          appendAttribute(buf, TYPE, TEXTAREA);
+          appendAttribute(buf, COLS, "50");
+          appendAttribute(buf, ROWS, "5");
           appendAttribute(buf, NAME, key);
           buf.append(CLOSE_TAG);
-          if (value == null) {
-            value = "";
+          if (value != null) {
+            appendValue(buf, value);
           }
-
-          try {
-            XmlUtils.xmlAppendAttrValue(value, buf);
-          } catch (IOException e) {
-            LOGGER.severe("SEVERE" + e.getStackTrace());
-          }
-
           buf.append(OPEN_ELEMENT);
           buf.append("/" + TEXTAREA);
           buf.append(CLOSE_TAG);
         } else {
+          buf.append(OPEN_ELEMENT);
           buf.append(INPUT);
           if (key.equalsIgnoreCase(PASSWORD_KEY)) {
             appendAttribute(buf, TYPE, PASSWORD);
@@ -510,29 +502,27 @@ public class FileConnectorType implements ConnectorType {
             appendAttribute(buf, TYPE, HIDDEN);
           } else {
             appendAttribute(buf, TYPE, TEXT);
+            appendAttribute(buf, SIZE, "50");
           }
-
           appendAttribute(buf, NAME, key);
           appendAttribute(buf, VALUE, value);
           buf.append(CLOSE_ELEMENT);
         }
         appendEndRow(buf);
-        value = "";
       }
     }
-    if (configMap != null) {
+    if (!configMap.isEmpty()) {
       appendStartHiddenRow(buf);
-      Iterator<String> i = new TreeSet<String>(configMap.keySet()).iterator();
-      while (i.hasNext()) {
-        String key = i.next();
+      for (String key : configMap.keySet()) {
         if (!keys.contains(key)) {
           // add another hidden field to preserve this data
-          String val = configMap.get(key);
-          buf.append("<input type=\"hidden\" value=\"");
-          buf.append(val);
-          buf.append("\" name=\"");
-          buf.append(key);
-          buf.append("\"/>\r\n");
+          String value = configMap.get(key);
+          buf.append(OPEN_ELEMENT);
+          buf.append(INPUT);
+          appendAttribute(buf, TYPE, HIDDEN);
+          appendAttribute(buf, VALUE, value);
+          appendAttribute(buf, NAME, key);
+          buf.append(CLOSE_ELEMENT);
         }
       }
       appendEndRow(buf);
@@ -544,7 +534,7 @@ public class FileConnectorType implements ConnectorType {
    * To append table row start (TR_START) and table column start (TD_START)
    * tags to the configuration form for the hidden form elements.
    */
-  private void appendStartHiddenRow(StringBuffer buf) {
+  private void appendStartHiddenRow(StringBuilder buf) {
     buf.append(TR_START_HIDDEN);
     buf.append(TD_START);
   }
@@ -552,40 +542,28 @@ public class FileConnectorType implements ConnectorType {
   /**
    * To creates a new table row in the configuration form.
    */
-  private void appendStartRow(StringBuffer buf, String key, String validate,
+  private void appendStartRow(StringBuilder buf, String key, String validate,
       ResourceBundle resource) {
     buf.append(TR_START);
-    buf.append(TD_START_LABEL);
-    buf.append(TD_WHITE_SPACE);
-    if (isRequired(key)) {
-      buf.append(TD_END_START_LABEL);
-      buf.append(DIV_START_LABEL);
-      buf.append(TD_FLOAT_LEFT);
-      buf.append(TD_DELIMITER);
+    buf.append("<td style='white-space: nowrap'>");
+    if (requiredKeys.contains(key)) {
+      buf.append("<div style='float: left;");
       if (!validate.equals("")) {
-        buf.append(TD_FONT_COLOR);
-        buf.append(TD_DELIMITER);
+        buf.append("color: red;");
       }
-      buf.append(TD_FONT_WEIGHT);
-      buf.append(TD_END_START_LABEL);
+      buf.append("font-weight: bold'>");
       buf.append(resource.getString(key));
-      buf.append(DIV_END);
+      buf.append("</div>\r\n");
 
-      buf.append(DIV_START_LABEL);
-      buf.append(TD_TEXT_ALIGN_RIGHT);
-      buf.append(TD_DELIMITER);
-      buf.append(TD_FONT_WEIGHT);
-      buf.append(TD_DELIMITER);
-      buf.append(TD_FONT_COLOR);
-      buf.append(TD_END_START_LABEL);
-      buf.append(ASTERISK);
-      buf.append(DIV_END);
-      buf.append(TD_END);
+      buf.append("<div style='text-align: right;");
+      buf.append("color: red;");
+      buf.append("font-weight: bold'>");
+      buf.append("*");
+      buf.append("</div>\r\n");
     } else {
-      buf.append(TD_END_START_LABEL);
       buf.append(resource.getString(key));
-      buf.append(TD_END);
     }
+    buf.append(TD_END);
     buf.append(TD_START);
   }
 
@@ -593,72 +571,48 @@ public class FileConnectorType implements ConnectorType {
    * To append table column end (TD_END), and
    * table row end (TR_END) tags to the current table row.
    */
-  private void appendEndRow(StringBuffer buf) {
+  private void appendEndRow(StringBuilder buf) {
     buf.append(TD_END);
     buf.append(TR_END);
   }
 
-  /**
-   * To append an attribute to the connector configuration form.
-   */
-  private void appendAttribute(StringBuffer buf, String attrName,
+  private void appendAttribute(StringBuilder buf, String attrName,
           String attrValue) {
-    buf.append(" ");
-    if (attrName == TYPE && attrValue == TEXTAREA) {
-      buf.append(" cols=\"50\"");
-      buf.append(" rows=\"5\"");
-    } else {
-      buf.append(attrName);
-      buf.append("=\"");
-      try {
-        // XML-encode the special characters (< > " etc.)
-        // Check the basic requirement mentioned in ConnectorType as
-        // part of
-        // CM-Issue 186
-        XmlUtils.xmlAppendAttrValue(attrValue, buf);
-      } catch (IOException e) {
-        String msg = new StringBuffer(
-                "Exceptions while constructing the config form for attribute : ").append(attrName).append(" with value : ").append(attrValue).toString();
-        LOGGER.log(Level.WARNING, msg, e);
-      }
-      buf.append("\"");
+    try {
+      XmlUtils.xmlAppendAttr(attrName, attrValue, buf);
+    } catch (IOException e) {
+      // This can't happen with StringBuilder.
+      throw new AssertionError(e);
     }
-    if (attrName == TYPE && attrValue == TEXT) {
-      buf.append(" size=\"50\"");
-    }
+  }
 
+  private void appendValue(StringBuilder buf, String attrValue) {
+    try {
+      XmlUtils.xmlAppendAttrValue(attrValue, buf);
+    } catch (IOException e) {
+      // This can't happen with StringBuilder.
+      throw new AssertionError(e);
+    }
   }
 
   /**
    * To add a 'Check Marking Set' check box to the form
    */
-  private void appendMarkingCheckBox(StringBuffer buf, String key,
+  private void appendMarkingCheckBox(StringBuilder buf, String key,
           String label, String value) {
     buf.append(TR_START);
     buf.append(TD_START_COLSPAN);
     buf.append(OPEN_ELEMENT);
     buf.append(INPUT);
-    buf.append(" " + TYPE + "=\"" + MARKINGCHECKBOX + '"');
-    buf.append(" " + NAME + "=\"" + key + "\" ");
+    appendAttribute(buf, TYPE, CHECKBOX);
+    appendAttribute(buf, NAME, key);
     if (value != null && value.equals("on")) {
-      buf.append(MARKINGCHECKED);
+      appendAttribute(buf, CHECKED, CHECKED);
     }
     buf.append(CLOSE_ELEMENT);
-    buf.append(label + TD_END);
+    appendValue(buf, label);
+    buf.append(TD_END);
     buf.append(TR_END);
-  }
-
-  /**
-   * To check all the required field are entered or not.
-   */
-  private boolean isRequired(final String configKey) {
-    final boolean bValue = false;
-    if (configKey.equals(OBJECT_STORE) || configKey.equals(WORKPLACE_URL)
-            || configKey.equals(PASSWORD_KEY) || configKey.equals(USERNAME)
-            || configKey.equals(CONTENT_ENGINE_URL)) {
-      return true;
-    }
-    return bValue;
   }
 
   private String rightTrim(String strTarget, char separator) {
