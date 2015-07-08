@@ -19,6 +19,7 @@ import static org.easymock.EasyMock.createNiceMock;
 import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
@@ -258,9 +259,65 @@ public class FileConnectorTypeTest {
         Locale.US, new MockConnectorFactory());
     assertTrue(response.getMessage(),
         response.getMessage().contains("cannot be blank"));
+    assertMarkedError("Workplace URL", response);
+  }
+
+  private void assertMarkedError(String label, ConfigureResponse response) {
     assertResponseContains(
-        "<div style='float: left;color: red;font-weight: bold'>Workplace URL",
-        "Workplace URL error", response);
+        "<div style='float: left;color: red;font-weight: bold'>" + label,
+        label + " error", response);
+  }
+
+  private void testQuery(String query, String expectedMessage) {
+    map.put("workplace_display_url", mockWorkplaceUrl);
+    map.put("additional_where_clause", query);
+    ConfigureResponse response = testConnectorType.validateConfig(map,
+        Locale.US, new MockConnectorFactory());
+    if (expectedMessage == null) {
+      if (response != null) {
+        fail(response.getMessage());
+      }
+    } else {
+      assertNotNull(response);
+      assertTrue("Expected:<" + expectedMessage + ">, but got:<"
+          + response.getMessage() + ">",
+          response.getMessage().contains(expectedMessage));
+      // assertMarkedError("Additional Where Clause", response);
+    }
+  }
+
+  @Test
+  public void testValidateConfig_invalidSelectQuery() {
+    testQuery(FileConnectorType.SELECT + " 42 from document where 1=1",
+        "should start with SELECT ID");
+  }
+
+  @Test
+  public void testValidateConfig_invalidConditionQuery() {
+    testQuery(FileConnectorType.QUERYFORMAT + " from document where 1=1",
+        "Query should contain WHERE");
+  }
+
+  @Test
+  public void testValidateConfig_validQuery() {
+    testQuery(FileConnectorType.QUERYFORMAT + " Document "
+        + FileConnectorType.VERSIONQUERY + " or 1=1", null);
+  }
+
+  @Test
+  public void testValidateConfig_sameQueries() {
+    String query = FileConnectorType.QUERYFORMAT + " Document "
+        + FileConnectorType.VERSIONQUERY;
+    map.put("delete_additional_where_clause", query);
+    testQuery(query, "should not be same");
+  }
+
+  @Test
+  public void testValidateConfig_differentQueries() {
+    String query = FileConnectorType.QUERYFORMAT + " Document "
+        + FileConnectorType.VERSIONQUERY;
+    map.put("delete_additional_where_clause", query + " and 1=1");
+    testQuery(query + " and 0=0", null);
   }
 
   @Test

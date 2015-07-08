@@ -14,6 +14,7 @@
 
 package com.google.enterprise.connector.filenet4;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.api.SearchWrapper;
@@ -76,9 +77,12 @@ public class FileConnectorType implements ConnectorType {
   private static final String DELETEWHERECLAUSE = "delete_additional_where_clause";
   private static final String CHECKMARKING = "check_marking";
 
-  private static final String SELECT = "SELECT";
-  private static final String QUERYFORMAT = "SELECT ID,DATELASTMODIFIED FROM ";
-  private static final String VERSIONQUERY = "WHERE VersionStatus=1 and ContentSize IS NOT NULL";
+  @VisibleForTesting static final String SELECT = "SELECT";
+  @VisibleForTesting static final String QUERYFORMAT =
+      "SELECT ID,DATELASTMODIFIED FROM ";
+  @VisibleForTesting static final String VERSIONQUERY =
+      "WHERE VersionStatus=1 and ContentSize IS NOT NULL";
+
   private static final String ACCESS_DENIED_EXCEPTION = "com.filenet.api.exception.EngineRuntimeException: E_ACCESS_DENIED:";
   private static final String RETRIEVE_SQL_SYNTAX_ERROR = "com.filenet.api.exception.EngineRuntimeException: RETRIEVE_SQL_SYNTAX_ERROR:";
 
@@ -168,8 +172,6 @@ public class FileConnectorType implements ConnectorType {
       return null;
     }
 
-    String form = null;
-
     LOGGER.info("validating the configuration data...");
     String validation = validateConfigMap(configData);
     this.validation = validation;
@@ -206,142 +208,32 @@ public class FileConnectorType implements ConnectorType {
         testWorkplaceUrl(configData.get(WORKPLACE_URL).trim(),
             resource);
 
-        StringBuilder query = new StringBuilder();
-
-        if (configData.get(WHERECLAUSE).trim().toUpperCase()
-            .startsWith(SELECT)) {
-          if (configData.get(WHERECLAUSE).trim().toUpperCase()
-              .startsWith(QUERYFORMAT)) {
-            if (configData.get(WHERECLAUSE).trim().toUpperCase()
-                .contains(VERSIONQUERY.toUpperCase())) {
-              query = new StringBuilder(configData.get(WHERECLAUSE).trim());
-              LOGGER.fine("Using Custom Query["
-                  + configData.get(WHERECLAUSE).trim() + "]");
-            } else {
-              this.validation = WHERECLAUSE;
-              form = makeConfigForm(configData, this.validation, resource);
-              return new ConfigureResponse(
-                      resource.getString("query_not_having_versionstatus_condition"),
-                      form);
-            }
-          } else {
-            this.validation = WHERECLAUSE;
-            form = makeConfigForm(configData, this.validation, resource);
-            return new ConfigureResponse(
-                    resource.getString("query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND"),
-                    form);
-          }
-        } else {
-          query.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-          query.append(configData.get(WHERECLAUSE).trim());
+        ConfigureResponse queryResponse =
+            validateQuery(configData, resource, session, WHERECLAUSE,
+                "query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND",
+                "query_not_having_versionstatus_condition",
+                "additional_where_clause_invalid");
+        if (queryResponse != null) {
+          return queryResponse;
         }
 
-        try {
-          if (session != null) {
-            SearchWrapper search = session.getSearch();
-            search.fetchObjects(query.toString(),
-                1, SearchWrapper.noFilter, SearchWrapper.FIRST_ROWS);
-          }
-        } catch (EngineRuntimeException e) {
-          if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {
-            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            this.validation = OBJECT_STORE;
-            form = makeConfigForm(configData, this.validation, resource);
-
-            return new ConfigureResponse(
-                    resource.getString("object_store_access_error"),
-                    form);
-          } else if (e.toString().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
-            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            this.validation = WHERECLAUSE;
-            form = makeConfigForm(configData, this.validation, resource);
-
-            return new ConfigureResponse(
-                    resource.getString("additional_where_clause_invalid"),
-                    form);
-          } else {
-            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            this.validation = "FileNet exception";
-            form = makeConfigForm(configData, this.validation, resource);
-
-            return new ConfigureResponse(e.getLocalizedMessage(),
-                    form);
-          }
-        }
-
-        StringBuilder deleteuery = new StringBuilder();
-
-        if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase()
-            .startsWith(SELECT)) {
-          if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase()
-              .startsWith(QUERYFORMAT)) {
-            if (configData.get(DELETEWHERECLAUSE).trim().toUpperCase()
-                .contains(((VERSIONQUERY)).toUpperCase())) {
-              deleteuery = new StringBuilder(
-                      configData.get(DELETEWHERECLAUSE).trim());
-              LOGGER.fine("Using Custom Query["
-                      + configData.get(DELETEWHERECLAUSE).trim()
-                      + "]");
-            } else {
-              this.validation = DELETEWHERECLAUSE;
-              form = makeConfigForm(configData, this.validation, resource);
-              return new ConfigureResponse(
-                      resource.getString("delete_query_not_having_versionstatus_condition"),
-                      form);
-            }
-          } else {
-            this.validation = DELETEWHERECLAUSE;
-            form = makeConfigForm(configData, this.validation, resource);
-            return new ConfigureResponse(
-                    resource.getString("delete_query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND"),
-                    form);
-          }
-        } else {
-          deleteuery.append("SELECT TOP 1 Id, DateLastModified FROM Document WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-          deleteuery.append(configData.get(DELETEWHERECLAUSE).trim());
-        }
-
-        try {
-          if (session != null) {
-            SearchWrapper search = session.getSearch();
-            search.fetchObjects(deleteuery.toString(),
-                1, SearchWrapper.noFilter, SearchWrapper.FIRST_ROWS);
-          }
-        } catch (EngineRuntimeException e) {
-          if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {
-            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            this.validation = OBJECT_STORE;
-            form = makeConfigForm(configData, this.validation, resource);
-
-            return new ConfigureResponse(
-                    resource.getString("object_store_access_error"),
-                    form);
-          } else if (e.toString().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
-            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            this.validation = DELETEWHERECLAUSE;
-            form = makeConfigForm(configData, this.validation, resource);
-
-            return new ConfigureResponse(
-                    resource.getString("delete_additional_where_clause_invalid"),
-                    form);
-          } else {
-            LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
-            this.validation = "FileNet exception";
-            form = makeConfigForm(configData, this.validation, resource);
-
-            return new ConfigureResponse(e.getLocalizedMessage(),
-                    form);
-          }
+        ConfigureResponse deleteResponse =
+            validateQuery(configData, resource, session,
+                DELETEWHERECLAUSE,
+                "delete_query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND",
+                "delete_query_not_having_versionstatus_condition",
+                "delete_additional_where_clause_invalid");
+        if (deleteResponse != null) {
+          return deleteResponse;
         }
 
         if (!configData.get(WHERECLAUSE).trim().equalsIgnoreCase("")
                 || !configData.get(DELETEWHERECLAUSE).trim().equalsIgnoreCase("")) {
           if ((configData.get(WHERECLAUSE).trim()).equalsIgnoreCase(configData.get(DELETEWHERECLAUSE).trim())) {
             this.validation = DELETEWHERECLAUSE;
-            form = makeConfigForm(configData, this.validation, resource);
             return new ConfigureResponse(
-                    resource.getString("same_additional_where_clause_and_additional_delete_clause"),
-                    form);
+                resource.getString("same_additional_where_clause_and_additional_delete_clause"),
+                makeConfigForm(configData, this.validation, resource));
           }
         }
       } catch (EngineRuntimeException e) {
@@ -359,8 +251,8 @@ public class FileConnectorType implements ConnectorType {
           bundleMessage = e.getLocalizedMessage();
           LOGGER.log(Level.SEVERE, bundleMessage, mre);
         }
-        form = makeConfigForm(configData, validation, resource);
-        return new ConfigureResponse(bundleMessage, form);
+        return new ConfigureResponse(bundleMessage,
+            makeConfigForm(configData, validation, resource));
       } catch (RepositoryException e) {
         String bundleMessage;
         try {
@@ -411,14 +303,13 @@ public class FileConnectorType implements ConnectorType {
         }
 
         LOGGER.info("request to make configuration form..");
-        form = makeConfigForm(configData, validation, resource);
-        return new ConfigureResponse(bundleMessage, form);
+        return new ConfigureResponse(bundleMessage,
+            makeConfigForm(configData, validation, resource));
       }
       return null;
     }
-    form = makeConfigForm(configData, validation, resource);
     return new ConfigureResponse(resource.getString(validation + "_error"),
-            form);
+        makeConfigForm(configData, validation, resource));
   }
 
   /**
@@ -433,6 +324,60 @@ public class FileConnectorType implements ConnectorType {
       LOGGER.log(Level.WARNING, "Error validating Workplace URL", e);
       throw new RepositoryException(
               resource.getString("workplace_url_error"));
+    }
+  }
+
+  private ConfigureResponse validateQuery(Map<String, String> configData,
+      ResourceBundle resource, FileSession session, String propertyKey,
+      String selectError, String whereError, String syntaxError) {
+    String query;
+
+    String whereClause = configData.get(propertyKey).trim();
+    if (whereClause.toUpperCase().startsWith(SELECT)) {
+      if (whereClause.toUpperCase().startsWith(QUERYFORMAT)) {
+        if (whereClause.toUpperCase().contains(VERSIONQUERY.toUpperCase())) {
+          query = whereClause;
+          LOGGER.fine("Using Custom Query[" + whereClause + "]");
+        } else {
+          this.validation = propertyKey;
+          return new ConfigureResponse(resource.getString(whereError),
+              makeConfigForm(configData, this.validation, resource));
+        }
+      } else {
+        this.validation = propertyKey;
+        return new ConfigureResponse(resource.getString(selectError),
+            makeConfigForm(configData, this.validation, resource));
+      }
+    } else {
+      query = QUERYFORMAT.replaceFirst(SELECT, SELECT + " TOP 1")
+          + " Document " + VERSIONQUERY + " " + whereClause;
+    }
+
+    try {
+      if (session != null) {
+        SearchWrapper search = session.getSearch();
+        search.fetchObjects(query,
+            1, SearchWrapper.noFilter, SearchWrapper.FIRST_ROWS);
+      }
+      return null;
+    } catch (EngineRuntimeException e) {
+      if (e.toString().contains(ACCESS_DENIED_EXCEPTION)) {
+        LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+        this.validation = OBJECT_STORE;
+        return new ConfigureResponse(
+            resource.getString("object_store_access_error"),
+            makeConfigForm(configData, this.validation, resource));
+      } else if (e.toString().contains(RETRIEVE_SQL_SYNTAX_ERROR)) {
+        LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+        this.validation = propertyKey;
+        return new ConfigureResponse(resource.getString(syntaxError),
+            makeConfigForm(configData, this.validation, resource));
+      } else {
+        LOGGER.log(Level.SEVERE, e.getLocalizedMessage(), e);
+        this.validation = "FileNet exception";
+        return new ConfigureResponse(e.getLocalizedMessage(),
+            makeConfigForm(configData, this.validation, resource));
+      }
     }
   }
 
