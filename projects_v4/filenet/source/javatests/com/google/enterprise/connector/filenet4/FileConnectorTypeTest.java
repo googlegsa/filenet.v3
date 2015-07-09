@@ -259,16 +259,32 @@ public class FileConnectorTypeTest {
         Locale.US, new MockConnectorFactory());
     assertTrue(response.getMessage(),
         response.getMessage().contains("cannot be blank"));
-    assertMarkedError("Workplace URL", response);
+    assertRequiredError("Workplace URL", response);
   }
 
-  private void assertMarkedError(String label, ConfigureResponse response) {
-    assertResponseContains(
-        "<div style='float: left;color: red;font-weight: bold'>" + label,
-        label + " error", response);
+  @Test
+  public void testValidateConfig_stickyMarkedError() {
+    map.remove("workplace_display_url");
+    ConfigureResponse response = testConnectorType.validateConfig(map,
+        Locale.US, new MockConnectorFactory());
+    assertTrue(response.getMessage(),
+        response.getMessage().contains("cannot be blank"));
+    assertRequiredError("Workplace URL", response);
+
+    response = testConnectorType.getPopulatedConfigForm(map, Locale.US);
+    assertEquals("", response.getMessage());
+    assertResponseNotContains(REQUIRED_ERROR + "Workplace URL",
+        "Workplace URL error", response);
   }
 
-  private void testQuery(String query, String expectedMessage) {
+  private static final String REQUIRED_ERROR =
+      "<div style='float: left;color: red;font-weight: bold'>";
+
+  private void assertRequiredError(String label, ConfigureResponse response) {
+    assertResponseContains(REQUIRED_ERROR + label, label + " error", response);
+  }
+
+  private void testQuery(String query, String label, String expectedMessage) {
     map.put("workplace_display_url", mockWorkplaceUrl);
     map.put("additional_where_clause", query);
     ConfigureResponse response = testConnectorType.validateConfig(map,
@@ -282,26 +298,27 @@ public class FileConnectorTypeTest {
       assertTrue("Expected:<" + expectedMessage + ">, but got:<"
           + response.getMessage() + ">",
           response.getMessage().contains(expectedMessage));
-      // assertMarkedError("Additional Where Clause", response);
+      assertResponseContains("<span style='color: red'>" + label,
+          label + " error", response);
     }
   }
 
   @Test
   public void testValidateConfig_invalidSelectQuery() {
     testQuery(FileConnectorType.SELECT + " 42 from document where 1=1",
-        "should start with SELECT ID");
+        "Additional Where Clause", "should start with SELECT ID");
   }
 
   @Test
   public void testValidateConfig_invalidConditionQuery() {
     testQuery(FileConnectorType.QUERYFORMAT + " from document where 1=1",
-        "Query should contain WHERE");
+        "Additional Where Clause", "Query should contain WHERE");
   }
 
   @Test
   public void testValidateConfig_validQuery() {
     testQuery(FileConnectorType.QUERYFORMAT + " Document "
-        + FileConnectorType.VERSIONQUERY + " or 1=1", null);
+        + FileConnectorType.VERSIONQUERY + " or 1=1", null, null);
   }
 
   @Test
@@ -309,7 +326,7 @@ public class FileConnectorTypeTest {
     String query = FileConnectorType.QUERYFORMAT + " Document "
         + FileConnectorType.VERSIONQUERY;
     map.put("delete_additional_where_clause", query);
-    testQuery(query, "should not be same");
+    testQuery(query, "Additional Delete Clause", "should not be same");
   }
 
   @Test
@@ -317,7 +334,7 @@ public class FileConnectorTypeTest {
     String query = FileConnectorType.QUERYFORMAT + " Document "
         + FileConnectorType.VERSIONQUERY;
     map.put("delete_additional_where_clause", query + " and 1=1");
-    testQuery(query + " and 0=0", null);
+    testQuery(query + " and 0=0", null, null);
   }
 
   @Test
