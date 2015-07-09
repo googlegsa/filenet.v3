@@ -164,11 +164,6 @@ public class FileConnectorType implements ConnectorType {
       return new ConfigureResponse(e.getMessage(), "");
     }
 
-    if (configData == null) {
-      LOGGER.severe("No configuration information is available");
-      return null;
-    }
-
     LOGGER.info("validating the configuration data...");
     String errorKey = validateConfigMap(configData);
     if (errorKey != null) {
@@ -185,10 +180,6 @@ public class FileConnectorType implements ConnectorType {
             rightTrim((configData.get(CONTENT_ENGINE_URL)).trim(), '/'));
 
         FileConnector conn = (FileConnector) connectorFactory.makeConnector(configData);
-        if (null == conn) {
-          LOGGER.severe("Unable to establish connection with FileNet server");
-          return null;
-        }
 
         LOGGER.info("FileNet4 connector instance creation succeeded. Trying to Login into FileNet server.");
         FileSession session = (FileSession) conn.login();
@@ -206,32 +197,31 @@ public class FileConnectorType implements ConnectorType {
         testWorkplaceUrl(configData.get(WORKPLACE_URL).trim(),
             resource);
 
-        ConfigureResponse queryResponse =
-            validateQuery(configData, resource, session, WHERECLAUSE,
-                "query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND",
-                "query_not_having_versionstatus_condition",
-                "additional_where_clause_invalid");
+        String whereClause = configData.get(WHERECLAUSE).trim();
+        ConfigureResponse queryResponse = validateQuery(
+            whereClause, configData, resource, session, WHERECLAUSE,
+            "query_invalid_select_clause",
+            "query_not_having_versionstatus_condition",
+            "additional_where_clause_invalid");
         if (queryResponse != null) {
           return queryResponse;
         }
 
-        ConfigureResponse deleteResponse =
-            validateQuery(configData, resource, session,
-                DELETEWHERECLAUSE,
-                "delete_query_not_starting_with_SELECT_Id,DateLastModified_FROM_or_with_AND",
-                "delete_query_not_having_versionstatus_condition",
-                "delete_additional_where_clause_invalid");
+        String deleteWhereClause = configData.get(DELETEWHERECLAUSE).trim();
+        ConfigureResponse deleteResponse = validateQuery(
+            deleteWhereClause, configData, resource, session, DELETEWHERECLAUSE,
+            "delete_query_invalid_select_clause",
+            "delete_query_not_having_versionstatus_condition",
+            "delete_additional_where_clause_invalid");
         if (deleteResponse != null) {
           return deleteResponse;
         }
 
-        if (!configData.get(WHERECLAUSE).trim().equalsIgnoreCase("")
-                || !configData.get(DELETEWHERECLAUSE).trim().equalsIgnoreCase("")) {
-          if ((configData.get(WHERECLAUSE).trim()).equalsIgnoreCase(configData.get(DELETEWHERECLAUSE).trim())) {
-            return new ConfigureResponse(
-                resource.getString("same_additional_where_clause_and_additional_delete_clause"),
-                makeConfigForm(configData, DELETEWHERECLAUSE, resource));
-          }
+        if (!whereClause.isEmpty()
+            && whereClause.equalsIgnoreCase(deleteWhereClause)) {
+          return new ConfigureResponse(
+              resource.getString("same_additional_where_clauses"),
+              makeConfigForm(configData, DELETEWHERECLAUSE, resource));
         }
 
         return null;
@@ -324,12 +314,12 @@ public class FileConnectorType implements ConnectorType {
     }
   }
 
-  private ConfigureResponse validateQuery(Map<String, String> configData,
-      ResourceBundle resource, FileSession session, String propertyKey,
-      String selectError, String whereError, String syntaxError) {
+  private ConfigureResponse validateQuery(String whereClause,
+      Map<String, String> configData, ResourceBundle resource,
+      FileSession session, String propertyKey, String selectError,
+      String whereError, String syntaxError) {
     String query;
 
-    String whereClause = configData.get(propertyKey).trim();
     if (whereClause.toUpperCase().startsWith(SELECT)) {
       if (whereClause.toUpperCase().startsWith(QUERYFORMAT)) {
         if (whereClause.toUpperCase().contains(VERSIONQUERY.toUpperCase())) {

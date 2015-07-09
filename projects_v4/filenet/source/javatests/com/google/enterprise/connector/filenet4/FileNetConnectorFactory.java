@@ -54,6 +54,10 @@ public class FileNetConnectorFactory implements ConnectorFactory {
     PropertyPlaceholderConfigurer configurer = new PropertyPlaceholderConfigurer();
     configurer.setProperties(props);
     configurer.postProcessBeanFactory(factory);
-    return (Connector) factory.getBean("Filenet_P8");
+    Connector connector = (Connector) factory.getBean("Filenet_P8");
+    if (connector == null) {
+      throw new RepositoryException("Filenet_P8 bean could not be loaded");
+    }
+    return connector;
   }
 }
