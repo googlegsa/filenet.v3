@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
@@ -109,21 +110,30 @@ public class FileDocumentTest {
   public void testGetPropertyNames() throws RepositoryException {
     FileDocument fd = new FileDocument(new Id(TestConnection.docId2), ios,
         connec, new SimpleTraversalContext());
-    Iterator<String> properties = fd.getPropertyNames().iterator();
-
-    int counter = 0;
-    while (properties.hasNext()) {
-      properties.next();
-      counter++;
-    }
-    assertTrue(counter > 0);
-    assertTrue(TestConnection.included_meta.size() > 0);
-
     Set<String> propNames = fd.getPropertyNames();
+    assertFalse(propNames.isEmpty());
+    assertFalse(TestConnection.included_meta.isEmpty());
+
     assertTrue(propNames.contains(SpiConstants.PROPNAME_ACLUSERS));
     assertTrue(propNames.contains(SpiConstants.PROPNAME_ACLDENYUSERS));
     assertTrue(propNames.contains(SpiConstants.PROPNAME_ACLGROUPS));
     assertTrue(propNames.contains(SpiConstants.PROPNAME_ACLDENYGROUPS));
+  }
+
+  /** Tests that if pushAcls is false, ACL properties are not advertised. */
+  @Test
+  public void testGetPropertyNamesPushAclsFalse() throws RepositoryException {
+    connec.setPushAcls(false);
+    FileDocument fd = new FileDocument(new Id(TestConnection.docId2), ios,
+        connec, new SimpleTraversalContext());
+    Set<String> propNames = fd.getPropertyNames();
+    assertFalse(propNames.isEmpty());
+    assertFalse(TestConnection.included_meta.isEmpty());
+
+    assertFalse(propNames.contains(SpiConstants.PROPNAME_ACLUSERS));
+    assertFalse(propNames.contains(SpiConstants.PROPNAME_ACLDENYUSERS));
+    assertFalse(propNames.contains(SpiConstants.PROPNAME_ACLGROUPS));
+    assertFalse(propNames.contains(SpiConstants.PROPNAME_ACLDENYGROUPS));
   }
 
   /*

@@ -155,9 +155,11 @@ public class FileDocumentList implements DocumentList {
         default:
           throw new NullPointerException();
       }
-    } else {
+    } else if (connector.pushAcls()) {
       logger.finest("Processing ACL document");
       fileDocument = acls.pollFirst();
+    } else {
+      fileDocument = null;
     }
     return fileDocument;
   }
@@ -168,7 +170,9 @@ public class FileDocumentList implements DocumentList {
     logger.log(Level.FINEST, "Add document [ID: {0}]", id);
     FileDocument doc =
         new FileDocument(id, objectStore, connector, traversalContext);
-    doc.processInheritedPermissions(acls);
+    if (connector.pushAcls()) {
+      doc.processInheritedPermissions(acls);
+    }
     return doc;
   }
 

@@ -17,6 +17,7 @@
         value="com.google.enterprise.connector.filenet4.api.FnObjectFactory" />
 
     <property name="useIDForChangeDetection" value="true"/>
+    <property name="pushAcls" value="true"/>
     <property name="is_public" value="false"/>
     <property name="included_meta">
       <set>

@@ -34,6 +34,7 @@ class TestObjectFactory {
     connector.setWorkplace_display_url(TestConnection.displayURL);
     connector.setObject_factory(TestConnection.objectFactory);
     connector.setContent_engine_url(TestConnection.uri);
+    connector.setPushAcls(true);
     return connector;
   }
 

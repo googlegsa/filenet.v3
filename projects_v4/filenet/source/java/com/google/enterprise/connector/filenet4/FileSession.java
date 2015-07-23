@@ -100,15 +100,19 @@ public class FileSession implements Session {
 
   @Override
   public TraversalManager getTraversalManager() throws RepositoryException {
-    return new FileTraversalManager(getFileDocumentTraverser(),
-        getSecurityPolicyTraverser(), getSecurityFolderTraverser());
+    if (connector.pushAcls()) {
+      return new FileTraversalManager(getFileDocumentTraverser(),
+          getSecurityPolicyTraverser(), getSecurityFolderTraverser());
+    } else {
+      return new FileTraversalManager(getFileDocumentTraverser());
+    }
   }
 
   @Override
   public AuthenticationManager getAuthenticationManager()
           throws RepositoryException {
     return new FileAuthenticationManager(connection,
-        connector.getGoogleGlobalNamespace());
+        connector.getGoogleGlobalNamespace(), connector.pushAcls());
   }
 
   @Override

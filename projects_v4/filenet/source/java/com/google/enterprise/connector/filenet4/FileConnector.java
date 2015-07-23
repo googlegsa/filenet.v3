@@ -41,6 +41,7 @@ public class FileConnector implements Connector {
   private String is_public = "false";
   private String check_marking = "off";
   private String useIDForChangeDetection = "false";
+  private boolean pushAcls = true;
   private String additional_where_clause;
   private String delete_additional_where_clause = "";
   private Set<String> included_meta;
@@ -235,5 +236,14 @@ public class FileConnector implements Connector {
 
   public boolean useIDForChangeDetection() {
     return "true".equalsIgnoreCase(useIDForChangeDetection);
+  }
+
+  public void setPushAcls(boolean pushAcls) {
+    LOGGER.config("Set pushAcls to " + pushAcls);
+    this.pushAcls = pushAcls;
+  }
+
+  public boolean pushAcls() {
+    return pushAcls;
   }
 }

@@ -44,10 +44,13 @@ public class FileAuthenticationManager implements AuthenticationManager {
   
   private final IConnection conn;
   private final String globalNamespace;
+  private final boolean returnGroups;
 
-  public FileAuthenticationManager(IConnection conn, String namespace) {
+  public FileAuthenticationManager(IConnection conn, String namespace,
+        boolean returnGroups) {
     this.conn = conn;
     this.globalNamespace = namespace;
+    this.returnGroups = returnGroups;
   }
 
   /**
@@ -60,13 +63,17 @@ public class FileAuthenticationManager implements AuthenticationManager {
     IUserContext uc = conn.getUserContext();
     try {
       User user = uc.authenticate(id.getUsername(), id.getPassword());
-      List<Principal> principalGroups = FileUtil.getPrincipals(
-          PrincipalType.UNKNOWN, globalNamespace, getGroupNames(user),
-          CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
-      principalGroups.add(new Principal(PrincipalType.UNKNOWN, globalNamespace,
-          Permissions.AUTHENTICATED_USERS,
-          CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE));
-      return new AuthenticationResponse(true, "", principalGroups);
+      if (returnGroups) {
+        List<Principal> principalGroups = FileUtil.getPrincipals(
+            PrincipalType.UNKNOWN, globalNamespace, getGroupNames(user),
+            CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE);
+        principalGroups.add(new Principal(PrincipalType.UNKNOWN,
+            globalNamespace, Permissions.AUTHENTICATED_USERS,
+            CaseSensitivityType.EVERYTHING_CASE_INSENSITIVE));
+        return new AuthenticationResponse(true, "", principalGroups);
+      } else {
+        return new AuthenticationResponse(true, "");
+      }
     } catch (Throwable e) {
       logger.log(Level.WARNING, "Authentication failed for user " + id, e);
       return new AuthenticationResponse(false, "");

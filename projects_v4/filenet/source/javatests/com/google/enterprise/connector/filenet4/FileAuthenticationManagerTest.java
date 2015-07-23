@@ -14,9 +14,11 @@
 package com.google.enterprise.connector.filenet4;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import com.google.enterprise.connector.spi.AuthenticationManager;
 import com.google.enterprise.connector.spi.AuthenticationResponse;
 import com.google.enterprise.connector.spi.Principal;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -28,27 +30,29 @@ import org.junit.Test;
 import java.util.List;
 
 public class FileAuthenticationManagerTest {
-  private FileConnector connec;
-  private FileAuthenticationManager fatm;
 
   @Before
-  public void setUp() throws Exception {
+  public void checkLiveConnection() throws Exception {
     assumeTrue(TestConnection.isLiveConnection());
+  }
 
-    connec = new FileConnector();
+  private AuthenticationManager getObjectUnderTest(boolean pushAcls)
+      throws RepositoryException {
+    FileConnector connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
     connec.setObject_store(TestConnection.objectStore);
     connec.setWorkplace_display_url(TestConnection.displayURL);
     connec.setObject_factory(TestConnection.objectFactory);
     connec.setContent_engine_url(TestConnection.uri);
+    connec.setPushAcls(pushAcls);
 
-    FileSession fs = (FileSession) connec.login();
-    fatm = (FileAuthenticationManager) fs.getAuthenticationManager();
+    return connec.login().getAuthenticationManager();
   }
 
   @Test
   public void testAuthenticate() throws RepositoryException {
+    AuthenticationManager fatm = getObjectUnderTest(true);
     SimpleAuthenticationIdentity fai = new SimpleAuthenticationIdentity(
         TestConnection.username, TestConnection.password);
     AuthenticationResponse ar = fatm.authenticate(fai);
@@ -71,7 +75,19 @@ public class FileAuthenticationManagerTest {
   }
 
   @Test
+  public void testAuthenticateNoGroupsIfPushAclsFalse()
+      throws RepositoryException {
+    AuthenticationManager fatm = getObjectUnderTest(false);
+    SimpleAuthenticationIdentity fai = new SimpleAuthenticationIdentity(
+        TestConnection.username, TestConnection.password);
+    AuthenticationResponse ar = fatm.authenticate(fai);
+    assertEquals(true, ar.isValid());
+    assertNull(ar.getGroups());
+  }
+
+  @Test
   public void testAuthenticate_fail() throws RepositoryException  {
+    AuthenticationManager fatm = getObjectUnderTest(true);
     SimpleAuthenticationIdentity faiWrong = new SimpleAuthenticationIdentity(TestConnection.username, TestConnection.wrongPassword);
     AuthenticationResponse arWrong = fatm.authenticate(faiWrong);
     assertEquals(false, arWrong.isValid());

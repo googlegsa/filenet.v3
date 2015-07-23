@@ -54,6 +54,7 @@ public class FileDocument implements Document {
 
   private IDocument document = null;
   private String vsDocId;
+  private boolean pushAcls;
   private Permissions.Acl permissions;
 
   public FileDocument(Id docId, IObjectStore objectStore,
@@ -62,6 +63,7 @@ public class FileDocument implements Document {
     this.objectStore = objectStore;
     this.connector = connector;
     this.traversalContext = traversalContext;
+    this.pushAcls = connector.pushAcls();
   }
 
   private void fetch() throws RepositoryException {
@@ -73,8 +75,12 @@ public class FileDocument implements Document {
     logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
     vsDocId = document.getVersionSeries().get_Id().toString();
     logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
-    permissions = new Permissions(document.get_Permissions(),
-        document.get_Owner()).getAcl();
+    if (pushAcls) {
+      permissions = new Permissions(document.get_Permissions(),
+          document.get_Owner()).getAcl();
+    } else {
+      permissions = null;
+    }
   }
 
   private boolean hasSupportedMimeType() throws RepositoryException {
@@ -179,41 +185,45 @@ public class FileDocument implements Document {
       logger.fine("Getting Property " + name + " : "
           + SpiConstants.ActionType.ADD.toString());
       return new SimpleProperty(list);
-    } else if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
-      addPrincipals(list, name,
-          permissions.getAllowUsers(PermissionSource.SOURCE_DEFAULT));
-      addPrincipals(list, name,
-          permissions.getAllowUsers(PermissionSource.SOURCE_DIRECT));
-      return new SimpleProperty(list);
-    } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
-      addPrincipals(list, name,
-          permissions.getDenyUsers(PermissionSource.SOURCE_DEFAULT));
-      addPrincipals(list, name,
-          permissions.getDenyUsers(PermissionSource.SOURCE_DIRECT));
-      return new SimpleProperty(list);
-    } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
-      addPrincipals(list, name,
-          permissions.getAllowGroups(PermissionSource.SOURCE_DEFAULT));
-      addPrincipals(list, name,
-          permissions.getAllowGroups(PermissionSource.SOURCE_DIRECT));
-      return new SimpleProperty(list);
-    } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
-      addPrincipals(list, name,
-          permissions.getDenyGroups(PermissionSource.SOURCE_DEFAULT));
-      addPrincipals(list, name,
-          permissions.getDenyGroups(PermissionSource.SOURCE_DIRECT));
-      return new SimpleProperty(list);
-    } else if (SpiConstants.PROPNAME_ACLINHERITFROM_DOCID.equals(name)) {
-      String parentId = getParentId();
-      if (parentId == null) {
-        return null;
-      } else {
-        logger.log(Level.FINE, "{0}: {1}", new Object[] {
-            SpiConstants.PROPNAME_ACLINHERITFROM_DOCID, parentId});
-        list.add(Value.getStringValue(parentId));
+    }
+    if (pushAcls) {
+      if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
+        addPrincipals(list, name,
+            permissions.getAllowUsers(PermissionSource.SOURCE_DEFAULT));
+        addPrincipals(list, name,
+            permissions.getAllowUsers(PermissionSource.SOURCE_DIRECT));
         return new SimpleProperty(list);
+      } else if (SpiConstants.PROPNAME_ACLDENYUSERS.equals(name)) {
+        addPrincipals(list, name,
+            permissions.getDenyUsers(PermissionSource.SOURCE_DEFAULT));
+        addPrincipals(list, name,
+            permissions.getDenyUsers(PermissionSource.SOURCE_DIRECT));
+        return new SimpleProperty(list);
+      } else if (SpiConstants.PROPNAME_ACLGROUPS.equals(name)) {
+        addPrincipals(list, name,
+            permissions.getAllowGroups(PermissionSource.SOURCE_DEFAULT));
+        addPrincipals(list, name,
+            permissions.getAllowGroups(PermissionSource.SOURCE_DIRECT));
+        return new SimpleProperty(list);
+      } else if (SpiConstants.PROPNAME_ACLDENYGROUPS.equals(name)) {
+        addPrincipals(list, name,
+            permissions.getDenyGroups(PermissionSource.SOURCE_DEFAULT));
+        addPrincipals(list, name,
+            permissions.getDenyGroups(PermissionSource.SOURCE_DIRECT));
+        return new SimpleProperty(list);
+      } else if (SpiConstants.PROPNAME_ACLINHERITFROM_DOCID.equals(name)) {
+        String parentId = getParentId();
+        if (parentId == null) {
+          return null;
+        } else {
+          logger.log(Level.FINE, "{0}: {1}", new Object[] {
+              SpiConstants.PROPNAME_ACLINHERITFROM_DOCID, parentId});
+          list.add(Value.getStringValue(parentId));
+          return new SimpleProperty(list);
+        }
       }
-    } else if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
+    }
+    if (name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
       return null;
     } else {
       document.getProperty(name, list);
@@ -255,10 +265,12 @@ public class FileDocument implements Document {
   public Set<String> getPropertyNames() throws RepositoryException {
     Set<String> properties = new HashSet<String>();
 
-    properties.add(SpiConstants.PROPNAME_ACLUSERS);
-    properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
-    properties.add(SpiConstants.PROPNAME_ACLGROUPS);
-    properties.add(SpiConstants.PROPNAME_ACLDENYGROUPS);
+    if (pushAcls) {
+      properties.add(SpiConstants.PROPNAME_ACLUSERS);
+      properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
+      properties.add(SpiConstants.PROPNAME_ACLGROUPS);
+      properties.add(SpiConstants.PROPNAME_ACLDENYGROUPS);
+    }
 
     fetch();
     Set<String> documentProperties = document.getPropertyNames();
