@@ -509,7 +509,7 @@ public class FileDocumentListTest {
   public void testEmptyCheckpointWithoutNextDocument() throws Exception {
     IObjectStore os = newObjectStore(DatabaseType.MSSQL);
     DocumentList docList = new FileDocumentList(new EmptyObjectSet(),
-        new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
+        new EmptyObjectSet(), new EmptyObjectSet(), null, os, connec,
         new SimpleTraversalContext(), new Checkpoint());
     Checkpoint cp = new Checkpoint(docList.checkpoint());
 
@@ -566,7 +566,7 @@ public class FileDocumentListTest {
     };
 
     DocumentList docList = new FileDocumentList(docSet,
-        new EmptyObjectSet(), new EmptyObjectSet(), os, connec,
+        new EmptyObjectSet(), new EmptyObjectSet(), null, os, connec,
         traversalContext, new Checkpoint(CHECKPOINT));
     Document doc = docList.nextDocument();
     assertNotNull(doc);
@@ -635,7 +635,7 @@ public class FileDocumentListTest {
       IndependentObjectSet docSet, IndependentObjectSet customDeletionSet,
       IndependentObjectSet deletionEventSet) throws RepositoryException {
     return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
-        os, connec, getTraversalContext(), new Checkpoint(CHECKPOINT));
+        null, os, connec, getTraversalContext(), new Checkpoint(CHECKPOINT));
   }
 
   private TraversalContext getTraversalContext() {

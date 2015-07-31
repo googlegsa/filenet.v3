@@ -15,6 +15,7 @@
 package com.google.enterprise.connector.filenet4;
 
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
@@ -41,6 +42,7 @@ public class FileDocumentList implements DocumentList {
   private static final Logger logger = 
       Logger.getLogger(FileDocumentList.class.getName());
 
+  private final IObjectFactory objectFactory;
   private final IObjectStore objectStore;
   private final FileConnector connector;
   private final TraversalContext traversalContext;
@@ -60,8 +62,10 @@ public class FileDocumentList implements DocumentList {
   public FileDocumentList(IndependentObjectSet objectSet,
       IndependentObjectSet objectSetToDeleteDocs,
       IndependentObjectSet objectSetToDelete,
-      IObjectStore objectStore, FileConnector connector,
+      IObjectFactory objectFactory, IObjectStore objectStore,
+      FileConnector connector,
       TraversalContext traversalContext, Checkpoint checkpoint) {
+    this.objectFactory = objectFactory;
     this.objectStore = objectStore;
     this.connector = connector;
     this.traversalContext = traversalContext;
@@ -168,8 +172,8 @@ public class FileDocumentList implements DocumentList {
       throws RepositoryException {
     Id id = object.get_Id();
     logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-    FileDocument doc =
-        new FileDocument(id, objectStore, connector, traversalContext);
+    FileDocument doc = new FileDocument(id, objectFactory, objectStore,
+        connector, traversalContext);
     if (connector.pushAcls()) {
       doc.processInheritedPermissions(acls);
     }

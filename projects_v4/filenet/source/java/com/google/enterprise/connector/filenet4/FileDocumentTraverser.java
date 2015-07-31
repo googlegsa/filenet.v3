@@ -161,8 +161,8 @@ public class FileDocumentTraverser implements Traverser {
       if (!objectSet.isEmpty() || !objectSetToDeleteDocs.isEmpty()
           || !objectSetToDelete.isEmpty()) {
         return new FileDocumentList(objectSet, objectSetToDeleteDocs,
-            objectSetToDelete, objectStore, connector, traversalContext,
-            checkPoint);
+            objectSetToDelete, fileObjectFactory, objectStore, connector,
+            traversalContext, checkPoint);
       } else {
         return null;
       }

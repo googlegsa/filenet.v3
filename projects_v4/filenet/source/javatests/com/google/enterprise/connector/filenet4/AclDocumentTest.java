@@ -79,7 +79,7 @@ public class AclDocumentTest {
     IndependentObjectSetMock objectSet =
         getObjectSet(objectStore, entries, perms);
     return new FileDocumentList(objectSet, new EmptyObjectSet(),
-        new EmptyObjectSet(), objectStore, connector,
+        new EmptyObjectSet(), null, objectStore, connector,
         new SimpleTraversalContext(), null);
   }
 
