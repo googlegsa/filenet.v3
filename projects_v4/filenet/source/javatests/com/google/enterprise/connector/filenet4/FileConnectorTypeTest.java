@@ -277,6 +277,44 @@ public class FileConnectorTypeTest {
         "Workplace URL error", response);
   }
 
+  public void testValidateConfigcheckMarking(String value, String expected,
+      String label) {
+    map.put("check_marking", value);
+    ConfigureResponse response =
+        testConnectorType.validateConfig(map, Locale.US,
+            new MockConnectorFactory());
+    if (response != null) {
+      fail(response.getMessage());
+    }
+    response = testConnectorType.getPopulatedConfigForm(map, Locale.US);
+    assertEquals("", response.getMessage());
+    assertResponseContains(expected, label, response);
+  }
+
+  @Test
+  public void testValidateConfig_checkMarking() {
+    testValidateConfigcheckMarking(
+        "",
+        "<input type=\"checkbox\" name=\"check_marking\" checked=\"checked\"/>",
+        "check_marking not checked");
+  }
+
+  @Test
+  public void testValidateConfig_checkMarkingOn() {
+    testValidateConfigcheckMarking(
+        "on",
+        "<input type=\"checkbox\" name=\"check_marking\" checked=\"checked\"/>",
+        "check_marking not checked");
+  }
+
+  @Test
+  public void testValidateConfig_checkMarkingOff() {
+    testValidateConfigcheckMarking(
+        "off",
+        "<input type=\"checkbox\" name=\"check_marking\"/>",
+        "check_marking checked");
+  }
+
   private static final String REQUIRED_ERROR =
       "<div style='float: left;color: red;font-weight: bold'>";
 

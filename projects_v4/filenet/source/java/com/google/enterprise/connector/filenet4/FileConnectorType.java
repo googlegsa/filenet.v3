@@ -482,7 +482,7 @@ public class FileConnectorType implements ConnectorType {
     buf.append(INPUT);
     appendAttribute(buf, TYPE, CHECKBOX);
     appendAttribute(buf, NAME, key);
-    if (value != null && value.equals("on")) {
+    if (!"off".equals(value)) {
       appendAttribute(buf, CHECKED, CHECKED);
     }
     buf.append(CLOSE_ELEMENT);
