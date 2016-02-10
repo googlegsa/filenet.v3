@@ -277,8 +277,9 @@ public class FileConnectorTypeTest {
         "Workplace URL error", response);
   }
 
-  public void testValidateConfigcheckMarking(String value, String expected,
+  private void testValidateConfigcheckMarking(String value, String expected,
       String label) {
+    map.put("workplace_display_url", mockWorkplaceUrl);
     map.put("check_marking", value);
     ConfigureResponse response =
         testConnectorType.validateConfig(map, Locale.US,
