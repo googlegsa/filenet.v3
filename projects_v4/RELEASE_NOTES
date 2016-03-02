@@ -4,11 +4,44 @@ Release Notes:
 Google Search Appliance Connector for FileNet
 
 This document contains the release notes for Google Search Appliance Connector
-for FileNet. This connector supports IBM FileNet P8 4.0 through 5.1.  The
-following sections describe the release in detail and provide information that
-supplements the main documentation.
+for FileNet. This connector supports IBM FileNet Content Manager. The following
+sections describe the release in detail and provide information that supplements
+the main documentation.
 
-Web Site: http://code.google.com/p/google-enterprise-connector-file/
+Web Site: https://github.com/googlegsa/filenet.v3
+
+
+Release 3.4.0, March 1, 2016
+============================
+This is an upgrade release with some enhancements and bug fixes. Users of
+previous releases are encouraged to review the changes below to determine
+whether to upgrade.
+
+Issues Fixed Since 3.2.8
+------------------------
+4327049, 19423927 - Implement per-URL ACLs for early binding authorization.
+           ACLs are enabled by default, and can be disabled with the pushAcls
+           advanced configuration property. When ACLs are enabled, the connector
+           will also send group memberships to the GSA. ACLs are not sent for
+           documents with active marking sets.
+17290650 - Initial checkpoint handling may delete unindexed documents or skip
+           the entire repository.
+20124547 - Skip documents with unsupported MIME types or excessively large
+           content sizes. The supported MIME types and sizes are configured in
+           applicationContext.xml and applicationContext.properties,
+           respectively.
+22359325 - Red error labels are applied inconsistently on the config form.
+27453650 - Change config form "Check Marking Sets" check box to be checked by
+           default.
+
+Version Compatibility
+---------------------
+Connector instances created using versions 2.0.0 or later may be used with this
+version. This version works with Connector Manager version 3.4.0 or later.
+
+This connector supports IBM FileNet Content Manager versions 4.5 through 5.1.
+
+Java SE versions 6, 7, and 8 are supported.
 
 
 Release 3.2.8, Jun 16, 2014
