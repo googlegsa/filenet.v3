@@ -30,6 +30,7 @@ import com.filenet.api.core.ContentTransfer;
 import com.filenet.api.core.Document;
 import com.filenet.api.core.Folder;
 import com.filenet.api.exception.EngineRuntimeException;
+import com.filenet.api.exception.ExceptionCode;
 import com.filenet.api.property.Properties;
 import com.filenet.api.property.Property;
 import com.filenet.api.property.PropertyBinary;
@@ -49,6 +50,7 @@ import com.filenet.api.property.PropertyStringList;
 import com.filenet.api.util.Id;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -119,13 +121,22 @@ public class FnDocument implements IDocument {
     return new FnVersionSeries(doc.get_VersionSeries());
   }
 
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private static class EmptyActiveMarkingList extends ArrayList
+    implements ActiveMarkingList {}
+
   @Override
   public ActiveMarkingList get_ActiveMarkings()
       throws RepositoryDocumentException {
     try {
       return doc.get_ActiveMarkings();
     } catch (EngineRuntimeException e) {
-      throw new RepositoryDocumentException(e);
+      if (e.getExceptionCode() == ExceptionCode.API_PROPERTY_NOT_IN_CACHE) {
+        logger.log(Level.FINER, e.getMessage());
+        return new EmptyActiveMarkingList();
+      } else {
+        throw new RepositoryDocumentException(e);
+      }
     }
   }
 
