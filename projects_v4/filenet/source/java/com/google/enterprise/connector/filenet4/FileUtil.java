@@ -229,8 +229,8 @@ public class FileUtil {
 
   /**
    * Given a dn, it returns the domain.
-   * E.g., DN: uid=xyz,ou=engineer,dc=corp.google,dc=com
-   * it will return corp.google.com
+   * E.g., DN: uid=xyz,ou=engineer,dc=abc,dc=example,dc=com
+   * it will return abc.example.com
    * 
    * This method is copied from com/google/enterprise/secmgr/ldap/LDAPClient
    * and modified to exclude NETBIOS naming check.
