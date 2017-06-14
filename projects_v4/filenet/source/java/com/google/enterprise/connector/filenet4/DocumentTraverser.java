@@ -38,11 +38,10 @@ import com.filenet.api.admin.PropertyDefinitionString;
 import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.constants.ClassNames;
-import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
-import com.filenet.api.core.IndependentObject;
+import com.filenet.api.core.Containable; // Avoid clash with SPI Document
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.security.MarkingSet;
 import com.filenet.api.util.Id;
@@ -195,8 +194,7 @@ class DocumentTraverser implements Traverser {
   private class LocalDocumentList implements DocumentList {
     private final Checkpoint checkpoint;
 
-    private final DatabaseType databaseType;
-    private final Iterator<SearchObject> objects;
+    private final Iterator<?> objects;
     private final LinkedList<Document> acls;
 
     private Date fileDocumentDate;
@@ -205,47 +203,8 @@ class DocumentTraverser implements Traverser {
     public LocalDocumentList(IndependentObjectSet objectSet,
         Checkpoint checkpoint) {
       this.checkpoint = checkpoint;
-
-      this.databaseType = getDatabaseType(objectStore);
-      this.objects = mergeAndSortObjects(objectSet);
+      this.objects = objectSet.iterator();
       this.acls = new LinkedList<Document>();
-    }
-
-    private DatabaseType getDatabaseType(IObjectStore os) {
-      try {
-        return os.get_DatabaseType();
-      } catch (RepositoryException e) {
-        logger.log(Level.WARNING,
-            "Unable to retrieve database type from object store", e);
-        return null;
-      }
-    }
-
-    /** Sort the objects by modify date and ID. */
-    private Iterator<SearchObject> mergeAndSortObjects(
-        IndependentObjectSet objectSet) {
-      List<SearchObject> objectList = new ArrayList<>();
-
-      // Adding documents to the object list
-      addToList(objectList, objectSet, SearchObject.Type.ADD);
-
-      logger.log(Level.INFO, "Number of documents to add, update: {0}",
-          objectList.size());
-
-      return objectList.iterator();
-    }
-
-    /**
-     * Wraps elements of the object set as SearchObjects and adds them
-     * to the list.
-     */
-    private void addToList(List<SearchObject> objectList,
-        IndependentObjectSet objectSet, SearchObject.Type searchType) {
-      Iterator<?> iter = objectSet.iterator();
-      while (iter.hasNext()) {
-        objectList.add(new SearchObject((IndependentObject) iter.next(),
-                databaseType, searchType));
-      }
     }
 
     @Override
@@ -254,10 +213,10 @@ class DocumentTraverser implements Traverser {
 
       Document fileDocument;
       if (objects.hasNext()) {
-        SearchObject object = objects.next();
-        fileDocumentDate = object.getModifyDate();
+        Containable object = (Containable) objects.next();
+        fileDocumentDate = object.get_DateLastModified();
         docId = object.get_Id();
-        fileDocument = createAddDocument(object);
+        fileDocument = createAddDocument(docId);
       } else if (connector.pushAcls()) {
         logger.finest("Processing ACL document");
         fileDocument = acls.pollFirst();
@@ -267,9 +226,8 @@ class DocumentTraverser implements Traverser {
       return fileDocument;
     }
 
-    private Document createAddDocument(SearchObject object)
+    private Document createAddDocument(Id id)
         throws RepositoryException {
-      Id id = object.get_Id();
       logger.log(Level.FINEST, "Add document [ID: {0}]", id);
       LocalDocument doc = new LocalDocument(id);
       if (connector.pushAcls()) {
