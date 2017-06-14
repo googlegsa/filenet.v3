@@ -190,7 +190,7 @@ class DocumentTraverser implements Traverser {
     return MessageFormat.format(whereClause, new Object[] { c, uuid });
   }
 
-  private class LocalDocumentList implements DocumentList {
+  class LocalDocumentList implements DocumentList {
     private final Checkpoint checkpoint;
 
     private final Iterator<?> objects;
@@ -346,7 +346,7 @@ class DocumentTraverser implements Traverser {
       } else {
         double contentSize = Double.parseDouble(value);
         if (contentSize > 0) {
-          if (contentSize <= 2 * 1024 * 1024 * 1024) {
+          if (contentSize <= 2L * 1024 * 1024 * 1024) {
             logger.log(Level.FINEST, "{0} : {1}",
                 new Object[] {PropertyNames.CONTENT_SIZE, contentSize});
             return true;

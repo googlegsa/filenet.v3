@@ -16,7 +16,6 @@ package com.google.enterprise.connector.filenet4;
 
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertDateNearly;
 import static com.google.enterprise.connector.filenet4.CheckpointTest.assertNullField;
-import static com.google.enterprise.connector.filenet4.ObjectMocks.mockDeletionEvent;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.mockDocument;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newId;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
@@ -124,7 +123,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     connec.setContent_engine_url(TestConnection.uri);
   }
 
-  private Traverser getObjectUnderTest() throws RepositoryException {
+  private DocumentTraverser getObjectUnderTest() throws RepositoryException {
     FileSession fs = (FileSession) connec.login();
     return fs.getDocumentTraverser();
   }
@@ -346,183 +345,6 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     assertTrue(isTested);
   }
 
-  @Test
-  public void testTimeSorting() throws Exception {
-    String[][] entries = {
-        {"AAAAAAAA-0000-0000-0000-000000000000", "2014-02-11T08:15:30.129"},
-        {"BBBBBBBB-0000-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
-        {"BBBBBBAA-0000-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
-        {"CCCCCCCC-0000-0000-0000-000000000000", "2014-02-11T08:15:10.329"},
-        {"DDDDDDDD-0000-0000-0000-000000000000", "2014-02-11T07:14:30.329"},
-        {"EEEEEEEE-0000-0000-0000-000000000000", "2014-02-11T07:15:30.329"},
-        {"FFFFFFFF-0000-0000-0000-000000000000", "2014-02-10T08:15:30.329"},
-        {"FFFFFFFF-AAAA-0000-0000-000000000000", "2014-01-11T08:15:30.329"},
-        {"FFFFFFFF-BBBB-0000-0000-000000000000", "2013-02-11T08:15:30.329"}
-    };
-    testSorting(new int[] {8, 7, 6, 4, 5, 3, 0, 2, 1}, entries,
-        DatabaseType.ORACLE);
-  }
-
-  @Test
-  public void testGUIDSorting() throws Exception {
-    String[][] entries = {
-        {"AAAAAA01-0000-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
-        {"BBBBBBCC-0000-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
-        {"CCCCCCAA-00BB-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
-        {"CCCCCCAA-00AA-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
-        {"CCCCCCAA-AAAA-0000-0000-000000000000", "2014-02-11T08:15:30.329"},
-        {"CCCCCCAA-DDDD-AAAA-0000-000000000000", "2014-02-11T08:15:30.329"},
-        {"CCCCCCAA-DDDD-00AA-0000-000000000000", "2014-02-11T08:15:30.329"}
-    };
-    testSorting(new int[]{0, 3, 4, 2, 6, 5, 1}, entries, DatabaseType.DB2);
-    testSorting(new int[]{0, 3, 4, 2, 6, 5, 1}, entries, DatabaseType.ORACLE);
-    testSorting(new int[]{0, 1, 3, 4, 2, 6, 5}, entries, DatabaseType.MSSQL);
-  }
-
-  @Test
-  public void testMergeSorting() throws Exception {
-    // IDs are sorted in groups right-to-left, and (in SQL Server) within
-    // groups left-to-right. For DeletionEvents, the VersionSeriesId and Id
-    // properties must be different (for fetches from the object store), but
-    // they need to sort together. Object sets are sorted by ID, but we're
-    // using the VersionSeriesId (via PROPNAME_DOCID) to verify the sort
-    // order.
-    String[][] entries = {
-        {"BBBBBBBB-BBBB",                  "2014-11-11T00:55:00.320"},
-        {"AAAAAAAA-0000", "AAAAAAAA-00AA", "2014-11-11T22:55:00.320"},
-        {"BBBBBBBB-AAAA",                  "2014-11-11T22:55:00.320"},
-        {"EEEEEEEE-AAAA",                  "2014-11-11T22:55:00.320"},
-        {"AAAAAAAA-BBBB", "AAAAAAAA-00BB", "2014-11-11T22:55:00.321"},
-        {"DDDDDDDD-0000",                  "2014-12-12T11:11:11.123"},
-        {"DDDDDDDD-0000",                  "2014-12-12T11:11:11.123"},
-        {"FFFFFFFF-0000",                  "2014-12-12T11:11:11.123"},
-        {"CCCCCCCC-0000",                  "2014-12-22T12:12:12.000"},
-        {"DDDDDDDD-0000", "DDDDDDDD-00AA", "2014-12-31T23:59:59.999"}
-    };
-    String[][] docEntries = { entries[0], entries[5], entries[7], entries[8] };
-    String[][] cdEntries = { entries[2], entries[3], entries[6] };
-    String[][] deEntries = { entries[1], entries[4], entries[9] };
-    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    testSorting(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, entries, os,
-        getDocuments(os, docEntries, true),
-        getCustomDeletions(os, cdEntries, true),
-        getDeletionEvents(os, deEntries, true));
-  }
-
-  private void testSorting(int[] expectedOrder, String[][] entries,
-      DatabaseType dbType) throws Exception {
-    MockObjectStore os = newObjectStore(dbType);
-    IndependentObjectSet documents = getDocuments(os, entries, true);
-    testSorting(expectedOrder, entries, os,
-        documents, new EmptyObjectSet(), new EmptyObjectSet());
-  }
-
-  private void testSorting(int[] expectedOrder, String[][] entries,
-      MockObjectStore os, IndependentObjectSet documents,
-      IndependentObjectSet customDeletions, IndependentObjectSet deletionEvents)
-      throws Exception {
-    DocumentList docList =
-        getObjectUnderTest(os, documents, customDeletions, deletionEvents);
-
-    // Test the order
-    for (int index : expectedOrder) {
-      Document doc = docList.nextDocument();
-      Property fid = doc.findProperty(SpiConstants.PROPNAME_DOCID);
-      assertEquals("[" + os.get_DatabaseType() + "] Incorrect id sorting order",
-          newId(entries[index][0]).toString(), fid.nextValue().toString());
-    }
-  }
-
-  @Test
-  public void testUnreleasedNextDeletionEvent_firstEntry() throws Exception {
-    testUnreleasedNextDeletionEvent("2014-01-01T08:00:00.100",
-        SkipPosition.FIRST);
-  }
-
-  @Test
-  public void testUnreleasedNextDeletionEvent_middleEntry() throws Exception {
-    testUnreleasedNextDeletionEvent("2014-02-03T08:00:00.100",
-        SkipPosition.MIDDLE);
-  }
-
-  @Test
-  public void testUnreleasedNextDeletionEvent_lastEntry() throws Exception {
-    testUnreleasedNextDeletionEvent("2014-03-03T08:00:00.100",
-        SkipPosition.LAST);
-  }
-
-  private void testUnreleasedNextDeletionEvent(String timeStamp,
-      SkipPosition expectedPosition) throws Exception {
-    String[][] unreleasedEntries =
-        { {"AAAAAAA3-AAAA", "AAAAAAA3-0000", timeStamp} };
-    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    testUnreleasedNextDocument(newId(unreleasedEntries[0][1]), os,
-        new EmptyObjectSet(), getDeletionEvents(os, unreleasedEntries, false),
-        expectedPosition);
-  }
-
-  @Test
-  public void testUnreleasedNextCustomDeletion_firstEntry() throws Exception {
-    testUnreleasedNextCustomDeletion("2014-01-01T08:00:00.100",
-        SkipPosition.FIRST);
-  }
-
-  @Test
-  public void testUnreleasedNextCustomDeletion_middleEntry() throws Exception {
-    testUnreleasedNextCustomDeletion("2014-02-03T08:00:00.100",
-        SkipPosition.MIDDLE);
-  }
-
-  @Test
-  public void testUnreleasedNextCustomDeletion_lastEntry() throws Exception {
-    testUnreleasedNextCustomDeletion("2014-03-03T08:00:00.100",
-        SkipPosition.LAST);
-  }
-
-  private void testUnreleasedNextCustomDeletion(String timeStamp,
-      SkipPosition position) throws Exception {
-    String[][] unreleasedEntries =
-        { {"AAAAAAA3-0000-0000-0000-000000000000", timeStamp} };
-    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    testUnreleasedNextDocument(newId(unreleasedEntries[0][0]), os,
-        getCustomDeletions(os, unreleasedEntries, false), new EmptyObjectSet(),
-        position);
-  }
-
-  private void testUnreleasedNextDocument(Id unreleasedGuid, MockObjectStore os,
-      IndependentObjectSet customDeletionSet,
-      IndependentObjectSet deletionEventSet, SkipPosition expectedPosition)
-      throws Exception {
-    String[][] docEntries = new String[][] {
-        {"AAAAAAA1-0000-0000-0000-000000000000", "2014-02-01T08:00:00.100"},
-        {"AAAAAAA2-0000-0000-0000-000000000000", "2014-02-02T08:00:00.100"},
-        {"BBBBBBB1-0000-0000-0000-000000000000", "2014-03-01T08:00:00.100"},
-        {"BBBBBBB2-0000-0000-0000-000000000000", "2014-03-02T08:00:00.100"}};
-
-    IndependentObjectSet docSet = getDocuments(os, docEntries, true);
-
-    // Begin testing nextDocument for exception
-    DocumentList docList =
-        getObjectUnderTest(os, docSet, customDeletionSet, deletionEventSet);
-
-    SkipPosition actualPosition = SkipPosition.FIRST;
-    try {
-      for (Document doc = docList.nextDocument(); doc != null;
-          doc = docList.nextDocument()) {
-        actualPosition = SkipPosition.MIDDLE;
-      }
-      fail("Expect SkippedDocumentException");
-    } catch (SkippedDocumentException expected) {
-      if (!expected.getMessage().contains(unreleasedGuid.toString())) {
-        throw expected;
-      }
-      if (docList.nextDocument() == null) {
-        actualPosition = SkipPosition.LAST;
-      }
-    }
-    assertEquals(expectedPosition, actualPosition);
-  }
-
   private String[][] docEntries = {
     { "AAAAAAA1-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
     { "AAAAAAA2-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
@@ -530,84 +352,32 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     { "AAAAAAA4-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
   };
 
-  private String[][] deEntries = {
-    { "DEEEEEE1", "DE000001", CHECKPOINT_TIMESTAMP },
-    { "DEEEEEE2", "DE000002", CHECKPOINT_TIMESTAMP },
-  };
-
-  private String[][] cdEntries = {
-    { "CD000001-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-    { "CD000002-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-    { "CD000003-0000-0000-0000-000000000000", CHECKPOINT_TIMESTAMP },
-  };
-
   @Test
   public void testNullObjectSet_nullDocuments() throws Exception {
     MockObjectStore os = newObjectStore(DatabaseType.ORACLE);
     thrown.expect(NullPointerException.class);
-    DocumentList docList = getObjectUnderTest(os,
-        null, new EmptyObjectSet(), new EmptyObjectSet());
-  }
-
-  @Test
-  public void testNullObjectSet_nullCustomDeletes() throws Exception {
-    MockObjectStore os = newObjectStore(DatabaseType.ORACLE);
-    thrown.expect(NullPointerException.class);
-    DocumentList docList = getObjectUnderTest(os,
-        new EmptyObjectSet(), null, new EmptyObjectSet());
-  }
-
-  @Test
-  public void testNullObjectSet_nullDeletionEvents() throws Exception {
-    MockObjectStore os = newObjectStore(DatabaseType.ORACLE);
-    thrown.expect(NullPointerException.class);
-    DocumentList docList = getObjectUnderTest(os,
-        new EmptyObjectSet(), new EmptyObjectSet(), null);
+    DocumentList docList = getObjectUnderTest(os, null);
   }
 
   @Test
   public void testMockCheckpoint() throws Exception {
     MockObjectStore os = newObjectStore(DatabaseType.ORACLE);
-    testMockCheckpoint(os, getDocuments(os, docEntries, true),
-        getCustomDeletions(os, cdEntries, true),
-        getDeletionEvents(os, deEntries, true));
+    testMockCheckpoint(os, getDocuments(os, docEntries, true));
   }
 
   @Test
   public void testMockCheckpoint_emptyDocuments() throws Exception {
     MockObjectStore os = newObjectStore(DatabaseType.ORACLE);
-    testMockCheckpoint(os, new EmptyObjectSet(),
-        getCustomDeletions(os, cdEntries, true),
-        getDeletionEvents(os, deEntries, true));
-  }
-
-  @Test
-  public void testMockCheckpoint_emptyCustomDeletes() throws Exception {
-    MockObjectStore os = newObjectStore(DatabaseType.ORACLE);
-    testMockCheckpoint(os, getDocuments(os, docEntries, true),
-        new EmptyObjectSet(), getDeletionEvents(os, deEntries, true));
-  }
-
-  @Test
-  public void testMockCheckpoint_emptyDeletionEvents() throws Exception {
-    MockObjectStore os = newObjectStore(DatabaseType.ORACLE);
-    testMockCheckpoint(os, getDocuments(os, docEntries, true),
-        getCustomDeletions(os, cdEntries, true), new EmptyObjectSet());
+    testMockCheckpoint(os, new EmptyObjectSet());
   }
 
   private void testMockCheckpoint(MockObjectStore os,
-      IndependentObjectSet docSet, IndependentObjectSet customDeletionSet,
-      IndependentObjectSet deletionEventSet) throws Exception {
+      IndependentObjectSet docSet) throws Exception {
     boolean expectAddTested = !docSet.isEmpty();
-    boolean expectCustomDeletionTested = !customDeletionSet.isEmpty();
-    boolean expectDeletionEventTested = !deletionEventSet.isEmpty();
 
     boolean isAddTested = false;
-    boolean isDeletionEventTested = false;
-    boolean isCustomDeletionTested = false;
 
-    DocumentList docList =
-        getObjectUnderTest(os, docSet, customDeletionSet, deletionEventSet);
+    DocumentList docList = getObjectUnderTest(os, docSet);
     Document doc = null;
     while ((doc = docList.nextDocument()) != null) {
       Property actionProp = doc.findProperty(SpiConstants.PROPNAME_ACTION);
@@ -616,30 +386,14 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
 
       String id =
           doc.findProperty(SpiConstants.PROPNAME_DOCID).nextValue().toString();
-      if (ActionType.ADD.equals(actionType)) {
-        assertTrue(os.containsObject(ClassNames.DOCUMENT, new Id(id)));
-        assertTrue(checkpointContains(docList.checkpoint(),
+      assertEquals(ActionType.ADD, actionType);
+      assertTrue(os.containsObject(ClassNames.DOCUMENT, new Id(id)));
+      assertTrue(checkpointContains(docList.checkpoint(),
             doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
             JsonField.LAST_MODIFIED_TIME));
-        isAddTested = true;
-      } else if (ActionType.DELETE.equals(actionType)) {
-        if (!os.containsObject(ClassNames.DOCUMENT, new Id(id))) {
-          // Proxy for a DeletionEvent.
-          assertTrue(checkpointContains(docList.checkpoint(),
-              doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
-              JsonField.LAST_DELETION_EVENT_TIME));
-          isDeletionEventTested = true;
-        } else {
-          assertTrue(checkpointContains(docList.checkpoint(),
-              doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED),
-              JsonField.LAST_CUSTOM_DELETION_TIME));
-          isCustomDeletionTested = true;
-        }
-      }
+      isAddTested = true;
     }
     assertEquals(expectAddTested, isAddTested);
-    assertEquals(expectCustomDeletionTested, isCustomDeletionTested);
-    assertEquals(expectDeletionEventTested, isDeletionEventTested);
 
     String expectedCheckpoint = "{"
         + (expectAddTested
@@ -647,16 +401,9 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
             + "\"lastModified\":\"" + CHECKPOINT_TIMESTAMP + TZ_OFFSET + "\","
             : "\"uuid\":\"{AAAAAAAA-0000-0000-0000-000000000000}\","
             + "\"lastModified\":\"1990-01-01T00:00:00.000\",")
-        + (expectDeletionEventTested
-            ? "\"uuidToDelete\":\"{DE000002-0000-0000-0000-000000000000}\","
-            + "\"lastRemoveDate\":\"" + CHECKPOINT_TIMESTAMP + TZ_OFFSET + "\","
-            : "\"uuidToDelete\":\"{BBBBBBBB-0000-0000-0000-000000000000}\","
+        + ("\"uuidToDelete\":\"{BBBBBBBB-0000-0000-0000-000000000000}\","
             + "\"lastRemoveDate\":\"2000-01-01T00:00:00.000\",")
-        + (expectCustomDeletionTested
-            ? "\"uuidToDeleteDocs\":\"{CD000003-0000-0000-0000-000000000000}\","
-            + "\"lastModifiedDate\":\"" + CHECKPOINT_TIMESTAMP + TZ_OFFSET
-            + "\""
-            : "\"uuidToDeleteDocs\":\"{CCCCCCCC-0000-0000-0000-000000000000}\","
+        + ("\"uuidToDeleteDocs\":\"{CCCCCCCC-0000-0000-0000-000000000000}\","
             + "\"lastModifiedDate\":\"2010-01-01T00:00:00.000\"")
         + "}";
     assertCheckpointEquals(expectedCheckpoint, docList.checkpoint());
@@ -665,8 +412,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   @Test
   public void testCheckpointWithoutNextDocument() throws Exception {
     IObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    DocumentList docList = getObjectUnderTest(os, new EmptyObjectSet(),
-        new EmptyObjectSet(), new EmptyObjectSet());
+    DocumentList docList = getObjectUnderTest(os, new EmptyObjectSet());
 
     assertCheckpointEquals(CHECKPOINT, docList.checkpoint());
   }
@@ -678,27 +424,20 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   @Test
   public void testEmptyCheckpointWithoutNextDocument() throws Exception {
     IObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    DocumentList docList = new FileDocumentList(new EmptyObjectSet(),
-        new EmptyObjectSet(), new EmptyObjectSet(), null, os, connec,
-        new SimpleTraversalContext(), new Checkpoint());
+    DocumentList docList = getObjectUnderTest(os)
+        .new LocalDocumentList(new EmptyObjectSet(), new Checkpoint());
     Checkpoint cp = new Checkpoint(docList.checkpoint());
 
     // The checkpoint contains only the dates for the delete queries.
-    Date now = new Date();
     assertNullField(cp, JsonField.LAST_MODIFIED_TIME);
-    assertDateNearly(now, cp.getString(JsonField.LAST_DELETION_EVENT_TIME));
-    assertDateNearly(now, cp.getString(JsonField.LAST_CUSTOM_DELETION_TIME));
-
     assertNullField(cp, JsonField.UUID);
-    assertEquals("", cp.getString(JsonField.UUID_DELETION_EVENT));
-    assertEquals("", cp.getString(JsonField.UUID_CUSTOM_DELETED_DOC));
   }
 
   @Test
   public void testMimeTypesAndSizes() throws Exception {
     testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 32, true);
-    testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 50, false);
-    testMimeTypeAndContentSize("video/3gpp", 1024 * 1024 * 32, false);
+    testMimeTypeAndContentSize("text/plain", 1024 * 1024 * 1024 * 3L, false);
+    testMimeTypeAndContentSize("video/3gpp", 1024 * 1024 * 100, true);
   }
 
   private void testMimeTypeAndContentSize(String mimeType, double size,
@@ -709,8 +448,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     IndependentObjectSet docSet =
         new IndependentObjectSetMock(ImmutableList.of(doc1));
 
-    DocumentList docList = getObjectUnderTest(os, docSet,
-        new EmptyObjectSet(), new EmptyObjectSet());
+    DocumentList docList = getObjectUnderTest(os, docSet);
     Document doc = docList.nextDocument();
     assertNotNull(doc);
     if (expectNotNull) {
@@ -718,33 +456,6 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
           doc.findProperty(SpiConstants.PROPNAME_CONTENT));
     } else {
       assertNull(doc.findProperty(SpiConstants.PROPNAME_CONTENT));
-    }
-  }
-
-  @Test
-  public void testExcludedMimeType() throws Exception {
-    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    IndependentObject doc1 = mockDocument(os,
-        "AAAAAAA1", CHECKPOINT_TIMESTAMP, false, 1024.0, "text/plain");
-    IndependentObjectSet docSet =
-        new IndependentObjectSetMock(ImmutableList.of(doc1));
-
-    TraversalContext traversalContext = new SimpleTraversalContext() {
-      @Override public int mimeTypeSupportLevel(String mimeType) {
-        return -1;
-      }
-    };
-
-    DocumentList docList = new FileDocumentList(docSet,
-        new EmptyObjectSet(), new EmptyObjectSet(), null, os, connec,
-        traversalContext, new Checkpoint(CHECKPOINT));
-    Document doc = docList.nextDocument();
-    assertNotNull(doc);
-    try {
-      doc.findProperty(SpiConstants.PROPNAME_CONTENT);
-      fail("Expected SkippedDocumentException was not thrown.");
-    } catch (SkippedDocumentException ex) {
-      // Expected
     }
   }
 
@@ -756,29 +467,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
    */
   private IndependentObjectSet getDocuments(MockObjectStore os,
       String[][] entries, boolean releasedVersion) {
-    return getObjects(os, entries, false, releasedVersion);
-  }
-
-  /**
-   * Creates an object set of deletion events.
-   *
-   * @param entries an array of arrays of IDs and timestamps
-   * @param releasedVersion if the deleted documents should be released versions
-   */
-  private IndependentObjectSet getDeletionEvents(MockObjectStore os,
-      String[][] entries, boolean releasedVersion) {
-    return getObjects(os, entries, true, releasedVersion);
-  }
-
-  /**
-   * Creates an object set of custom deletion documents.
-   *
-   * @param entries an array of arrays of IDs and timestamps
-   * @param releasedVersion if the deleted documents should be released versions
-   */
-  private IndependentObjectSet getCustomDeletions(MockObjectStore os,
-      String[][] entries, boolean releasedVersion) {
-    return getDocuments(os, entries, releasedVersion);
+    return getObjects(os, entries, releasedVersion);
   }
 
   /**
@@ -786,37 +475,25 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
    *
    * @param os the object store to create the objects in
    * @param entries an array of arrays of IDs and timestamps
-   * @param isDeletionEvent if the objects are DeletionEvents
    * @param releasedVersion if the objects should refer to released versions
    */
   private IndependentObjectSet getObjects(MockObjectStore os,
-      String[][] entries, boolean isDeletionEvent, boolean releasedVersion) {
+      String[][] entries, boolean releasedVersion) {
     List<IndependentObject> objectList = new ArrayList<>(entries.length);
     for (String[] entry : entries) {
-      objectList.add(
-          (isDeletionEvent)
-          ? mockDeletionEvent(os, entry[0], entry[1], entry[2], releasedVersion)
-          : mockDocument(os, entry[0], entry[1], releasedVersion));
+      objectList.add(mockDocument(os, entry[0], entry[1], releasedVersion));
     }
     return new IndependentObjectSetMock(objectList);
   }
 
-  private DocumentList getObjectUnderTest(IObjectStore os,
-      IndependentObjectSet docSet, IndependentObjectSet customDeletionSet,
-      IndependentObjectSet deletionEventSet) throws RepositoryException {
-    return new FileDocumentList(docSet, customDeletionSet, deletionEventSet,
-        null, os, connec, getTraversalContext(), new Checkpoint(CHECKPOINT));
+  private DocumentTraverser getObjectUnderTest(IObjectStore os) {
+    return new DocumentTraverser(null, null, os, connec);
   }
 
-  private TraversalContext getTraversalContext() {
-    Set<String> supportedMimeTypes = new HashSet<String>();
-    supportedMimeTypes.add("text/plain");
-    supportedMimeTypes.add("text/html");
-
-    SimpleTraversalContext context = new SimpleTraversalContext();
-    context.setMaxDocumentSize(1024 * 1024 * 32);
-    context.setMimeTypeSet(supportedMimeTypes);
-    return context;
+  private DocumentList getObjectUnderTest(IObjectStore os,
+      IndependentObjectSet docSet) throws RepositoryException {
+    return getObjectUnderTest(os)
+        .new LocalDocumentList(docSet, new Checkpoint(CHECKPOINT));
   }
 
   private boolean checkpointContains(String checkpoint, Property lastModified,

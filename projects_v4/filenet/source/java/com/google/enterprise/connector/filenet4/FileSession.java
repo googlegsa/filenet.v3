@@ -75,7 +75,7 @@ public class FileSession implements Session {
   }
 
   @VisibleForTesting
-  Traverser getDocumentTraverser() {
+  DocumentTraverser getDocumentTraverser() {
     return new DocumentTraverser(connection, fileObjectFactory,
         objectStore, connector);
   }
