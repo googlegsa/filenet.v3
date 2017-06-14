@@ -230,6 +230,7 @@
       </classpath>
 
       <syspropertyset refid="javatest.properties"/>
+      <formatter type="plain" usefile="false"/>
       <formatter type="xml" />
       <batchtest todir="${reports.xml.dir}" unless="testcase">
         <fileset dir="${src-test}">

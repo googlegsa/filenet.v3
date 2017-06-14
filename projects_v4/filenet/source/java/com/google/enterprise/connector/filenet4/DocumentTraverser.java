@@ -41,7 +41,7 @@ import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
-import com.filenet.api.core.Containable; // Avoid clash with SPI Document
+import com.filenet.api.core.Containable;
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.security.MarkingSet;
 import com.filenet.api.util.Id;
@@ -104,7 +104,6 @@ class DocumentTraverser implements Traverser {
     SearchWrapper search = objectFactory.getSearch(objectStore);
 
     try {
-      // to add
       String query = buildQueryString(checkPoint);
       logger.log(Level.FINE, "Query for added or updated documents: {0}",
           query);
@@ -213,6 +212,7 @@ class DocumentTraverser implements Traverser {
 
       Document fileDocument;
       if (objects.hasNext()) {
+        // Avoid clash with SPI Document class.
         Containable object = (Containable) objects.next();
         fileDocumentDate = object.get_DateLastModified();
         docId = object.get_Id();
