@@ -25,14 +25,12 @@ import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
-import com.google.enterprise.connector.spi.SkippedDocumentException;
+import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.AclInheritanceType;
 import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
-import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
@@ -40,11 +38,10 @@ import com.filenet.api.admin.PropertyDefinitionString;
 import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.constants.ClassNames;
-import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
-import com.filenet.api.core.IndependentObject;
+import com.filenet.api.core.Containable;
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.security.MarkingSet;
 import com.filenet.api.util.Id;
@@ -68,67 +65,26 @@ import java.util.logging.Logger;
  */
 class DocumentTraverser implements Traverser {
   private static final Logger logger =
-      Logger.getLogger(FileDocumentTraverser.class.getName());
-
-  private static final String tableName = "Document";
-
-  private static final String ORDER_BY =
-      " ORDER BY " + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE = " AND (("
-      + PropertyNames.DATE_LAST_MODIFIED + "={0} AND (''{1}''<"
-      + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_LAST_MODIFIED
-      + ">{0}))";
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_ONLY_DATE = " AND (("
-          + PropertyNames.DATE_LAST_MODIFIED + ">={0}))";
-
-  private static final String ORDER_BY_TO_DELETE =
-      " ORDER BY " + PropertyNames.DATE_CREATED + "," + PropertyNames.ID;
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_TO_DELETE = " WHERE (("
-          + PropertyNames.DATE_CREATED + "={0} AND (''{1}''<"
-          + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_CREATED
-          + ">{0}))";
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_TO_DELETE_ONLY_DATE = " WHERE ("
-          + PropertyNames.DATE_CREATED + ">={0})";
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_TO_DELETE_DOCS = " AND ((("
-          + PropertyNames.DATE_LAST_MODIFIED + "={0}  AND (''{1}''<"
-          + PropertyNames.ID
-          + "))OR ("
-          + PropertyNames.DATE_LAST_MODIFIED + ">{0})))";
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE = " AND ("
-          + PropertyNames.DATE_LAST_MODIFIED + ">={0})";
+      Logger.getLogger(DocumentTraverser.class.getName());
 
   private final IConnection connection;
-  private final IObjectFactory fileObjectFactory;
+  private final IObjectFactory objectFactory;
   private final IObjectStore objectStore;
   private final FileConnector connector;
 
-  private TraversalContext traversalContext;
   private int batchHint = 1000;
 
   public DocumentTraverser(IConnection connection,
-      IObjectFactory fileObjectFactory, IObjectStore objectStore,
+      IObjectFactory objectFactory, IObjectStore objectStore,
       FileConnector fileConnector) {
     this.connection = connection;
-    this.fileObjectFactory = fileObjectFactory;
+    this.objectFactory = objectFactory;
     this.objectStore = objectStore;
     this.connector = fileConnector;
   }
 
   @Override
   public void setTraversalContext(TraversalContext traversalContext) {
-    this.traversalContext = traversalContext;
   }
 
   /**
@@ -145,10 +101,9 @@ class DocumentTraverser implements Traverser {
     connection.refreshSUserContext();
     logger.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
 
-    SearchWrapper search = fileObjectFactory.getSearch(objectStore);
+    SearchWrapper search = objectFactory.getSearch(objectStore);
 
     try {
-      // to add
       String query = buildQueryString(checkPoint);
       logger.log(Level.FINE, "Query for added or updated documents: {0}",
           query);
@@ -157,39 +112,8 @@ class DocumentTraverser implements Traverser {
       logger.fine((objectSet.isEmpty()) ? "Found no documents to add or update"
           : "Found documents to add or update");
 
-      // to delete for deleted documents
-      String queryStringToDelete = buildQueryToDelete(checkPoint);
-      logger.log(Level.FINE, "Query for deleted documents: {0}",
-          queryStringToDelete);
-      IndependentObjectSet objectSetToDelete = search.fetchObjects(
-          queryStringToDelete, batchHint, SearchWrapper.dereferenceObjects,
-          SearchWrapper.ALL_ROWS);
-      logger.fine((objectSetToDelete.isEmpty()) ? "Found no documents to delete"
-          : "Found documents to delete");
-
-      // to delete for additional delete clause
-      IndependentObjectSet objectSetToDeleteDocs;
-      if (Strings.isNullOrEmpty(connector.getDeleteAdditionalWhereClause())) {
-        objectSetToDeleteDocs = new EmptyObjectSet();
-      } else {
-        String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(
-            checkPoint, connector.getDeleteAdditionalWhereClause());
-        logger.log(Level.FINE,
-            "Query for documents satisfying the delete WHERE clause: {0}",
-            queryStringToDeleteDocs);
-        objectSetToDeleteDocs = search.fetchObjects(queryStringToDeleteDocs,
-            batchHint, SearchWrapper.dereferenceObjects,
-            SearchWrapper.ALL_ROWS);
-        logger.fine((objectSetToDeleteDocs.isEmpty())
-            ? "Found no documents to delete using WHERE clause"
-            : "Found documents to delete using WHERE clause");
-      }
-
-      if (!objectSet.isEmpty() || !objectSetToDeleteDocs.isEmpty()
-          || !objectSetToDelete.isEmpty()) {
-        return new LocalDocumentList(objectSet, objectSetToDeleteDocs,
-            objectSetToDelete, fileObjectFactory, objectStore, connector,
-            traversalContext, checkPoint);
+      if (!objectSet.isEmpty()) {
+        return new LocalDocumentList(objectSet, checkPoint);
       } else {
         return null;
       }
@@ -200,14 +124,9 @@ class DocumentTraverser implements Traverser {
 
   /**
    * To construct FileNet query to fetch documents from FileNet repository
-   * considering additional delete where clause specified as connector
+   * considering additional where clause specified as connector
    * configuration and the previously remembered checkpoint to indicate where
-   * to resume acquiring documents from the FileNet repository to send delete
-   * feed.
-   *
-   * @param checkpoint
-   * @return
-   * @throws RepositoryException
+   * to resume acquiring documents from the FileNet repository to send feed.
    */
   private String buildQueryString(Checkpoint checkpoint)
           throws RepositoryException {
@@ -220,7 +139,7 @@ class DocumentTraverser implements Traverser {
     query.append(",");
     query.append(PropertyNames.RELEASED_VERSION);
     query.append(" FROM ");
-    query.append(tableName);
+    query.append(GuidConstants.Class_Document);
     query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
     String additionalWhereClause = connector.getAdditionalWhereClause();
@@ -236,81 +155,12 @@ class DocumentTraverser implements Traverser {
     }
     if (!checkpoint.isNull(JsonField.LAST_MODIFIED_TIME)) {
       query.append(getCheckpointClause(checkpoint, JsonField.LAST_MODIFIED_TIME,
-              JsonField.UUID, WHERE_CLAUSE, WHERE_CLAUSE_ONLY_DATE));
+              JsonField.UUID));
     }
-    query.append(ORDER_BY);
-    return query.toString();
-  }
-
-  /**
-   * Builds the query to send delete feeds to GSA based on the Additional
-   * Delete clause set as Connector Configuration.
-   */
-  private String buildQueryStringToDeleteDocs(Checkpoint checkpoint,
-      String deleteadditionalWhereClause) throws RepositoryException {
-    StringBuilder query = new StringBuilder("SELECT TOP ");
-    query.append(batchHint);
-    query.append(" ");
-    query.append(PropertyNames.ID);
-    query.append(",");
+    query.append(" ORDER BY ");
     query.append(PropertyNames.DATE_LAST_MODIFIED);
-    query.append(" FROM ");
-    query.append(tableName);
-    query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-
-    if ((deleteadditionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
-      query = new StringBuilder(deleteadditionalWhereClause);
-      query.replace(0, 6, "SELECT TOP " + batchHint + " ");
-      logger.log(Level.FINE, "Using Custom Query[{0}]",
-          deleteadditionalWhereClause);
-    } else {
-      query.append(deleteadditionalWhereClause);
-    }
-    if (!checkpoint.isNull(JsonField.LAST_CUSTOM_DELETION_TIME)) {
-      query.append(getCheckpointClause(checkpoint,
-              JsonField.LAST_CUSTOM_DELETION_TIME,
-              JsonField.UUID_CUSTOM_DELETED_DOC, WHERE_CLAUSE_TO_DELETE_DOCS,
-              WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE));
-    }
-    query.append(ORDER_BY);
-    return query.toString();
-  }
-
-  /**
-   * Builds the query to send delete feeds to GSA. This query does not include
-   * the "Additional Where Clause"(AWC) because the schema of Event Table and
-   * the Classes included in AWC are different. Due to the exclusion of AWC in
-   * query, there are chances that, connector may send Delete Feed to GSA for
-   * documents which were never indexed to GSA
-   *
-   * @param checkpoint
-   * @return
-   * @throws RepositoryException
-   */
-  private String buildQueryToDelete(Checkpoint checkpoint)
-          throws RepositoryException {
-    StringBuilder query = new StringBuilder("SELECT TOP ");
-    query.append(batchHint);
-    query.append(" ");
-
-    // GuidConstants.Class_DeletionEvent = Only deleted objects in event
-    // table
+    query.append(",");
     query.append(PropertyNames.ID);
-    query.append(",");
-    query.append(PropertyNames.DATE_CREATED);
-    query.append(",");
-    query.append(PropertyNames.VERSION_SERIES_ID);
-    query.append(",");
-    query.append(PropertyNames.SOURCE_OBJECT_ID);
-    query.append(" FROM ");
-    query.append(GuidConstants.Class_DeletionEvent);
-    if (!checkpoint.isNull(JsonField.LAST_DELETION_EVENT_TIME)) {
-      query.append(getCheckpointClause(checkpoint,
-              JsonField.LAST_DELETION_EVENT_TIME,
-              JsonField.UUID_DELETION_EVENT, WHERE_CLAUSE_TO_DELETE,
-              WHERE_CLAUSE_TO_DELETE_ONLY_DATE));
-    }
-    query.append(ORDER_BY_TO_DELETE);
     return query.toString();
   }
 
@@ -320,108 +170,40 @@ class DocumentTraverser implements Traverser {
    * @param checkpoint the checkpoint
    * @param dateField the checkpoint date field
    * @param uuidField the checkpoint ID field
-   * @param whereClause the date and ID where clause pattern
-   * @param whereClauseOnlyDate the date only where clause pattern
    * @return a query string
    * @throws RepositoryException if the checkpoint is uninitialized
    */
   @VisibleForTesting
   String getCheckpointClause(Checkpoint checkPoint, JsonField dateField,
-      JsonField uuidField, String whereClause, String whereClauseOnlyDate)
-      throws RepositoryException {
-    String uuid = checkPoint.getString(uuidField);
+      JsonField uuidField) throws RepositoryException {
     String c = FileUtil.getQueryTimeString(checkPoint.getString(dateField));
-    String statement;
-    Object[] arguments = { c, uuid };
-    if (uuid.equals("") || !connector.useIDForChangeDetection()) {
-      statement = MessageFormat.format(whereClauseOnlyDate, arguments);
-    } else {
-      statement = MessageFormat.format(whereClause, arguments);
+    String uuid = checkPoint.getString(uuidField);
+    if (uuid.equals("")) {
+      uuid = Id.ZERO_ID.toString();
     }
     logger.log(Level.FINE, "MakeCheckpointQueryString date: {0}", c);
     logger.log(Level.FINE, "MakeCheckpointQueryString ID: {0}", uuid);
-    return statement;
+    String whereClause = " AND (("
+        + PropertyNames.DATE_LAST_MODIFIED + "={0} AND (''{1}''<"
+        + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_LAST_MODIFIED
+        + ">{0}))";
+    return MessageFormat.format(whereClause, new Object[] { c, uuid });
   }
 
-  private static class LocalDocumentList implements DocumentList {
-    private final IObjectFactory objectFactory;
-    private final IObjectStore objectStore;
-    private final FileConnector connector;
-    private final TraversalContext traversalContext;
+  class LocalDocumentList implements DocumentList {
     private final Checkpoint checkpoint;
 
-    private final DatabaseType databaseType;
-    private final Iterator<SearchObject> objects;
+    private final Iterator<?> objects;
     private final LinkedList<Document> acls;
 
     private Date fileDocumentDate;
-    private Date fileDocumentToDeleteDate;
-    private Date fileDocumentToDeleteDocsDate;
     private Id docId;
-    private Id docIdToDelete;
-    private Id docIdToDeleteDocs;
 
     public LocalDocumentList(IndependentObjectSet objectSet,
-        IndependentObjectSet objectSetToDeleteDocs,
-        IndependentObjectSet objectSetToDelete,
-        IObjectFactory objectFactory, IObjectStore objectStore,
-        FileConnector connector,
-        TraversalContext traversalContext, Checkpoint checkpoint) {
-      this.objectFactory = objectFactory;
-      this.objectStore = objectStore;
-      this.connector = connector;
-      this.traversalContext = traversalContext;
+        Checkpoint checkpoint) {
       this.checkpoint = checkpoint;
-
-      this.databaseType = getDatabaseType(objectStore);
-      this.objects = mergeAndSortObjects(objectSet, objectSetToDelete,
-          objectSetToDeleteDocs);
+      this.objects = objectSet.iterator();
       this.acls = new LinkedList<Document>();
-    }
-
-    private DatabaseType getDatabaseType(IObjectStore os) {
-      try {
-        return os.get_DatabaseType();
-      } catch (RepositoryException e) {
-        logger.log(Level.WARNING,
-            "Unable to retrieve database type from object store", e);
-        return null;
-      }
-    }
-
-    /** Sort the objects by modify date and ID. */
-    private Iterator<SearchObject> mergeAndSortObjects(
-        IndependentObjectSet objectSet, IndependentObjectSet objectSetToDelete,
-        IndependentObjectSet objectSetToDeleteDocs) {
-      List<SearchObject> objectList = new ArrayList<>();
-
-      // Adding documents, deletion events and custom deletion to the object list
-      addToList(objectList, objectSet, SearchObject.Type.ADD);
-      addToList(objectList, objectSetToDelete, SearchObject.Type.DELETION_EVENT);
-      addToList(objectList, objectSetToDeleteDocs,
-          SearchObject.Type.CUSTOM_DELETE);
-
-      // Sort list by last modified time and ID. We depend on this being
-      // a stable sort, because an updated document may appear in both
-      // objectSet and objectSetToDeleteDocs with the same modified date.
-      Collections.sort(objectList);
-      logger.log(Level.INFO, "Number of documents to add, update, or delete: {0}",
-          objectList.size());
-
-      return objectList.iterator();
-    }
-
-    /**
-     * Wraps elements of the object set as SearchObjects and adds them
-     * to the list.
-     */
-    private void addToList(List<SearchObject> objectList,
-        IndependentObjectSet objectSet, SearchObject.Type searchType) {
-      Iterator<?> iter = objectSet.iterator();
-      while (iter.hasNext()) {
-        objectList.add(new SearchObject((IndependentObject) iter.next(),
-                databaseType, searchType));
-      }
     }
 
     @Override
@@ -430,37 +212,11 @@ class DocumentTraverser implements Traverser {
 
       Document fileDocument;
       if (objects.hasNext()) {
-        SearchObject object = objects.next();
-        switch (object.getType()) {
-          case DELETION_EVENT:
-            fileDocumentToDeleteDate = object.getModifyDate();
-            docIdToDelete = object.get_Id();
-            if (object.isReleasedVersion()) {
-              fileDocument = createDeleteDocument(object);
-            } else {
-              throw new SkippedDocumentException("Skip a deletion event [ID: "
-                  + docIdToDelete + "] of an unreleased document.");
-            }
-            break;
-          case CUSTOM_DELETE:
-            fileDocumentToDeleteDocsDate = object.getModifyDate();
-            docIdToDeleteDocs = object.get_Id();
-            if (object.isReleasedVersion()) {
-              fileDocument = createDeleteDocument(object);
-            } else {
-              throw new SkippedDocumentException("Skip custom deletion [ID: "
-                  + docIdToDeleteDocs + "] because document is not a released "
-                  + "version.");
-            }
-            break;
-          case ADD:
-            fileDocumentDate = object.getModifyDate();
-            docId = object.get_Id();
-            fileDocument = createAddDocument(object);
-            break;
-          default:
-            throw new NullPointerException();
-        }
+        // Avoid clash with SPI Document class.
+        Containable object = (Containable) objects.next();
+        fileDocumentDate = object.get_DateLastModified();
+        docId = object.get_Id();
+        fileDocument = createAddDocument(docId);
       } else if (connector.pushAcls()) {
         logger.finest("Processing ACL document");
         fileDocument = acls.pollFirst();
@@ -470,25 +226,14 @@ class DocumentTraverser implements Traverser {
       return fileDocument;
     }
 
-    private Document createAddDocument(SearchObject object)
+    private Document createAddDocument(Id id)
         throws RepositoryException {
-      Id id = object.get_Id();
       logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-      LocalDocument doc = new LocalDocument(id, objectFactory, objectStore,
-          connector, traversalContext);
+      LocalDocument doc = new LocalDocument(id);
       if (connector.pushAcls()) {
         doc.processInheritedPermissions(acls);
       }
       return doc;
-    }
-
-    private Document createDeleteDocument(SearchObject object)
-        throws RepositoryDocumentException {
-      Id id = object.get_Id();
-      Id versionSeriesId = object.getVersionSeriesId();
-      logger.log(Level.FINEST, "Delete document [ID: {0}, VersionSeriesID: {1}]",
-          new Object[] {id, versionSeriesId});
-      return new FileDeleteDocument(versionSeriesId, object.getModifyDate());
     }
 
     @Override
@@ -496,41 +241,22 @@ class DocumentTraverser implements Traverser {
       checkpoint.setTimeAndUuid(
           JsonField.LAST_MODIFIED_TIME, fileDocumentDate,
           JsonField.UUID, docId);
-      checkpoint.setTimeAndUuid(
-          JsonField.LAST_CUSTOM_DELETION_TIME, fileDocumentToDeleteDocsDate,
-          JsonField.UUID_CUSTOM_DELETED_DOC, docIdToDeleteDocs);
-      checkpoint.setTimeAndUuid(
-          JsonField.LAST_DELETION_EVENT_TIME, fileDocumentToDeleteDate,
-          JsonField.UUID_DELETION_EVENT, docIdToDelete);
       return checkpoint.toString();
     }
   }
 
-  /**
-   * Concrete Document class with all the functionalities of Document
-   */
-  private static class LocalDocument implements Document {
-    private static Boolean hasMarkings;
+  private static Boolean hasMarkings;
 
+  private class LocalDocument implements Document {
     private final Id docId;
-    private final IObjectFactory objectFactory;
-    private final IObjectStore objectStore;
-    private final FileConnector connector;
-    private final TraversalContext traversalContext;
 
     private IDocument document = null;
     private String vsDocId;
     private boolean pushAcls;
     private Permissions.Acl permissions;
 
-    public LocalDocument(Id docId, IObjectFactory objectFactory,
-        IObjectStore objectStore, FileConnector connector,
-        TraversalContext traversalContext) {
+    public LocalDocument(Id docId) {
       this.docId = docId;
-      this.objectFactory = objectFactory;
-      this.objectStore = objectStore;
-      this.connector = connector;
-      this.traversalContext = traversalContext;
       this.pushAcls = connector.pushAcls();
     }
 
@@ -539,7 +265,7 @@ class DocumentTraverser implements Traverser {
       if (!(pushAcls && connector.checkMarking())) {
         return false;
       }
-      synchronized (LocalDocument.class) {
+      synchronized (DocumentTraverser.class) {
         if (hasMarkings == null) {
           // If the additional WHERE clause starts with SELECT,
           // then the config may not be using the Document class.
@@ -610,30 +336,6 @@ class DocumentTraverser implements Traverser {
       }
     }
 
-    private boolean hasSupportedMimeType() throws RepositoryException {
-      String value = Value.getSingleValueString(this, PropertyNames.MIME_TYPE);
-      if (value == null) {
-        logger.log(Level.FINEST,
-            "Send content to the GSA since the {0} value is null [DocId: {1}]",
-            new Object[] {PropertyNames.MIME_TYPE, docId});
-        return true;
-      } else {
-        int supportLevel = traversalContext.mimeTypeSupportLevel(value);
-        if (supportLevel < 0) {
-          throw new SkippedDocumentException("Excluded "
-              + PropertyNames.MIME_TYPE + " [" + value
-              + "]: Skip document [DocId: " + docId.toString() + "]");
-        } else if (supportLevel == 0) {
-          logger.log(Level.FINER, "Unsupported {0} [{1}]: "
-              + "Send document metadata [DocId: {2}]",
-              new Object[] {PropertyNames.MIME_TYPE, value, docId});
-          return false;
-        } else {
-          return true;
-        }
-      }
-    }
-
     private boolean hasAllowableSize() throws RepositoryException {
       String value = Value.getSingleValueString(this, PropertyNames.CONTENT_SIZE);
       if (value == null) {
@@ -644,7 +346,7 @@ class DocumentTraverser implements Traverser {
       } else {
         double contentSize = Double.parseDouble(value);
         if (contentSize > 0) {
-          if (contentSize <= traversalContext.maxDocumentSize()) {
+          if (contentSize <= 2L * 1024 * 1024 * 1024) {
             logger.log(Level.FINEST, "{0} : {1}",
                 new Object[] {PropertyNames.CONTENT_SIZE, contentSize});
             return true;
@@ -679,8 +381,7 @@ class DocumentTraverser implements Traverser {
       // }
       if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        if (traversalContext != null && hasSupportedMimeType()
-            && hasAllowableSize()) {
+        if (hasAllowableSize()) {
           list.add(Value.getBinaryValue(document.getContent()));
           return new SimpleProperty(list);
         } else {

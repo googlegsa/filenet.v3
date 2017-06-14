@@ -131,6 +131,25 @@ public class TraverserFactoryFixture {
     jdbcFixture.tearDown();
   }
 
+  protected DocumentTraverser getDocumentTraverser(
+      FileConnector connector, MockObjectStore os,
+      IndependentObjectSet objectSet, Capture<String> capture)
+      throws RepositoryException {
+    IConnection connection = createNiceMock(IConnection.class);
+
+    // The search result is for added and update documents.
+    SearchWrapper searcher = createMock(SearchWrapper.class);
+    expect(searcher.fetchObjects(capture(capture), anyInt(),
+            isA(PropertyFilter.class), anyBoolean()))
+        .andReturn(objectSet);
+
+    IObjectFactory objectFactory = createMock(IObjectFactory.class);
+    expect(objectFactory.getSearch(os)).andReturn(searcher);
+    replayAndSave(connection, searcher, objectFactory);
+
+    return new DocumentTraverser(connection, objectFactory, os, connector);
+  }
+
   protected FileDocumentTraverser getFileDocumentTraverser(
       FileConnector connector, MockObjectStore os,
       IndependentObjectSet objectSet, Capture<String> capture)
