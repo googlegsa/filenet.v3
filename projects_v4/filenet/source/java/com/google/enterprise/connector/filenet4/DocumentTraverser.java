@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.enterprise.adaptor.DocId;
 import com.google.enterprise.adaptor.DocIdPusher;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IConnection;
@@ -46,9 +47,9 @@ import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.security.MarkingSet;
 import com.filenet.api.util.Id;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -88,6 +89,131 @@ class DocumentTraverser {
    */
   public void setBatchHint(int batchHint) throws RepositoryException {
     this.batchHint = batchHint;
+  }
+
+  // class Checkpoint {
+  //   private static String dateToString(Date timestamp) {
+  //     Calendar cal = Calendar.getInstance();
+  //     cal.setTime(nextCheckpointDate);
+  //     return FileUtil.getQueryTimeString(Value.calendarToIso8601(cal));
+  //   }
+
+  //   private final String type;
+  //   private final String timestamp;
+  //   private final String guid;
+
+  //   public Checkpoint fromDocId(DocId docId) {
+  //     String[] parts = docId.getUniqueId().split("/", 0);
+  //     if (!parts[0].equals("pseudo")) {
+  //       return null;
+  //     }
+  //     return new Checkpoint(parts[
+  //   }
+
+  //   public Checkpoint(Checkpoint checkpoint, Date timestamp, Id guid) {
+  //     type = checkpoint.type;
+  //     this.timestamp = dateToString(timestamp); // TODO: No, not really.
+  //     this.guid = guid.toString();
+  //   }
+
+  //   private Checkpoint(String type, String timestamp, String guid) {
+  //     this.type = type;
+  //     this.timestamp = timestamp;
+  //     this.guid = guid;
+  //   }
+
+  //   public String getTimestamp() {
+  //     return timestamp;
+  //   }
+
+  //   public String getGuid() {
+  //     return guid;
+  //   }
+
+  //   public DocId getDocId() { return new DocId(toString()); }
+
+  //   public String toString() {
+  //     return String.format("pseudo/type=%1$s;timestamp=%2$s;guid=%3$s",
+  //         type, timestamp, guid);
+  //   }
+  // }
+
+  public void getDocIds(String checkpointStr, DocIdPusher pusher)
+      throws RepositoryException, InterruptedException {
+    Checkpoint checkpoint = new Checkpoint(checkpointStr);
+
+    connection.refreshSUserContext();
+    logger.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
+
+    SearchWrapper search = objectFactory.getSearch(objectStore);
+
+    String query = buildQueryString(checkpoint);
+    logger.log(Level.FINE, "Query for added or updated documents: {0}",
+        query);
+    IndependentObjectSet objectSet = search.fetchObjects(query, batchHint,
+        SearchWrapper.dereferenceObjects, SearchWrapper.ALL_ROWS);
+    logger.fine(objectSet.isEmpty()
+        ? "Found no documents to add or update"
+        : "Found documents to add or update");
+
+    ArrayList<DocId> docIds = new ArrayList<>();
+    Date timestamp = null;
+    Id guid = null; // TODO: Id.ZERO_ID?
+    Iterator<?> objects = objectSet.iterator();
+    while (objects.hasNext()) {
+      // Avoid clash with SPI Document class.
+      Containable object = (Containable) objects.next();
+      timestamp = object.get_DateLastModified();
+      guid = object.get_Id();
+      docIds.add(new DocId("guid/" + guid));
+    }
+    if (timestamp != null) {
+      checkpoint.setTimeAndUuid(
+          JsonField.LAST_MODIFIED_TIME, timestamp,
+          JsonField.UUID, guid);
+      docIds.add(new DocId("pseudo/" + checkpoint));
+      pusher.pushDocIds(docIds);
+    }
+  }
+
+  public Document getDocContent(String idStr)
+      throws RepositoryException {
+    Id id = new Id(idStr);
+    logger.log(Level.FINEST, "Add document [ID: {0}]", id);
+    LocalDocument doc = new LocalDocument(id);
+    if (connector.pushAcls()) {
+      LinkedList<Document> acls = new LinkedList<>();
+      doc.processInheritedPermissions(acls);
+      for (Document acl : acls) {
+        logger.finest("Processing ACL document");
+        // Do something
+      }
+    }
+    return doc;
+  }
+
+  public Document getDocContent(String docId, DocIdPusher pusher)
+      throws IOException {
+    if (docId.startsWith("DocId(")) {
+      throw new AssertionError("Yo, call getUniqueId() maybe? " + docId);
+    }
+    try {
+      String[] parts = docId.split("/", 0);
+      switch (parts[0]) {
+        case "pseudo":
+          getDocIds(parts[1], pusher);
+          return null;
+        case "guid":
+          return getDocContent(parts[1]);
+        default:
+          System.out.println("Not found: " + docId);
+          // TODO: respondNotFound
+          return null;
+      }
+    } catch (EngineRuntimeException | RepositoryException
+        | InterruptedException e) {
+      throw new IOException(e);
+    }
   }
 
   public LocalDocumentList getDocumentList(Checkpoint checkPoint)
