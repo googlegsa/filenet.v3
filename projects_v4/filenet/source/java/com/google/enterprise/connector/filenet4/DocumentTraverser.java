@@ -68,21 +68,6 @@ class DocumentTraverser implements Traverser {
   private static final Logger logger =
       Logger.getLogger(DocumentTraverser.class.getName());
 
-  private static final String tableName = "Document";
-
-  private static final String ORDER_BY =
-      " ORDER BY " + PropertyNames.DATE_LAST_MODIFIED + "," + PropertyNames.ID;
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE = " AND (("
-      + PropertyNames.DATE_LAST_MODIFIED + "={0} AND (''{1}''<"
-      + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_LAST_MODIFIED
-      + ">{0}))";
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_ONLY_DATE = " AND (("
-          + PropertyNames.DATE_LAST_MODIFIED + ">={0}))";
-
   private final IConnection connection;
   private final IObjectFactory objectFactory;
   private final IObjectStore objectStore;
@@ -156,7 +141,7 @@ class DocumentTraverser implements Traverser {
     query.append(",");
     query.append(PropertyNames.RELEASED_VERSION);
     query.append(" FROM ");
-    query.append(tableName);
+    query.append(GuidConstants.Class_Document);
     query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
 
     String additionalWhereClause = connector.getAdditionalWhereClause();
@@ -172,9 +157,12 @@ class DocumentTraverser implements Traverser {
     }
     if (!checkpoint.isNull(JsonField.LAST_MODIFIED_TIME)) {
       query.append(getCheckpointClause(checkpoint, JsonField.LAST_MODIFIED_TIME,
-              JsonField.UUID, WHERE_CLAUSE, WHERE_CLAUSE_ONLY_DATE));
+              JsonField.UUID));
     }
-    query.append(ORDER_BY);
+    query.append(" ORDER BY ");
+    query.append(PropertyNames.DATE_LAST_MODIFIED);
+    query.append(",");
+    query.append(PropertyNames.ID);
     return query.toString();
   }
 
@@ -184,27 +172,24 @@ class DocumentTraverser implements Traverser {
    * @param checkpoint the checkpoint
    * @param dateField the checkpoint date field
    * @param uuidField the checkpoint ID field
-   * @param whereClause the date and ID where clause pattern
-   * @param whereClauseOnlyDate the date only where clause pattern
    * @return a query string
    * @throws RepositoryException if the checkpoint is uninitialized
    */
   @VisibleForTesting
   String getCheckpointClause(Checkpoint checkPoint, JsonField dateField,
-      JsonField uuidField, String whereClause, String whereClauseOnlyDate)
-      throws RepositoryException {
-    String uuid = checkPoint.getString(uuidField);
+      JsonField uuidField) throws RepositoryException {
     String c = FileUtil.getQueryTimeString(checkPoint.getString(dateField));
-    String statement;
-    Object[] arguments = { c, uuid };
-    if (uuid.equals("") || !connector.useIDForChangeDetection()) {
-      statement = MessageFormat.format(whereClauseOnlyDate, arguments);
-    } else {
-      statement = MessageFormat.format(whereClause, arguments);
+    String uuid = checkPoint.getString(uuidField);
+    if (uuid.equals("")) {
+      uuid = Id.ZERO_ID.toString();
     }
     logger.log(Level.FINE, "MakeCheckpointQueryString date: {0}", c);
     logger.log(Level.FINE, "MakeCheckpointQueryString ID: {0}", uuid);
-    return statement;
+    String whereClause = " AND (("
+        + PropertyNames.DATE_LAST_MODIFIED + "={0} AND (''{1}''<"
+        + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_LAST_MODIFIED
+        + ">{0}))";
+    return MessageFormat.format(whereClause, new Object[] { c, uuid });
   }
 
   private class LocalDocumentList implements DocumentList {
