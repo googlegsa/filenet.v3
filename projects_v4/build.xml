@@ -57,6 +57,7 @@
   <path id="compile.prod.classpath">
     <pathelement location="${file.jarfile}" />
     <pathelement location="${spi.jarfile}" />
+    <pathelement location="adaptor-4.1.3-31-g889ec27.jar" />
     <fileset dir="${connector-manager-thirdparty-jar.dir}">
       <include name="prod/*.jar" />
     </fileset>

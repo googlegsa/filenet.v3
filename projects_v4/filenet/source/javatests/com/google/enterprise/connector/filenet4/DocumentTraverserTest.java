@@ -32,18 +32,15 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
+import com.google.enterprise.connector.filenet4.DocumentTraverser.LocalDocumentList;
 import com.google.enterprise.connector.filenet4.EngineCollectionMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.Document;
-import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.SimpleTraversalContext;
-import com.google.enterprise.connector.spi.SkippedDocumentException;
 import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.ActionType;
-import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.IndependentObjectSet;
@@ -62,16 +59,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 
 public class DocumentTraverserTest extends TraverserFactoryFixture {
   private static final SimpleDateFormat dateFormatter =
@@ -132,12 +125,11 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   public void testStartTraversal() throws RepositoryException {
     assumeTrue(TestConnection.isLiveConnection());
 
-    Traverser traverser = getObjectUnderTest();
+    DocumentTraverser traverser = getObjectUnderTest();
     traverser.setBatchHint(TestConnection.batchSize);
-    DocumentList set = traverser.getDocumentList(new Checkpoint());
+    LocalDocumentList set = traverser.getDocumentList(new Checkpoint());
     long counter = 0;
-    com.google.enterprise.connector.spi.Document doc = null;
-    doc = set.nextDocument();
+    Document doc = set.nextDocument();
     while (doc != null) {
       if (counter == 113) {
         String checkpoint = set.checkpoint();
@@ -153,14 +145,13 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   public void testResumeTraversal() throws RepositoryException {
     assumeTrue(TestConnection.isLiveConnection());
 
-    Traverser traverser = getObjectUnderTest();
+    DocumentTraverser traverser = getObjectUnderTest();
     traverser.setBatchHint(TestConnection.batchSize);
-    DocumentList set = traverser.getDocumentList(
+    LocalDocumentList set = traverser.getDocumentList(
         new Checkpoint(TestConnection.checkpoint2));
     assertNotNull(set);
     int counter = 0;
-    com.google.enterprise.connector.spi.Document doc = null;
-    doc = set.nextDocument();
+    Document doc = set.nextDocument();
     while (doc != null) {
       doc = set.nextDocument();
       counter++;
@@ -173,9 +164,9 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   public void testSetBatchHint() throws RepositoryException {
     assumeTrue(TestConnection.isLiveConnection());
 
-    Traverser traverser = getObjectUnderTest();
+    DocumentTraverser traverser = getObjectUnderTest();
     traverser.setBatchHint(10);
-    DocumentList set = traverser.getDocumentList(new Checkpoint());
+    LocalDocumentList set = traverser.getDocumentList(new Checkpoint());
     int counter = 0;
     while (set.nextDocument() != null) {
       counter++;
@@ -186,9 +177,9 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   @Test
   public void testGetDocumentList_empty() throws Exception {
     MockObjectStore objectStore = newObjectStore(DatabaseType.ORACLE);
-    Traverser traverser = getDocumentTraverser(connec, objectStore,
+    DocumentTraverser traverser = getDocumentTraverser(connec, objectStore,
         new EmptyObjectSet(), new Capture<String>(CaptureType.NONE));
-    DocumentList docList = traverser.getDocumentList(new Checkpoint());
+    LocalDocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNull(docList);
     verifyAll();
   }
@@ -200,10 +191,10 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     String lastModified = dateFormatter.format(new Date());
     IndependentObject doc = mockDocument(objectStore, id, lastModified, true,
         getPermissions(PermissionSource.SOURCE_DIRECT));
-    Traverser traverser = getDocumentTraverser(connec, objectStore,
+    DocumentTraverser traverser = getDocumentTraverser(connec, objectStore,
         new IndependentObjectSetMock(ImmutableList.of(doc)),
         new Capture<String>(CaptureType.NONE));
-    DocumentList docList = traverser.getDocumentList(new Checkpoint());
+    LocalDocumentList docList = traverser.getDocumentList(new Checkpoint());
 
     assertEquals(ImmutableList.of(id), getDocids(docList));
     String checkpoint = docList.checkpoint();
@@ -212,7 +203,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     verifyAll();
   }
 
-  private ImmutableList<String> getDocids(DocumentList docList)
+  private ImmutableList<String> getDocids(LocalDocumentList docList)
       throws RepositoryException {
     ImmutableList.Builder<String> builder = ImmutableList.builder();
     Document doc;
@@ -229,9 +220,9 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
 
     MockObjectStore objectStore = newObjectStore(DatabaseType.ORACLE);
     Capture<String> capture = new Capture<>(CaptureType.ALL);
-    Traverser traverser = getDocumentTraverser(connec, objectStore,
+    DocumentTraverser traverser = getDocumentTraverser(connec, objectStore,
         new EmptyObjectSet(), capture);
-    DocumentList docList = traverser.getDocumentList(new Checkpoint());
+    LocalDocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNull(docList);
     assertTrue(capture.toString(), capture.hasCaptured());
     List<String> queries = capture.getValues();
@@ -296,12 +287,12 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   public void testLiveCheckpoint() throws Exception {
     assumeTrue(TestConnection.isLiveConnection());
 
-    Traverser traverser = getObjectUnderTest();
+    DocumentTraverser traverser = getObjectUnderTest();
     traverser.setBatchHint(100);
     // Under live test and the test account, the deletion events weren't
     // returned from FileNet.
     boolean tested = false;
-    DocumentList docList = traverser.getDocumentList(new Checkpoint());
+    LocalDocumentList docList = traverser.getDocumentList(new Checkpoint());
     Document doc;
     while ((doc = docList.nextDocument()) != null) {
       assertTrue(checkpointContains(docList.checkpoint(),
@@ -319,9 +310,9 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   public void testLiveNextDocument() throws Exception {
     assumeTrue(TestConnection.isLiveConnection());
 
-    Traverser traverser = getObjectUnderTest();
+    DocumentTraverser traverser = getObjectUnderTest();
     boolean isTested = false;
-    DocumentList docList = traverser.getDocumentList(new Checkpoint());
+    LocalDocumentList docList = traverser.getDocumentList(new Checkpoint());
     assertNotNull("Document list is null", docList);
     Document doc = docList.nextDocument();
     while (doc != null && doc instanceof FileDocument) {
@@ -356,7 +347,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   public void testNullObjectSet_nullDocuments() throws Exception {
     MockObjectStore os = newObjectStore(DatabaseType.ORACLE);
     thrown.expect(NullPointerException.class);
-    DocumentList docList = getObjectUnderTest(os, null);
+    getObjectUnderTest(os, null);
   }
 
   @Test
@@ -377,7 +368,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
 
     boolean isAddTested = false;
 
-    DocumentList docList = getObjectUnderTest(os, docSet);
+    LocalDocumentList docList = getObjectUnderTest(os, docSet);
     Document doc = null;
     while ((doc = docList.nextDocument()) != null) {
       Property actionProp = doc.findProperty(SpiConstants.PROPNAME_ACTION);
@@ -412,7 +403,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   @Test
   public void testCheckpointWithoutNextDocument() throws Exception {
     IObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    DocumentList docList = getObjectUnderTest(os, new EmptyObjectSet());
+    LocalDocumentList docList = getObjectUnderTest(os, new EmptyObjectSet());
 
     assertCheckpointEquals(CHECKPOINT, docList.checkpoint());
   }
@@ -424,7 +415,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
   @Test
   public void testEmptyCheckpointWithoutNextDocument() throws Exception {
     IObjectStore os = newObjectStore(DatabaseType.MSSQL);
-    DocumentList docList = getObjectUnderTest(os)
+    LocalDocumentList docList = getObjectUnderTest(os)
         .new LocalDocumentList(new EmptyObjectSet(), new Checkpoint());
     Checkpoint cp = new Checkpoint(docList.checkpoint());
 
@@ -448,7 +439,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     IndependentObjectSet docSet =
         new IndependentObjectSetMock(ImmutableList.of(doc1));
 
-    DocumentList docList = getObjectUnderTest(os, docSet);
+    LocalDocumentList docList = getObjectUnderTest(os, docSet);
     Document doc = docList.nextDocument();
     assertNotNull(doc);
     if (expectNotNull) {
@@ -490,7 +481,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     return new DocumentTraverser(null, null, os, connec);
   }
 
-  private DocumentList getObjectUnderTest(IObjectStore os,
+  private LocalDocumentList getObjectUnderTest(IObjectStore os,
       IndependentObjectSet docSet) throws RepositoryException {
     return getObjectUnderTest(os)
         .new LocalDocumentList(docSet, new Checkpoint(CHECKPOINT));

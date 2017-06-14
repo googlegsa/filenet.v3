@@ -65,15 +65,15 @@ public class TestConnection {
   public static final String checkpoint2;
 
   public static boolean isLiveConnection() {
-    try {
-      HttpURLConnection conn =
-          (HttpURLConnection) new URL(uri).openConnection();
-      conn.connect();
-      conn.disconnect();
-      return true;
-    } catch (Exception e) {
+    // try {
+    //   HttpURLConnection conn =
+    //       (HttpURLConnection) new URL(uri).openConnection();
+    //   conn.connect();
+    //   conn.disconnect();
+    //   return true;
+    // } catch (Exception e) {
       return false;
-    }
+    // }
   }
 
   static {

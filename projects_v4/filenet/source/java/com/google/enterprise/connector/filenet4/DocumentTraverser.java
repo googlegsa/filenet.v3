@@ -16,6 +16,7 @@ package com.google.enterprise.connector.filenet4;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.enterprise.adaptor.DocIdPusher;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
@@ -23,7 +24,6 @@ import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.Document;
-import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
@@ -63,7 +63,7 @@ import java.util.logging.Logger;
  * deleting index of documents to GSA. 2. Execution of the SQL query constructed
  * in step 1. 3. Retrieve the results of step 2 and wrap it in DocumentList
  */
-class DocumentTraverser implements Traverser {
+class DocumentTraverser {
   private static final Logger logger =
       Logger.getLogger(DocumentTraverser.class.getName());
 
@@ -83,20 +83,14 @@ class DocumentTraverser implements Traverser {
     this.connector = fileConnector;
   }
 
-  @Override
-  public void setTraversalContext(TraversalContext traversalContext) {
-  }
-
   /**
    * To set BatchHint for traversal.
    */
-  @Override
   public void setBatchHint(int batchHint) throws RepositoryException {
     this.batchHint = batchHint;
   }
 
-  @Override
-  public DocumentList getDocumentList(Checkpoint checkPoint)
+  public LocalDocumentList getDocumentList(Checkpoint checkPoint)
       throws RepositoryException {
     connection.refreshSUserContext();
     logger.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
@@ -190,7 +184,7 @@ class DocumentTraverser implements Traverser {
     return MessageFormat.format(whereClause, new Object[] { c, uuid });
   }
 
-  class LocalDocumentList implements DocumentList {
+  class LocalDocumentList {
     private final Checkpoint checkpoint;
 
     private final Iterator<?> objects;
@@ -206,7 +200,6 @@ class DocumentTraverser implements Traverser {
       this.acls = new LinkedList<Document>();
     }
 
-    @Override
     public Document nextDocument() throws RepositoryException {
       logger.entering("LocalDocumentList", "nextDocument()");
 
@@ -236,7 +229,6 @@ class DocumentTraverser implements Traverser {
       return doc;
     }
 
-    @Override
     public String checkpoint() throws RepositoryException {
       checkpoint.setTimeAndUuid(
           JsonField.LAST_MODIFIED_TIME, fileDocumentDate,
