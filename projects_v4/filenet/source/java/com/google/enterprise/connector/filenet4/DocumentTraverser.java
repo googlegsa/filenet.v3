@@ -28,11 +28,10 @@ import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
-import com.google.enterprise.connector.spi.SkippedDocumentException;
+import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.SpiConstants.AclInheritanceType;
 import com.google.enterprise.connector.spi.SpiConstants.CaseSensitivityType;
 import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
-import com.google.enterprise.connector.spi.SpiConstants;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
@@ -90,7 +89,6 @@ class DocumentTraverser implements Traverser {
   private final IObjectStore objectStore;
   private final FileConnector connector;
 
-  private TraversalContext traversalContext;
   private int batchHint = 1000;
 
   public DocumentTraverser(IConnection connection,
@@ -104,7 +102,6 @@ class DocumentTraverser implements Traverser {
 
   @Override
   public void setTraversalContext(TraversalContext traversalContext) {
-    this.traversalContext = traversalContext;
   }
 
   /**
@@ -135,7 +132,7 @@ class DocumentTraverser implements Traverser {
 
       if (!objectSet.isEmpty()) {
         return new LocalDocumentList(objectSet, fileObjectFactory, objectStore,
-            connector, traversalContext, checkPoint);
+            connector, checkPoint);
       } else {
         return null;
       }
@@ -216,7 +213,6 @@ class DocumentTraverser implements Traverser {
     private final IObjectFactory objectFactory;
     private final IObjectStore objectStore;
     private final FileConnector connector;
-    private final TraversalContext traversalContext;
     private final Checkpoint checkpoint;
 
     private final DatabaseType databaseType;
@@ -228,12 +224,10 @@ class DocumentTraverser implements Traverser {
 
     public LocalDocumentList(IndependentObjectSet objectSet,
         IObjectFactory objectFactory, IObjectStore objectStore,
-        FileConnector connector,
-        TraversalContext traversalContext, Checkpoint checkpoint) {
+        FileConnector connector, Checkpoint checkpoint) {
       this.objectFactory = objectFactory;
       this.objectStore = objectStore;
       this.connector = connector;
-      this.traversalContext = traversalContext;
       this.checkpoint = checkpoint;
 
       this.databaseType = getDatabaseType(objectStore);
@@ -302,7 +296,7 @@ class DocumentTraverser implements Traverser {
       Id id = object.get_Id();
       logger.log(Level.FINEST, "Add document [ID: {0}]", id);
       LocalDocument doc = new LocalDocument(id, objectFactory, objectStore,
-          connector, traversalContext);
+          connector);
       if (connector.pushAcls()) {
         doc.processInheritedPermissions(acls);
       }
@@ -328,7 +322,6 @@ class DocumentTraverser implements Traverser {
     private final IObjectFactory objectFactory;
     private final IObjectStore objectStore;
     private final FileConnector connector;
-    private final TraversalContext traversalContext;
 
     private IDocument document = null;
     private String vsDocId;
@@ -336,13 +329,11 @@ class DocumentTraverser implements Traverser {
     private Permissions.Acl permissions;
 
     public LocalDocument(Id docId, IObjectFactory objectFactory,
-        IObjectStore objectStore, FileConnector connector,
-        TraversalContext traversalContext) {
+        IObjectStore objectStore, FileConnector connector) {
       this.docId = docId;
       this.objectFactory = objectFactory;
       this.objectStore = objectStore;
       this.connector = connector;
-      this.traversalContext = traversalContext;
       this.pushAcls = connector.pushAcls();
     }
 
@@ -422,30 +413,6 @@ class DocumentTraverser implements Traverser {
       }
     }
 
-    private boolean hasSupportedMimeType() throws RepositoryException {
-      String value = Value.getSingleValueString(this, PropertyNames.MIME_TYPE);
-      if (value == null) {
-        logger.log(Level.FINEST,
-            "Send content to the GSA since the {0} value is null [DocId: {1}]",
-            new Object[] {PropertyNames.MIME_TYPE, docId});
-        return true;
-      } else {
-        int supportLevel = traversalContext.mimeTypeSupportLevel(value);
-        if (supportLevel < 0) {
-          throw new SkippedDocumentException("Excluded "
-              + PropertyNames.MIME_TYPE + " [" + value
-              + "]: Skip document [DocId: " + docId.toString() + "]");
-        } else if (supportLevel == 0) {
-          logger.log(Level.FINER, "Unsupported {0} [{1}]: "
-              + "Send document metadata [DocId: {2}]",
-              new Object[] {PropertyNames.MIME_TYPE, value, docId});
-          return false;
-        } else {
-          return true;
-        }
-      }
-    }
-
     private boolean hasAllowableSize() throws RepositoryException {
       String value = Value.getSingleValueString(this, PropertyNames.CONTENT_SIZE);
       if (value == null) {
@@ -456,7 +423,7 @@ class DocumentTraverser implements Traverser {
       } else {
         double contentSize = Double.parseDouble(value);
         if (contentSize > 0) {
-          if (contentSize <= traversalContext.maxDocumentSize()) {
+          if (contentSize <= 2 * 1024 * 1024 * 1024) {
             logger.log(Level.FINEST, "{0} : {1}",
                 new Object[] {PropertyNames.CONTENT_SIZE, contentSize});
             return true;
@@ -491,8 +458,7 @@ class DocumentTraverser implements Traverser {
       // }
       if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
-        if (traversalContext != null && hasSupportedMimeType()
-            && hasAllowableSize()) {
+        if (hasAllowableSize()) {
           list.add(Value.getBinaryValue(document.getContent()));
           return new SimpleProperty(list);
         } else {
