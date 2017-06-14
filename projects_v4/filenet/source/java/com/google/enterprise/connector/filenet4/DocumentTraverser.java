@@ -85,30 +85,6 @@ class DocumentTraverser implements Traverser {
   static final String WHERE_CLAUSE_ONLY_DATE = " AND (("
           + PropertyNames.DATE_LAST_MODIFIED + ">={0}))";
 
-  private static final String ORDER_BY_TO_DELETE =
-      " ORDER BY " + PropertyNames.DATE_CREATED + "," + PropertyNames.ID;
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_TO_DELETE = " WHERE (("
-          + PropertyNames.DATE_CREATED + "={0} AND (''{1}''<"
-          + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_CREATED
-          + ">{0}))";
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_TO_DELETE_ONLY_DATE = " WHERE ("
-          + PropertyNames.DATE_CREATED + ">={0})";
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_TO_DELETE_DOCS = " AND ((("
-          + PropertyNames.DATE_LAST_MODIFIED + "={0}  AND (''{1}''<"
-          + PropertyNames.ID
-          + "))OR ("
-          + PropertyNames.DATE_LAST_MODIFIED + ">{0})))";
-
-  @VisibleForTesting
-  static final String WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE = " AND ("
-          + PropertyNames.DATE_LAST_MODIFIED + ">={0})";
-
   private final IConnection connection;
   private final IObjectFactory fileObjectFactory;
   private final IObjectStore objectStore;
@@ -157,39 +133,9 @@ class DocumentTraverser implements Traverser {
       logger.fine((objectSet.isEmpty()) ? "Found no documents to add or update"
           : "Found documents to add or update");
 
-      // to delete for deleted documents
-      String queryStringToDelete = buildQueryToDelete(checkPoint);
-      logger.log(Level.FINE, "Query for deleted documents: {0}",
-          queryStringToDelete);
-      IndependentObjectSet objectSetToDelete = search.fetchObjects(
-          queryStringToDelete, batchHint, SearchWrapper.dereferenceObjects,
-          SearchWrapper.ALL_ROWS);
-      logger.fine((objectSetToDelete.isEmpty()) ? "Found no documents to delete"
-          : "Found documents to delete");
-
-      // to delete for additional delete clause
-      IndependentObjectSet objectSetToDeleteDocs;
-      if (Strings.isNullOrEmpty(connector.getDeleteAdditionalWhereClause())) {
-        objectSetToDeleteDocs = new EmptyObjectSet();
-      } else {
-        String queryStringToDeleteDocs = buildQueryStringToDeleteDocs(
-            checkPoint, connector.getDeleteAdditionalWhereClause());
-        logger.log(Level.FINE,
-            "Query for documents satisfying the delete WHERE clause: {0}",
-            queryStringToDeleteDocs);
-        objectSetToDeleteDocs = search.fetchObjects(queryStringToDeleteDocs,
-            batchHint, SearchWrapper.dereferenceObjects,
-            SearchWrapper.ALL_ROWS);
-        logger.fine((objectSetToDeleteDocs.isEmpty())
-            ? "Found no documents to delete using WHERE clause"
-            : "Found documents to delete using WHERE clause");
-      }
-
-      if (!objectSet.isEmpty() || !objectSetToDeleteDocs.isEmpty()
-          || !objectSetToDelete.isEmpty()) {
-        return new LocalDocumentList(objectSet, objectSetToDeleteDocs,
-            objectSetToDelete, fileObjectFactory, objectStore, connector,
-            traversalContext, checkPoint);
+      if (!objectSet.isEmpty()) {
+        return new LocalDocumentList(objectSet, fileObjectFactory, objectStore,
+            connector, traversalContext, checkPoint);
       } else {
         return null;
       }
@@ -200,14 +146,9 @@ class DocumentTraverser implements Traverser {
 
   /**
    * To construct FileNet query to fetch documents from FileNet repository
-   * considering additional delete where clause specified as connector
+   * considering additional where clause specified as connector
    * configuration and the previously remembered checkpoint to indicate where
-   * to resume acquiring documents from the FileNet repository to send delete
-   * feed.
-   *
-   * @param checkpoint
-   * @return
-   * @throws RepositoryException
+   * to resume acquiring documents from the FileNet repository to send feed.
    */
   private String buildQueryString(Checkpoint checkpoint)
           throws RepositoryException {
@@ -239,78 +180,6 @@ class DocumentTraverser implements Traverser {
               JsonField.UUID, WHERE_CLAUSE, WHERE_CLAUSE_ONLY_DATE));
     }
     query.append(ORDER_BY);
-    return query.toString();
-  }
-
-  /**
-   * Builds the query to send delete feeds to GSA based on the Additional
-   * Delete clause set as Connector Configuration.
-   */
-  private String buildQueryStringToDeleteDocs(Checkpoint checkpoint,
-      String deleteadditionalWhereClause) throws RepositoryException {
-    StringBuilder query = new StringBuilder("SELECT TOP ");
-    query.append(batchHint);
-    query.append(" ");
-    query.append(PropertyNames.ID);
-    query.append(",");
-    query.append(PropertyNames.DATE_LAST_MODIFIED);
-    query.append(" FROM ");
-    query.append(tableName);
-    query.append(" WHERE VersionStatus=1 and ContentSize IS NOT NULL ");
-
-    if ((deleteadditionalWhereClause.toUpperCase()).startsWith("SELECT ID,DATELASTMODIFIED FROM ")) {
-      query = new StringBuilder(deleteadditionalWhereClause);
-      query.replace(0, 6, "SELECT TOP " + batchHint + " ");
-      logger.log(Level.FINE, "Using Custom Query[{0}]",
-          deleteadditionalWhereClause);
-    } else {
-      query.append(deleteadditionalWhereClause);
-    }
-    if (!checkpoint.isNull(JsonField.LAST_CUSTOM_DELETION_TIME)) {
-      query.append(getCheckpointClause(checkpoint,
-              JsonField.LAST_CUSTOM_DELETION_TIME,
-              JsonField.UUID_CUSTOM_DELETED_DOC, WHERE_CLAUSE_TO_DELETE_DOCS,
-              WHERE_CLAUSE_TO_DELETE_DOCS_ONLY_DATE));
-    }
-    query.append(ORDER_BY);
-    return query.toString();
-  }
-
-  /**
-   * Builds the query to send delete feeds to GSA. This query does not include
-   * the "Additional Where Clause"(AWC) because the schema of Event Table and
-   * the Classes included in AWC are different. Due to the exclusion of AWC in
-   * query, there are chances that, connector may send Delete Feed to GSA for
-   * documents which were never indexed to GSA
-   *
-   * @param checkpoint
-   * @return
-   * @throws RepositoryException
-   */
-  private String buildQueryToDelete(Checkpoint checkpoint)
-          throws RepositoryException {
-    StringBuilder query = new StringBuilder("SELECT TOP ");
-    query.append(batchHint);
-    query.append(" ");
-
-    // GuidConstants.Class_DeletionEvent = Only deleted objects in event
-    // table
-    query.append(PropertyNames.ID);
-    query.append(",");
-    query.append(PropertyNames.DATE_CREATED);
-    query.append(",");
-    query.append(PropertyNames.VERSION_SERIES_ID);
-    query.append(",");
-    query.append(PropertyNames.SOURCE_OBJECT_ID);
-    query.append(" FROM ");
-    query.append(GuidConstants.Class_DeletionEvent);
-    if (!checkpoint.isNull(JsonField.LAST_DELETION_EVENT_TIME)) {
-      query.append(getCheckpointClause(checkpoint,
-              JsonField.LAST_DELETION_EVENT_TIME,
-              JsonField.UUID_DELETION_EVENT, WHERE_CLAUSE_TO_DELETE,
-              WHERE_CLAUSE_TO_DELETE_ONLY_DATE));
-    }
-    query.append(ORDER_BY_TO_DELETE);
     return query.toString();
   }
 
@@ -355,15 +224,9 @@ class DocumentTraverser implements Traverser {
     private final LinkedList<Document> acls;
 
     private Date fileDocumentDate;
-    private Date fileDocumentToDeleteDate;
-    private Date fileDocumentToDeleteDocsDate;
     private Id docId;
-    private Id docIdToDelete;
-    private Id docIdToDeleteDocs;
 
     public LocalDocumentList(IndependentObjectSet objectSet,
-        IndependentObjectSet objectSetToDeleteDocs,
-        IndependentObjectSet objectSetToDelete,
         IObjectFactory objectFactory, IObjectStore objectStore,
         FileConnector connector,
         TraversalContext traversalContext, Checkpoint checkpoint) {
@@ -374,8 +237,7 @@ class DocumentTraverser implements Traverser {
       this.checkpoint = checkpoint;
 
       this.databaseType = getDatabaseType(objectStore);
-      this.objects = mergeAndSortObjects(objectSet, objectSetToDelete,
-          objectSetToDeleteDocs);
+      this.objects = mergeAndSortObjects(objectSet);
       this.acls = new LinkedList<Document>();
     }
 
@@ -391,21 +253,13 @@ class DocumentTraverser implements Traverser {
 
     /** Sort the objects by modify date and ID. */
     private Iterator<SearchObject> mergeAndSortObjects(
-        IndependentObjectSet objectSet, IndependentObjectSet objectSetToDelete,
-        IndependentObjectSet objectSetToDeleteDocs) {
+        IndependentObjectSet objectSet) {
       List<SearchObject> objectList = new ArrayList<>();
 
-      // Adding documents, deletion events and custom deletion to the object list
+      // Adding documents to the object list
       addToList(objectList, objectSet, SearchObject.Type.ADD);
-      addToList(objectList, objectSetToDelete, SearchObject.Type.DELETION_EVENT);
-      addToList(objectList, objectSetToDeleteDocs,
-          SearchObject.Type.CUSTOM_DELETE);
 
-      // Sort list by last modified time and ID. We depend on this being
-      // a stable sort, because an updated document may appear in both
-      // objectSet and objectSetToDeleteDocs with the same modified date.
-      Collections.sort(objectList);
-      logger.log(Level.INFO, "Number of documents to add, update, or delete: {0}",
+      logger.log(Level.INFO, "Number of documents to add, update: {0}",
           objectList.size());
 
       return objectList.iterator();
@@ -431,36 +285,9 @@ class DocumentTraverser implements Traverser {
       Document fileDocument;
       if (objects.hasNext()) {
         SearchObject object = objects.next();
-        switch (object.getType()) {
-          case DELETION_EVENT:
-            fileDocumentToDeleteDate = object.getModifyDate();
-            docIdToDelete = object.get_Id();
-            if (object.isReleasedVersion()) {
-              fileDocument = createDeleteDocument(object);
-            } else {
-              throw new SkippedDocumentException("Skip a deletion event [ID: "
-                  + docIdToDelete + "] of an unreleased document.");
-            }
-            break;
-          case CUSTOM_DELETE:
-            fileDocumentToDeleteDocsDate = object.getModifyDate();
-            docIdToDeleteDocs = object.get_Id();
-            if (object.isReleasedVersion()) {
-              fileDocument = createDeleteDocument(object);
-            } else {
-              throw new SkippedDocumentException("Skip custom deletion [ID: "
-                  + docIdToDeleteDocs + "] because document is not a released "
-                  + "version.");
-            }
-            break;
-          case ADD:
-            fileDocumentDate = object.getModifyDate();
-            docId = object.get_Id();
-            fileDocument = createAddDocument(object);
-            break;
-          default:
-            throw new NullPointerException();
-        }
+        fileDocumentDate = object.getModifyDate();
+        docId = object.get_Id();
+        fileDocument = createAddDocument(object);
       } else if (connector.pushAcls()) {
         logger.finest("Processing ACL document");
         fileDocument = acls.pollFirst();
@@ -482,26 +309,11 @@ class DocumentTraverser implements Traverser {
       return doc;
     }
 
-    private Document createDeleteDocument(SearchObject object)
-        throws RepositoryDocumentException {
-      Id id = object.get_Id();
-      Id versionSeriesId = object.getVersionSeriesId();
-      logger.log(Level.FINEST, "Delete document [ID: {0}, VersionSeriesID: {1}]",
-          new Object[] {id, versionSeriesId});
-      return new FileDeleteDocument(versionSeriesId, object.getModifyDate());
-    }
-
     @Override
     public String checkpoint() throws RepositoryException {
       checkpoint.setTimeAndUuid(
           JsonField.LAST_MODIFIED_TIME, fileDocumentDate,
           JsonField.UUID, docId);
-      checkpoint.setTimeAndUuid(
-          JsonField.LAST_CUSTOM_DELETION_TIME, fileDocumentToDeleteDocsDate,
-          JsonField.UUID_CUSTOM_DELETED_DOC, docIdToDeleteDocs);
-      checkpoint.setTimeAndUuid(
-          JsonField.LAST_DELETION_EVENT_TIME, fileDocumentToDeleteDate,
-          JsonField.UUID_DELETION_EVENT, docIdToDelete);
       return checkpoint.toString();
     }
   }
