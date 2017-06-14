@@ -25,7 +25,6 @@ import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.DocumentList;
 import com.google.enterprise.connector.spi.Property;
-import com.google.enterprise.connector.spi.RepositoryDocumentException;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
 import com.google.enterprise.connector.spi.SpiConstants;
@@ -67,7 +66,7 @@ import java.util.logging.Logger;
  */
 class DocumentTraverser implements Traverser {
   private static final Logger logger =
-      Logger.getLogger(FileDocumentTraverser.class.getName());
+      Logger.getLogger(DocumentTraverser.class.getName());
 
   private static final String tableName = "Document";
 
@@ -85,17 +84,17 @@ class DocumentTraverser implements Traverser {
           + PropertyNames.DATE_LAST_MODIFIED + ">={0}))";
 
   private final IConnection connection;
-  private final IObjectFactory fileObjectFactory;
+  private final IObjectFactory objectFactory;
   private final IObjectStore objectStore;
   private final FileConnector connector;
 
   private int batchHint = 1000;
 
   public DocumentTraverser(IConnection connection,
-      IObjectFactory fileObjectFactory, IObjectStore objectStore,
+      IObjectFactory objectFactory, IObjectStore objectStore,
       FileConnector fileConnector) {
     this.connection = connection;
-    this.fileObjectFactory = fileObjectFactory;
+    this.objectFactory = objectFactory;
     this.objectStore = objectStore;
     this.connector = fileConnector;
   }
@@ -118,7 +117,7 @@ class DocumentTraverser implements Traverser {
     connection.refreshSUserContext();
     logger.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
 
-    SearchWrapper search = fileObjectFactory.getSearch(objectStore);
+    SearchWrapper search = objectFactory.getSearch(objectStore);
 
     try {
       // to add
@@ -131,8 +130,7 @@ class DocumentTraverser implements Traverser {
           : "Found documents to add or update");
 
       if (!objectSet.isEmpty()) {
-        return new LocalDocumentList(objectSet, fileObjectFactory, objectStore,
-            connector, checkPoint);
+        return new LocalDocumentList(objectSet, checkPoint);
       } else {
         return null;
       }
@@ -209,10 +207,7 @@ class DocumentTraverser implements Traverser {
     return statement;
   }
 
-  private static class LocalDocumentList implements DocumentList {
-    private final IObjectFactory objectFactory;
-    private final IObjectStore objectStore;
-    private final FileConnector connector;
+  private class LocalDocumentList implements DocumentList {
     private final Checkpoint checkpoint;
 
     private final DatabaseType databaseType;
@@ -223,11 +218,7 @@ class DocumentTraverser implements Traverser {
     private Id docId;
 
     public LocalDocumentList(IndependentObjectSet objectSet,
-        IObjectFactory objectFactory, IObjectStore objectStore,
-        FileConnector connector, Checkpoint checkpoint) {
-      this.objectFactory = objectFactory;
-      this.objectStore = objectStore;
-      this.connector = connector;
+        Checkpoint checkpoint) {
       this.checkpoint = checkpoint;
 
       this.databaseType = getDatabaseType(objectStore);
@@ -295,8 +286,7 @@ class DocumentTraverser implements Traverser {
         throws RepositoryException {
       Id id = object.get_Id();
       logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-      LocalDocument doc = new LocalDocument(id, objectFactory, objectStore,
-          connector);
+      LocalDocument doc = new LocalDocument(id);
       if (connector.pushAcls()) {
         doc.processInheritedPermissions(acls);
       }
@@ -312,28 +302,18 @@ class DocumentTraverser implements Traverser {
     }
   }
 
-  /**
-   * Concrete Document class with all the functionalities of Document
-   */
-  private static class LocalDocument implements Document {
-    private static Boolean hasMarkings;
+  private static Boolean hasMarkings;
 
+  private class LocalDocument implements Document {
     private final Id docId;
-    private final IObjectFactory objectFactory;
-    private final IObjectStore objectStore;
-    private final FileConnector connector;
 
     private IDocument document = null;
     private String vsDocId;
     private boolean pushAcls;
     private Permissions.Acl permissions;
 
-    public LocalDocument(Id docId, IObjectFactory objectFactory,
-        IObjectStore objectStore, FileConnector connector) {
+    public LocalDocument(Id docId) {
       this.docId = docId;
-      this.objectFactory = objectFactory;
-      this.objectStore = objectStore;
-      this.connector = connector;
       this.pushAcls = connector.pushAcls();
     }
 
@@ -342,7 +322,7 @@ class DocumentTraverser implements Traverser {
       if (!(pushAcls && connector.checkMarking())) {
         return false;
       }
-      synchronized (LocalDocument.class) {
+      synchronized (DocumentTraverser.class) {
         if (hasMarkings == null) {
           // If the additional WHERE clause starts with SELECT,
           // then the config may not be using the Document class.
