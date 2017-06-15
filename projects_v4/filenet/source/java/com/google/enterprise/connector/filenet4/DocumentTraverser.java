@@ -46,6 +46,7 @@ import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.util.Id;
 
 import java.io.IOException;
+import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -164,7 +165,7 @@ class DocumentTraverser {
         // Avoid clash with SPI Document class.
         Containable object = (Containable) objects.next();
         timestamp = object.get_DateLastModified();
-        guid = object.get_Id();
+        guid = object.get_Id(); // TODO: Use the VersionSeries ID.
         docIds.add(new DocId("guid/" + guid));
       }
       if (timestamp != null) {
@@ -297,7 +298,14 @@ class DocumentTraverser {
         permissions = null;
       }
 
+      response.setContentType(document.get_MimeType());
+      // TODO(jlacey): Use ValidatedUri. Use a percent encoder, or URI's
+      // multi-argument constructors?
+      response.setDisplayUrl(
+          URI.create(connector.getWorkplaceDisplayUrl() +
+              vsDocId.replace("{", "%7B").replace("}", "%7D")));
       response.setLastModified(document.get_DateLastModified());
+      response.setSecure(!connector.isPublic());
 
       logger.log(Level.FINEST, "Getting content");
       if (hasAllowableSize()) {
@@ -336,39 +344,6 @@ class DocumentTraverser {
     public Property findProperty(String name) throws RepositoryException {
       LinkedList<Value> list = new LinkedList<Value>();
 
-      // TODO (tdnguyen): refactor this method or conditions below to alleviate
-      // performance concern with using Value.getStringValueString().
-      // if (!name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
-      //    document.getProperty(name, list);
-      //    return new SimpleProperty(this);
-      // } else if (SpiConstants.PROPNAME_CONTENT.equals(name) {
-      //    ... All google: properties...
-      // } else {
-      //    return null;
-      // }
-      if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(connector.getWorkplaceDisplayUrl()
-                + vsDocId));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getBooleanValue(connector.isPublic()));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
-        document.getPropertyStringValue("MimeType", list);
-        logger.log(Level.FINEST, "Getting property: " + name);
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_DOCID.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        list.add(Value.getStringValue(vsDocId));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_ACTION.equals(name)) {
-        list.add(Value.getStringValue(SpiConstants.ActionType.ADD.toString()));
-        logger.fine("Getting Property " + name + " : "
-            + SpiConstants.ActionType.ADD.toString());
-        return new SimpleProperty(list);
-      }
       if (pushAcls) {
         if (SpiConstants.PROPNAME_ACLUSERS.equals(name)) {
           addPrincipals(list, name,
@@ -446,13 +421,6 @@ class DocumentTraverser {
 
     public Set<String> getPropertyNames() throws RepositoryException {
       Set<String> properties = new HashSet<String>();
-
-      if (pushAcls) {
-        properties.add(SpiConstants.PROPNAME_ACLUSERS);
-        properties.add(SpiConstants.PROPNAME_ACLDENYUSERS);
-        properties.add(SpiConstants.PROPNAME_ACLGROUPS);
-        properties.add(SpiConstants.PROPNAME_ACLDENYGROUPS);
-      }
 
       Set<String> documentProperties = document.getPropertyNames();
       for (String property : documentProperties) {

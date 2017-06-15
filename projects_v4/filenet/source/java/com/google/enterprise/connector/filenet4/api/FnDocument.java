@@ -127,6 +127,11 @@ public class FnDocument implements IDocument {
   }
 
   @Override
+  public String get_MimeType() {
+    return doc.get_MimeType();
+  }
+
+  @Override
   public IVersionSeries getVersionSeries() {
     return new FnVersionSeries(doc.get_VersionSeries());
   }

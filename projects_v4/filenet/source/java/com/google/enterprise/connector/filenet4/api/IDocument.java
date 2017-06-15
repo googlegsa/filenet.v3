@@ -41,6 +41,8 @@ public interface IDocument extends IBaseObject {
 
   Double get_ContentSize();
 
+  String get_MimeType();
+
   IVersionSeries getVersionSeries();
 
   ActiveMarkingList get_ActiveMarkings() throws RepositoryDocumentException;

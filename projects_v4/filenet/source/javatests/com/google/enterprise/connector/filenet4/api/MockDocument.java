@@ -81,6 +81,11 @@ public class MockDocument implements IDocument {
   }
 
   @Override
+  public String get_MimeType() {
+    return doc.get_MimeType();
+  }
+
+  @Override
   public IVersionSeries getVersionSeries() {
     return new MockVersionSeries(this.doc);
   }

@@ -36,6 +36,7 @@ import com.google.enterprise.adaptor.testing.RecordingResponse;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.EngineCollectionMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
+import com.google.enterprise.connector.filenet4.api.MockObjectFactory;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.RepositoryException;
 
@@ -109,8 +110,9 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     connec.setPassword(TestConnection.adminPassword);
     connec.setObject_store(TestConnection.objectStore);
     connec.setWorkplace_display_url(TestConnection.displayURL);
-    connec.setObject_factory(TestConnection.objectFactory);
+    connec.setObject_factory(MockObjectFactory.class.getName());
     connec.setContent_engine_url(TestConnection.uri);
+    connec.login();
   }
 
   private DocumentTraverser getObjectUnderTest() throws RepositoryException {
