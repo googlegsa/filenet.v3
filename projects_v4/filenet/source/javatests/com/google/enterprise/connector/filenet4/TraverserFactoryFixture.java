@@ -223,10 +223,13 @@ public class TraverserFactoryFixture {
         connector);
   }
 
-  protected AccessPermissionList getPermissions(PermissionSource source) {
-    List<AccessPermission> aces = TestObjectFactory.generatePermissions(
+  protected AccessPermissionList getPermissions(PermissionSource... sources) {
+    List<AccessPermission> aces = new ArrayList<>();
+    for (PermissionSource source : sources) {
+      aces.addAll(TestObjectFactory.generatePermissions(
         1, 1, 1, 1, (AccessRight.READ_AS_INT | AccessRight.VIEW_CONTENT_AS_INT),
-        0, source);
+        0, source));
+    }
     return TestObjectFactory.newPermissionList(aces);
   }
 

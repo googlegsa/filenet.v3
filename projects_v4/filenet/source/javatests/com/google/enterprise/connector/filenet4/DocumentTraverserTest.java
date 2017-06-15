@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.enterprise.adaptor.Acl;
 import com.google.enterprise.adaptor.DocId;
 import com.google.enterprise.adaptor.testing.RecordingDocIdPusher;
 import com.google.enterprise.adaptor.testing.RecordingResponse;
@@ -102,6 +103,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     connec.setWorkplace_display_url(TestConnection.displayURL);
     connec.setObject_factory(MockObjectFactory.class.getName());
     connec.setContent_engine_url(TestConnection.uri);
+    connec.setGoogleGlobalNamespace("ns");
     connec.login();
   }
 
@@ -414,6 +416,41 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     assertEquals("Content size: " + contentSize,
         expectNotNull, contentSize > 0);
     verifyAll();
+  }
+
+  @Test
+  public void testGetDocContent() throws Exception {
+    String id = "{AAAAAAAA-0000-0000-0000-000000000000}";
+    DocId docId = new DocId("guid/" + id);
+    MockObjectStore os = newObjectStore(DatabaseType.MSSQL);
+    IndependentObject doc = mockDocument(os, id, CHECKPOINT_TIMESTAMP, true,
+        getPermissions(
+            PermissionSource.SOURCE_DIRECT,
+            PermissionSource.SOURCE_TEMPLATE,
+            PermissionSource.SOURCE_PARENT));
+
+    DocumentTraverser traverser =
+        new DocumentTraverser(null, null, os, connec);
+    RecordingResponse response = new RecordingResponse();
+    traverser.getDocContent(id, response);
+
+    Acl acl = response.getAcl();
+    assertFalse(acl.getPermitUsers().toString(),
+        acl.getPermitUsers().isEmpty());
+    assertEquals(docId, acl.getInheritFrom());
+    assertEquals("TMPL", acl.getInheritFromFragment());
+
+    acl = response.getNamedResources().get("TMPL");
+    assertFalse(acl.getPermitUsers().toString(),
+        acl.getPermitUsers().isEmpty());
+    assertEquals(docId, acl.getInheritFrom());
+    assertEquals("FLDR", acl.getInheritFromFragment());
+
+    acl = response.getNamedResources().get("FLDR");
+    assertFalse(acl.getPermitUsers().toString(),
+        acl.getPermitUsers().isEmpty());
+    assertEquals(null, acl.getInheritFrom());
+    assertEquals(null, acl.getInheritFromFragment());
   }
 
   /**

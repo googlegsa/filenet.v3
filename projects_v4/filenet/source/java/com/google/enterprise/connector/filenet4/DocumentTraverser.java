@@ -32,7 +32,6 @@ import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.SearchWrapper;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.SpiConstants.AclInheritanceType;
 import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.IndependentObjectSet;
@@ -52,7 +51,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -185,15 +186,8 @@ class DocumentTraverser {
     Id id = new Id(idStr);
     try {
       logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-      LocalDocument doc = new LocalDocument(id, response);
-      if (connector.pushAcls()) {
-        ArrayList<AclDocument> acls = new ArrayList<>();
-        doc.processInheritedPermissions(acls);
-        for (AclDocument acl : acls) {
-          logger.finest("Processing ACL document");
-          // Do something
-        }
-      }
+      LocalDocument doc =
+          new LocalDocument(id, new DocId("guid/" + id), response);
     } catch (EngineRuntimeException | RepositoryException e) {
       throw new IOException(e);
     }
@@ -268,21 +262,21 @@ class DocumentTraverser {
   }
 
   private class LocalDocument {
-    private final Id docId;
+    private final Id guid;
+    private final DocId docId;
 
     private final IDocument document;
-    private final String vsDocId;
-    private boolean pushAcls;
     private final Permissions.Acl permissions;
 
-    public LocalDocument(Id docId, Response response)
+    public LocalDocument(Id guid, DocId docId, Response response)
         throws IOException, RepositoryException {
+      this.guid = guid;
       this.docId = docId;
-      this.pushAcls = connector.pushAcls();
-      document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
+      boolean pushAcls = connector.pushAcls();
+      document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, guid,
           FileUtil.getDocumentPropertyFilter(connector.getIncludedMeta()));
-      logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
-      vsDocId = document.getVersionSeries().get_Id().toString();
+      logger.log(Level.FINE, "Fetch document for DocId {0}", guid);
+      String vsDocId = document.getVersionSeries().get_Id().toString();
       logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
       if (!document.get_ActiveMarkings().isEmpty()) {
         logger.log(Level.FINE, "Document {0} has an active marking set - "
@@ -293,6 +287,13 @@ class DocumentTraverser {
         permissions = new Permissions(document.get_Permissions(),
             document.get_Owner()).getAcl();
         response.setAcl(getAcl());
+
+        TreeMap<String, Acl> acls = new TreeMap<>();
+        processInheritedPermissions(acls);
+        for (Map.Entry<String, Acl> entry : acls.entrySet()) {
+          logger.finest("Processing ACL document");
+          response.putNamedResource(entry.getKey(), entry.getValue());
+        }
       } else {
         permissions = null;
       }
@@ -317,7 +318,7 @@ class DocumentTraverser {
       if (value == null) {
         logger.log(Level.FINEST,
             "Send content to the GSA since the {0} value is null [DocId: {1}]",
-            new Object[] {PropertyNames.CONTENT_SIZE, docId});
+            new Object[] {PropertyNames.CONTENT_SIZE, guid});
         return true;
       } else {
         double contentSize = value.doubleValue();
@@ -329,60 +330,42 @@ class DocumentTraverser {
           } else {
             logger.log(Level.FINER,
                 "{0} [{1}] exceeds the allowable size [DocId: {2}]",
-                new Object[] {PropertyNames.CONTENT_SIZE, contentSize, docId});
+                new Object[] {PropertyNames.CONTENT_SIZE, contentSize, guid});
             return false;
           }
         } else {
           logger.log(Level.FINEST, "{0} is empty [DocId: {1}]",
-              new Object[] {PropertyNames.CONTENT_SIZE, docId});
+              new Object[] {PropertyNames.CONTENT_SIZE, guid});
           return false;
         }
       }
     }
 
     private Acl getAcl() {
-      String namespace = connector.getGoogleGlobalNamespace();
-
-      Acl.Builder builder = new Acl.Builder();
-      builder.setEverythingCaseInsensitive();
-      builder.setPermitUsers(
-          getUserPrincipals(
-              union(
-                  permissions.getAllowUsers(PermissionSource.SOURCE_DEFAULT),
-                  permissions.getAllowUsers(PermissionSource.SOURCE_DIRECT)),
-              namespace));
-      builder.setDenyUsers(
-          getUserPrincipals(
-              union(
-                  permissions.getDenyUsers(PermissionSource.SOURCE_DEFAULT),
-                  permissions.getDenyUsers(PermissionSource.SOURCE_DIRECT)),
-              namespace));
-      builder.setPermitGroups(
-          getGroupPrincipals(
-              union(
-                  permissions.getAllowGroups(PermissionSource.SOURCE_DEFAULT),
-                  permissions.getAllowGroups(PermissionSource.SOURCE_DIRECT)),
-              namespace));
-      builder.setDenyGroups(
-          getGroupPrincipals(
-              union(
-                  permissions.getDenyGroups(PermissionSource.SOURCE_DEFAULT),
-                  permissions.getDenyGroups(PermissionSource.SOURCE_DIRECT)),
-              namespace));
-      String parentId = getParentId();
-      if (parentId != null) {
-        builder.setInheritFrom(new DocId(parentId));
-      }
-      Acl acl = builder.build();
-      logger.log(Level.FINER, "ACL for {0}: {1}", new Object[] { docId, acl });
-      return acl;
+      return createAcl(getParentFragment(), Acl.InheritanceType.LEAF_NODE,
+          connector.getGoogleGlobalNamespace(),
+          union(
+              permissions.getAllowUsers(PermissionSource.SOURCE_DEFAULT),
+              permissions.getAllowUsers(PermissionSource.SOURCE_DIRECT)),
+          union(
+              permissions.getDenyUsers(PermissionSource.SOURCE_DEFAULT),
+              permissions.getDenyUsers(PermissionSource.SOURCE_DIRECT)),
+          union(
+              permissions.getAllowGroups(PermissionSource.SOURCE_DEFAULT),
+              permissions.getAllowGroups(PermissionSource.SOURCE_DIRECT)),
+          union(
+              permissions.getDenyGroups(PermissionSource.SOURCE_DEFAULT),
+              permissions.getDenyGroups(PermissionSource.SOURCE_DIRECT)));
     }
 
-    private String getParentId() {
+  public static final String SEC_POLICY_POSTFIX = "TMPL";
+  public static final String SEC_FOLDER_POSTFIX = "FLDR";
+
+    private String getParentFragment() {
       if (hasPermissions(PermissionSource.SOURCE_TEMPLATE)) {
-        return docId + AclDocument.SEC_POLICY_POSTFIX;
+        return SEC_POLICY_POSTFIX;
       } else if (hasPermissions(PermissionSource.SOURCE_PARENT)) {
-        return docId + AclDocument.SEC_FOLDER_POSTFIX;
+        return SEC_FOLDER_POSTFIX;
       } else {
         return null;
       }
@@ -445,35 +428,32 @@ class DocumentTraverser {
       return properties;
     }
 
-    public void processInheritedPermissions(List<AclDocument> acls)
-        throws RepositoryException {
+    public void processInheritedPermissions(Map<String, Acl> acls) {
       logger.log(Level.FINEST, "Process inherited permissions for document: {0}",
-          docId);
+          guid);
 
       // Send add request for adding ACLs inherited from parent folders.
-      String secParentId = null;
-      AclDocument folderAclDoc = createAclDocument(PermissionSource.SOURCE_PARENT,
-          AclDocument.SEC_FOLDER_POSTFIX, null);
-      if (folderAclDoc != null) {
-        logger.log(Level.FINEST, "Create ACL document for folder {0}{1}",
-            new Object[] {docId, AclDocument.SEC_FOLDER_POSTFIX});
-        acls.add(folderAclDoc);
-        secParentId = docId + AclDocument.SEC_FOLDER_POSTFIX;
+      String secParentFragment = null;
+      Acl folderAcl = createAcl(PermissionSource.SOURCE_PARENT, null);
+      if (folderAcl != null) {
+        logger.log(Level.FINEST, "Create ACL for folder {0}{1}",
+            new Object[] {guid, SEC_FOLDER_POSTFIX});
+        acls.put(SEC_FOLDER_POSTFIX, folderAcl);
+        secParentFragment = SEC_FOLDER_POSTFIX;
       }
 
       // Send add request for adding ACLs inherited from security template.
-      AclDocument secAclDoc = createAclDocument(PermissionSource.SOURCE_TEMPLATE,
-          AclDocument.SEC_POLICY_POSTFIX, secParentId);
-      if (secAclDoc != null) {
+      Acl secAcl = createAcl(PermissionSource.SOURCE_TEMPLATE,
+          secParentFragment);
+      if (secAcl != null) {
         logger.log(Level.FINEST,
-            "Create ACL document for security template {0}{1}",
-            new Object[] {docId, AclDocument.SEC_POLICY_POSTFIX});
-        acls.add(secAclDoc);
+            "Create ACL for security template {0}{1}",
+            new Object[] {guid, SEC_POLICY_POSTFIX});
+        acls.put(SEC_POLICY_POSTFIX, secAcl);
       }
     }
 
-    private AclDocument createAclDocument(PermissionSource permSrc, String postfix,
-        String parentId) {
+    private Acl createAcl(PermissionSource permSrc, String parentFragment) {
       Set<String> allowUsers = permissions.getAllowUsers(permSrc);
       Set<String> denyUsers = permissions.getDenyUsers(permSrc);
       Set<String> allowGroups = permissions.getAllowGroups(permSrc);
@@ -481,14 +461,32 @@ class DocumentTraverser {
       if (allowUsers.isEmpty() && denyUsers.isEmpty()
               && allowGroups.isEmpty() && denyGroups.isEmpty()) {
         logger.log(Level.FINEST,
-            "Document {0} does not have inherited permissions", docId);
+            "Document {0} does not have inherited permissions", guid);
         return null;
       } else {
-        return new AclDocument(docId + postfix, parentId,
-            AclInheritanceType.CHILD_OVERRIDES,
+        return createAcl(parentFragment, Acl.InheritanceType.CHILD_OVERRIDES,
             connector.getGoogleGlobalNamespace(), allowUsers, denyUsers,
             allowGroups, denyGroups);
       }
+    }
+
+    private Acl createAcl(String parentFragment,
+        Acl.InheritanceType inheritanceType, String namespace,
+        Set<String> allowUsers, Set<String> denyUsers,
+        Set<String> allowGroups, Set<String> denyGroups) {
+      Acl.Builder builder = new Acl.Builder();
+      builder.setEverythingCaseInsensitive();
+      builder.setInheritanceType(inheritanceType);
+      builder.setPermitUsers(getUserPrincipals(allowUsers, namespace));
+      builder.setDenyUsers(getUserPrincipals(denyUsers, namespace));
+      builder.setPermitGroups(getGroupPrincipals(allowGroups, namespace));
+      builder.setDenyGroups(getGroupPrincipals(denyGroups, namespace));
+      if (parentFragment != null) {
+        builder.setInheritFrom(docId, parentFragment);
+      }
+      Acl acl = builder.build();
+      logger.log(Level.FINER, "ACL for {0}: {1}", new Object[] { guid, acl });
+      return acl;
     }
   }
 }
