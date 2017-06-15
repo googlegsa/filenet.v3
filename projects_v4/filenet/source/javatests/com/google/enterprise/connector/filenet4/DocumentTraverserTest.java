@@ -422,8 +422,8 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     DocumentTraverser traverser = getObjectUnderTest(os, docSet);
     RecordingDocIdPusher pusher = new RecordingDocIdPusher();
     traverser.getDocIds(CHECKPOINT, pusher);
-    List<DocId> docList = pusher.getDocIds();
-    Document doc = traverser.getDocContent(docList.get(0).getUniqueId(), null);
+    List<String> docList = getDocids(pusher.getDocIds());
+    Document doc = traverser.getDocContent(docList.get(0));
     assertNotNull(doc);
     if (expectNotNull) {
       assertNotNull(SpiConstants.PROPNAME_CONTENT + " is null",

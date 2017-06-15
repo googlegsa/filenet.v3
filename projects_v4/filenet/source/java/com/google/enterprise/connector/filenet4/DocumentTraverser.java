@@ -135,24 +135,43 @@ class DocumentTraverser {
   //   }
   // }
 
-  // TODO: @Override Adaptor.getDocContent(Request, Response)
-  public Document getDocContent(String docId, DocIdPusher pusher)
+  // TODO: void getDocIds(Checkpoint, DocIdPusher)
+  public void getDocIds(String checkpointStr, DocIdPusher pusher)
       throws IOException {
-    if (docId.startsWith("DocId(")) {
-      throw new AssertionError("Yo, call getUniqueId() maybe? " + docId);
-    }
     try {
-      String[] parts = docId.split("/", 0);
-      switch (parts[0]) {
-        case "pseudo":
-          getDocIds(parts[1], pusher);
-          return null;
-        case "guid":
-          return getDocContent(parts[1]);
-        default:
-          System.out.println("Not found: " + docId);
-          // TODO: respondNotFound
-          return null;
+      Checkpoint checkpoint = new Checkpoint(checkpointStr);
+
+      connection.refreshSUserContext();
+      logger.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
+
+      SearchWrapper search = objectFactory.getSearch(objectStore);
+
+      String query = buildQueryString(checkpoint);
+      logger.log(Level.FINE, "Query for added or updated documents: {0}",
+          query);
+      IndependentObjectSet objectSet = search.fetchObjects(query, batchHint,
+          SearchWrapper.dereferenceObjects, SearchWrapper.ALL_ROWS);
+      logger.fine(objectSet.isEmpty()
+          ? "Found no documents to add or update"
+          : "Found documents to add or update");
+
+      ArrayList<DocId> docIds = new ArrayList<>();
+      Date timestamp = null;
+      Id guid = null; // TODO: Id.ZERO_ID?
+      Iterator<?> objects = objectSet.iterator();
+      while (objects.hasNext()) {
+        // Avoid clash with SPI Document class.
+        Containable object = (Containable) objects.next();
+        timestamp = object.get_DateLastModified();
+        guid = object.get_Id();
+        docIds.add(new DocId("guid/" + guid));
+      }
+      if (timestamp != null) {
+        checkpoint.setTimeAndUuid(
+            JsonField.LAST_MODIFIED_TIME, timestamp,
+            JsonField.UUID, guid);
+        docIds.add(new DocId("pseudo/" + checkpoint));
+        pusher.pushDocIds(docIds);
       }
     } catch (EngineRuntimeException | RepositoryException
         | InterruptedException e) {
@@ -160,60 +179,24 @@ class DocumentTraverser {
     }
   }
 
-  // TODO: void getDocIds(Checkpoint, DocIdPusher)
-  public void getDocIds(String checkpointStr, DocIdPusher pusher)
-      throws RepositoryException, InterruptedException {
-    Checkpoint checkpoint = new Checkpoint(checkpointStr);
-
-    connection.refreshSUserContext();
-    logger.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
-
-    SearchWrapper search = objectFactory.getSearch(objectStore);
-
-    String query = buildQueryString(checkpoint);
-    logger.log(Level.FINE, "Query for added or updated documents: {0}",
-        query);
-    IndependentObjectSet objectSet = search.fetchObjects(query, batchHint,
-        SearchWrapper.dereferenceObjects, SearchWrapper.ALL_ROWS);
-    logger.fine(objectSet.isEmpty()
-        ? "Found no documents to add or update"
-        : "Found documents to add or update");
-
-    ArrayList<DocId> docIds = new ArrayList<>();
-    Date timestamp = null;
-    Id guid = null; // TODO: Id.ZERO_ID?
-    Iterator<?> objects = objectSet.iterator();
-    while (objects.hasNext()) {
-      // Avoid clash with SPI Document class.
-      Containable object = (Containable) objects.next();
-      timestamp = object.get_DateLastModified();
-      guid = object.get_Id();
-      docIds.add(new DocId("guid/" + guid));
-    }
-    if (timestamp != null) {
-      checkpoint.setTimeAndUuid(
-          JsonField.LAST_MODIFIED_TIME, timestamp,
-          JsonField.UUID, guid);
-      docIds.add(new DocId("pseudo/" + checkpoint));
-      pusher.pushDocIds(docIds);
-    }
-  }
-
   // TODO: void getDocContent(Id, Request, Response)
-  public Document getDocContent(String idStr)
-      throws RepositoryException {
+  public Document getDocContent(String idStr) throws IOException {
     Id id = new Id(idStr);
-    logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-    LocalDocument doc = new LocalDocument(id);
-    if (connector.pushAcls()) {
-      LinkedList<Document> acls = new LinkedList<>();
-      doc.processInheritedPermissions(acls);
-      for (Document acl : acls) {
-        logger.finest("Processing ACL document");
-        // Do something
+    try {
+      logger.log(Level.FINEST, "Add document [ID: {0}]", id);
+      LocalDocument doc = new LocalDocument(id);
+      if (connector.pushAcls()) {
+        ArrayList<AclDocument> acls = new ArrayList<>();
+        doc.processInheritedPermissions(acls);
+        for (AclDocument acl : acls) {
+          logger.finest("Processing ACL document");
+          // Do something
+        }
       }
+      return doc;
+    } catch (EngineRuntimeException | RepositoryException e) {
+      throw new IOException(e);
     }
-    return doc;
   }
 
   /**
@@ -287,20 +270,14 @@ class DocumentTraverser {
   private class LocalDocument implements Document {
     private final Id docId;
 
-    private IDocument document = null;
-    private String vsDocId;
+    private final IDocument document;
+    private final String vsDocId;
     private boolean pushAcls;
-    private Permissions.Acl permissions;
+    private final Permissions.Acl permissions;
 
-    public LocalDocument(Id docId) {
+    public LocalDocument(Id docId) throws RepositoryException {
       this.docId = docId;
       this.pushAcls = connector.pushAcls();
-    }
-
-    private void fetch() throws RepositoryException {
-      if (document != null) {
-        return;
-      }
       document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
           FileUtil.getDocumentPropertyFilter(connector.getIncludedMeta()));
       logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
@@ -351,7 +328,6 @@ class DocumentTraverser {
     public Property findProperty(String name) throws RepositoryException {
       LinkedList<Value> list = new LinkedList<Value>();
 
-      fetch();
       // TODO (tdnguyen): refactor this method or conditions below to alleviate
       // performance concern with using Value.getStringValueString().
       // if (!name.startsWith(SpiConstants.RESERVED_PROPNAME_PREFIX)) {
@@ -474,7 +450,6 @@ class DocumentTraverser {
 
     @Override
     public Set<String> getPropertyNames() throws RepositoryException {
-      fetch();
       Set<String> properties = new HashSet<String>();
 
       if (pushAcls) {
@@ -507,9 +482,8 @@ class DocumentTraverser {
       return properties;
     }
 
-    public void processInheritedPermissions(LinkedList<Document> acls)
+    public void processInheritedPermissions(List<AclDocument> acls)
         throws RepositoryException {
-      fetch();
       if (!pushAcls) {
         return;
       }
@@ -518,7 +492,7 @@ class DocumentTraverser {
 
       // Send add request for adding ACLs inherited from parent folders.
       String secParentId = null;
-      Document folderAclDoc = createAclDocument(PermissionSource.SOURCE_PARENT,
+      AclDocument folderAclDoc = createAclDocument(PermissionSource.SOURCE_PARENT,
           AclDocument.SEC_FOLDER_POSTFIX, null);
       if (folderAclDoc != null) {
         logger.log(Level.FINEST, "Create ACL document for folder {0}{1}",
@@ -528,7 +502,7 @@ class DocumentTraverser {
       }
 
       // Send add request for adding ACLs inherited from security template.
-      Document secAclDoc = createAclDocument(PermissionSource.SOURCE_TEMPLATE,
+      AclDocument secAclDoc = createAclDocument(PermissionSource.SOURCE_TEMPLATE,
           AclDocument.SEC_POLICY_POSTFIX, secParentId);
       if (secAclDoc != null) {
         logger.log(Level.FINEST,
@@ -538,7 +512,7 @@ class DocumentTraverser {
       }
     }
 
-    private Document createAclDocument(PermissionSource permSrc, String postfix,
+    private AclDocument createAclDocument(PermissionSource permSrc, String postfix,
         String parentId) throws RepositoryException {
       Set<String> allowUsers = permissions.getAllowUsers(permSrc);
       Set<String> denyUsers = permissions.getDenyUsers(permSrc);
