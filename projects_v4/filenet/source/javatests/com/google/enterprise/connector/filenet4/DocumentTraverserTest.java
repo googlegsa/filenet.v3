@@ -14,28 +14,22 @@
 
 package com.google.enterprise.connector.filenet4;
 
-import static com.google.enterprise.connector.filenet4.CheckpointTest.assertDateNearly;
-import static com.google.enterprise.connector.filenet4.CheckpointTest.assertNullField;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.mockDocument;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newId;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
-import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.adaptor.DocId;
 import com.google.enterprise.adaptor.testing.RecordingDocIdPusher;
 import com.google.enterprise.adaptor.testing.RecordingResponse;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.EngineCollectionMocks.IndependentObjectSetMock;
-import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.MockObjectFactory;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
 import com.google.enterprise.connector.spi.RepositoryException;
@@ -60,7 +54,6 @@ import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -95,8 +88,6 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     }
   }
 
-  private enum SkipPosition {FIRST, MIDDLE, LAST};
-
   private FileConnector connec;
 
   @Rule
@@ -104,7 +95,6 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
 
   @Before
   public void setUp() throws RepositoryException {
-    // connec = TestObjectFactory.newFileConnector();
     connec = new FileConnector();
     connec.setUsername(TestConnection.adminUsername);
     connec.setPassword(TestConnection.adminPassword);
@@ -113,11 +103,6 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     connec.setObject_factory(MockObjectFactory.class.getName());
     connec.setContent_engine_url(TestConnection.uri);
     connec.login();
-  }
-
-  private DocumentTraverser getObjectUnderTest() throws RepositoryException {
-    FileSession fs = (FileSession) connec.login();
-    return fs.getDocumentTraverser();
   }
 
   @Test
@@ -456,10 +441,6 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
       objectList.add(mockDocument(os, entry[0], entry[1], releasedVersion));
     }
     return new IndependentObjectSetMock(objectList);
-  }
-
-  private DocumentTraverser getObjectUnderTest(IObjectStore os) {
-    return new DocumentTraverser(null, null, os, connec);
   }
 
   private DocumentTraverser getObjectUnderTest(MockObjectStore os,
