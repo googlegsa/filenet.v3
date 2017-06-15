@@ -29,6 +29,8 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Iterators;
+import com.google.enterprise.connector.filenet4.EngineCollectionMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.EngineCollectionMocks.SecurityPolicySetMock;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
@@ -45,11 +47,13 @@ import com.filenet.api.constants.AccessRight;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
+import com.filenet.api.core.IndependentObject;
 import com.filenet.api.exception.EngineRuntimeException;
 import com.filenet.api.property.PropertyFilter;
 import com.filenet.api.security.AccessPermission;
 
 import org.easymock.Capture;
+import org.easymock.IAnswer;
 import org.junit.After;
 import org.junit.Before;
 
@@ -58,6 +62,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 // Some JVMs require this class to be public in order for JUnit to
@@ -133,15 +138,30 @@ public class TraverserFactoryFixture {
 
   protected DocumentTraverser getDocumentTraverser(
       FileConnector connector, MockObjectStore os,
-      IndependentObjectSet objectSet, Capture<String> capture)
+      final IndependentObjectSet objectSet, Capture<String> capture)
       throws RepositoryException {
     IConnection connection = createNiceMock(IConnection.class);
 
     // The search result is for added and update documents.
     SearchWrapper searcher = createMock(SearchWrapper.class);
-    expect(searcher.fetchObjects(capture(capture), anyInt(),
+    final Capture<Integer> batchHint = new Capture<>();
+    expect(searcher.fetchObjects(capture(capture), capture(batchHint),
             isA(PropertyFilter.class), anyBoolean()))
-        .andReturn(objectSet);
+        .andAnswer(
+            new IAnswer<IndependentObjectSet>() {
+              @Override public IndependentObjectSet answer() {
+                // We can't get the size of objectSet easily, so we always
+                // copy the objects, limited by the captured batch hint.
+                Iterator<?> oldObjects = objectSet.iterator();
+                List<IndependentObject> newObjects = new ArrayList<>();
+                int limit = batchHint.getValue();
+                while (oldObjects.hasNext() && limit-- > 0) {
+                  newObjects.add((IndependentObject) oldObjects.next());
+                }
+                return new IndependentObjectSetMock(newObjects);
+              }
+            }
+          );
 
     IObjectFactory objectFactory = createMock(IObjectFactory.class);
     expect(objectFactory.getSearch(os)).andReturn(searcher);

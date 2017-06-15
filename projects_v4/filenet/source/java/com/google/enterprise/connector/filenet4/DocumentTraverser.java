@@ -138,6 +138,32 @@ class DocumentTraverser {
   //   }
   // }
 
+  // TODO: @Override Adaptor.getDocContent(Request, Response)
+  public Document getDocContent(String docId, DocIdPusher pusher)
+      throws IOException {
+    if (docId.startsWith("DocId(")) {
+      throw new AssertionError("Yo, call getUniqueId() maybe? " + docId);
+    }
+    try {
+      String[] parts = docId.split("/", 0);
+      switch (parts[0]) {
+        case "pseudo":
+          getDocIds(parts[1], pusher);
+          return null;
+        case "guid":
+          return getDocContent(parts[1]);
+        default:
+          System.out.println("Not found: " + docId);
+          // TODO: respondNotFound
+          return null;
+      }
+    } catch (EngineRuntimeException | RepositoryException
+        | InterruptedException e) {
+      throw new IOException(e);
+    }
+  }
+
+  // TODO: void getDocIds(Checkpoint, DocIdPusher)
   public void getDocIds(String checkpointStr, DocIdPusher pusher)
       throws RepositoryException, InterruptedException {
     Checkpoint checkpoint = new Checkpoint(checkpointStr);
@@ -176,6 +202,7 @@ class DocumentTraverser {
     }
   }
 
+  // TODO: void getDocContent(Id, Request, Response)
   public Document getDocContent(String idStr)
       throws RepositoryException {
     Id id = new Id(idStr);
@@ -190,56 +217,6 @@ class DocumentTraverser {
       }
     }
     return doc;
-  }
-
-  public Document getDocContent(String docId, DocIdPusher pusher)
-      throws IOException {
-    if (docId.startsWith("DocId(")) {
-      throw new AssertionError("Yo, call getUniqueId() maybe? " + docId);
-    }
-    try {
-      String[] parts = docId.split("/", 0);
-      switch (parts[0]) {
-        case "pseudo":
-          getDocIds(parts[1], pusher);
-          return null;
-        case "guid":
-          return getDocContent(parts[1]);
-        default:
-          System.out.println("Not found: " + docId);
-          // TODO: respondNotFound
-          return null;
-      }
-    } catch (EngineRuntimeException | RepositoryException
-        | InterruptedException e) {
-      throw new IOException(e);
-    }
-  }
-
-  public LocalDocumentList getDocumentList(Checkpoint checkPoint)
-      throws RepositoryException {
-    connection.refreshSUserContext();
-    logger.log(Level.FINE, "Target ObjectStore is: {0}", objectStore);
-
-    SearchWrapper search = objectFactory.getSearch(objectStore);
-
-    try {
-      String query = buildQueryString(checkPoint);
-      logger.log(Level.FINE, "Query for added or updated documents: {0}",
-          query);
-      IndependentObjectSet objectSet = search.fetchObjects(query, batchHint,
-          SearchWrapper.dereferenceObjects, SearchWrapper.ALL_ROWS);
-      logger.fine((objectSet.isEmpty()) ? "Found no documents to add or update"
-          : "Found documents to add or update");
-
-      if (!objectSet.isEmpty()) {
-        return new LocalDocumentList(objectSet, checkPoint);
-      } else {
-        return null;
-      }
-    } catch (EngineRuntimeException e) {
-      throw new RepositoryException(e);
-    }
   }
 
   /**
@@ -308,59 +285,6 @@ class DocumentTraverser {
         + PropertyNames.ID + ")) OR (" + PropertyNames.DATE_LAST_MODIFIED
         + ">{0}))";
     return MessageFormat.format(whereClause, new Object[] { c, uuid });
-  }
-
-  class LocalDocumentList {
-    private final Checkpoint checkpoint;
-
-    private final Iterator<?> objects;
-    private final LinkedList<Document> acls;
-
-    private Date fileDocumentDate;
-    private Id docId;
-
-    public LocalDocumentList(IndependentObjectSet objectSet,
-        Checkpoint checkpoint) {
-      this.checkpoint = checkpoint;
-      this.objects = objectSet.iterator();
-      this.acls = new LinkedList<Document>();
-    }
-
-    public Document nextDocument() throws RepositoryException {
-      logger.entering("LocalDocumentList", "nextDocument()");
-
-      Document fileDocument;
-      if (objects.hasNext()) {
-        // Avoid clash with SPI Document class.
-        Containable object = (Containable) objects.next();
-        fileDocumentDate = object.get_DateLastModified();
-        docId = object.get_Id();
-        fileDocument = createAddDocument(docId);
-      } else if (connector.pushAcls()) {
-        logger.finest("Processing ACL document");
-        fileDocument = acls.pollFirst();
-      } else {
-        fileDocument = null;
-      }
-      return fileDocument;
-    }
-
-    private Document createAddDocument(Id id)
-        throws RepositoryException {
-      logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-      LocalDocument doc = new LocalDocument(id);
-      if (connector.pushAcls()) {
-        doc.processInheritedPermissions(acls);
-      }
-      return doc;
-    }
-
-    public String checkpoint() throws RepositoryException {
-      checkpoint.setTimeAndUuid(
-          JsonField.LAST_MODIFIED_TIME, fileDocumentDate,
-          JsonField.UUID, docId);
-      return checkpoint.toString();
-    }
   }
 
   private static Boolean hasMarkings;
