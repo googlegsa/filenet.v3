@@ -35,16 +35,13 @@ import com.google.enterprise.connector.spi.SpiConstants.PrincipalType;
 import com.google.enterprise.connector.spi.TraversalContext;
 import com.google.enterprise.connector.spi.Value;
 
-import com.filenet.api.admin.PropertyDefinitionString;
 import com.filenet.api.collection.IndependentObjectSet;
-import com.filenet.api.collection.PropertyDefinitionList;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.GuidConstants;
 import com.filenet.api.constants.PermissionSource;
 import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.core.Containable;
 import com.filenet.api.exception.EngineRuntimeException;
-import com.filenet.api.security.MarkingSet;
 import com.filenet.api.util.Id;
 
 import java.io.IOException;
@@ -287,8 +284,6 @@ class DocumentTraverser {
     return MessageFormat.format(whereClause, new Object[] { c, uuid });
   }
 
-  private static Boolean hasMarkings;
-
   private class LocalDocument implements Document {
     private final Id docId;
 
@@ -302,58 +297,6 @@ class DocumentTraverser {
       this.pushAcls = connector.pushAcls();
     }
 
-    @VisibleForTesting
-    boolean checkForMarkings() throws RepositoryException {
-      if (!(pushAcls && connector.checkMarking())) {
-        return false;
-      }
-      synchronized (DocumentTraverser.class) {
-        if (hasMarkings == null) {
-          // If the additional WHERE clause starts with SELECT,
-          // then the config may not be using the Document class.
-          String whereClause = connector.getAdditionalWhereClause();
-          if (whereClause != null &&
-              whereClause.trim().toUpperCase().startsWith("SELECT")) {
-            hasMarkings = Boolean.TRUE;
-          } else {
-            hasMarkings = hasMarkings();
-          }
-        }
-        return hasMarkings;
-      }
-    }
-
-    // TODO(bmj): This code was lifted from FileAuthorizationHandler.
-    private boolean hasMarkings() throws RepositoryException {
-      // Check for the marking sets applied over the document class.
-      try {
-        PropertyDefinitionList propertyDefinitions =
-            objectFactory.getPropertyDefinitions(objectStore,
-                GuidConstants.Class_Document, null);
-        Iterator<?> iter = propertyDefinitions.iterator();
-        while (iter.hasNext()) {
-          Object propertyDefinition = iter.next();
-          // Only string properties can have a marking set, and
-          // get_MarkingSet is defined directly on PropertyDefinitionString.
-          if (propertyDefinition instanceof PropertyDefinitionString) {
-            MarkingSet markingSet =
-                ((PropertyDefinitionString) propertyDefinition).get_MarkingSet();
-            if (markingSet != null) {
-              logger.info("Document class has a property with a marking set");
-              return true;
-            }
-          }
-        }
-        logger.info("Document class has no properties with a marking set");
-        return false;
-      } catch (Exception ecp) {
-        logger.log(Level.SEVERE, "Failure checking for a marking set", ecp);
-        // This was the existing behavior when an exception was thrown, to
-        // use checkMarkings, and if we're here then checkMarkings is true.
-        return true;
-      }
-    }
-
     private void fetch() throws RepositoryException {
       if (document != null) {
         return;
@@ -363,12 +306,10 @@ class DocumentTraverser {
       logger.log(Level.FINE, "Fetch document for DocId {0}", docId);
       vsDocId = document.getVersionSeries().get_Id().toString();
       logger.log(Level.FINE, "VersionSeriesID for document is: {0}", vsDocId);
-      if (checkForMarkings()) {
-        if (!document.get_ActiveMarkings().isEmpty()) {
-          logger.log(Level.FINE, "Document {0} has an active marking set - "
-              + "ignoring ACL.", vsDocId);
-          pushAcls = false;
-        }
+      if (!document.get_ActiveMarkings().isEmpty()) {
+        logger.log(Level.FINE, "Document {0} has an active marking set - "
+            + "ignoring ACL.", vsDocId);
+        pushAcls = false;
       }
       if (pushAcls) {
         permissions = new Permissions(document.get_Permissions(),
