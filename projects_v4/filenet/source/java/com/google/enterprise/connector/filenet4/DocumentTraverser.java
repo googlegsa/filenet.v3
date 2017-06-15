@@ -18,13 +18,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.enterprise.adaptor.DocId;
 import com.google.enterprise.adaptor.DocIdPusher;
+import com.google.enterprise.adaptor.IOHelper;
+import com.google.enterprise.adaptor.Response;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.api.IConnection;
 import com.google.enterprise.connector.filenet4.api.IDocument;
 import com.google.enterprise.connector.filenet4.api.IObjectFactory;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.SearchWrapper;
-import com.google.enterprise.connector.spi.Document;
 import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
 import com.google.enterprise.connector.spi.SimpleProperty;
@@ -180,11 +181,12 @@ class DocumentTraverser {
   }
 
   // TODO: void getDocContent(Id, Request, Response)
-  public Document getDocContent(String idStr) throws IOException {
+  public void getDocContent(String idStr, Response response)
+      throws IOException {
     Id id = new Id(idStr);
     try {
       logger.log(Level.FINEST, "Add document [ID: {0}]", id);
-      LocalDocument doc = new LocalDocument(id);
+      LocalDocument doc = new LocalDocument(id, response);
       if (connector.pushAcls()) {
         ArrayList<AclDocument> acls = new ArrayList<>();
         doc.processInheritedPermissions(acls);
@@ -193,7 +195,6 @@ class DocumentTraverser {
           // Do something
         }
       }
-      return doc;
     } catch (EngineRuntimeException | RepositoryException e) {
       throw new IOException(e);
     }
@@ -267,7 +268,7 @@ class DocumentTraverser {
     return MessageFormat.format(whereClause, new Object[] { c, uuid });
   }
 
-  private class LocalDocument implements Document {
+  private class LocalDocument {
     private final Id docId;
 
     private final IDocument document;
@@ -275,7 +276,8 @@ class DocumentTraverser {
     private boolean pushAcls;
     private final Permissions.Acl permissions;
 
-    public LocalDocument(Id docId) throws RepositoryException {
+    public LocalDocument(Id docId, Response response)
+        throws IOException, RepositoryException {
       this.docId = docId;
       this.pushAcls = connector.pushAcls();
       document = (IDocument) objectStore.fetchObject(ClassNames.DOCUMENT, docId,
@@ -294,17 +296,24 @@ class DocumentTraverser {
       } else {
         permissions = null;
       }
+
+      response.setLastModified(document.get_DateLastModified());
+
+      logger.log(Level.FINEST, "Getting content");
+      if (hasAllowableSize()) {
+        IOHelper.copyStream(document.getContent(), response.getOutputStream());
+      }
     }
 
     private boolean hasAllowableSize() throws RepositoryException {
-      String value = Value.getSingleValueString(this, PropertyNames.CONTENT_SIZE);
+      Double value = document.get_ContentSize();
       if (value == null) {
         logger.log(Level.FINEST,
             "Send content to the GSA since the {0} value is null [DocId: {1}]",
             new Object[] {PropertyNames.CONTENT_SIZE, docId});
         return true;
       } else {
-        double contentSize = Double.parseDouble(value);
+        double contentSize = value.doubleValue();
         if (contentSize > 0) {
           if (contentSize <= 2L * 1024 * 1024 * 1024) {
             logger.log(Level.FINEST, "{0} : {1}",
@@ -324,7 +333,6 @@ class DocumentTraverser {
       }
     }
 
-    @Override
     public Property findProperty(String name) throws RepositoryException {
       LinkedList<Value> list = new LinkedList<Value>();
 
@@ -338,15 +346,7 @@ class DocumentTraverser {
       // } else {
       //    return null;
       // }
-      if (SpiConstants.PROPNAME_CONTENT.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        if (hasAllowableSize()) {
-          list.add(Value.getBinaryValue(document.getContent()));
-          return new SimpleProperty(list);
-        } else {
-          return null;
-        }
-      } else if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
+      if (SpiConstants.PROPNAME_DISPLAYURL.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(Value.getStringValue(connector.getWorkplaceDisplayUrl()
                 + vsDocId));
@@ -354,10 +354,6 @@ class DocumentTraverser {
       } else if (SpiConstants.PROPNAME_ISPUBLIC.equals(name)) {
         logger.log(Level.FINEST, "Getting property: " + name);
         list.add(Value.getBooleanValue(connector.isPublic()));
-        return new SimpleProperty(list);
-      } else if (SpiConstants.PROPNAME_LASTMODIFIED.equals(name)) {
-        logger.log(Level.FINEST, "Getting property: " + name);
-        this.document.getPropertyDateValue("DateLastModified", list);
         return new SimpleProperty(list);
       } else if (SpiConstants.PROPNAME_MIMETYPE.equals(name)) {
         document.getPropertyStringValue("MimeType", list);
@@ -448,7 +444,6 @@ class DocumentTraverser {
           new Object[] { propName, names});
     }
 
-    @Override
     public Set<String> getPropertyNames() throws RepositoryException {
       Set<String> properties = new HashSet<String>();
 

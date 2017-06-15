@@ -22,6 +22,7 @@ import com.filenet.api.collection.ActiveMarkingList;
 import com.filenet.api.core.Folder;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -30,11 +31,15 @@ import java.util.Set;
  */
 public interface IDocument extends IBaseObject {
 
+  Date get_DateLastModified();
+
   AccessPermissionList get_Permissions();
 
   String get_Owner();
 
   InputStream getContent();
+
+  Double get_ContentSize();
 
   IVersionSeries getVersionSeries();
 

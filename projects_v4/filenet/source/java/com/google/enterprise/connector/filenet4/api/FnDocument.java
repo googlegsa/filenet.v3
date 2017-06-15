@@ -93,6 +93,11 @@ public class FnDocument implements IDocument {
   }
 
   @Override
+  public Date get_DateLastModified() {
+    return doc.get_DateLastModified();
+  }
+
+  @Override
   public AccessPermissionList get_Permissions() {
     return doc.get_Permissions();
   }
@@ -114,6 +119,11 @@ public class FnDocument implements IDocument {
           + this.doc.get_Id() + " " + er.getLocalizedMessage(), er);
     }
     return ip;
+  }
+
+  @Override
+  public Double get_ContentSize() {
+    return doc.get_ContentSize();
   }
 
   @Override

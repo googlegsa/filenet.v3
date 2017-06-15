@@ -32,16 +32,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.adaptor.DocId;
 import com.google.enterprise.adaptor.testing.RecordingDocIdPusher;
+import com.google.enterprise.adaptor.testing.RecordingResponse;
 import com.google.enterprise.connector.filenet4.Checkpoint.JsonField;
 import com.google.enterprise.connector.filenet4.EngineCollectionMocks.IndependentObjectSetMock;
 import com.google.enterprise.connector.filenet4.api.IObjectStore;
 import com.google.enterprise.connector.filenet4.api.MockObjectStore;
-import com.google.enterprise.connector.spi.Document;
-import com.google.enterprise.connector.spi.Property;
 import com.google.enterprise.connector.spi.RepositoryException;
-import com.google.enterprise.connector.spi.SpiConstants;
-import com.google.enterprise.connector.spi.SpiConstants.ActionType;
-import com.google.enterprise.connector.spi.Value;
 
 import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.constants.ClassNames;
@@ -59,6 +55,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -152,8 +149,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     verifyAll();
   }
 
-  private ImmutableList<String> getDocids(List<DocId> docList)
-      throws RepositoryException {
+  private ImmutableList<String> getDocids(List<DocId> docList) {
     ImmutableList.Builder<String> builder = ImmutableList.builder();
     for (DocId docId : docList) {
       String s = docId.getUniqueId();
@@ -164,7 +160,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     return builder.build();
   }
 
-  private String getCheckpoint(List<DocId> docList) throws RepositoryException {
+  private String getCheckpoint(List<DocId> docList) {
     String checkpoint = null;
     for (DocId docId : docList) {
       String s = docId.getUniqueId();
@@ -284,21 +280,21 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     IndependentObjectSet docSet = getDocuments(os, docEntries, true);
 
     int counter = 0;
-    Property lastModified = null;
+    Date lastModified = null;
     DocumentTraverser traverser = getObjectUnderTest(os, docSet);
     RecordingDocIdPusher pusher = new RecordingDocIdPusher();
     traverser.getDocIds(new Checkpoint().toString(), pusher);
     List<DocId> docList = pusher.getDocIds();
     for (String id : getDocids(docList)) {
       assertTrue(os.containsObject(ClassNames.DOCUMENT, new Id(id)));
-      Document doc = traverser.getDocContent(id);
-      lastModified = doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED);
+      RecordingResponse response = new RecordingResponse();
+      traverser.getDocContent(id, response);
+      lastModified = response.getLastModified();
       counter++;
     }
     assertEquals(docEntries.length, counter);
 
-    assertCheckpointContains(
-        getCheckpoint(docList), lastModified, JsonField.LAST_MODIFIED_TIME);
+    assertEquals(CHECKPOINT_TIMESTAMP, dateFormatterNoTz.format(lastModified));
     assertCheckpointEquals(getCheckpoint(docList),
         CHECKPOINT_TIMESTAMP + TZ_OFFSET,
         "{AAAAAAAA-4000-0000-0000-000000000000}");
@@ -311,21 +307,21 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     IndependentObjectSet docSet = getDocuments(os, docEntries, true);
 
     int counter = 0;
-    Property lastModified = null;
+    Date lastModified = null;
     DocumentTraverser traverser = getObjectUnderTest(os, docSet);
     RecordingDocIdPusher pusher = new RecordingDocIdPusher();
     traverser.getDocIds(CHECKPOINT, pusher);
     List<DocId> docList = pusher.getDocIds();
     for (String id : getDocids(docList)) {
       assertTrue(os.containsObject(ClassNames.DOCUMENT, new Id(id)));
-      Document doc = traverser.getDocContent(id);
-      lastModified = doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED);
+      RecordingResponse response = new RecordingResponse();
+      traverser.getDocContent(id, response);
+      lastModified = response.getLastModified();
       counter++;
     }
     assertEquals(docEntries.length, counter);
 
-    assertCheckpointContains(
-        getCheckpoint(docList), lastModified, JsonField.LAST_MODIFIED_TIME);
+    assertEquals(CHECKPOINT_TIMESTAMP, dateFormatterNoTz.format(lastModified));
     assertCheckpointEquals(getCheckpoint(docList),
         CHECKPOINT_TIMESTAMP + TZ_OFFSET,
         "{AAAAAAAA-4000-0000-0000-000000000000}");
@@ -347,13 +343,12 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     assertFalse(docList.isEmpty());
 
     int counter = 0;
-    String prevDate = "0";
+    Date prevDate = new Date(0L);
     for (String id : getDocids(docList)) {
       assertTrue(os.containsObject(ClassNames.DOCUMENT, new Id(id)));
-      Document doc = traverser.getDocContent(id);
-      Property lastModified =
-          doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED);
-      String thisDate = lastModified.nextValue().toString();
+      RecordingResponse response = new RecordingResponse();
+      traverser.getDocContent(id, response);
+      Date thisDate = response.getLastModified();
       assertTrue("Previous date " + prevDate + " is after " + thisDate,
           prevDate.compareTo(thisDate) <= 0);
       prevDate = thisDate;
@@ -369,7 +364,7 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     IndependentObjectSet docSet = getDocuments(os, docEntries, true);
 
     int counter = 0;
-    Property lastModified = null;
+    Date lastModified = null;
     DocumentTraverser traverser = getObjectUnderTest(os, docSet);
     traverser.setBatchHint(1);
     assertTrue(String.valueOf(docEntries.length), docEntries.length > 1);
@@ -378,14 +373,14 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     List<DocId> docList = pusher.getDocIds();
     for (String id : getDocids(docList)) {
       assertTrue(os.containsObject(ClassNames.DOCUMENT, new Id(id)));
-      Document doc = traverser.getDocContent(id);
-      lastModified = doc.findProperty(SpiConstants.PROPNAME_LASTMODIFIED);
+      RecordingResponse response = new RecordingResponse();
+      traverser.getDocContent(id, response);
+      lastModified = response.getLastModified();
       counter++;
     }
     assertEquals(1, counter);
 
-    assertCheckpointContains(
-        getCheckpoint(docList), lastModified, JsonField.LAST_MODIFIED_TIME);
+    assertEquals(CHECKPOINT_TIMESTAMP, dateFormatterNoTz.format(lastModified));
     assertCheckpointEquals(getCheckpoint(docList),
         CHECKPOINT_TIMESTAMP + TZ_OFFSET,
         "{AAAAAAAA-1000-0000-0000-000000000000}");
@@ -423,14 +418,14 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
     RecordingDocIdPusher pusher = new RecordingDocIdPusher();
     traverser.getDocIds(CHECKPOINT, pusher);
     List<String> docList = getDocids(pusher.getDocIds());
-    Document doc = traverser.getDocContent(docList.get(0));
-    assertNotNull(doc);
-    if (expectNotNull) {
-      assertNotNull(SpiConstants.PROPNAME_CONTENT + " is null",
-          doc.findProperty(SpiConstants.PROPNAME_CONTENT));
-    } else {
-      assertNull(doc.findProperty(SpiConstants.PROPNAME_CONTENT));
-    }
+
+    RecordingResponse response = new RecordingResponse();
+    traverser.getDocContent(docList.get(0), response);
+
+    int contentSize =
+        ((ByteArrayOutputStream) response.getOutputStream()).size();
+    assertEquals("Content size: " + contentSize,
+        expectNotNull, contentSize > 0);
     verifyAll();
   }
 
@@ -471,24 +466,8 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
         new Capture<String>(CaptureType.NONE));
   }
 
-  private void assertCheckpointContains(String checkpoint,
-      Property lastModified, JsonField jsonField)
-      throws JSONException, RepositoryException {
-    assertFalse("Missing checkpoint: " + checkpoint,
-        Strings.isNullOrEmpty(checkpoint));
-    assertNotNull("Null expected lastModified property", lastModified);
-    assertNotNull("Null checkpoint field", jsonField);
-
-    JSONObject json = new JSONObject(checkpoint);
-    String checkpointTime = (String) json.get(jsonField.toString());
-    String docLastModifiedTime = lastModified.nextValue().toString();
-
-    assertEquals(docLastModifiedTime, checkpointTime);
-  }
-
   private void assertCheckpointEquals(String actualCheckpoint,
-      String expectedDate, String expectedId)
-      throws JSONException, RepositoryException {
+      String expectedDate, String expectedId) throws JSONException {
     assertFalse("Missing checkpoint: " + actualCheckpoint,
         Strings.isNullOrEmpty(actualCheckpoint));
     assertNotNull("Null expected date", expectedDate);

@@ -27,6 +27,7 @@ import com.filenet.api.util.Id;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -54,6 +55,11 @@ public class MockDocument implements IDocument {
   }
 
   @Override
+  public Date get_DateLastModified() {
+    return doc.get_DateLastModified();
+  }
+
+  @Override
   public AccessPermissionList get_Permissions() {
     return doc.get_Permissions();
   }
@@ -70,13 +76,24 @@ public class MockDocument implements IDocument {
   }
 
   @Override
+  public Double get_ContentSize() {
+    return doc.get_ContentSize();
+  }
+
+  @Override
   public IVersionSeries getVersionSeries() {
     return new MockVersionSeries(this.doc);
   }
 
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public static class ActiveMarkingListMock
+      extends ArrayList implements ActiveMarkingList { }
+
   @Override
   public ActiveMarkingList get_ActiveMarkings()
-      throws RepositoryDocumentException { return null; }
+      throws RepositoryDocumentException {
+    return new ActiveMarkingListMock();
+  }
 
   @Override
   public Folder get_SecurityFolder() {
