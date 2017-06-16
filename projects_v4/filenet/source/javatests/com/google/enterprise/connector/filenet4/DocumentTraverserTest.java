@@ -15,7 +15,6 @@
 package com.google.enterprise.connector.filenet4;
 
 import static com.google.enterprise.connector.filenet4.ObjectMocks.mockDocument;
-import static com.google.enterprise.connector.filenet4.ObjectMocks.newId;
 import static com.google.enterprise.connector.filenet4.ObjectMocks.newObjectStore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.enterprise.adaptor.Acl;
 import com.google.enterprise.adaptor.DocId;
 import com.google.enterprise.adaptor.testing.RecordingDocIdPusher;
@@ -39,6 +39,7 @@ import com.filenet.api.collection.IndependentObjectSet;
 import com.filenet.api.constants.ClassNames;
 import com.filenet.api.constants.DatabaseType;
 import com.filenet.api.constants.PermissionSource;
+import com.filenet.api.constants.PropertyNames;
 import com.filenet.api.core.IndependentObject;
 import com.filenet.api.util.Id;
 
@@ -433,6 +434,10 @@ public class DocumentTraverserTest extends TraverserFactoryFixture {
         new DocumentTraverser(null, null, os, connec);
     RecordingResponse response = new RecordingResponse();
     traverser.getDocContent(id, response);
+
+    assertEquals(
+        ImmutableSet.of(PropertyNames.ID, PropertyNames.DATE_LAST_MODIFIED),
+        response.getMetadata().getKeys());
 
     Acl acl = response.getAcl();
     assertFalse(acl.getPermitUsers().toString(),

@@ -45,8 +45,9 @@ public class MockDocument implements IDocument {
     props.put(PropertyNames.ID, doc.get_Id());
     props.put(PropertyNames.DATE_LAST_MODIFIED, doc.get_DateLastModified());
     props.put(PropertyNames.MIME_TYPE, doc.get_MimeType());
+    Double contentSize = doc.get_ContentSize();
     props.put(PropertyNames.CONTENT_SIZE,
-        String.valueOf(doc.get_ContentSize()));
+        (contentSize == null) ? null : contentSize.toString());
   }
 
   @Override
@@ -114,7 +115,7 @@ public class MockDocument implements IDocument {
   public void getProperty(String name, List<Value> list)
       throws RepositoryDocumentException {
     if (PropertyNames.ID.equalsIgnoreCase(name)) {
-      String val = (String) props.get(name);
+      String val = props.get(name).toString();
       list.add(Value.getStringValue(val));
     } else if (PropertyNames.DATE_LAST_MODIFIED.equalsIgnoreCase(name)) {
       getPropertyDateValue(name, list);
@@ -126,8 +127,9 @@ public class MockDocument implements IDocument {
   private void getPropertyValue(String name, List<Value> list)
       throws RepositoryDocumentException {
     Object obj = props.get(name);
-    if (obj == null) return;
-
+    if (obj == null) {
+      return;
+    }
     if (obj instanceof String) {
       getPropertyStringValue(name, list);
     } else if (obj instanceof Date) {

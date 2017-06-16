@@ -17,7 +17,6 @@ package com.google.enterprise.connector.filenet4;
 import static com.google.common.collect.Sets.union;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.google.enterprise.adaptor.Acl;
 import com.google.enterprise.adaptor.DocId;
 import com.google.enterprise.adaptor.DocIdPusher;
@@ -302,10 +301,12 @@ class DocumentTraverser {
       // TODO(jlacey): Use ValidatedUri. Use a percent encoder, or URI's
       // multi-argument constructors?
       response.setDisplayUrl(
-          URI.create(connector.getWorkplaceDisplayUrl() +
-              vsDocId.replace("{", "%7B").replace("}", "%7D")));
+          URI.create(connector.getWorkplaceDisplayUrl()
+              + vsDocId.replace("{", "%7B").replace("}", "%7D")));
       response.setLastModified(document.get_DateLastModified());
       response.setSecure(!connector.isPublic());
+
+      setMetadata(response);
 
       logger.log(Level.FINEST, "Getting content");
       if (hasAllowableSize()) {
@@ -396,13 +397,17 @@ class DocumentTraverser {
       return list;
     }
 
-    public List<Value> findProperty(String name) throws RepositoryException {
-      ArrayList<Value> list = new ArrayList<>();
-      document.getProperty(name, list);
-      return list;
+    private void setMetadata(Response response) throws RepositoryException {
+      for (String name : getPropertyNames()) {
+        ArrayList<Value> list = new ArrayList<>();
+        document.getProperty(name, list);
+        for (Value value : list) {
+          response.addMetadata(name, value.toString());
+        }
+      }
     }
 
-    public Set<String> getPropertyNames() throws RepositoryException {
+    private Set<String> getPropertyNames()  {
       Set<String> properties = new HashSet<String>();
 
       Set<String> documentProperties = document.getPropertyNames();
@@ -422,7 +427,6 @@ class DocumentTraverser {
           }
         }
       }
-      // TODO(jlacey): Add logging for property names in Connector Manager.
       logger.log(Level.FINEST, "Property names: {0}", properties);
 
       return properties;
